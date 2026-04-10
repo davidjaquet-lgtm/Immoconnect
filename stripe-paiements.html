@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Stripe : Récolter les abonnements</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0F0F0E;--ink2:#3A3A38;--muted:#8C8B86;--bg:#F5F2EC;--warm:#FEFDFB;--line:rgba(15,15,14,.08);--gold:#C09B5A;--gold2:#E2C07A;--teal:#1E7A62;--rose:#C0392B;--purple:#6B3FA0;--amber:#D4732A;--code:#16161A;--r:6px}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink)}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(15,15,14,.95);backdrop-filter:blur(12px);height:56px;display:flex;align-items:center;padding:0 40px;gap:16px}
+.nav-logo{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#fff}.nav-logo span{color:var(--gold2)}
+.nav-links{display:flex;gap:16px;margin-left:auto}.nav-links a{font-size:12px;color:rgba(255,255,255,.5);text-decoration:none}.nav-links a:hover{color:#fff}
+
+.layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 56px)}
+
+/* SIDEBAR */
+.sidenav{background:var(--warm);border-right:1px solid var(--line);padding:20px 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+.sn-section{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:10px 16px 4px;font-weight:600}
+.sn-item{display:flex;align-items:center;gap:8px;padding:8px 16px;font-size:13px;color:var(--ink2);cursor:pointer;transition:all .15s;border-left:2px solid transparent;text-decoration:none}
+.sn-item:hover{background:var(--bg);color:var(--ink)}
+.sn-item.active{border-left-color:var(--gold);background:var(--gold-bg, rgba(192,155,90,.06));color:var(--gold);font-weight:500}
+.sn-num{width:20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sn-item.active .sn-num{background:var(--gold);color:var(--ink)}
+
+/* MAIN */
+.main{padding:32px 40px;max-width:860px}
+
+/* SECTIONS */
+.step-section{margin-bottom:48px;scroll-margin-top:80px}
+.step-head{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.step-num{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0}
+.step-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:3px}
+.step-meta{display:flex;gap:10px;flex-wrap:wrap}
+.step-tag{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.tag-time{background:rgba(30,122,98,.1);color:var(--teal)}
+.tag-price{background:rgba(192,155,90,.1);color:var(--gold)}
+.tag-easy{background:rgba(30,122,98,.1);color:var(--teal)}
+.tag-hard{background:rgba(192,57,43,.1);color:var(--rose)}
+
+/* BOXES */
+.box{border-radius:8px;padding:14px 18px;margin-bottom:14px}
+.box.tip{background:rgba(30,122,98,.07);border:1px solid rgba(30,122,98,.2)}
+.box.warn{background:rgba(192,155,90,.07);border:1px solid rgba(192,155,90,.2)}
+.box.danger{background:rgba(192,57,43,.07);border:1px solid rgba(192,57,43,.2)}
+.box.info{background:rgba(44,62,106,.07);border:1px solid rgba(44,62,106,.2)}
+.box-head{display:flex;gap:10px;align-items:flex-start}
+.box-icon{font-size:18px;flex-shrink:0;margin-top:2px}
+.box-content{}
+.box-title{font-size:13px;font-weight:600;margin-bottom:4px}
+.box.tip .box-title{color:var(--teal)}.box.warn .box-title{color:var(--gold)}.box.danger .box-title{color:var(--rose)}.box.info .box-title{color:var(--slate, #2C3E6A)}
+.box-text{font-size:13px;color:var(--ink2);line-height:1.7}
+
+/* STEPS LIST */
+.steps{display:flex;flex-direction:column;gap:0}
+.si{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.si:last-child{border-bottom:none}
+.si-num{width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.si-title{font-size:14px;font-weight:600;margin-bottom:3px}
+.si-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.si-tip{margin-top:6px;padding:6px 10px;background:var(--bg);border-radius:4px;font-size:12px;color:var(--muted)}
+
+/* CODE */
+.code-wrap{border-radius:8px;overflow:hidden;margin:14px 0}
+.code-header{background:#1E1E28;padding:8px 16px;display:flex;align-items:center;justify-content:space-between}
+.code-lang{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#6C7086}
+.code-copy{font-size:11px;color:#6C7086;cursor:pointer;padding:2px 8px;border:1px solid #30304A;border-radius:3px;background:none;font-family:inherit;transition:all .2s}
+.code-copy:hover{color:#fff;border-color:#6C7086}
+pre{background:var(--code);padding:20px;overflow-x:auto}
+code{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8}
+.kw{color:#CBA6F7}.str{color:#A6E3A1}.cm{color:#45475A;font-style:italic}.fn{color:#89B4FA}.num{color:#FAB387}.tag{color:#F38BA8}.attr{color:#89DCEB}
+
+/* PRODUITS STRIPE */
+.products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px}
+.prod-card{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.prod-name{font-size:13px;font-weight:600;margin-bottom:4px}
+.prod-price{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold);margin-bottom:4px}
+.prod-id{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;padding:3px 8px;background:var(--bg);border-radius:4px;display:inline-block}
+.prod-type{font-size:11px;color:var(--teal);margin-top:6px}
+
+/* DASHBOARD STRIPE */
+.stripe-dash{background:var(--ink);border-radius:10px;padding:24px;margin-bottom:14px}
+.sd-title{font-size:14px;font-weight:600;color:#fff;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.sd-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.sd-stat{background:rgba(255,255,255,.06);border-radius:6px;padding:12px;text-align:center}
+.sd-val{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold2);margin-bottom:3px}
+.sd-lbl{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:.5px}
+
+/* WEBHOOK TABLE */
+.wtable{width:100%;border-collapse:collapse;background:var(--warm);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.wtable th{padding:9px 14px;text-align:left;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line);font-weight:600}
+.wtable td{padding:10px 14px;font-size:12px;border-bottom:1px solid var(--line);color:var(--ink2)}
+.wtable tr:last-child td{border-bottom:none}
+.wtable tr:hover td{background:rgba(192,155,90,.03)}
+.event-name{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--purple)}
+.action{color:var(--ink);font-weight:500}
+
+/* CHECKLIST */
+.checklist{display:flex;flex-direction:column;gap:0;background:var(--warm);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.ci{display:flex;align-items:flex-start;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .15s}
+.ci:last-child{border-bottom:none}
+.ci:hover{background:var(--bg)}
+.ci-box{width:18px;height:18px;border-radius:4px;border:1px solid var(--line);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .2s}
+.ci-box.done{background:var(--teal);border-color:var(--teal);color:#fff}
+.ci-text{font-size:13px;line-height:1.5}
+.ci-text.done{text-decoration:line-through;color:var(--muted)}
+.ci-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* REVENUS TABLE */
+.rev-table{width:100%;border-collapse:collapse;background:var(--warm);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.rev-table th{padding:9px 14px;text-align:left;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line);font-weight:600}
+.rev-table td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--line)}
+.rev-table tr:last-child td{font-weight:600;background:rgba(192,155,90,.05)}
+
+/* TOAST */
+.tw{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--ink);color:#fff;padding:11px 16px;border-radius:var(--r);font-size:13px;display:flex;align-items:center;gap:9px;min-width:260px;box-shadow:0 8px 32px rgba(15,15,14,.25);animation:tIn .25s ease}
+.toast.ok{border-left:3px solid var(--teal)}.toast.gold{border-left:3px solid var(--gold)}
+@keyframes tIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+
+@media(max-width:800px){.layout{grid-template-columns:1fr}.sidenav{display:none}.main{padding:20px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Immo<span>Connect</span></div>
+  <div class="nav-links">
+    <a href="index.html">← Accueil</a>
+    <a href="forfaits.html">Forfaits</a>
+    <a href="dashboard.html">Dashboard</a>
+  </div>
+</nav>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidenav">
+  <div class="sn-section">Les étapes</div>
+  <a class="sn-item active" href="#etape1"><span class="sn-num">1</span>Créer le compte Stripe</a>
+  <a class="sn-item" href="#etape2"><span class="sn-num">2</span>Créer les produits</a>
+  <a class="sn-item" href="#etape3"><span class="sn-num">3</span>Liens de paiement</a>
+  <a class="sn-item" href="#etape4"><span class="sn-num">4</span>Intégrer dans le site</a>
+  <a class="sn-item" href="#etape5"><span class="sn-num">5</span>Webhooks automatiques</a>
+  <a class="sn-item" href="#etape6"><span class="sn-num">6</span>Suivi des revenus</a>
+  <div class="sn-section">Référence</div>
+  <a class="sn-item" href="#produits">Tous les produits</a>
+  <a class="sn-item" href="#checklist">Checklist</a>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- ══ ÉTAPE 1 ══ -->
+<div class="step-section" id="etape1">
+  <div class="step-head">
+    <div class="step-num" style="background:var(--gold)">1</div>
+    <div>
+      <div class="step-title">Créer et configurer votre compte Stripe</div>
+      <div class="step-meta">
+        <span class="step-tag tag-time">⏱ 20 minutes</span>
+        <span class="step-tag tag-price">💶 Gratuit — Stripe prend 1,5% + 0,25€ par transaction</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="box warn">
+    <div class="box-head"><div class="box-icon">⚠️</div><div class="box-content">
+      <div class="box-title">Stripe = votre caisse enregistreuse en ligne</div>
+      <div class="box-text">C'est Stripe qui encaisse l'argent de vos clients, le sécurise, et vous le vire sur votre compte bancaire chaque semaine automatiquement. Vous ne touchez jamais directement les CB des clients.</div>
+    </div></div>
+  </div>
+
+  <div class="steps">
+    <div class="si"><div class="si-num">1</div><div>
+      <div class="si-title">Aller sur stripe.com → cliquer "Commencer maintenant"</div>
+      <div class="si-desc">Créer un compte avec votre email professionnel. Choisir "France" comme pays.</div>
+    </div></div>
+    <div class="si"><div class="si-num">2</div><div>
+      <div class="si-title">Remplir les informations de votre entreprise</div>
+      <div class="si-desc">Raison sociale ou nom/prénom · Adresse · SIRET si vous en avez un (sinon micro-entrepreneur ou particulier) · Activité : "Services immobiliers / Plateforme en ligne".</div>
+    </div></div>
+    <div class="si"><div class="si-num">3</div><div>
+      <div class="si-title">Vérifier votre identité</div>
+      <div class="si-desc">Stripe demande une pièce d'identité (CNI ou passeport) + justificatif de domicile. Obligatoire légalement. Prise en charge : 24-48h.</div>
+      <div class="si-tip">Sans vérification, Stripe bloque les virements au-delà de quelques centaines d'euros.</div>
+    </div></div>
+    <div class="si"><div class="si-num">4</div><div>
+      <div class="si-title">Ajouter votre RIB pour recevoir les virements</div>
+      <div class="si-desc">Dashboard Stripe → Paramètres → Informations bancaires → Ajouter un compte bancaire → entrer votre IBAN. Les virements arrivent automatiquement chaque semaine.</div>
+    </div></div>
+    <div class="si"><div class="si-num">5</div><div>
+      <div class="si-title">Récupérer vos clés API</div>
+      <div class="si-desc">Développeurs → Clés API → Copier la <strong>Clé secrète</strong> (sk_live_...) et la <strong>Clé publiable</strong> (pk_live_...). Les garder en sécurité — ne jamais les partager.</div>
+      <div class="si-tip">En attendant la vérification, utilisez les clés TEST (sk_test_...) pour tester sans vrai argent.</div>
+    </div></div>
+  </div>
+
+  <div class="box tip">
+    <div class="box-head"><div class="box-icon">💶</div><div class="box-content">
+      <div class="box-title">Tarification Stripe France (2026)</div>
+      <div class="box-text">
+        Carte européenne : <strong>1,5% + 0,25€</strong> par transaction<br>
+        Carte hors Europe : <strong>2,5% + 0,25€</strong> par transaction<br>
+        Abonnement mensuel 49€ → Stripe prend : 0,99€ → Vous recevez : <strong>48,01€</strong><br>
+        Abonnement mensuel 199€ → Stripe prend : 3,23€ → Vous recevez : <strong>195,77€</strong>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══ ÉTAPE 2 ══ -->
+<div class="step-section" id="etape2">
+  <div class="step-head">
+    <div class="step-num" style="background:var(--teal)">2</div>
+    <div>
+      <div class="step-title">Créer tous vos produits dans Stripe</div>
+      <div class="step-meta">
+        <span class="step-tag tag-time">⏱ 15 minutes</span>
+        <span class="step-tag tag-easy">✅ Sans code</span>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">Dans Stripe → <strong>Catalogue de produits</strong> → <strong>Ajouter un produit</strong>. Créer un produit par forfait :</p>
+
+  <div id="produits" class="products-grid">
+    <div class="prod-card">
+      <div class="prod-name">Agent Starter</div>
+      <div class="prod-price">49 €<span style="font-size:13px;font-weight:400;color:var(--muted)">/mois</span></div>
+      <div class="prod-type">Abonnement récurrent · mensuel</div>
+      <div class="prod-id">price_agent_starter_monthly</div>
+    </div>
+    <div class="prod-card">
+      <div class="prod-name">Agent Pro</div>
+      <div class="prod-price">99 €<span style="font-size:13px;font-weight:400;color:var(--muted)">/mois</span></div>
+      <div class="prod-type">Abonnement récurrent · mensuel</div>
+      <div class="prod-id">price_agent_pro_monthly</div>
+    </div>
+    <div class="prod-card">
+      <div class="prod-name">Agent Expert</div>
+      <div class="prod-price">149 €<span style="font-size:13px;font-weight:400;color:var(--muted)">/mois</span></div>
+      <div class="prod-type">Abonnement récurrent · mensuel</div>
+      <div class="prod-id">price_agent_expert_monthly</div>
+    </div>
+    <div class="prod-card">
+      <div class="prod-name">Agent Platinium</div>
+      <div class="prod-price">199 €<span style="font-size:13px;font-weight:400;color:var(--muted)">/mois</span></div>
+      <div class="prod-type">Abonnement récurrent · mensuel</div>
+      <div class="prod-id">price_agent_platinium_monthly</div>
+    </div>
+    <div class="prod-card">
+      <div class="prod-name">Acheteur Essentiel</div>
+      <div class="prod-price">9 €<span style="font-size:13px;font-weight:400;color:var(--muted)">/mois</span></div>
+      <div class="prod-type">Abonnement récurrent · mensuel</div>
+      <div class="prod-id">price_buyer_essentiel_monthly</div>
+    </div>
+    <div class="prod-card">
+      <div class="prod-name">Acheteur Premium</div>
+      <div class="prod-price">29 €<span style="font-size:13px;font-weight:400;color:var(--muted)">/mois</span></div>
+      <div class="prod-type">Abonnement récurrent · mensuel</div>
+      <div class="prod-id">price_buyer_premium_monthly</div>
+    </div>
+    <div class="prod-card">
+      <div class="prod-name">Investisseur Pro</div>
+      <div class="prod-price">19 €<span style="font-size:13px;font-weight:400;color:var(--muted)">/mois</span></div>
+      <div class="prod-type">Abonnement récurrent · mensuel</div>
+      <div class="prod-id">price_invest_pro_monthly</div>
+    </div>
+    <div class="prod-card">
+      <div class="prod-name">Accès contact simple</div>
+      <div class="prod-price">29 €<span style="font-size:13px;font-weight:400;color:var(--muted)"> · unitaire</span></div>
+      <div class="prod-type">Paiement unique (one-time)</div>
+      <div class="prod-id">price_contact_simple</div>
+    </div>
+    <div class="prod-card">
+      <div class="prod-name">Exclusivité 7 jours</div>
+      <div class="prod-price">149 €<span style="font-size:13px;font-weight:400;color:var(--muted)"> · unitaire</span></div>
+      <div class="prod-type">Paiement unique (one-time)</div>
+      <div class="prod-id">price_exclusivite_7j</div>
+    </div>
+    <div class="prod-card">
+      <div class="prod-name">Rapport DVF PDF</div>
+      <div class="prod-price">19 €<span style="font-size:13px;font-weight:400;color:var(--muted)"> · unitaire</span></div>
+      <div class="prod-type">Paiement unique (one-time)</div>
+      <div class="prod-id">price_rapport_dvf</div>
+    </div>
+  </div>
+
+  <div class="box tip">
+    <div class="box-head"><div class="box-icon">💡</div><div class="box-content">
+      <div class="box-title">Comment créer un abonnement dans Stripe</div>
+      <div class="box-text">
+        Catalogue → Ajouter produit → Nom → Prix récurrent → Mensuel → Montant → Enregistrer.<br>
+        Stripe génère un <strong>Price ID</strong> unique (ex: <code style="background:rgba(107,63,160,.1);padding:1px 5px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:11px">price_1ABC...xyz</code>). C'est ce code que vous mettrez dans votre site.
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══ ÉTAPE 3 ══ -->
+<div class="step-section" id="etape3">
+  <div class="step-head">
+    <div class="step-num" style="background:var(--purple)">3</div>
+    <div>
+      <div class="step-title">Créer les liens de paiement Stripe</div>
+      <div class="step-meta">
+        <span class="step-tag tag-time">⏱ 10 minutes</span>
+        <span class="step-tag tag-easy">✅ Zéro code</span>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">La solution <strong>la plus simple</strong> : Stripe génère des pages de paiement hébergées, vous n'avez qu'à copier le lien dans vos boutons.</p>
+
+  <div class="steps">
+    <div class="si"><div class="si-num">1</div><div>
+      <div class="si-title">Dans Stripe → Liens de paiement → Créer un lien</div>
+      <div class="si-desc">Sélectionner le produit → Activer "Permettre la promotion des codes" si vous voulez offrir des essais → Cliquer Créer.</div>
+    </div></div>
+    <div class="si"><div class="si-num">2</div><div>
+      <div class="si-title">Copier le lien généré</div>
+      <div class="si-desc">Stripe génère une URL type <code style="background:var(--bg);padding:2px 6px;border-radius:3px;font-size:11px;font-family:monospace">https://buy.stripe.com/abc123</code>. Ce lien est une page de paiement complète, sécurisée, RGPD-conforme.</div>
+    </div></div>
+    <div class="si"><div class="si-num">3</div><div>
+      <div class="si-title">Coller le lien dans vos boutons</div>
+      <div class="si-desc">Dans vos fichiers HTML (forfaits.html, regions.html), remplacer les <code style="font-size:11px;font-family:monospace">onclick="planClick(...)"</code> par :</div>
+    </div></div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">HTML — Remplacement des boutons de paiement</span><button class="code-copy" onclick="copyCode(this)">Copier</button></div>
+    <pre><code><span class="cm">&lt;!-- AVANT (démo) --&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">onclick</span>=<span class="str">"planClick('Agent Pro', false)"</span><span class="tag">&gt;</span>Choisir Pro<span class="tag">&lt;/button&gt;</span>
+
+<span class="cm">&lt;!-- APRÈS (Stripe réel) --&gt;</span>
+<span class="tag">&lt;a</span> <span class="attr">href</span>=<span class="str">"https://buy.stripe.com/VOTRE_LIEN_AGENT_PRO"</span>
+   <span class="attr">target</span>=<span class="str">"_blank"</span>
+   <span class="attr">class</span>=<span class="str">"pcta cta-amb"</span><span class="tag">&gt;</span>
+  Choisir Agent Pro — 99€/mois
+<span class="tag">&lt;/a&gt;</span>
+
+<span class="cm">&lt;!-- Un lien par plan — exemples --&gt;</span>
+Agent Starter  : https://buy.stripe.com/LIEN_STARTER
+Agent Pro      : https://buy.stripe.com/LIEN_PRO
+Agent Expert   : https://buy.stripe.com/LIEN_EXPERT
+Agent Platinium: https://buy.stripe.com/LIEN_PLATINIUM
+Acheteur Ess.  : https://buy.stripe.com/LIEN_ACH_ESS
+Acheteur Prem. : https://buy.stripe.com/LIEN_ACH_PREM
+Investisseur   : https://buy.stripe.com/LIEN_INVEST
+Contact simple : https://buy.stripe.com/LIEN_CONTACT
+Exclusivité 7j : https://buy.stripe.com/LIEN_EXCLU</code></pre>
+  </div>
+
+  <div class="box tip">
+    <div class="box-head"><div class="box-icon">🎁</div><div class="box-content">
+      <div class="box-title">Offrir un mois gratuit aux agents</div>
+      <div class="box-text">Dans Stripe → Coupons → Créer un coupon → Durée : 1 mois → 100% de réduction → Générer un code (ex: <strong>ESSAI1MOIS</strong>). Partagez ce code aux agents lors de votre prospection. Ils s'abonnent normalement mais le 1er mois est gratuit.</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══ ÉTAPE 4 ══ -->
+<div class="step-section" id="etape4">
+  <div class="step-head">
+    <div class="step-num" style="background:var(--amber)">4</div>
+    <div>
+      <div class="step-title">Intégrer Stripe dans vos pages</div>
+      <div class="step-meta">
+        <span class="step-tag tag-time">⏱ 30 minutes</span>
+        <span class="step-tag tag-hard">🔧 Un peu technique</span>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">Si vous voulez une intégration plus poussée (vérifier que le paiement a réussi, débloquer automatiquement l'accès), voici le code :</p>
+
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">JavaScript — Redirection vers Stripe Checkout</span><button class="code-copy" onclick="copyCode(this)">Copier</button></div>
+    <pre><code><span class="cm">// Ajouter dans &lt;head&gt; de vos pages</span>
+<span class="tag">&lt;script</span> <span class="attr">src</span>=<span class="str">"https://js.stripe.com/v3/"</span><span class="tag">&gt;&lt;/script&gt;</span>
+
+<span class="cm">// Vos Price IDs Stripe (à remplacer par les vrais)</span>
+<span class="kw">const</span> STRIPE_PRICES = {
+  agent_starter:   <span class="str">'price_1ABC...STARTER'</span>,
+  agent_pro:       <span class="str">'price_1ABC...PRO'</span>,
+  agent_expert:    <span class="str">'price_1ABC...EXPERT'</span>,
+  agent_platinium: <span class="str">'price_1ABC...PLATINIUM'</span>,
+  acheteur_ess:    <span class="str">'price_1ABC...ACH_ESS'</span>,
+  acheteur_prem:   <span class="str">'price_1ABC...ACH_PREM'</span>,
+  invest_pro:      <span class="str">'price_1ABC...INVEST'</span>,
+  contact_simple:  <span class="str">'price_1ABC...CONTACT'</span>,
+  exclusivite:     <span class="str">'price_1ABC...EXCLU'</span>,
+}
+
+<span class="kw">const</span> stripe = Stripe(<span class="str">'pk_live_VOTRE_CLE_PUBLIABLE'</span>)
+
+<span class="kw">async function</span> <span class="fn">payer</span>(planKey, email = <span class="str">''</span>) {
+  <span class="kw">const</span> priceId = STRIPE_PRICES[planKey]
+  <span class="kw">if</span> (!priceId) { alert(<span class="str">'Plan introuvable'</span>); <span class="kw">return</span> }
+
+  <span class="kw">const</span> { error } = <span class="kw">await</span> stripe.redirectToCheckout({
+    lineItems: [{ price: priceId, quantity: <span class="num">1</span> }],
+    mode: planKey.includes(<span class="str">'contact'</span>) || planKey.includes(<span class="str">'exclu'</span>)
+          ? <span class="str">'payment'</span>      <span class="cm">// Paiement unique</span>
+          : <span class="str">'subscription'</span>, <span class="cm">// Abonnement récurrent</span>
+    customerEmail: email,
+    successUrl: <span class="str">`https://immoconnect-agence.fr/merci?plan=${planKey}`</span>,
+    cancelUrl:  <span class="str">'https://immoconnect-agence.fr/forfaits'</span>,
+  })
+
+  <span class="kw">if</span> (error) console.error(error.message)
+}
+
+<span class="cm">// Utilisation dans vos boutons :</span>
+<span class="cm">// &lt;button onclick="payer('agent_pro')"&gt;Choisir Agent Pro&lt;/button&gt;</span>
+<span class="cm">// &lt;button onclick="payer('exclusivite')"&gt;Acheter l'exclusivité&lt;/button&gt;</span></code></pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">HTML — Page de remerciement (merci.html)</span><button class="code-copy" onclick="copyCode(this)">Copier</button></div>
+    <pre><code><span class="cm">&lt;!-- Créer un fichier merci.html avec ce contenu --&gt;</span>
+<span class="tag">&lt;script&gt;</span>
+  <span class="kw">const</span> params = <span class="kw">new</span> URLSearchParams(window.location.search)
+  <span class="kw">const</span> plan = params.get(<span class="str">'plan'</span>)
+  <span class="kw">const</span> msgs = {
+    agent_pro:    <span class="str">'Bienvenue Agent Pro ! Vous recevrez vos premiers leads sous 24h.'</span>,
+    agent_expert: <span class="str">'Bienvenue Agent Expert ! Vos alertes SMS sont activées.'</span>,
+    exclusivite:  <span class="str">'Exclusivité activée ! Vous avez 7 jours pour contacter ce vendeur.'</span>,
+  }
+  document.getElementById(<span class="str">'msg'</span>).textContent =
+    msgs[plan] || <span class="str">'Paiement confirmé. Bienvenue sur ImmoConnect !'</span>
+<span class="tag">&lt;/script&gt;</span>
+<span class="tag">&lt;h1&gt;</span>Paiement confirmé ✅<span class="tag">&lt;/h1&gt;</span>
+<span class="tag">&lt;p</span> <span class="attr">id</span>=<span class="str">"msg"</span><span class="tag">&gt;&lt;/p&gt;</span></code></pre>
+  </div>
+</div>
+
+<!-- ══ ÉTAPE 5 ══ -->
+<div class="step-section" id="etape5">
+  <div class="step-head">
+    <div class="step-num" style="background:var(--rose)">5</div>
+    <div>
+      <div class="step-title">Webhooks — automatiser les actions</div>
+      <div class="step-meta">
+        <span class="step-tag tag-time">⏱ 20 minutes</span>
+        <span class="step-tag tag-hard">🔧 Technique</span>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">Les webhooks permettent à Stripe d'avertir votre site automatiquement quand un paiement réussit, échoue, ou qu'un abonnement est annulé.</p>
+
+  <table class="wtable">
+    <thead><tr><th>Événement Stripe</th><th>Action automatique à déclencher</th></tr></thead>
+    <tbody>
+      <tr><td><span class="event-name">checkout.session.completed</span></td><td><span class="action">Paiement réussi → Activer l'accès dans Supabase</span></td></tr>
+      <tr><td><span class="event-name">customer.subscription.created</span></td><td><span class="action">Nouvel abonné → Envoyer email de bienvenue + leads</span></td></tr>
+      <tr><td><span class="event-name">customer.subscription.deleted</span></td><td><span class="action">Résiliation → Désactiver l'accès dans Supabase</span></td></tr>
+      <tr><td><span class="event-name">invoice.payment_failed</span></td><td><span class="action">Échec de paiement → Email de relance automatique</span></td></tr>
+      <tr><td><span class="event-name">invoice.paid</span></td><td><span class="action">Renouvellement mensuel → Confirmer l'accès pour 30j</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">Node.js — backend/webhook.js (à ajouter dans api.js)</span><button class="code-copy" onclick="copyCode(this)">Copier</button></div>
+    <pre><code><span class="kw">const</span> stripe = require(<span class="str">'stripe'</span>)(process.env.STRIPE_SECRET_KEY)
+<span class="kw">const</span> endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
+
+<span class="cm">// Route webhook — Stripe appelle cette URL à chaque événement</span>
+app.post(<span class="str">'/api/webhook'</span>, express.raw({type: <span class="str">'application/json'</span>}), <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> sig = req.headers[<span class="str">'stripe-signature'</span>]
+  <span class="kw">let</span> event
+
+  <span class="kw">try</span> {
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret)
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">return</span> res.status(<span class="num">400</span>).send(<span class="str">`Webhook Error: ${err.message}`</span>)
+  }
+
+  <span class="kw">switch</span> (event.type) {
+
+    <span class="kw">case</span> <span class="str">'checkout.session.completed'</span>: {
+      <span class="kw">const</span> session = event.data.object
+      <span class="kw">const</span> email = session.customer_email
+      <span class="kw">const</span> plan = session.metadata?.plan || <span class="str">'starter'</span>
+
+      <span class="cm">// Activer l'accès dans Supabase</span>
+      <span class="kw">await</span> supabase.from(<span class="str">'abonnements'</span>).upsert({
+        email, plan, statut: <span class="str">'actif'</span>,
+        stripe_customer_id: session.customer,
+        debut: <span class="kw">new</span> Date().toISOString()
+      })
+
+      <span class="cm">// Email de bienvenue automatique</span>
+      <span class="kw">await</span> <span class="fn">sendWelcomeEmail</span>(email, plan)
+      <span class="kw">break</span>
+    }
+
+    <span class="kw">case</span> <span class="str">'customer.subscription.deleted'</span>: {
+      <span class="kw">const</span> sub = event.data.object
+      <span class="cm">// Désactiver l'accès</span>
+      <span class="kw">await</span> supabase.from(<span class="str">'abonnements'</span>)
+        .update({ statut: <span class="str">'annule'</span> })
+        .eq(<span class="str">'stripe_customer_id'</span>, sub.customer)
+      <span class="kw">break</span>
+    }
+
+    <span class="kw">case</span> <span class="str">'invoice.payment_failed'</span>: {
+      <span class="kw">const</span> invoice = event.data.object
+      <span class="cm">// Email de relance</span>
+      <span class="kw">await</span> <span class="fn">sendPaymentFailedEmail</span>(invoice.customer_email)
+      <span class="kw">break</span>
+    }
+  }
+
+  res.json({ received: <span class="kw">true</span> })
+})</code></pre>
+  </div>
+
+  <div class="box info">
+    <div class="box-head"><div class="box-icon">🔗</div><div class="box-content">
+      <div class="box-title">Configurer le webhook dans Stripe</div>
+      <div class="box-text">
+        Stripe → Développeurs → Webhooks → Ajouter un endpoint<br>
+        URL : <code style="font-family:monospace;font-size:11px;background:rgba(44,62,106,.1);padding:2px 6px;border-radius:3px">https://immoconnect-agence.fr/api/webhook</code><br>
+        Événements à écouter : cocher les 5 événements du tableau ci-dessus.<br>
+        Copier le <strong>Secret de signature</strong> → l'ajouter dans <code style="font-family:monospace;font-size:11px">.env</code> : <code style="font-family:monospace;font-size:11px">STRIPE_WEBHOOK_SECRET=whsec_...</code>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══ ÉTAPE 6 ══ -->
+<div class="step-section" id="etape6">
+  <div class="step-head">
+    <div class="step-num" style="background:var(--slate, #2C3E6A)">6</div>
+    <div>
+      <div class="step-title">Suivre vos revenus en temps réel</div>
+      <div class="step-meta">
+        <span class="step-tag tag-easy">✅ Automatique dans Stripe</span>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">Le dashboard Stripe vous donne en temps réel tous vos indicateurs financiers :</p>
+
+  <div class="stripe-dash">
+    <div class="sd-title">📊 Votre futur tableau de bord Stripe</div>
+    <div class="sd-grid">
+      <div class="sd-stat"><div class="sd-val" id="sd-mrr">0 €</div><div class="sd-lbl">MRR (revenu mensuel récurrent)</div></div>
+      <div class="sd-stat"><div class="sd-val" id="sd-abos">0</div><div class="sd-lbl">Abonnés actifs</div></div>
+      <div class="sd-stat"><div class="sd-val" id="sd-churn">0%</div><div class="sd-lbl">Taux de résiliation</div></div>
+    </div>
+  </div>
+
+  <p style="font-size:13px;color:var(--muted);margin-bottom:12px;margin-top:4px">Simulez votre MRR selon vos abonnés :</p>
+
+  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:12px;font-size:13px">
+      <label style="color:var(--muted);width:180px;flex-shrink:0">Agents Starter (49€)</label>
+      <input type="number" id="nb-starter" value="3" min="0" style="width:60px;padding:6px;border:1px solid var(--line);border-radius:4px;font-family:'Outfit',sans-serif;background:var(--bg);font-size:13px" oninput="calcMRR()">
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;font-size:13px">
+      <label style="color:var(--muted);width:180px;flex-shrink:0">Agents Pro (99€)</label>
+      <input type="number" id="nb-pro" value="5" min="0" style="width:60px;padding:6px;border:1px solid var(--line);border-radius:4px;font-family:'Outfit',sans-serif;background:var(--bg);font-size:13px" oninput="calcMRR()">
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;font-size:13px">
+      <label style="color:var(--muted);width:180px;flex-shrink:0">Agents Expert (149€)</label>
+      <input type="number" id="nb-expert" value="2" min="0" style="width:60px;padding:6px;border:1px solid var(--line);border-radius:4px;font-family:'Outfit',sans-serif;background:var(--bg);font-size:13px" oninput="calcMRR()">
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;font-size:13px">
+      <label style="color:var(--muted);width:180px;flex-shrink:0">Agents Platinium (199€)</label>
+      <input type="number" id="nb-plat" value="1" min="0" style="width:60px;padding:6px;border:1px solid var(--line);border-radius:4px;font-family:'Outfit',sans-serif;background:var(--bg);font-size:13px" oninput="calcMRR()">
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;font-size:13px">
+      <label style="color:var(--muted);width:180px;flex-shrink:0">Acheteurs Essentiel (9€)</label>
+      <input type="number" id="nb-ach-ess" value="10" min="0" style="width:60px;padding:6px;border:1px solid var(--line);border-radius:4px;font-family:'Outfit',sans-serif;background:var(--bg);font-size:13px" oninput="calcMRR()">
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;font-size:13px">
+      <label style="color:var(--muted);width:180px;flex-shrink:0">Acheteurs Premium (29€)</label>
+      <input type="number" id="nb-ach-prem" value="5" min="0" style="width:60px;padding:6px;border:1px solid var(--line);border-radius:4px;font-family:'Outfit',sans-serif;background:var(--bg);font-size:13px" oninput="calcMRR()">
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;font-size:13px">
+      <label style="color:var(--muted);width:180px;flex-shrink:0">Investisseurs Pro (19€)</label>
+      <input type="number" id="nb-invest" value="4" min="0" style="width:60px;padding:6px;border:1px solid var(--line);border-radius:4px;font-family:'Outfit',sans-serif;background:var(--bg);font-size:13px" oninput="calcMRR()">
+    </div>
+  </div>
+
+  <table class="rev-table" id="mrrTable"></table>
+</div>
+
+<!-- CHECKLIST -->
+<div class="step-section" id="checklist">
+  <div style="font-size:16px;font-weight:600;margin-bottom:14px;font-family:'Playfair Display',serif">Checklist de mise en place</div>
+  <div class="checklist" id="checklistEl"></div>
+</div>
+
+</div>
+</div>
+
+<div class="tw" id="tw"></div>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre')
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'Copié !'
+    setTimeout(() => btn.textContent = 'Copier', 2000)
+  })
+}
+
+function calcMRR() {
+  const plans = [
+    { name:'Agents Starter', id:'nb-starter', price:49 },
+    { name:'Agents Pro', id:'nb-pro', price:99 },
+    { name:'Agents Expert', id:'nb-expert', price:149 },
+    { name:'Agents Platinium', id:'nb-plat', price:199 },
+    { name:'Acheteurs Essentiel', id:'nb-ach-ess', price:9 },
+    { name:'Acheteurs Premium', id:'nb-ach-prem', price:29 },
+    { name:'Investisseurs Pro', id:'nb-invest', price:19 },
+  ]
+  let totalMRR = 0, totalAbos = 0
+  let rows = plans.map(p => {
+    const nb = parseInt(document.getElementById(p.id)?.value) || 0
+    const rev = nb * p.price
+    const stripe_fee = Math.round(rev * 0.015 + nb * 0.25)
+    const net = rev - stripe_fee
+    totalMRR += net; totalAbos += nb
+    return `<tr>
+      <td>${p.name}</td>
+      <td style="text-align:center">${nb}</td>
+      <td style="text-align:right">${rev.toLocaleString('fr-FR')} €</td>
+      <td style="text-align:right;color:var(--rose)">-${stripe_fee} €</td>
+      <td style="text-align:right;font-weight:600;color:var(--teal)">${net.toLocaleString('fr-FR')} €</td>
+    </tr>`
+  }).join('')
+
+  document.getElementById('mrrTable').innerHTML = `
+    <thead><tr>
+      <th>Plan</th><th style="text-align:center">Abonnés</th>
+      <th style="text-align:right">Brut</th>
+      <th style="text-align:right">Frais Stripe</th>
+      <th style="text-align:right">Net perçu</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+    <tfoot><tr>
+      <td>TOTAL MENSUEL</td>
+      <td style="text-align:center">${totalAbos}</td>
+      <td></td><td></td>
+      <td style="text-align:right;color:var(--gold)">${totalMRR.toLocaleString('fr-FR')} €</td>
+    </tr></tfoot>`
+
+  document.getElementById('sd-mrr').textContent = totalMRR.toLocaleString('fr-FR') + ' €'
+  document.getElementById('sd-abos').textContent = totalAbos
+}
+
+// CHECKLIST
+const checks = [
+  { t:'Compte Stripe créé sur stripe.com', s:'Avec votre email professionnel' },
+  { t:'Identité vérifiée (pièce d\'identité + justificatif)', s:'Obligatoire pour recevoir des virements' },
+  { t:'RIB/IBAN ajouté dans Stripe', s:'Paramètres → Informations bancaires' },
+  { t:'Clés API récupérées (sk_live_ et pk_live_)', s:'Développeurs → Clés API' },
+  { t:'10 produits créés dans le catalogue Stripe', s:'Un produit par forfait + paiements unitaires' },
+  { t:'Liens de paiement générés pour chaque plan', s:'Stripe → Liens de paiement → Créer un lien' },
+  { t:'Liens copiés dans forfaits.html et regions.html', s:'Remplacer les onclick="planClick..." par les vrais liens' },
+  { t:'Coupon ESSAI1MOIS créé (pour les agents)', s:'Stripe → Coupons → 1 mois gratuit 100%' },
+  { t:'Webhook configuré sur l\'URL /api/webhook', s:'Stripe → Développeurs → Webhooks → Ajouter endpoint' },
+  { t:'STRIPE_WEBHOOK_SECRET ajouté dans .env', s:'Copier le secret de signature du webhook' },
+  { t:'Page merci.html créée', s:'Page affichée après un paiement réussi' },
+  { t:'Test complet en mode TEST (sk_test_...)', s:'Utiliser la carte test 4242 4242 4242 4242' },
+  { t:'Virement de test reçu sur votre compte', s:'Stripe → Transferts → vérifier que ça arrive' },
+  { t:'Passer en mode LIVE (remplacer sk_test_ par sk_live_)', s:'Seulement après tests concluants' },
+]
+
+const stored = JSON.parse(localStorage.getItem('stripe_checks') || '{}')
+
+function renderChecklist() {
+  document.getElementById('checklistEl').innerHTML = checks.map((c, i) => `
+    <div class="ci" onclick="toggleCheck(${i})">
+      <div class="ci-box ${stored[i]?'done':''}" id="cb-${i}">${stored[i]?'✓':''}</div>
+      <div>
+        <div class="ci-text ${stored[i]?'done':''}" id="ct-${i}">${c.t}</div>
+        <div class="ci-sub">${c.s}</div>
+      </div>
+    </div>`).join('')
+}
+
+function toggleCheck(i) {
+  stored[i] = !stored[i]
+  localStorage.setItem('stripe_checks', JSON.stringify(stored))
+  renderChecklist()
+}
+
+// SCROLL SPY
+const sections = document.querySelectorAll('.step-section')
+const links = document.querySelectorAll('.sn-item')
+window.addEventListener('scroll', () => {
+  const pos = window.scrollY + 100
+  sections.forEach(s => {
+    if (s.offsetTop <= pos) {
+      links.forEach(l => l.classList.remove('active'))
+      const match = [...links].find(l => l.getAttribute('href') === '#' + s.id)
+      if (match) match.classList.add('active')
+    }
+  })
+}, { passive: true })
+
+calcMRR()
+renderChecklist()
+</script>
+</body>
+</html>

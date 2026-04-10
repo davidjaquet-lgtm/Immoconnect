@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Revenus Passifs</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════ TOKENS ═══════════════ */
+:root{
+  --ink:#0A0A09;
+  --bg:#F2EFE8;
+  --warm:#FAF9F5;
+  --gold:#C4922A;
+  --gold2:#E8B84B;
+  --gold-bg:rgba(196,146,42,.08);
+  --teal:#1A7A5E;
+  --teal-bg:rgba(26,122,94,.08);
+  --rose:#C43B2A;
+  --purple:#6A3FA5;
+  --slate:#2C3E6A;
+  --amber:#D4732A;
+  --line:rgba(10,10,9,.09);
+  --muted:#7A7870;
+  --r:4px;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:60px;display:flex;align-items:center;
+  padding:0 48px;gap:24px;
+  background:rgba(10,10,9,.92);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.nav-logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px;letter-spacing:1px;color:#fff;
+}
+.nav-logo span{color:var(--gold2);}
+.nav-links{display:flex;gap:20px;margin-left:auto;align-items:center;}
+.nav-links a{
+  font-size:12.5px;color:rgba(255,255,255,.5);
+  text-decoration:none;letter-spacing:.3px;transition:color .2s;
+}
+.nav-links a:hover{color:rgba(255,255,255,.9);}
+.nav-cta{
+  padding:8px 20px;background:var(--gold);color:var(--ink);
+  border-radius:var(--r);font-size:12px;font-weight:700;
+  letter-spacing:.5px;transition:background .2s;
+}
+.nav-cta:hover{background:var(--gold2)!important;color:var(--ink)!important;}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  background:var(--ink);
+  position:relative;overflow:hidden;
+  padding:100px 48px 60px;
+  text-align:center;
+}
+.hero-canvas{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse at 15% 50%, rgba(196,146,42,.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 30%, rgba(26,122,94,.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 90%, rgba(106,63,165,.1) 0%, transparent 50%);
+}
+/* Animated grid lines */
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size:60px 60px;
+  animation:gridShift 20s linear infinite;
+}
+@keyframes gridShift{from{background-position:0 0}to{background-position:60px 60px}}
+
+.hero-content{position:relative;z-index:1;max-width:820px;}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(196,146,42,.15);border:1px solid rgba(196,146,42,.3);
+  color:var(--gold2);padding:6px 16px;border-radius:20px;
+  font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  margin-bottom:28px;
+}
+.hero-eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--gold2);animation:blink 2s ease infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(56px,10vw,120px);
+  line-height:.95;letter-spacing:1px;
+  color:#fff;margin-bottom:24px;
+}
+.hero-h1 .accent{
+  -webkit-text-stroke:2px var(--gold);
+  color:transparent;
+}
+.hero-sub{
+  font-size:17px;color:rgba(255,255,255,.5);
+  line-height:1.7;max-width:560px;margin:0 auto 44px;
+  font-weight:300;
+}
+.hero-total{
+  display:inline-flex;flex-direction:column;align-items:center;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:8px;padding:20px 40px;margin-bottom:40px;
+  position:relative;overflow:hidden;
+}
+.hero-total::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.ht-label{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:6px;}
+.ht-value{
+  font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:2px;
+  color:var(--gold2);line-height:1;
+}
+.ht-sub{font-size:12px;color:rgba(255,255,255,.3);margin-top:4px;}
+
+.hero-streams{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.stream-pill{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;padding:6px 14px;
+  font-size:12px;color:rgba(255,255,255,.6);font-weight:500;
+  cursor:pointer;transition:all .2s;
+}
+.stream-pill:hover{background:rgba(255,255,255,.1);color:#fff;}
+.stream-pill .sp-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* ── SECTION ── */
+.section{padding:80px 48px;}
+.section-label{
+  font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--muted);font-weight:700;margin-bottom:12px;
+}
+.section-title{
+  font-family:'Libre Baskerville',serif;
+  font-size:clamp(28px,4vw,44px);font-weight:700;
+  line-height:1.15;margin-bottom:8px;
+}
+.section-title em{font-style:italic;color:var(--gold);}
+
+/* ── REVENUE SIMULATOR ── */
+.simulator{
+  background:var(--ink);border-radius:12px;
+  overflow:hidden;margin-bottom:80px;
+}
+.sim-header{
+  padding:32px 40px;
+  background:linear-gradient(135deg,#111110 0%,#1A1A18 100%);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.sim-title{
+  font-family:'Bebas Neue',sans-serif;font-size:28px;
+  letter-spacing:1px;color:#fff;margin-bottom:6px;
+}
+.sim-sub{font-size:13px;color:rgba(255,255,255,.4);}
+.sim-body{display:grid;grid-template-columns:1fr 360px;}
+.sim-controls{padding:32px 40px;border-right:1px solid rgba(255,255,255,.06);}
+.sim-control{margin-bottom:28px;}
+.sc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.sc-label{font-size:12px;font-weight:600;color:rgba(255,255,255,.7);}
+.sc-value{
+  font-family:'Bebas Neue',sans-serif;font-size:20px;
+  color:var(--gold2);letter-spacing:1px;
+}
+.sc-desc{font-size:11px;color:rgba(255,255,255,.3);margin-top:4px;}
+.slider{
+  -webkit-appearance:none;width:100%;height:4px;
+  background:rgba(255,255,255,.1);border-radius:2px;outline:none;
+  cursor:pointer;
+}
+.slider::-webkit-slider-thumb{
+  -webkit-appearance:none;width:18px;height:18px;
+  border-radius:50%;background:var(--gold);cursor:pointer;
+  transition:transform .15s;
+}
+.slider::-webkit-slider-thumb:hover{transform:scale(1.2);}
+.sim-results{padding:32px;}
+.sr-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:20px;font-weight:600;}
+.sr-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06);
+}
+.sr-item:last-of-type{border-bottom:none;}
+.sr-name{font-size:13px;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:8px;}
+.sr-name .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.sr-amount{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:#fff;}
+.sr-total{
+  margin-top:20px;padding:20px;
+  background:rgba(196,146,42,.1);border:1px solid rgba(196,146,42,.2);
+  border-radius:8px;text-align:center;
+}
+.sr-total-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold2);margin-bottom:8px;font-weight:600;}
+.sr-total-val{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--gold2);letter-spacing:2px;line-height:1;}
+.sr-total-sub{font-size:11px;color:rgba(255,255,255,.3);margin-top:4px;}
+.sr-annual{
+  margin-top:10px;padding:10px;
+  background:rgba(26,122,94,.1);border:1px solid rgba(26,122,94,.2);
+  border-radius:6px;text-align:center;
+}
+.sr-annual-val{font-family:'Bebas Neue',sans-serif;font-size:22px;color:#4DC9A0;letter-spacing:1px;}
+
+/* ── REVENUE CARDS ── */
+.revenue-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+  gap:20px;margin-bottom:60px;
+}
+.rev-card{
+  background:var(--warm);border:1px solid var(--line);
+  border-radius:12px;overflow:hidden;
+  transition:transform .3s,box-shadow .3s;
+  cursor:pointer;position:relative;
+}
+.rev-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(10,10,9,.1);}
+.rev-card-top{
+  padding:24px 26px 20px;
+  position:relative;overflow:hidden;
+}
+.rev-card-top::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+}
+.card-c1 .rev-card-top::before{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.card-c2 .rev-card-top::before{background:linear-gradient(90deg,var(--teal),#4DC9A0);}
+.card-c3 .rev-card-top::before{background:linear-gradient(90deg,var(--purple),#A87FD8);}
+.card-c4 .rev-card-top::before{background:linear-gradient(90deg,var(--slate),#5A7AC4);}
+.card-c5 .rev-card-top::before{background:linear-gradient(90deg,var(--amber),#F4A85A);}
+.card-c6 .rev-card-top::before{background:linear-gradient(90deg,var(--rose),#E87A6A);}
+.card-c7 .rev-card-top::before{background:linear-gradient(90deg,#2A7A9E,#5ABCD8);}
+
+.rev-num{
+  position:absolute;top:20px;right:20px;
+  font-family:'Bebas Neue',sans-serif;font-size:52px;
+  color:rgba(10,10,9,.05);letter-spacing:2px;line-height:1;
+}
+.rev-icon{font-size:32px;margin-bottom:12px;}
+.rev-category{
+  font-size:9px;letter-spacing:2.5px;text-transform:uppercase;
+  font-weight:700;margin-bottom:6px;
+}
+.card-c1 .rev-category{color:var(--gold);}
+.card-c2 .rev-category{color:var(--teal);}
+.card-c3 .rev-category{color:var(--purple);}
+.card-c4 .rev-category{color:var(--slate);}
+.card-c5 .rev-category{color:var(--amber);}
+.card-c6 .rev-category{color:var(--rose);}
+.card-c7 .rev-category{color:#2A7A9E;}
+.rev-title{font-family:'Libre Baskerville',serif;font-size:20px;font-weight:700;margin-bottom:6px;line-height:1.25;}
+.rev-tagline{font-size:13px;color:var(--muted);line-height:1.5;}
+.rev-card-body{padding:20px 26px;}
+.rev-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:16px;}
+.rev-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;}
+.metric{
+  background:var(--bg);border:1px solid var(--line);
+  border-radius:6px;padding:10px;text-align:center;
+}
+.metric-val{
+  font-family:'Bebas Neue',sans-serif;font-size:20px;
+  letter-spacing:.5px;line-height:1;margin-bottom:2px;
+}
+.metric-label{font-size:9px;color:var(--muted);letter-spacing:.5px;}
+.card-c1 .metric-val{color:var(--gold);}
+.card-c2 .metric-val{color:var(--teal);}
+.card-c3 .metric-val{color:var(--purple);}
+.card-c4 .metric-val{color:var(--slate);}
+.card-c5 .metric-val{color:var(--amber);}
+.card-c6 .metric-val{color:var(--rose);}
+.card-c7 .metric-val{color:#2A7A9E;}
+
+.rev-features{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.rev-feat{
+  display:flex;align-items:flex-start;gap:8px;
+  font-size:12.5px;color:var(--ink);line-height:1.5;
+}
+.rev-feat::before{
+  content:'→';color:var(--muted);font-size:11px;
+  margin-top:2px;flex-shrink:0;
+}
+.rev-card-footer{
+  padding:14px 26px;border-top:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg);
+}
+.diff-badge{
+  padding:4px 10px;border-radius:20px;
+  font-size:10px;font-weight:700;letter-spacing:.5px;
+}
+.diff-easy{background:rgba(26,122,94,.1);color:var(--teal);}
+.diff-med{background:rgba(196,146,42,.1);color:var(--gold);}
+.diff-hard{background:rgba(106,63,165,.1);color:var(--purple);}
+.btn-integrate{
+  padding:8px 18px;border-radius:var(--r);
+  font-family:'Manrope',sans-serif;font-size:12px;font-weight:700;
+  cursor:pointer;transition:all .2s;border:none;letter-spacing:.3px;
+}
+.card-c1 .btn-integrate{background:var(--gold);color:var(--ink);}
+.card-c1 .btn-integrate:hover{background:var(--gold2);}
+.card-c2 .btn-integrate{background:var(--teal);color:#fff;}
+.card-c2 .btn-integrate:hover{background:#22A07A;}
+.card-c3 .btn-integrate{background:var(--purple);color:#fff;}
+.card-c3 .btn-integrate:hover{background:#7A4DB5;}
+.card-c4 .btn-integrate{background:var(--slate);color:#fff;}
+.card-c4 .btn-integrate:hover{background:#3C4E8A;}
+.card-c5 .btn-integrate{background:var(--amber);color:#fff;}
+.card-c5 .btn-integrate:hover{background:#E4833A;}
+.card-c6 .btn-integrate{background:var(--rose);color:#fff;}
+.card-c6 .btn-integrate:hover{background:#D44B3A;}
+.card-c7 .btn-integrate{background:#2A7A9E;color:#fff;}
+.card-c7 .btn-integrate:hover{background:#3A8AAE;}
+
+/* ── TIMELINE ROADMAP ── */
+.roadmap{
+  background:var(--ink);border-radius:12px;
+  padding:48px;position:relative;overflow:hidden;
+  margin-bottom:60px;
+}
+.roadmap::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 80% 20%,rgba(196,146,42,.08) 0%,transparent 60%);
+}
+.roadmap-title{
+  font-family:'Bebas Neue',sans-serif;font-size:32px;
+  color:#fff;letter-spacing:1px;margin-bottom:8px;
+  position:relative;z-index:1;
+}
+.roadmap-sub{font-size:13px;color:rgba(255,255,255,.35);margin-bottom:40px;position:relative;z-index:1;}
+.roadmap-phases{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:20px;position:relative;z-index:1;
+}
+.roadmap-phases::before{
+  content:'';position:absolute;
+  top:24px;left:12%;right:12%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);
+  z-index:0;
+}
+.phase{position:relative;z-index:1;}
+.phase-dot{
+  width:48px;height:48px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;margin-bottom:16px;
+  border:1px solid rgba(255,255,255,.1);
+}
+.phase-month{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:6px;}
+.phase-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:8px;}
+.phase-items{display:flex;flex-direction:column;gap:4px;}
+.phase-item{font-size:11.5px;color:rgba(255,255,255,.45);display:flex;align-items:center;gap:6px;}
+.phase-item::before{content:'·';color:var(--gold2);}
+.phase-rev{
+  margin-top:12px;padding:8px 10px;
+  background:rgba(196,146,42,.1);border:1px solid rgba(196,146,42,.15);
+  border-radius:4px;
+}
+.phase-rev-label{font-size:9px;color:rgba(196,146,42,.6);letter-spacing:1px;text-transform:uppercase;}
+.phase-rev-val{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gold2);letter-spacing:1px;}
+
+/* ── INTEGRATION CODE SECTION ── */
+.code-section{
+  background:var(--warm);border:1px solid var(--line);
+  border-radius:12px;overflow:hidden;margin-bottom:60px;
+}
+.cs-header{
+  padding:24px 32px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.cs-title{font-size:16px;font-weight:700;}
+.cs-tabs{display:flex;gap:4px;}
+.cs-tab{
+  padding:6px 14px;border-radius:var(--r);
+  font-size:12px;font-weight:600;cursor:pointer;
+  border:1px solid var(--line);background:transparent;
+  color:var(--muted);transition:all .2s;font-family:'Manrope',sans-serif;
+}
+.cs-tab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.cs-body{padding:0;}
+.code-block{
+  background:#0D0D0F;padding:28px 32px;
+  font-family:'JetBrains Mono',monospace;font-size:12.5px;
+  line-height:1.8;overflow-x:auto;
+  display:none;
+}
+.code-block.active{display:block;}
+code .kw{color:#CBA6F7;}
+code .str{color:#A6E3A1;}
+code .cm{color:#363647;font-style:italic;}
+code .fn{color:#89B4FA;}
+code .num{color:#FAB387;}
+code .tag{color:#F38BA8;}
+code .attr{color:#89DCEB;}
+
+/* ── MODAL ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(10,10,9,.8);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.open{display:flex;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{
+  background:var(--warm);border-radius:12px;width:100%;max-width:640px;
+  max-height:90vh;overflow-y:auto;
+  animation:modalIn .3s ease;
+}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal-head{
+  padding:24px 28px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;background:var(--warm);z-index:1;
+}
+.modal-title{font-family:'Libre Baskerville',serif;font-size:20px;font-weight:700;}
+.modal-close{
+  width:32px;height:32px;border-radius:50%;border:1px solid var(--line);
+  background:none;cursor:pointer;font-size:16px;display:flex;
+  align-items:center;justify-content:center;transition:all .2s;
+}
+.modal-close:hover{background:var(--ink);color:#fff;border-color:var(--ink);}
+.modal-body{padding:24px 28px;}
+.modal-section{margin-bottom:24px;}
+.ms-title{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.step-list{display:flex;flex-direction:column;gap:10px;}
+.step-li{
+  display:flex;gap:12px;padding:12px;
+  background:var(--bg);border-radius:var(--r);
+}
+.sl-num{
+  width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:#fff;font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.sl-content{}
+.sl-title{font-size:13px;font-weight:600;margin-bottom:2px;}
+.sl-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+.partner-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.partner-card{
+  background:var(--bg);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px;text-align:center;cursor:pointer;transition:all .2s;
+}
+.partner-card:hover{border-color:var(--gold);}
+.pc-name{font-size:13px;font-weight:700;margin-bottom:2px;}
+.pc-comm{font-size:11px;color:var(--gold);font-weight:600;}
+.pc-desc{font-size:10px;color:var(--muted);margin-top:2px;}
+.revenue-calc{
+  background:var(--ink);border-radius:8px;padding:20px;
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;
+}
+.rc-item{}
+.rc-val{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold2);letter-spacing:1px;}
+.rc-label{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:.5px;}
+.modal-footer{
+  padding:16px 28px;border-top:1px solid var(--line);
+  display:flex;gap:10px;
+}
+.btn-primary{
+  flex:1;padding:12px;background:var(--ink);color:#fff;
+  border:none;border-radius:var(--r);font-family:'Manrope',sans-serif;
+  font-size:13px;font-weight:700;cursor:pointer;transition:background .2s;
+}
+.btn-primary:hover{background:var(--gold);}
+.btn-secondary{
+  padding:12px 20px;background:transparent;color:var(--muted);
+  border:1px solid var(--line);border-radius:var(--r);
+  font-family:'Manrope',sans-serif;font-size:13px;cursor:pointer;
+  transition:all .2s;
+}
+.btn-secondary:hover{border-color:var(--ink);color:var(--ink);}
+
+/* ── TOAST ── */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+.toast{
+  background:var(--ink);color:#fff;
+  padding:12px 18px;border-radius:var(--r);
+  font-size:13px;display:flex;align-items:center;gap:10px;
+  box-shadow:0 8px 32px rgba(10,10,9,.3);
+  animation:toastIn .3s ease;min-width:260px;
+}
+.toast.success{border-left:3px solid var(--teal);}
+.toast.info{border-left:3px solid var(--gold);}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* ── FOOTER ── */
+footer{
+  background:var(--ink);padding:48px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:20px;
+  border-top:1px solid rgba(255,255,255,.04);
+}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;color:#fff;}
+.footer-logo span{color:var(--gold2);}
+.footer-txt{font-size:12px;color:rgba(255,255,255,.3);}
+
+@media(max-width:900px){
+  .sim-body{grid-template-columns:1fr;}
+  .roadmap-phases{grid-template-columns:1fr 1fr;}
+  nav{padding:0 24px;}
+  .section{padding:60px 24px;}
+  .roadmap{padding:32px 24px;}
+}
+@media(max-width:600px){
+  .roadmap-phases{grid-template-columns:1fr;}
+  .rev-metrics{grid-template-columns:1fr 1fr;}
+  .partner-grid{grid-template-columns:1fr 1fr;}
+  .revenue-calc{grid-template-columns:1fr;}
+  .hero{padding:80px 24px 48px;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Immo<span>Connect</span></div>
+  <div class="nav-links">
+    <a href="#revenus">Revenus</a>
+    <a href="#simulateur">Simulateur</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#code">Intégration</a>
+    <a href="immo-connect.html" class="nav-cta">← Site principal</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-canvas"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-dot"></div>
+      7 sources de revenus passifs
+    </div>
+    <h1 class="hero-h1">
+      FAITES<br>TRAVAILLER<br><span class="accent">VOTRE SITE</span>
+    </h1>
+    <p class="hero-sub">ImmoConnect peut générer des revenus automatiques 24h/24 grâce à des modèles économiques éprouvés intégrés directement dans vos pages.</p>
+
+    <div class="hero-total">
+      <div class="ht-label">Potentiel mensuel estimé</div>
+      <div class="ht-value" id="heroTotal">4 850 €</div>
+      <div class="ht-sub">avec 500 visiteurs/mois · sans intervention manuelle</div>
+    </div>
+
+    <div class="hero-streams">
+      <div class="stream-pill" onclick="scrollToId('r1')"><div class="sp-dot" style="background:var(--gold)"></div>Abonnements agents</div>
+      <div class="stream-pill" onclick="scrollToId('r2')"><div class="sp-dot" style="background:var(--teal)"></div>Leads qualifiés</div>
+      <div class="stream-pill" onclick="scrollToId('r3')"><div class="sp-dot" style="background:var(--purple)"></div>Affiliation banques</div>
+      <div class="stream-pill" onclick="scrollToId('r4')"><div class="sp-dot" style="background:var(--slate)"></div>Rapports DVF</div>
+      <div class="stream-pill" onclick="scrollToId('r5')"><div class="sp-dot" style="background:var(--amber)"></div>Pub display</div>
+      <div class="stream-pill" onclick="scrollToId('r6')"><div class="sp-dot" style="background:var(--rose)"></div>Formation en ligne</div>
+      <div class="stream-pill" onclick="scrollToId('r7')"><div class="sp-dot" style="background:#2A7A9E"></div>API white-label</div>
+    </div>
+  </div>
+</div>
+
+<!-- SIMULATEUR -->
+<div class="section" id="simulateur" style="background:var(--bg)">
+  <div class="section-label">Calculez votre potentiel</div>
+  <div class="section-title" style="margin-bottom:32px">Simulateur de <em>revenus</em></div>
+
+  <div class="simulator">
+    <div class="sim-header">
+      <div class="sim-title">🧮 SIMULATEUR INTERACTIF</div>
+      <div class="sim-sub">Ajustez les curseurs pour estimer vos revenus selon votre trafic</div>
+    </div>
+    <div class="sim-body">
+      <div class="sim-controls">
+        <div class="sim-control">
+          <div class="sc-header">
+            <div class="sc-label">👥 Visiteurs / mois</div>
+            <div class="sc-value" id="sv-visitors">500</div>
+          </div>
+          <input type="range" class="slider" id="sl-visitors" min="100" max="10000" step="100" value="500" oninput="updateSim()">
+          <div class="sc-desc">Plus de visiteurs = plus de revenus sur toutes les sources</div>
+        </div>
+        <div class="sim-control">
+          <div class="sc-header">
+            <div class="sc-label">🏢 Agents abonnés</div>
+            <div class="sc-value" id="sv-agents">5</div>
+          </div>
+          <input type="range" class="slider" id="sl-agents" min="0" max="100" step="1" value="5" oninput="updateSim()">
+          <div class="sc-desc">Agents payant 49€/mois pour accéder aux leads qualifiés</div>
+        </div>
+        <div class="sim-control">
+          <div class="sc-header">
+            <div class="sc-label">📋 Leads vendus / mois</div>
+            <div class="sc-value" id="sv-leads">12</div>
+          </div>
+          <input type="range" class="slider" id="sl-leads" min="0" max="200" step="1" value="12" oninput="updateSim()">
+          <div class="sc-desc">Demandes qualifiées vendues à 25€ pièce aux agences partenaires</div>
+        </div>
+        <div class="sim-control">
+          <div class="sc-header">
+            <div class="sc-label">📊 Rapports DVF vendus</div>
+            <div class="sc-value" id="sv-rapports">8</div>
+          </div>
+          <input type="range" class="slider" id="sl-rapports" min="0" max="100" step="1" value="8" oninput="updateSim()">
+          <div class="sc-desc">Rapports d'estimation automatiques vendus 19€ l'unité</div>
+        </div>
+      </div>
+      <div class="sim-results">
+        <div class="sr-title">Décomposition des revenus</div>
+        <div class="sr-item">
+          <div class="sr-name"><div class="dot" style="background:var(--gold)"></div>Abonnements agents</div>
+          <div class="sr-amount" id="res-agents">245 €</div>
+        </div>
+        <div class="sr-item">
+          <div class="sr-name"><div class="dot" style="background:var(--teal)"></div>Vente de leads</div>
+          <div class="sr-amount" id="res-leads">300 €</div>
+        </div>
+        <div class="sr-item">
+          <div class="sr-name"><div class="dot" style="background:var(--purple)"></div>Affiliation bancaire</div>
+          <div class="sr-amount" id="res-affil">0 €</div>
+        </div>
+        <div class="sr-item">
+          <div class="sr-name"><div class="dot" style="background:var(--slate)"></div>Rapports DVF</div>
+          <div class="sr-amount" id="res-rapports">152 €</div>
+        </div>
+        <div class="sr-item">
+          <div class="sr-name"><div class="dot" style="background:var(--amber)"></div>Publicité display</div>
+          <div class="sr-amount" id="res-pub">0 €</div>
+        </div>
+        <div class="sr-total">
+          <div class="sr-total-label">Total mensuel estimé</div>
+          <div class="sr-total-val" id="res-total">697 €</div>
+          <div class="sr-total-sub">revenus passifs récurrents</div>
+        </div>
+        <div class="sr-annual">
+          <div style="font-size:10px;color:rgba(77,201,160,.6);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Projection annuelle</div>
+          <div class="sr-annual-val" id="res-annual">8 364 €</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REVENUE CARDS -->
+<div class="section" id="revenus" style="background:var(--warm)">
+  <div class="section-label">Les 7 modèles</div>
+  <div class="section-title" style="margin-bottom:40px">Chaque source <em>expliquée</em></div>
+
+  <div class="revenue-grid">
+
+    <!-- 1 — ABONNEMENTS AGENTS -->
+    <div class="rev-card card-c1" id="r1">
+      <div class="rev-card-top">
+        <div class="rev-num">01</div>
+        <div class="rev-icon">🏢</div>
+        <div class="rev-category">SaaS · Récurrent</div>
+        <div class="rev-title">Abonnements agents immobiliers</div>
+        <div class="rev-tagline">Les agents paient pour accéder aux leads qualifiés de votre plateforme</div>
+      </div>
+      <div class="rev-card-body">
+        <div class="rev-desc">Créez un espace "Agent Pro" sur ImmoConnect. Les agents paient un abonnement mensuel pour recevoir les demandes d'acheteurs et vendeurs correspondant à leur zone géographique.</div>
+        <div class="rev-metrics">
+          <div class="metric"><div class="metric-val">49€</div><div class="metric-label">Par agent/mois</div></div>
+          <div class="metric"><div class="metric-val">20</div><div class="metric-label">Agents = 980€</div></div>
+          <div class="metric"><div class="metric-val">95%</div><div class="metric-label">Marge nette</div></div>
+        </div>
+        <div class="rev-features">
+          <div class="rev-feat">Paiement automatique via Stripe (0 intervention)</div>
+          <div class="rev-feat">Accès dashboard leads en temps réel</div>
+          <div class="rev-feat">Alertes email dès qu'une demande correspond</div>
+          <div class="rev-feat">Statistiques de performance incluses</div>
+        </div>
+      </div>
+      <div class="rev-card-footer">
+        <span class="diff-badge diff-med">⚡ Moyen à mettre en place</span>
+        <button class="btn-integrate" onclick="openModal('agents')">Intégrer →</button>
+      </div>
+    </div>
+
+    <!-- 2 — LEADS QUALIFIÉS -->
+    <div class="rev-card card-c2" id="r2">
+      <div class="rev-card-top">
+        <div class="rev-num">02</div>
+        <div class="rev-icon">📋</div>
+        <div class="rev-category">B2B · Vente unitaire</div>
+        <div class="rev-title">Vente de leads qualifiés</div>
+        <div class="rev-tagline">Revendez les demandes d'achat/vente aux agences immobilières partenaires</div>
+      </div>
+      <div class="rev-card-body">
+        <div class="rev-desc">Chaque demande soumise sur ImmoConnect (acheteur avec budget défini, vendeur avec bien à estimer) est un lead qualifié que les agences sont prêtes à payer. C'est le modèle le plus simple à démarrer.</div>
+        <div class="rev-metrics">
+          <div class="metric"><div class="metric-val">25€</div><div class="metric-label">Par lead achat</div></div>
+          <div class="metric"><div class="metric-val">45€</div><div class="metric-label">Par lead vente</div></div>
+          <div class="metric"><div class="metric-val">100%</div><div class="metric-label">Passif</div></div>
+        </div>
+        <div class="rev-features">
+          <div class="rev-feat">Partenariats avec agences locales (Century 21, Orpi, Laforêt)</div>
+          <div class="rev-feat">API automatique : lead créé → envoyé → facturé</div>
+          <div class="rev-feat">Système de scoring qualité des leads</div>
+          <div class="rev-feat">Tableau de bord agences partenaires</div>
+        </div>
+      </div>
+      <div class="rev-card-footer">
+        <span class="diff-badge diff-easy">✅ Facile à démarrer</span>
+        <button class="btn-integrate" onclick="openModal('leads')">Intégrer →</button>
+      </div>
+    </div>
+
+    <!-- 3 — AFFILIATION BANCAIRE -->
+    <div class="rev-card card-c3" id="r3">
+      <div class="rev-card-top">
+        <div class="rev-num">03</div>
+        <div class="rev-icon">🏦</div>
+        <div class="rev-category">Affiliation · Commission</div>
+        <div class="rev-title">Affiliation banques & courtiers</div>
+        <div class="rev-tagline">Percevez des commissions sur chaque crédit immobilier contracté via votre site</div>
+      </div>
+      <div class="rev-card-body">
+        <div class="rev-desc">Ajoutez un simulateur de crédit immobilier sur ImmoConnect. Chaque utilisateur qui clique et contacte un courtier ou une banque partenaire vous rapporte une commission automatique.</div>
+        <div class="rev-metrics">
+          <div class="metric"><div class="metric-val">150€</div><div class="metric-label">/dossier financé</div></div>
+          <div class="metric"><div class="metric-val">0,3%</div><div class="metric-label">Du montant prêt</div></div>
+          <div class="metric"><div class="metric-val">0h</div><div class="metric-label">De travail</div></div>
+        </div>
+        <div class="rev-features">
+          <div class="rev-feat">Simulateur de crédit intégré dans les fiches biens</div>
+          <div class="rev-feat">Partenaires : Empruntis, Meilleurtaux, Creditfoncier.fr</div>
+          <div class="rev-feat">Tracking automatique des conversions</div>
+          <div class="rev-feat">Paiement mensuel automatique des commissions</div>
+        </div>
+      </div>
+      <div class="rev-card-footer">
+        <span class="diff-badge diff-easy">✅ Très facile (lien affilié)</span>
+        <button class="btn-integrate" onclick="openModal('affiliation')">Intégrer →</button>
+      </div>
+    </div>
+
+    <!-- 4 — RAPPORTS DVF -->
+    <div class="rev-card card-c4" id="r4">
+      <div class="rev-card-top">
+        <div class="rev-num">04</div>
+        <div class="rev-icon">📊</div>
+        <div class="rev-category">Digital · Produit scalable</div>
+        <div class="rev-title">Rapports d'estimation DVF</div>
+        <div class="rev-tagline">Vendez des rapports d'estimation automatiques générés depuis vos données DVF</div>
+      </div>
+      <div class="rev-card-body">
+        <div class="rev-desc">Votre carte DVF contient déjà toutes les transactions du marché. Transformez-la en produit : les vendeurs paient pour recevoir un rapport complet sur les prix de leur quartier (comparatif, médiane, évolution).</div>
+        <div class="rev-metrics">
+          <div class="metric"><div class="metric-val">19€</div><div class="metric-label">Rapport PDF</div></div>
+          <div class="metric"><div class="metric-val">49€</div><div class="metric-label">Rapport Pro</div></div>
+          <div class="metric"><div class="metric-val">∞</div><div class="metric-label">Scalable</div></div>
+        </div>
+        <div class="rev-features">
+          <div class="rev-feat">Généré automatiquement depuis les données DVF existantes</div>
+          <div class="rev-feat">PDF téléchargeable après paiement Stripe</div>
+          <div class="rev-feat">Inclut : prix médian, top 10 ventes récentes, tendance 3 ans</div>
+          <div class="rev-feat">Zéro coût marginal (données publiques gratuites)</div>
+        </div>
+      </div>
+      <div class="rev-card-footer">
+        <span class="diff-badge diff-med">⚡ Moyen (PDF auto)</span>
+        <button class="btn-integrate" onclick="openModal('rapports')">Intégrer →</button>
+      </div>
+    </div>
+
+    <!-- 5 — PUBLICITÉ DISPLAY -->
+    <div class="rev-card card-c5" id="r5">
+      <div class="rev-card-top">
+        <div class="rev-num">05</div>
+        <div class="rev-icon">📣</div>
+        <div class="rev-category">Programmatique · CPM</div>
+        <div class="rev-title">Publicité display ciblée</div>
+        <div class="rev-tagline">Monétisez votre trafic avec des annonces contextuelles haut de gamme</div>
+      </div>
+      <div class="rev-card-body">
+        <div class="rev-desc">L'audience immobilière est parmi les plus valorisées en publicité. Les annonceurs (banques, assurances, artisans, déménageurs) paient cher pour toucher des personnes qui achètent ou vendent.</div>
+        <div class="rev-metrics">
+          <div class="metric"><div class="metric-val">8€</div><div class="metric-label">CPM immo</div></div>
+          <div class="metric"><div class="metric-val">500</div><div class="metric-label">Visites = 4€</div></div>
+          <div class="metric"><div class="metric-val">5k</div><div class="metric-label">Visites = 40€</div></div>
+        </div>
+        <div class="rev-features">
+          <div class="rev-feat">Google AdSense : installation en 10 minutes (balise JS)</div>
+          <div class="rev-feat">Ezoic ou Mediavine pour CPM plus élevé (>10k visites/mois)</div>
+          <div class="rev-feat">Emplacements stratégiques : sidebar carte DVF, entre les fiches</div>
+          <div class="rev-feat">Respecte les conditions Anthropic (pas de promo de produits)</div>
+        </div>
+      </div>
+      <div class="rev-card-footer">
+        <span class="diff-badge diff-easy">✅ Le plus facile</span>
+        <button class="btn-integrate" onclick="openModal('pub')">Intégrer →</button>
+      </div>
+    </div>
+
+    <!-- 6 — FORMATION EN LIGNE -->
+    <div class="rev-card card-c6" id="r6">
+      <div class="rev-card-top">
+        <div class="rev-num">06</div>
+        <div class="rev-icon">🎓</div>
+        <div class="rev-category">E-learning · Evergreen</div>
+        <div class="rev-title">Formations en ligne immobilier</div>
+        <div class="rev-tagline">Créez des formations pour acheteurs et vendeurs, vendez-les en automatique</div>
+      </div>
+      <div class="rev-card-body">
+        <div class="rev-desc">Votre audience a des questions : comment acheter son premier bien ? Comment négocier ? Comment lire les données DVF ? Créez une formation vidéo une fois, et encaissez indéfiniment.</div>
+        <div class="rev-metrics">
+          <div class="metric"><div class="metric-val">97€</div><div class="metric-label">Formation achat</div></div>
+          <div class="metric"><div class="metric-val">147€</div><div class="metric-label">Formation vente</div></div>
+          <div class="metric"><div class="metric-val">0€</div><div class="metric-label">Coût marginal</div></div>
+        </div>
+        <div class="rev-features">
+          <div class="rev-feat">Hébergé sur Teachable ou Gumroad (0% commission possible)</div>
+          <div class="rev-feat">Contenu : 5-10 vidéos de 10 min + PDF récapitulatifs</div>
+          <div class="rev-feat">Vente automatique via page de paiement intégrée</div>
+          <div class="rev-feat">Upsell : consultation 1h avec un agent partenaire</div>
+        </div>
+      </div>
+      <div class="rev-card-footer">
+        <span class="diff-badge diff-hard">🔥 Plus de travail initial</span>
+        <button class="btn-integrate" onclick="openModal('formation')">Intégrer →</button>
+      </div>
+    </div>
+
+    <!-- 7 — API WHITE-LABEL -->
+    <div class="rev-card card-c7" id="r7">
+      <div class="rev-card-top">
+        <div class="rev-num">07</div>
+        <div class="rev-icon">⚡</div>
+        <div class="rev-category">B2B · API · Haut potentiel</div>
+        <div class="rev-title">API white-label DVF</div>
+        <div class="rev-tagline">Vendez l'accès à votre infrastructure DVF à d'autres sites immobiliers</div>
+      </div>
+      <div class="rev-card-body">
+        <div class="rev-desc">Vous avez construit une carte DVF fonctionnelle. D'autres sites immobiliers (notaires, promoteurs, agences indépendantes) veulent la même chose. Vendez un accès API à votre infrastructure.</div>
+        <div class="rev-metrics">
+          <div class="metric"><div class="metric-val">99€</div><div class="metric-label">/mois/client</div></div>
+          <div class="metric"><div class="metric-val">10</div><div class="metric-label">Clients = 990€</div></div>
+          <div class="metric"><div class="metric-val">98%</div><div class="metric-label">Marge</div></div>
+        </div>
+        <div class="rev-features">
+          <div class="rev-feat">Documentation API générée automatiquement</div>
+          <div class="rev-feat">Clés API personnalisées par client via Supabase</div>
+          <div class="rev-feat">Facturation récurrente Stripe incluse</div>
+          <div class="rev-feat">Limite de requêtes par plan (Free/Pro/Business)</div>
+        </div>
+      </div>
+      <div class="rev-card-footer">
+        <span class="diff-badge diff-hard">🔥 Avancé mais très rentable</span>
+        <button class="btn-integrate" onclick="openModal('api')">Intégrer →</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ROADMAP -->
+<div class="section" style="background:var(--bg)">
+  <div class="section-label">Progression dans le temps</div>
+  <div class="section-title" style="margin-bottom:32px" id="roadmap">Roadmap de <em>monétisation</em></div>
+
+  <div class="roadmap">
+    <div class="roadmap-title">DE 0 À 5 000€/MOIS EN 12 MOIS</div>
+    <div class="roadmap-sub">Chaque phase s'appuie sur la précédente. Commencez simple, scalez progressivement.</div>
+    <div class="roadmap-phases">
+      <div class="phase">
+        <div class="phase-dot" style="background:rgba(196,146,42,.15);color:var(--gold2)">🌱</div>
+        <div class="phase-month">Mois 1–2</div>
+        <div class="phase-title">Fondations</div>
+        <div class="phase-items">
+          <div class="phase-item">Site en ligne</div>
+          <div class="phase-item">Google AdSense activé</div>
+          <div class="phase-item">1er agent partenaire</div>
+          <div class="phase-item">Lien affilié courtier</div>
+        </div>
+        <div class="phase-rev">
+          <div class="phase-rev-label">Revenus estimés</div>
+          <div class="phase-rev-val">100–300 €</div>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="phase-dot" style="background:rgba(26,122,94,.15);color:#4DC9A0">🚀</div>
+        <div class="phase-month">Mois 3–5</div>
+        <div class="phase-title">Traction</div>
+        <div class="phase-items">
+          <div class="phase-item">5–10 agents abonnés</div>
+          <div class="phase-item">Vente leads activée</div>
+          <div class="phase-item">Rapport DVF lancé</div>
+          <div class="phase-item">SEO en cours</div>
+        </div>
+        <div class="phase-rev">
+          <div class="phase-rev-label">Revenus estimés</div>
+          <div class="phase-rev-val">500–1 200 €</div>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="phase-dot" style="background:rgba(106,63,165,.15);color:#A87FD8">⚡</div>
+        <div class="phase-month">Mois 6–9</div>
+        <div class="phase-title">Accélération</div>
+        <div class="phase-items">
+          <div class="phase-item">20+ agents abonnés</div>
+          <div class="phase-item">Formation lancée</div>
+          <div class="phase-item">5k visites/mois</div>
+          <div class="phase-item">Premiers clients API</div>
+        </div>
+        <div class="phase-rev">
+          <div class="phase-rev-label">Revenus estimés</div>
+          <div class="phase-rev-val">1 500–3 000 €</div>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="phase-dot" style="background:rgba(196,146,42,.25);color:var(--gold2)">👑</div>
+        <div class="phase-month">Mois 10–12</div>
+        <div class="phase-title">Maturité</div>
+        <div class="phase-items">
+          <div class="phase-item">50+ agents</div>
+          <div class="phase-item">API white-label</div>
+          <div class="phase-item">Affiliation optimisée</div>
+          <div class="phase-item">Croissance organique</div>
+        </div>
+        <div class="phase-rev">
+          <div class="phase-rev-label">Revenus estimés</div>
+          <div class="phase-rev-val">3 000–6 000 €</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CODE INTÉGRATION -->
+<div class="section" id="code" style="background:var(--warm)">
+  <div class="section-label">Copier-coller prêt à l'emploi</div>
+  <div class="section-title" style="margin-bottom:32px">Code d'<em>intégration</em></div>
+
+  <div class="code-section">
+    <div class="cs-header">
+      <div class="cs-title">💻 Code à intégrer dans vos pages</div>
+      <div class="cs-tabs">
+        <button class="cs-tab active" onclick="switchTab('stripe')">Stripe / Paiement</button>
+        <button class="cs-tab" onclick="switchTab('adsense')">Google AdSense</button>
+        <button class="cs-tab" onclick="switchTab('affiliation')">Affiliation</button>
+        <button class="cs-tab" onclick="switchTab('api')">API clés</button>
+      </div>
+    </div>
+    <div class="cs-body">
+
+      <pre class="code-block active" id="tab-stripe"><code><span class="cm">// ═══════════════════════════════════════════════════
+// STRIPE — Paiement abonnement agents
+// Installer : npm install stripe
+// Ajouter dans backend/api.js
+// ═══════════════════════════════════════════════════</span>
+
+<span class="kw">const</span> stripe = require(<span class="str">'stripe'</span>)(process.env.STRIPE_SECRET_KEY)
+
+<span class="cm">// Créer un lien de paiement abonnement agent (49€/mois)</span>
+app.post(<span class="str">'/api/subscribe'</span>, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> session = <span class="kw">await</span> stripe.checkout.sessions.create({
+    payment_method_types: [<span class="str">'card'</span>],
+    mode: <span class="str">'subscription'</span>,
+    line_items: [{
+      price_data: {
+        currency: <span class="str">'eur'</span>,
+        product_data: { name: <span class="str">'ImmoConnect Agent Pro'</span> },
+        unit_amount: <span class="num">4900</span>,        <span class="cm">// 49€ en centimes</span>
+        recurring: { interval: <span class="str">'month'</span> }
+      },
+      quantity: <span class="num">1</span>
+    }],
+    success_url: <span class="str">'https://immoconnect.fr/merci?agent=true'</span>,
+    cancel_url: <span class="str">'https://immoconnect.fr/agents'</span>,
+  })
+  res.json({ url: session.url })
+})
+
+<span class="cm">// Vente d'un rapport DVF (19€, paiement unique)</span>
+app.post(<span class="str">'/api/rapport-dvf'</span>, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> { ville, codePostal } = req.body
+  <span class="kw">const</span> session = <span class="kw">await</span> stripe.checkout.sessions.create({
+    payment_method_types: [<span class="str">'card'</span>],
+    mode: <span class="str">'payment'</span>,
+    line_items: [{
+      price_data: {
+        currency: <span class="str">'eur'</span>,
+        product_data: {
+          name: <span class="str">`Rapport DVF — ${ville} (${codePostal})`</span>,
+          description: <span class="str">'Analyse complète des prix du marché dans votre secteur'</span>
+        },
+        unit_amount: <span class="num">1900</span>   <span class="cm">// 19€</span>
+      },
+      quantity: <span class="num">1</span>
+    }],
+    success_url: <span class="str">`https://immoconnect.fr/rapport?cp=${codePostal}&paid=true`</span>,
+    cancel_url: <span class="str">'https://immoconnect.fr/carte'</span>,
+  })
+  res.json({ url: session.url })
+})
+
+<span class="cm">// Dans votre frontend (bouton d'achat rapport)</span>
+<span class="kw">async function</span> <span class="fn">acheterRapport</span>(ville, cp) {
+  <span class="kw">const</span> r = <span class="kw">await</span> fetch(<span class="str">'/api/rapport-dvf'</span>, {
+    method: <span class="str">'POST'</span>,
+    headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
+    body: JSON.stringify({ ville, codePostal: cp })
+  })
+  <span class="kw">const</span> { url } = <span class="kw">await</span> r.json()
+  window.location.href = url  <span class="cm">// Redirige vers Stripe Checkout</span>
+}</code></pre>
+
+      <pre class="code-block" id="tab-adsense"><code><span class="cm">// ═══════════════════════════════════════════════════
+// GOOGLE ADSENSE — Publicité display
+// 1. Créer compte sur adsense.google.com
+// 2. Ajouter votre site → attendre validation (1-7j)
+// 3. Copier ces balises dans vos pages HTML
+// ═══════════════════════════════════════════════════</span>
+
+<span class="cm">&lt;!-- Dans &lt;head&gt; de index.html, carte-dvf.html, dashboard.html --&gt;</span>
+<span class="tag">&lt;script</span> <span class="attr">async</span> <span class="attr">src</span>=<span class="str">"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"</span>
+     <span class="attr">crossorigin</span>=<span class="str">"anonymous"</span><span class="tag">&gt;&lt;/script&gt;</span>
+
+<span class="cm">&lt;!-- EMPLACEMENT 1 : Sidebar de la carte DVF (320x250) --&gt;</span>
+<span class="tag">&lt;ins</span> <span class="attr">class</span>=<span class="str">"adsbygoogle"</span>
+     <span class="attr">style</span>=<span class="str">"display:block;width:320px;height:250px"</span>
+     <span class="attr">data-ad-client</span>=<span class="str">"ca-pub-XXXXXXXXXXXXXXXX"</span>
+     <span class="attr">data-ad-slot</span>=<span class="str">"1234567890"</span><span class="tag">&gt;&lt;/ins&gt;</span>
+<span class="tag">&lt;script&gt;</span>(adsbygoogle = window.adsbygoogle || []).push({});<span class="tag">&lt;/script&gt;</span>
+
+<span class="cm">&lt;!-- EMPLACEMENT 2 : Entre les fiches de l'index (responsive) --&gt;</span>
+<span class="tag">&lt;ins</span> <span class="attr">class</span>=<span class="str">"adsbygoogle"</span>
+     <span class="attr">style</span>=<span class="str">"display:block"</span>
+     <span class="attr">data-ad-format</span>=<span class="str">"auto"</span>
+     <span class="attr">data-full-width-responsive</span>=<span class="str">"true"</span>
+     <span class="attr">data-ad-client</span>=<span class="str">"ca-pub-XXXXXXXXXXXXXXXX"</span>
+     <span class="attr">data-ad-slot</span>=<span class="str">"0987654321"</span><span class="tag">&gt;&lt;/ins&gt;</span>
+<span class="tag">&lt;script&gt;</span>(adsbygoogle = window.adsbygoogle || []).push({});<span class="tag">&lt;/script&gt;</span>
+
+<span class="cm">/* CSS pour intégrer proprement dans le layout --
+   Ajouter dans le &lt;style&gt; de carte-dvf.html */</span>
+.ad-sidebar {
+  position: absolute;
+  top: 80px; right: 16px;
+  z-index: 400;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,.1);
+}
+.ad-in-list {
+  margin: 20px 0;
+  border: 1px dashed rgba(0,0,0,.1);
+  border-radius: 4px;
+  padding: 4px;
+  text-align: center;
+}
+
+<span class="cm">// ⚠️ Note importante : AdSense nécessite une politique
+// de confidentialité et un bandeau cookies RGPD.
+// Utiliser cookieyes.com (gratuit) pour le bandeau.</span></code></pre>
+
+      <pre class="code-block" id="tab-affiliation"><code><span class="cm">// ═══════════════════════════════════════════════════
+// AFFILIATION — Simulateur de crédit + courtiers
+// Partenaires recommandés :
+//   → Empruntis : programme affilié sur impact.com
+//   → Meilleurtaux : affiliation directe
+//   → Hello bank! : BNP Paribas affiliation
+// ═══════════════════════════════════════════════════</span>
+
+<span class="cm">&lt;!-- Simulateur de crédit à ajouter dans index.html
+     Dans la section hero ou les fiches de biens --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"credit-simulator"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;h3&gt;</span>Simulez votre crédit immobilier<span class="tag">&lt;/h3&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"sim-row"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;label&gt;</span>Montant emprunté<span class="tag">&lt;/label&gt;</span>
+    <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="str">"range"</span> <span class="attr">id</span>=<span class="str">"creditMontant"</span>
+           <span class="attr">min</span>=<span class="str">"50000"</span> <span class="attr">max</span>=<span class="str">"800000"</span> <span class="attr">value</span>=<span class="str">"250000"</span>
+           <span class="attr">oninput</span>=<span class="str">"updateCredit()"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;span</span> <span class="attr">id</span>=<span class="str">"creditMontantVal"</span><span class="tag">&gt;</span>250 000 €<span class="tag">&lt;/span&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"sim-row"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;label&gt;</span>Durée<span class="tag">&lt;/label&gt;</span>
+    <span class="tag">&lt;select</span> <span class="attr">id</span>=<span class="str">"creditDuree"</span> <span class="attr">onchange</span>=<span class="str">"updateCredit()"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;option</span> <span class="attr">value</span>=<span class="str">"15"</span><span class="tag">&gt;</span>15 ans<span class="tag">&lt;/option&gt;</span>
+      <span class="tag">&lt;option</span> <span class="attr">value</span>=<span class="str">"20"</span> <span class="attr">selected</span><span class="tag">&gt;</span>20 ans<span class="tag">&lt;/option&gt;</span>
+      <span class="tag">&lt;option</span> <span class="attr">value</span>=<span class="str">"25"</span><span class="tag">&gt;</span>25 ans<span class="tag">&lt;/option&gt;</span>
+    <span class="tag">&lt;/select&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"sim-result"</span><span class="tag">&gt;</span>
+    Mensualité estimée : <span class="tag">&lt;strong</span> <span class="attr">id</span>=<span class="str">"creditMensualite"</span><span class="tag">&gt;</span>1 180 €<span class="tag">&lt;/strong&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+  <span class="cm">&lt;!-- Lien affilié Meilleurtaux --&gt;</span>
+  <span class="tag">&lt;a</span> <span class="attr">href</span>=<span class="str">"https://www.meilleurtaux.com/?ref=VOTRE_CODE_AFFILIE"</span>
+     <span class="attr">target</span>=<span class="str">"_blank"</span> <span class="attr">class</span>=<span class="str">"btn-affil"</span>
+     <span class="attr">onclick</span>=<span class="str">"trackAffiliation('meilleurtaux')"</span><span class="tag">&gt;</span>
+    Obtenir le meilleur taux →
+  <span class="tag">&lt;/a&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="kw">function</span> <span class="fn">updateCredit</span>() {
+  <span class="kw">const</span> m = +document.getElementById(<span class="str">'creditMontant'</span>).value
+  <span class="kw">const</span> d = +document.getElementById(<span class="str">'creditDuree'</span>).value
+  <span class="kw">const</span> taux = <span class="num">0.035</span> / <span class="num">12</span>  <span class="cm">// 3.5% annuel</span>
+  <span class="kw">const</span> n = d * <span class="num">12</span>
+  <span class="kw">const</span> mensualite = m * taux / (<span class="num">1</span> - Math.pow(<span class="num">1</span> + taux, -n))
+  document.getElementById(<span class="str">'creditMontantVal'</span>).textContent = m.toLocaleString(<span class="str">'fr-FR'</span>) + <span class="str">' €'</span>
+  document.getElementById(<span class="str">'creditMensualite'</span>).textContent = Math.round(mensualite).toLocaleString(<span class="str">'fr-FR'</span>) + <span class="str">' €'</span>
+}
+
+<span class="kw">function</span> <span class="fn">trackAffiliation</span>(partenaire) {
+  gtag(<span class="str">'event'</span>, <span class="str">'affiliation_click'</span>, { partenaire })
+}</code></pre>
+
+      <pre class="code-block" id="tab-api"><code><span class="cm">// ═══════════════════════════════════════════════════
+// API WHITE-LABEL — Gestion des clés API par client
+// Ajouter dans backend/api.js + schema Supabase
+// ═══════════════════════════════════════════════════</span>
+
+<span class="cm">-- SQL Supabase : nouvelle table api_keys</span>
+CREATE TABLE api_keys (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at  TIMESTAMP DEFAULT NOW(),
+  client_name TEXT NOT NULL,
+  email       TEXT NOT NULL,
+  api_key     TEXT UNIQUE DEFAULT encode(gen_random_bytes(32), 'hex'),
+  plan        TEXT DEFAULT 'free',  <span class="cm">-- 'free', 'pro', 'business'</span>
+  requests_this_month INTEGER DEFAULT 0,
+  limit_monthly INTEGER DEFAULT 100,
+  active      BOOLEAN DEFAULT TRUE
+);
+
+<span class="cm">// Middleware de vérification de clé API</span>
+<span class="kw">async function</span> <span class="fn">requireApiKey</span>(req, res, next) {
+  <span class="kw">const</span> key = req.headers[<span class="str">'x-api-key'</span>]
+  <span class="kw">if</span> (!key) <span class="kw">return</span> res.status(<span class="num">401</span>).json({ error: <span class="str">'Clé API requise'</span> })
+
+  <span class="kw">const</span> { data: client } = <span class="kw">await</span> supabase
+    .from(<span class="str">'api_keys'</span>)
+    .select(<span class="str">'*'</span>)
+    .eq(<span class="str">'api_key'</span>, key)
+    .eq(<span class="str">'active'</span>, <span class="kw">true</span>)
+    .single()
+
+  <span class="kw">if</span> (!client) <span class="kw">return</span> res.status(<span class="num">403</span>).json({ error: <span class="str">'Clé invalide'</span> })
+  <span class="kw">if</span> (client.requests_this_month >= client.limit_monthly)
+    <span class="kw">return</span> res.status(<span class="num">429</span>).json({ error: <span class="str">'Quota mensuel atteint. Passez en Pro.'</span> })
+
+  <span class="cm">// Incrémenter le compteur</span>
+  <span class="kw">await</span> supabase.from(<span class="str">'api_keys'</span>)
+    .update({ requests_this_month: client.requests_this_month + <span class="num">1</span> })
+    .eq(<span class="str">'id'</span>, client.id)
+
+  req.apiClient = client
+  next()
+}
+
+<span class="cm">// Route DVF publique (avec clé API)</span>
+app.get(<span class="str">'/api/v1/dvf'</span>, requireApiKey, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> { lat, lon, dist = <span class="num">500</span> } = req.query
+  <span class="kw">const</span> url = <span class="str">`https://apidf-preprod.cerema.fr/dvf_opendata/mutations/?...`</span>
+  <span class="kw">const</span> data = <span class="kw">await</span> fetch(url).then(r => r.json())
+  res.json({
+    source: <span class="str">'ImmoConnect DVF API'</span>,
+    plan: req.apiClient.plan,
+    results: data.features || []
+  })
+})
+
+<span class="cm">// Plans tarifaires
+// Free  : 100 requêtes/mois → 0€
+// Pro   : 5 000 req/mois   → 99€/mois (Stripe)
+// Biz   : illimité         → 299€/mois</span></code></pre>
+
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Immo<span>Connect</span></div>
+  <div class="footer-txt">Revenus passifs · Modèle économique · 7 sources intégrées</div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold2);letter-spacing:1px">
+    POTENTIEL : 4 850 €/MOIS
+  </div>
+</footer>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle"></div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-primary" id="modalCTA" onclick="activateRevenue()">✓ Activer cette source</button>
+      <button class="btn-secondary" onclick="closeModalDirect()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ═══════════ SIMULATOR ═══════════ */
+function updateSim() {
+  const visitors = +document.getElementById('sl-visitors').value
+  const agents   = +document.getElementById('sl-agents').value
+  const leads    = +document.getElementById('sl-leads').value
+  const rapports = +document.getElementById('sl-rapports').value
+
+  document.getElementById('sv-visitors').textContent = visitors.toLocaleString('fr-FR')
+  document.getElementById('sv-agents').textContent   = agents
+  document.getElementById('sv-leads').textContent    = leads
+  document.getElementById('sv-rapports').textContent = rapports
+
+  const rAgents   = agents * 49
+  const rLeads    = leads * 25
+  const rAffil    = Math.round(visitors * 0.002 * 150)  // 0.2% clic * 150€ commission
+  const rRapports = rapports * 19
+  const rPub      = Math.round(visitors * 0.008)         // 8€ CPM
+  const total     = rAgents + rLeads + rAffil + rRapports + rPub
+
+  document.getElementById('res-agents').textContent   = fmtEur(rAgents)
+  document.getElementById('res-leads').textContent    = fmtEur(rLeads)
+  document.getElementById('res-affil').textContent    = fmtEur(rAffil)
+  document.getElementById('res-rapports').textContent = fmtEur(rRapports)
+  document.getElementById('res-pub').textContent      = fmtEur(rPub)
+  document.getElementById('res-total').textContent    = fmtEur(total)
+  document.getElementById('res-annual').textContent   = fmtEur(total * 12)
+  document.getElementById('heroTotal').textContent    = fmtEur(total)
+}
+
+function fmtEur(v) {
+  return new Intl.NumberFormat('fr-FR', { style:'currency', currency:'EUR', maximumFractionDigits:0 }).format(v)
+}
+
+updateSim()
+
+/* ═══════════ TABS ═══════════ */
+function switchTab(id) {
+  document.querySelectorAll('.code-block').forEach(b => b.classList.remove('active'))
+  document.querySelectorAll('.cs-tab').forEach(t => t.classList.remove('active'))
+  document.getElementById('tab-'+id).classList.add('active')
+  event.target.classList.add('active')
+}
+
+/* ═══════════ MODAL DATA ═══════════ */
+const modals = {
+  agents: {
+    title: '🏢 Abonnements agents — Guide d\'intégration',
+    body: `
+      <div class="modal-section">
+        <div class="ms-title">Comment ça marche</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:16px">
+          Vous créez une page "Espace Agent" sur ImmoConnect. Les agents s'inscrivent, choisissent leur zone géographique et paient 49€/mois via Stripe. En retour, ils reçoivent automatiquement toutes les demandes de leur zone.
+        </p>
+      </div>
+      <div class="modal-section">
+        <div class="ms-title">Étapes de mise en place</div>
+        <div class="step-list">
+          <div class="step-li"><div class="sl-num">1</div><div class="sl-content"><div class="sl-title">Créer un compte Stripe</div><div class="sl-desc">stripe.com → Créer un compte → Vérifier votre identité (RIB + pièce d'identité)</div></div></div>
+          <div class="step-li"><div class="sl-num">2</div><div class="sl-content"><div class="sl-title">Créer un produit abonnement</div><div class="sl-desc">Stripe → Products → Add product → "Agent Pro ImmoConnect" → 49€/mois → Recurring</div></div></div>
+          <div class="step-li"><div class="sl-num">3</div><div class="sl-content"><div class="sl-title">Copier la clé secrète Stripe</div><div class="sl-desc">Stripe → Developers → API Keys → Secret key → Ajouter dans .env : STRIPE_SECRET_KEY=sk_live_...</div></div></div>
+          <div class="step-li"><div class="sl-num">4</div><div class="sl-content"><div class="sl-title">Intégrer le code backend</div><div class="sl-desc">Copier le code de l'onglet "Stripe/Paiement" dans backend/api.js</div></div></div>
+          <div class="step-li"><div class="sl-num">5</div><div class="sl-content"><div class="sl-title">Prospecter vos 5 premiers agents</div><div class="sl-desc">LinkedIn → rechercher "agent immobilier [votre ville]" → proposer un essai gratuit 1 mois</div></div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="ms-title">Projection financière</div>
+        <div class="revenue-calc">
+          <div class="rc-item"><div class="rc-val">49€</div><div class="rc-label">Par agent/mois</div></div>
+          <div class="rc-item"><div class="rc-val">20</div><div class="rc-label">Agents cible</div></div>
+          <div class="rc-item"><div class="rc-val">980€</div><div class="rc-label">Récurrent/mois</div></div>
+        </div>
+      </div>
+    `
+  },
+  leads: {
+    title: '📋 Vente de leads — Guide d\'intégration',
+    body: `
+      <div class="modal-section">
+        <div class="ms-title">Partenaires à contacter</div>
+        <div class="partner-grid">
+          <div class="partner-card"><div class="pc-name">Century 21</div><div class="pc-comm">25–40€/lead</div><div class="pc-desc">Réseau national</div></div>
+          <div class="partner-card"><div class="pc-name">Orpi</div><div class="pc-comm">20–35€/lead</div><div class="pc-desc">2ème réseau FR</div></div>
+          <div class="partner-card"><div class="pc-name">Laforêt</div><div class="pc-comm">25–45€/lead</div><div class="pc-desc">Premium</div></div>
+          <div class="partner-card"><div class="pc-name">Nexity</div><div class="pc-comm">30–50€/lead</div><div class="pc-desc">Promoteur + réseau</div></div>
+          <div class="partner-card"><div class="pc-name">IAD France</div><div class="pc-comm">20–30€/lead</div><div class="pc-desc">Mandataires</div></div>
+          <div class="partner-card"><div class="pc-name">Local indépendant</div><div class="pc-comm">15–25€/lead</div><div class="pc-desc">Relation directe</div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="ms-title">Étapes</div>
+        <div class="step-list">
+          <div class="step-li"><div class="sl-num">1</div><div class="sl-content"><div class="sl-title">Contacter 3 agences locales</div><div class="sl-desc">Email : "Bonjour, je gère ImmoConnect.fr — je peux vous envoyer des leads acheteurs qualifiés à 25€ l'unité. Intéressé par un test de 10 leads ?"</div></div></div>
+          <div class="step-li"><div class="sl-num">2</div><div class="sl-content"><div class="sl-title">Créer une facture mensuelle automatique</div><div class="sl-desc">Stripe → Invoicing → Créer un client par agence → Facture auto en fin de mois</div></div></div>
+          <div class="step-li"><div class="sl-num">3</div><div class="sl-content"><div class="sl-title">Filtrer les leads de qualité</div><div class="sl-desc">Dans dashboard.html → filtre statut "Qualifié" + budget renseigné + téléphone valide = lead vendable</div></div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="ms-title">Projection financière</div>
+        <div class="revenue-calc">
+          <div class="rc-item"><div class="rc-val">30€</div><div class="rc-label">Prix moyen/lead</div></div>
+          <div class="rc-item"><div class="rc-val">30</div><div class="rc-label">Leads/mois</div></div>
+          <div class="rc-item"><div class="rc-val">900€</div><div class="rc-label">Revenus/mois</div></div>
+        </div>
+      </div>
+    `
+  },
+  affiliation: {
+    title: '🏦 Affiliation bancaire — Guide',
+    body: `
+      <div class="modal-section">
+        <div class="ms-title">Programmes d'affiliation disponibles</div>
+        <div class="partner-grid">
+          <div class="partner-card"><div class="pc-name">Meilleurtaux</div><div class="pc-comm">50–150€/dossier</div><div class="pc-desc">Inscription directe sur meilleurtaux.com/partenaires</div></div>
+          <div class="partner-card"><div class="pc-name">Empruntis</div><div class="pc-comm">80–200€/dossier</div><div class="pc-desc">Via impact.com → chercher "Empruntis"</div></div>
+          <div class="partner-card"><div class="pc-name">Cafpi</div><div class="pc-comm">100–300€/dossier</div><div class="pc-desc">Contact direct : affiliation@cafpi.fr</div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="ms-title">Intégration en 3 étapes</div>
+        <div class="step-list">
+          <div class="step-li"><div class="sl-num">1</div><div class="sl-content"><div class="sl-title">S'inscrire sur impact.com</div><div class="sl-desc">C'est la plateforme d'affiliation. Rechercher "Meilleurtaux" ou "Empruntis" → Postuler → Récupérer votre lien affilié unique</div></div></div>
+          <div class="step-li"><div class="sl-num">2</div><div class="sl-content"><div class="sl-title">Ajouter le simulateur de crédit</div><div class="sl-desc">Copier le code de l'onglet "Affiliation" → Coller dans index.html sous les fiches de biens</div></div></div>
+          <div class="step-li"><div class="sl-num">3</div><div class="sl-content"><div class="sl-title">Remplacer VOTRE_CODE_AFFILIE</div><div class="sl-desc">Dans le lien href, remplacer par votre code unique reçu de Meilleurtaux/Empruntis</div></div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="ms-title">Projection financière</div>
+        <div class="revenue-calc">
+          <div class="rc-item"><div class="rc-val">0,3%</div><div class="rc-label">Clic → dossier</div></div>
+          <div class="rc-item"><div class="rc-val">150€</div><div class="rc-label">Commission moy.</div></div>
+          <div class="rc-item"><div class="rc-val">450€</div><div class="rc-label">Pour 1000 clics</div></div>
+        </div>
+      </div>
+    `
+  },
+  rapports: {
+    title: '📊 Rapports DVF — Produit digital',
+    body: `
+      <div class="modal-section">
+        <div class="ms-title">Contenu du rapport (généré automatiquement)</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:12px">Le rapport récupère les données DVF de votre carte existante et génère un PDF structuré incluant :</p>
+        <div class="step-list">
+          <div class="step-li"><div class="sl-num">📊</div><div class="sl-content"><div class="sl-title">Prix médian au m² par quartier</div><div class="sl-desc">Calculé depuis les 24 derniers mois de transactions DVF</div></div></div>
+          <div class="step-li"><div class="sl-num">📈</div><div class="sl-content"><div class="sl-title">Évolution des prix sur 3 ans</div><div class="sl-desc">Tendance haussière ou baissière, % de variation</div></div></div>
+          <div class="step-li"><div class="sl-num">🏠</div><div class="sl-content"><div class="sl-title">10 transactions récentes comparables</div><div class="sl-desc">Type, surface, prix, date — anonymisées RGPD</div></div></div>
+          <div class="step-li"><div class="sl-num">⚖️</div><div class="sl-content"><div class="sl-title">Fourchette d'estimation pour le bien</div><div class="sl-desc">Estimation basse / médiane / haute selon surface déclarée</div></div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="ms-title">Mise en place</div>
+        <div class="step-list">
+          <div class="step-li"><div class="sl-num">1</div><div class="sl-content"><div class="sl-title">Créer le lien de paiement Stripe (19€)</div><div class="sl-desc">Stripe → Payment Links → Créer → "Rapport DVF" → 19€ → Copier le lien</div></div></div>
+          <div class="step-li"><div class="sl-num">2</div><div class="sl-content"><div class="sl-title">Ajouter un bouton sur la carte DVF</div><div class="sl-desc">Dans carte-dvf.html, ajouter : &lt;button onclick="acheterRapport(ville, cp)"&gt;📊 Rapport complet — 19€&lt;/button&gt;</div></div></div>
+          <div class="step-li"><div class="sl-num">3</div><div class="sl-content"><div class="sl-title">Générer le PDF après paiement</div><div class="sl-desc">Utiliser jsPDF (gratuit) pour générer un PDF côté client avec les données DVF, ou PDFMonkey.io pour un rendu premium</div></div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="ms-title">Projection</div>
+        <div class="revenue-calc">
+          <div class="rc-item"><div class="rc-val">19€</div><div class="rc-label">Par rapport</div></div>
+          <div class="rc-item"><div class="rc-val">2%</div><div class="rc-label">Taux conversion</div></div>
+          <div class="rc-item"><div class="rc-val">~190€</div><div class="rc-label">Pour 500 visites</div></div>
+        </div>
+      </div>
+    `
+  },
+  pub: {
+    title: '📣 Publicité display — Guide AdSense',
+    body: `
+      <div class="modal-section">
+        <div class="ms-title">Étapes d'activation</div>
+        <div class="step-list">
+          <div class="step-li"><div class="sl-num">1</div><div class="sl-content"><div class="sl-title">Créer un compte Google AdSense</div><div class="sl-desc">adsense.google.com → Se connecter → Ajouter votre site immoconnect.fr → Accepter les CGU</div></div></div>
+          <div class="step-li"><div class="sl-num">2</div><div class="sl-content"><div class="sl-title">Vérifier la propriété du site</div><div class="sl-desc">AdSense vous donne un code à coller dans &lt;head&gt;. Vercel redéploie automatiquement.</div></div></div>
+          <div class="step-li"><div class="sl-num">3</div><div class="sl-content"><div class="sl-title">Attendre la validation (1–7 jours)</div><div class="sl-desc">Google vérifie que votre site a du contenu de qualité et respecte les politiques</div></div></div>
+          <div class="step-li"><div class="sl-num">4</div><div class="sl-content"><div class="sl-title">Placer les emplacements publicitaires</div><div class="sl-desc">Copier le code de l'onglet "Google AdSense" → 2 emplacements recommandés : sidebar carte + entre fiches</div></div></div>
+          <div class="step-li"><div class="sl-num">5</div><div class="sl-content"><div class="sl-title">Installer le bandeau cookies RGPD</div><div class="sl-desc">Obligatoire pour AdSense. cookieyes.com gratuit → Copier leur script dans &lt;head&gt;</div></div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="ms-title">Revenus selon le trafic</div>
+        <div class="revenue-calc">
+          <div class="rc-item"><div class="rc-val">500</div><div class="rc-label">Visites → ~4€/mois</div></div>
+          <div class="rc-item"><div class="rc-val">5 000</div><div class="rc-label">Visites → ~40€/mois</div></div>
+          <div class="rc-item"><div class="rc-val">50k</div><div class="rc-label">Visites → ~400€/mois</div></div>
+        </div>
+      </div>
+    `
+  },
+  formation: {
+    title: '🎓 Formations en ligne — Guide de création',
+    body: `
+      <div class="modal-section">
+        <div class="ms-title">Idées de formations à créer</div>
+        <div class="partner-grid">
+          <div class="partner-card"><div class="pc-name">Acheter son 1er bien</div><div class="pc-comm">97€</div><div class="pc-desc">8 vidéos · PDF · Checklist</div></div>
+          <div class="partner-card"><div class="pc-name">Lire les données DVF</div><div class="pc-comm">47€</div><div class="pc-desc">5 vidéos · Cas pratiques</div></div>
+          <div class="partner-card"><div class="pc-name">Vendre sans agence</div><div class="pc-comm">147€</div><div class="pc-desc">12 vidéos · Contrats types</div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="ms-title">Plateformes recommandées</div>
+        <div class="step-list">
+          <div class="step-li"><div class="sl-num">1</div><div class="sl-content"><div class="sl-title">Gumroad (le plus simple)</div><div class="sl-desc">gumroad.com → Créer un produit → Upload vidéos ZIP + PDF → Définir prix → Partager le lien. Commission : 10%</div></div></div>
+          <div class="step-li"><div class="sl-num">2</div><div class="sl-content"><div class="sl-title">Teachable (plus pro)</div><div class="sl-desc">teachable.com → Plan gratuit possible → Créer un cours → Intégrer sur immoconnect.fr via iframe ou lien</div></div></div>
+          <div class="step-li"><div class="sl-num">3</div><div class="sl-content"><div class="sl-title">Intégrer le bouton d'achat</div><div class="sl-desc">Ajouter dans index.html une section "Formations" avec bouton qui redirige vers Gumroad/Teachable</div></div></div>
+        </div>
+      </div>
+    `
+  },
+  api: {
+    title: '⚡ API White-Label — Guide d\'activation',
+    body: `
+      <div class="modal-section">
+        <div class="ms-title">Étapes techniques</div>
+        <div class="step-list">
+          <div class="step-li"><div class="sl-num">1</div><div class="sl-content"><div class="sl-title">Exécuter le SQL de la table api_keys</div><div class="sl-desc">Copier le SQL de l'onglet "API clés" → Coller dans Supabase SQL Editor → Run</div></div></div>
+          <div class="step-li"><div class="sl-num">2</div><div class="sl-content"><div class="sl-title">Ajouter le middleware dans api.js</div><div class="sl-desc">Copier la fonction requireApiKey et la route /api/v1/dvf dans backend/api.js</div></div></div>
+          <div class="step-li"><div class="sl-num">3</div><div class="sl-content"><div class="sl-title">Créer une page de documentation</div><div class="sl-desc">Page simple avec les endpoints disponibles et exemples de code. Générer avec readme.so</div></div></div>
+          <div class="step-li"><div class="sl-num">4</div><div class="sl-content"><div class="sl-title">Créer les plans Stripe</div><div class="sl-desc">3 produits : Free (0€), Pro (99€/mois), Business (299€/mois) — abonnements récurrents</div></div></div>
+          <div class="step-li"><div class="sl-num">5</div><div class="sl-content"><div class="sl-title">Prospecter les clients B2B</div><div class="sl-desc">Notaires, promoteurs, agences indépendantes, startups proptech → LinkedIn + email direct</div></div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="ms-title">Projection</div>
+        <div class="revenue-calc">
+          <div class="rc-item"><div class="rc-val">99€</div><div class="rc-label">Plan Pro/mois</div></div>
+          <div class="rc-item"><div class="rc-val">10</div><div class="rc-label">Clients cible</div></div>
+          <div class="rc-item"><div class="rc-val">990€</div><div class="rc-label">Récurrent/mois</div></div>
+        </div>
+      </div>
+    `
+  }
+}
+
+let currentRevenue = null
+
+function openModal(key) {
+  currentRevenue = key
+  const data = modals[key]
+  document.getElementById('modalTitle').textContent = data.title
+  document.getElementById('modalBody').innerHTML = data.body
+  document.getElementById('modalOverlay').classList.add('open')
+  document.body.style.overflow = 'hidden'
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalDirect()
+}
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('open')
+  document.body.style.overflow = ''
+}
+
+function activateRevenue() {
+  const msgs = {
+    agents: '🏢 Super ! Créez votre compte Stripe sur stripe.com → Suivez le guide → 49€/agent/mois',
+    leads: '📋 Parfait ! Commencez par contacter 3 agences locales dès aujourd\'hui',
+    affiliation: '🏦 Facile ! Inscrivez-vous sur impact.com et cherchez Meilleurtaux',
+    rapports: '📊 Excellent ! Créez votre lien de paiement Stripe → ajoutez le bouton sur la carte DVF',
+    pub: '📣 Simple ! Allez sur adsense.google.com et ajoutez votre site immoconnect.fr',
+    formation: '🎓 Top ! Commencez par créer un compte Gumroad et planifiez vos 5 premières vidéos',
+    api: '⚡ Ambitieux ! Exécutez le SQL Supabase et déployez le nouveau api.js'
+  }
+  showToast(msgs[currentRevenue] || 'Source activée !', 'success')
+  closeModalDirect()
+}
+
+/* ═══════════ SCROLL ═══════════ */
+function scrollToId(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
+
+/* ═══════════ TOAST ═══════════ */
+function showToast(msg, type='info') {
+  const t = document.createElement('div')
+  t.className = `toast ${type}`
+  t.innerHTML = `<span>${type==='success'?'✅':'ℹ️'}</span><span>${msg}</span>`
+  document.getElementById('toastWrap').appendChild(t)
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(20px)'; t.style.transition = '.3s'; }, 4000)
+  setTimeout(() => t.remove(), 4400)
+}
+</script>
+</body>
+</html>

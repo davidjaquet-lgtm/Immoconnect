@@ -250,7 +250,7 @@
     font-size: 10px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase;
   }
   .badge-vente { background: var(--charcoal); color: var(--cream); }
-  .badge-location { background: var(--sage); color: white; }
+  .badge-vente { background: var(--sage); color: white; }
   .badge-neuf { background: var(--terracotta); color: white; }
   .card-fav {
     position: absolute; top: 16px; right: 16px;
@@ -536,8 +536,8 @@
 <nav>
   <div class="logo">Immo<span>Connect</span></div>
   <div class="nav-links">
-    <a href="#" onclick="showListings()">Acheter</a>
-    <a href="#">Louer</a>
+    <a href="#" onclick="showListings()">Acheter</a><a href="forfaits.html">Tarifs</a>
+    
     <a href="#">Vendre</a>
     <a href="#agents">Agents</a>
     <a href="#" class="btn-nav" onclick="openModal()">Se connecter</a>
@@ -552,7 +552,7 @@
       Trouvez<br>le bien <em>idéal</em>,<br>au bon prix
     </h1>
     <p class="hero-sub">
-      ImmoConnect met en relation acheteurs et vendeurs avec les meilleurs agents immobiliers de France. Plus de 12 000 biens disponibles.
+      ImmoConnect met en relation acheteurs et vendeurs avec les meilleurs agents immobiliers de France. Plus de des biens disponibles dans votre région.
     </p>
     <div class="hero-ctas">
       <button class="btn-primary" onclick="showListings()">Explorer les biens</button>
@@ -560,9 +560,7 @@
     </div>
   </div>
   <div class="hero-right">
-    <div class="hero-stat-badge">
-      <div class="stat-num">98%</div>
-      <div class="stat-label">Satisfaction client</div>
+    <div class="stat-label">En ce moment</div>
     </div>
     <div class="hero-image-grid">
       <div class="hero-img-cell">
@@ -584,7 +582,7 @@
 <!-- SEARCH -->
 <div class="search-tabs">
   <button class="search-tab active" onclick="setTab(this,'Acheter')">Acheter</button>
-  <button class="search-tab" onclick="setTab(this,'Louer')">Louer</button>
+  
   <button class="search-tab" onclick="setTab(this,'Neuf')">Programme neuf</button>
   <button class="search-tab" onclick="setTab(this,'Estimer')">Estimer</button>
 </div>
@@ -656,14 +654,10 @@
 </section>
 
 <!-- STATS -->
-<div class="stats-section">
-  <div class="stat-item">
-    <div class="stat-number">12 847</div>
-    <div class="stat-desc">Biens disponibles</div>
-  </div>
+
   <div class="stat-divider"></div>
   <div class="stat-item">
-    <div class="stat-number">3 200+</div>
+    <div class="stat-number">—</div>
     <div class="stat-desc">Transactions réalisées</div>
   </div>
   <div class="stat-divider"></div>
@@ -751,7 +745,7 @@
 <footer>
   <div>
     <div class="footer-logo">Immo<span>Connect</span></div>
-    <p class="footer-desc">La plateforme de référence pour mettre en relation acheteurs, vendeurs et agents immobiliers en France.</p>
+    <p class="footer-desc">La plateforme locale qui met en relation acheteurs, vendeurs et agents immobiliers.</p>
   </div>
   <div class="footer-col">
     <h4>Acheter</h4>
@@ -805,10 +799,10 @@
 const listings = [
   { type:'vente', badge:'badge-vente', label:'À vendre', price:'1 250 000', unit:'€', title:'Villa d'exception avec piscine', city:'Cannes, 06400', rooms:6, beds:4, area:280, agent:'Sophie M.', agentRole:'Agent Senior', img:'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600&q=80' },
   { type:'vente', badge:'badge-neuf', label:'Programme neuf', price:'385 000', unit:'€', title:'Appartement T3 — résidence privée', city:'Lyon 6e, 69006', rooms:3, beds:2, area:72, agent:'Marc D.', agentRole:'Agent Conseil', img:'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&q=80' },
-  { type:'location', badge:'badge-location', label:'À louer', price:'2 800', unit:'€/mois', title:'Loft industriel au cœur du Marais', city:'Paris 4e, 75004', rooms:2, beds:1, area:95, agent:'Claire B.', agentRole:'Spécialiste Paris', img:'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=600&q=80' },
+  { type:'location', badge:'badge-vente', label:'À louer', price:'2 800', unit:'€/mois', title:'Loft industriel au cœur du Marais', city:'Paris 4e, 75004', rooms:2, beds:1, area:95, agent:'Claire B.', agentRole:'Spécialiste Paris', img:'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=600&q=80' },
   { type:'vente', badge:'badge-vente', label:'À vendre', price:'620 000', unit:'€', title:'Maison bourgeoise avec jardin', city:'Bordeaux, 33000', rooms:7, beds:4, area:210, agent:'Antoine R.', agentRole:'Agent Immobilier', img:'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&q=80' },
   { type:'vente', badge:'badge-vente', label:'À vendre', price:'190 000', unit:'€', title:'Studio rénové proche métro', city:'Toulouse, 31000', rooms:1, beds:1, area:38, agent:'Léa F.', agentRole:'Agent Junior', img:'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80' },
-  { type:'location', badge:'badge-location', label:'À louer', price:'4 500', unit:'€/mois', title:'Penthouse vue mer panoramique', city:'Nice, 06000', rooms:4, beds:3, area:145, agent:'Pierre L.', agentRole:'Agent Luxe', img:'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&q=80' },
+  { type:'location', badge:'badge-vente', label:'À louer', price:'4 500', unit:'€/mois', title:'Penthouse vue mer panoramique', city:'Nice, 06000', rooms:4, beds:3, area:145, agent:'Pierre L.', agentRole:'Agent Luxe', img:'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&q=80' },
 ];
 
 const agents = [

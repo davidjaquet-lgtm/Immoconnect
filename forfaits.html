@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Forfaits Vendeurs, Acheteurs & Investisseurs</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0F0F0E;--ink2:#3A3A38;--muted:#8C8B86;--bg:#F5F2EC;--warm:#FEFDFB;--line:rgba(15,15,14,.08);--gold:#C09B5A;--gold2:#E2C07A;--teal:#1E7A62;--rose:#C0392B;--purple:#6B3FA0;--amber:#D4732A;--r:6px}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink)}
+nav{position:sticky;top:0;z-index:100;background:rgba(15,15,14,.95);backdrop-filter:blur(12px);height:56px;display:flex;align-items:center;padding:0 40px;gap:16px;border-bottom:1px solid rgba(255,255,255,.05)}
+.nav-logo{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#fff}.nav-logo span{color:var(--gold2)}
+.nav-links{display:flex;gap:16px;margin-left:auto}.nav-links a{font-size:12px;color:rgba(255,255,255,.5);text-decoration:none;transition:color .2s}.nav-links a:hover{color:#fff}
+.page{max-width:1100px;margin:0 auto;padding:56px 32px}
+/* TOGGLE */
+.toggle-wrap{display:flex;align-items:center;justify-content:center;gap:16px;margin:2rem 0}
+.tl{font-size:13px;color:var(--muted)}.tl.on{color:var(--ink);font-weight:500}
+.tt{width:48px;height:26px;border-radius:13px;background:var(--line);border:1px solid rgba(15,15,14,.12);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.tt.active{background:var(--ink)}.tth{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--warm);transition:transform .2s}.tt.active .tth{transform:translateX(22px)}
+/* SECTION */
+.sec{margin-bottom:56px}.sh{text-align:center;margin-bottom:28px}
+.sey{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;font-weight:600}
+.st{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,40px);font-weight:700;margin-bottom:8px}.st em{font-style:italic;color:var(--gold)}
+.ss{font-size:15px;color:var(--muted);line-height:1.7;max-width:540px;margin:0 auto}
+/* BANNER GRATUIT */
+.free-banner{background:rgba(30,122,98,.08);border:1px solid rgba(30,122,98,.2);border-radius:10px;padding:16px 22px;display:flex;align-items:center;gap:14px;margin-bottom:28px}
+.fb-icon{font-size:22px;flex-shrink:0}.fb-txt{font-size:13px;color:var(--teal);line-height:1.6;flex:1}.fb-txt strong{font-weight:600}
+.fb-badge{background:var(--teal);color:#fff;font-size:11px;font-weight:600;padding:5px 14px;border-radius:20px;white-space:nowrap}
+/* GRID */
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.g4{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+/* CARD */
+.pc{background:var(--warm);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s}
+.pc:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(15,15,14,.08)}
+.pc.feat{border:2px solid var(--gold)}
+.pc.inv{border:2px solid var(--amber)}
+/* PHOTO */
+.pph{height:130px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.pph-icon{font-size:44px;opacity:.18}
+.pb-top{position:absolute;top:10px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:600;padding:3px 11px;border-radius:20px;white-space:nowrap;letter-spacing:.3px}
+.pb-tr{position:absolute;top:10px;right:10px;font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px}
+.pb-tl{position:absolute;top:10px;left:10px;font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px}
+.bg-green{background:#E1F5EE}.bg-blue{background:#E6F1FB}.bg-purple{background:#EEEDFE}
+.bg-teal{background:#9FE1CB}.bg-gold{background:#FAEEDA}.bg-amber{background:#FAC775}
+.badge-free{background:#E1F5EE;color:#085041}.badge-offer{background:#E1F5EE;color:#085041}
+.badge-pop{background:#E6F1FB;color:#0C447C}.badge-prem{background:#EEEDFE;color:#3C3489}
+.badge-inv{background:#FAEEDA;color:#633806}
+/* CONTENT */
+.pb{padding:16px 18px 18px;flex:1;display:flex;flex-direction:column}
+.pn{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px}
+.pp{font-size:28px;font-weight:700;font-family:'Playfair Display',serif;color:var(--gold);line-height:1}
+.pp-sub{font-size:12px;color:var(--muted);margin-top:2px;margin-bottom:6px}
+.pp-was{font-size:13px;color:rgba(140,139,134,.5);text-decoration:line-through}
+.ptag{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:14px;flex-shrink:0}
+.phr{border:none;border-top:1px solid var(--line);margin:10px 0}
+.pfeats{display:flex;flex-direction:column;gap:6px;flex:1;margin-bottom:14px}
+.pf{display:flex;align-items:flex-start;gap:7px;font-size:12px;line-height:1.4}
+.pfd{width:14px;height:14px;border-radius:50%;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700}
+.pfd.y{background:rgba(30,122,98,.15);color:var(--teal)}.pfd.n{background:rgba(140,139,134,.12);color:var(--muted)}
+.pft{color:var(--muted)}.pft.b{color:var(--ink);font-weight:500}.pf.dim .pft{color:rgba(140,139,134,.5)}
+/* CTA */
+.pcta{width:100%;padding:11px;border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;border:none;flex-shrink:0;letter-spacing:.2px}
+.cta-dark{background:var(--ink);color:#fff}.cta-dark:hover{background:var(--gold);color:var(--ink)}
+.cta-out{background:transparent;border:1px solid var(--line);color:var(--muted)}.cta-out:hover{border-color:var(--gold);color:var(--gold)}
+.cta-ok{background:rgba(30,122,98,.1);color:var(--teal);border:1px solid rgba(30,122,98,.25)}.cta-ok:hover{background:var(--teal);color:#fff}
+.cta-amber{background:rgba(212,115,42,.1);color:var(--amber);border:1px solid rgba(212,115,42,.25)}.cta-amber:hover{background:var(--amber);color:#fff}
+/* RENDEMENT BOX */
+.rbox{background:var(--bg);border-radius:var(--r);padding:10px 12px;margin:10px 0}
+.rbox-t{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:600}
+.rrow{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px}
+.rval{font-weight:600}.rval.g{color:var(--teal)}.rval.a{color:var(--amber)}
+/* SIM */
+.sim-box{background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:22px;margin-top:18px}
+.sim-title{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sim-badge{font-size:10px;background:rgba(212,115,42,.1);color:var(--amber);padding:3px 10px;border-radius:20px;font-weight:600}
+.sim-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.si{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.si label{font-size:11px;color:var(--muted);letter-spacing:.3px}
+.si input{padding:9px 12px;border:1px solid var(--line);border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink);background:var(--bg);outline:none;transition:border-color .2s}
+.si input:focus{border-color:var(--gold)}
+.sr-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sr{background:var(--bg);border-radius:var(--r);padding:12px;text-align:center}
+.sr-v{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:2px}
+.sr-l{font-size:10px;color:var(--muted);letter-spacing:.5px}
+.sr.ok{background:rgba(30,122,98,.08);border:1px solid rgba(30,122,98,.15)}
+.sr.ok .sr-v{color:var(--teal)}
+.sr.warn{background:rgba(212,115,42,.08);border:1px solid rgba(212,115,42,.15)}
+.sr.warn .sr-v{color:var(--amber)}
+/* SEPARATOR */
+.sep{display:flex;align-items:center;gap:14px;margin:40px 0 32px}
+.sep-l{flex:1;border:none;border-top:1px solid var(--line)}
+.sep-t{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+/* INVEST BANNER */
+.inv-banner{background:rgba(212,115,42,.07);border:1px solid rgba(212,115,42,.2);border-radius:10px;padding:14px 20px;display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.inv-banner-text{font-size:13px;color:var(--amber);line-height:1.6;flex:1}
+.inv-banner-text strong{font-weight:600}
+/* FOOTER */
+footer{background:var(--ink);padding:32px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer-logo{font-family:'Playfair Display',serif;font-size:18px;color:#fff;font-weight:700}
+.footer-logo span{color:var(--gold2)}
+.footer-txt{font-size:12px;color:rgba(255,255,255,.3)}
+/* TOAST */
+.tw{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--ink);color:#fff;padding:11px 16px;border-radius:var(--r);font-size:13px;display:flex;align-items:center;gap:9px;min-width:260px;box-shadow:0 8px 32px rgba(15,15,14,.25);animation:tIn .25s ease}
+.toast.ok{border-left:3px solid var(--teal)}.toast.gold{border-left:3px solid var(--gold)}
+@keyframes tIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@media(max-width:900px){.g3,.g4{grid-template-columns:1fr 1fr}.sim-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.g3,.g4{grid-template-columns:1fr}.sr-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-logo">Immo<span>Connect</span></div>
+  <div class="nav-links">
+    <a href="index.html">Accueil</a>
+    <a href="agent-ia.html">Agent IA</a>
+    <a href="carte-dvf.html">Carte DVF</a>
+    <a href="dashboard.html">Dashboard</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- TOGGLE -->
+  <div class="toggle-wrap">
+    <span class="tl on" id="lm">Mensuel</span>
+    <div class="tt" id="tog" onclick="toggleBilling()"><div class="tth"></div></div>
+    <span class="tl" id="la">Annuel <span style="font-size:10px;background:rgba(30,122,98,.12);color:var(--teal);padding:2px 6px;border-radius:8px;margin-left:4px">-20%</span></span>
+  </div>
+
+  <!-- ══ VENDEURS ══ -->
+  <div class="sec">
+    <div class="sh">
+      <div class="sey">Vous avez un bien à vendre</div>
+      <div class="st">Forfaits <em>vendeurs</em></div>
+      <div class="ss">Publiez votre bien, accédez aux données DVF réelles et aux acheteurs qualifiés de notre réseau.</div>
+    </div>
+    <div class="free-banner">
+      <div class="fb-icon">★</div>
+      <div class="fb-txt"><strong>Offre de lancement — Tous les forfaits vendeurs sont 100% gratuits.</strong> Nous constituons notre catalogue de biens pour attirer acheteurs et agents. Profitez-en maintenant, sans engagement, sans carte bancaire.</div>
+      <div class="fb-badge">Gratuit jusqu'au lancement</div>
+    </div>
+    <div class="g3" id="vendeurGrid"></div>
+  </div>
+
+  <!-- ══ ACHETEURS ══ -->
+  <div class="sep"><div class="sep-l"></div><div class="sep-t">Forfaits acheteurs</div><div class="sep-l"></div></div>
+  <div class="sec">
+    <div class="sh">
+      <div class="sey">Vous cherchez un bien</div>
+      <div class="st">Forfaits <em>acheteurs</em></div>
+      <div class="ss">Accédez aux meilleures annonces, aux données DVF en temps réel et à un agent dédié selon votre plan.</div>
+    </div>
+    <div class="g3" id="acheteurGrid"></div>
+  </div>
+
+  <!-- ══ INVESTISSEURS ══ -->
+  <div class="sep"><div class="sep-l"></div><div class="sep-t">Forfaits investisseurs</div><div class="sep-l"></div></div>
+  <div class="sec">
+    <div class="sh">
+      <div class="sey">Vous investissez dans l'immobilier</div>
+      <div class="st">Forfaits <em>investisseurs</em></div>
+      <div class="ss">Identifiez les biens à fort rendement, analysez la rentabilité nette et activez les alertes automatiques dès qu'un bien dépasse votre seuil cible.</div>
+    </div>
+    <div class="inv-banner">
+      <div style="font-size:20px;flex-shrink:0">▲</div>
+      <div class="inv-banner-text"><strong>Rendement mis en avant automatiquement.</strong> Chaque bien avec un rendement brut supérieur à 5% est signalé avec un badge investisseur. Les biens éligibles Pinel, Denormandie ou LMNP sont identifiés automatiquement.</div>
+    </div>
+    <div class="g4" id="investGrid"></div>
+    <!-- SIMULATEUR -->
+    <div class="sim-box">
+      <div class="sim-title">Simulateur de rendement locatif <span class="sim-badge">Inclus dans Investisseur Pro</span></div>
+      <div class="sim-grid">
+        <div>
+          <div class="si"><label>Prix d'achat (€)</label><input type="number" id="si-prix" value="180000" step="5000" oninput="calc()"></div>
+          <div class="si"><label>Loyer mensuel estimé (€)</label><input type="number" id="si-loyer" value="800" step="50" oninput="calc()"></div>
+          <div class="si"><label>Charges annuelles (€)</label><input type="number" id="si-charges" value="2400" step="100" oninput="calc()"></div>
+          <div class="si"><label>Frais de notaire (€)</label><input type="number" id="si-notaire" value="14000" step="500" oninput="calc()"></div>
+        </div>
+        <div class="sr-grid" style="align-content:start">
+          <div class="sr warn"><div class="sr-v" id="sr-brut">5,3%</div><div class="sr-l">Rendement brut</div></div>
+          <div class="sr ok"><div class="sr-v" id="sr-net">4,1%</div><div class="sr-l">Rendement net</div></div>
+          <div class="sr"><div class="sr-v" id="sr-cf">+147 €</div><div class="sr-l">Cash-flow mensuel</div></div>
+          <div class="sr"><div class="sr-v" id="sr-rs">18,5 ans</div><div class="sr-l">Retour sur invest.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-logo">Immo<span>Connect</span></div>
+  <div class="footer-txt">© 2026 ImmoConnect — Tous droits réservés</div>
+  <div class="footer-txt">Carte pro T n° CPI 7501 2025 000 000 123</div>
+</footer>
+
+<div class="tw" id="tw"></div>
+
+<script>
+let annual = false;
+
+const V = [
+  { name:'Essentiel', price:0, priceA:0, tag:'Publiez votre bien gratuitement', bg:'bg-green', icon:'🏠', btl:null, btr:'badge-free', btrTxt:'Gratuit', cta:'cta-ok', ctaTxt:'Publier gratuitement', isFree:true,
+    feats:[{y:1,t:'1 annonce publiée'},{y:1,t:'Accès aux acheteurs ImmoConnect'},{y:1,t:'Estimation DVF basique'},{y:1,t:'Formulaire de contact acheteurs'},{y:0,t:'Photos illimitées'},{y:0,t:'Rapport DVF complet'},{y:0,t:'Documents juridiques'},{y:0,t:'Agent IA inclus'}]},
+  { name:'Pro', price:29, priceA:23, tag:'La solution complète pour vendre vite', bg:'bg-blue', icon:'🏡', btl:null, btr:'badge-offer', btrTxt:'Offert maintenant', feat:1, cta:'cta-ok', ctaTxt:'Activer gratuitement', isFree:true,
+    feats:[{y:1,b:1,t:'Annonces illimitées'},{y:1,t:'Estimation DVF complète + PDF'},{y:1,t:'Photos illimitées + visite virtuelle'},{y:1,b:1,t:'Mise en avant prioritaire'},{y:1,t:'Alertes SMS acheteur intéressé'},{y:1,t:'Acheteurs Premium en avant-première'},{y:1,t:'3 documents juridiques inclus'},{y:1,t:'Agent IA 50 questions/mois'}]},
+  { name:'Premium', price:59, priceA:47, tag:'Accompagnement complet jusqu\'à la vente', bg:'bg-purple', icon:'🏘', btl:null, btr:'badge-offer', btrTxt:'Offert maintenant', cta:'cta-ok', ctaTxt:'Activer gratuitement', isFree:true,
+    feats:[{y:1,t:'Tout Vendeur Pro inclus'},{y:1,b:1,t:'Agent IA illimité 24h/24'},{y:1,t:'Documents juridiques illimités'},{y:1,t:'Notaire partenaire préférentiel'},{y:1,t:'Simulation de négociation IA'},{y:1,t:'Coaching prix et analyse des offres'},{y:1,t:'Diffusion sur 5 plateformes'},{y:1,t:'Rapport hebdo statistiques annonce'}]},
+];
+
+const A = [
+  { name:'Gratuit', price:0, priceA:0, tag:'Pour explorer le marché', bg:'bg-teal', icon:'🔍', btr:null, cta:'cta-out', ctaTxt:'Commencer gratuitement',
+    feats:[{y:1,t:'Dépôt de 1 projet'},{y:1,t:'Mise en relation sous 48h'},{y:1,t:'Alertes annonces quotidiennes'},{y:1,t:'Simulateur crédit basique'},{y:0,t:'Accès données DVF'},{y:0,t:'Rapport estimation'},{y:0,t:'Biens en avant-première'},{y:0,t:'Conseiller dédié'}]},
+  { name:'Essentiel', price:9, priceA:7, tag:'Pour les acheteurs sérieux', bg:'bg-blue', icon:'🔑', btr:'badge-pop', btrTxt:'Le plus populaire', feat:1, cta:'cta-dark', ctaTxt:'Choisir Essentiel',
+    feats:[{y:1,t:'Projets illimités'},{y:1,b:1,t:'Mise en relation sous 24h'},{y:1,t:'Alertes temps réel'},{y:1,b:1,t:'Accès données DVF complet'},{y:1,t:'1 rapport estimation par mois'},{y:1,t:'Suivi dossier personnalisé'},{y:1,t:'Simulateur crédit avancé'},{y:0,t:'Biens en avant-première'}]},
+  { name:'Premium', price:29, priceA:23, tag:'Pour ne rater aucune opportunité', bg:'bg-purple', icon:'👑', btr:'badge-prem', btrTxt:'Premium', cta:'cta-dark', ctaTxt:'Choisir Premium',
+    feats:[{y:1,t:'Tout Essentiel inclus'},{y:1,b:1,t:'Biens en avant-première (-24h)'},{y:1,t:'Rapports estimation illimités'},{y:1,t:'Visites virtuelles prioritaires'},{y:1,b:1,t:'Conseiller immobilier dédié'},{y:1,t:'Analyse dossier financement'},{y:1,t:'Accès biens off-market'},{y:1,t:'Support 7j/7'}]},
+];
+
+const I = [
+  { name:'Investisseur', price:0, priceA:0, tag:'Repérez les opportunités gratuitement', bg:'bg-gold', icon:'📈', btr:'badge-free', btrTxt:'Gratuit', cta:'cta-out', ctaTxt:'Commencer gratuitement',
+    feats:[{y:1,t:'Biens avec badge rendement visibles'},{y:1,t:'Rendement brut affiché sur chaque fiche'},{y:1,t:'Filtre rendement supérieur à 5%'},{y:0,t:'Simulateur rendement net'},{y:0,t:'Alertes rendement automatiques'},{y:0,t:'Éligibilité fiscale Pinel / LMNP'},{y:0,t:'Analyse zone de tension locative'},{y:0,t:'Historique loyers DVF'}]},
+  { name:'Investisseur Pro', price:19, priceA:15, tag:'L\'outil complet pour investir intelligemment', bg:'bg-amber', icon:'💰', btr:'badge-inv', btrTxt:'Recommandé', inv:1, cta:'cta-amber', ctaTxt:'Choisir Investisseur Pro',
+    feats:[{y:1,b:1,t:'Simulateur rendement net complet'},{y:1,b:1,t:'Alertes dès que le seuil est atteint'},{y:1,t:'Éligibilité Pinel / Denormandie / LMNP'},{y:1,t:'Zone de tension locative (1 à 3)'},{y:1,t:'Historique des loyers dans le quartier'},{y:1,t:'Estimation loyer IA basée DVF'},{y:1,t:'Cash-flow et retour sur investissement'},{y:1,t:'Comparateur multi-biens'}],
+    rendement:{brut:'6,2%',net:'4,8%',cf:'+210 €',elig:'LMNP + Pinel'}},
+  { name:'Investisseur Expert', price:49, priceA:39, tag:'Pour les investisseurs multi-biens', bg:'bg-gold', icon:'💎', btr:null, cta:'cta-dark', ctaTxt:'Choisir Expert',
+    feats:[{y:1,t:'Tout Investisseur Pro inclus'},{y:1,b:1,t:'Analyse multi-biens simultanée'},{y:1,t:'Optimisation fiscale personnalisée'},{y:1,t:'Projection patrimoine sur 20 ans'},{y:1,t:'Accès biens off-market investisseurs'},{y:1,t:'Conseiller patrimoine dédié'},{y:1,t:'Export Excel / rapport PDF'},{y:1,t:'Alertes secteur entier temps réel'}]},
+];
+
+function card(p, isFree) {
+  const price = annual && p.priceA > 0 ? p.priceA : p.price;
+  const was = annual && !isFree && p.price > 0 ? p.price : null;
+  const priceStr = price === 0 ? '0 €' : price + ' €';
+  const sub = price === 0 ? 'pour toujours' : (annual ? '/mois · facturé annuellement' : '/mois');
+  const offerTag = isFree && price > 0;
+  return `<div class="pc${p.feat?' feat':''}${p.inv?' inv':''}">
+    <div class="pph">
+      <div class="pph-icon ${p.bg}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:44px;opacity:.18">${p.icon}</div>
+      ${p.feat?`<div class="pb-top badge-pop">Le plus populaire</div>`:''}
+      ${p.btr?`<div class="pb-tr ${p.btr}">${p.btrTxt}</div>`:''}
+      ${offerTag?`<div class="pb-tl badge-offer">★ Offert</div>`:''}
+    </div>
+    <div class="pb">
+      <div class="pn">${p.name}</div>
+      <div class="pp">${offerTag?`<span style="text-decoration:line-through;opacity:.35;font-size:18px">${priceStr}</span> <span style="color:var(--teal)">0 €</span>`:priceStr}</div>
+      <div class="pp-sub">${offerTag?`<span style="color:var(--teal)">offert au lancement</span>`:sub}${was?` <span class="pp-was">${was}€</span>`:''}</div>
+      <div class="ptag">${p.tag}</div>
+      <hr class="phr">
+      <div class="pfeats">${p.feats.map(f=>`<div class="pf${!f.y?' dim':''}"><div class="pfd ${f.y?'y':'n'}">${f.y?'✓':'✗'}</div><span class="pft${f.b?' b':''}">${f.t}</span></div>`).join('')}</div>
+      ${p.rendement?`<div class="rbox"><div class="rbox-t">Exemple bien analysé</div>
+        <div class="rrow"><span>Rendement brut</span><span class="rval a">${p.rendement.brut}</span></div>
+        <div class="rrow"><span>Rendement net</span><span class="rval g">${p.rendement.net}</span></div>
+        <div class="rrow"><span>Cash-flow</span><span class="rval g">${p.rendement.cf}/mois</span></div>
+        <div class="rrow"><span>Éligibilité</span><span class="rval" style="font-size:10px">${p.rendement.elig}</span></div>
+      </div>`:''}
+      <button class="pcta ${isFree&&price>0?'cta-ok':p.cta}" onclick="planClick('${p.name}',${!!offerTag||price===0})">${offerTag?'Activer gratuitement':p.ctaTxt}</button>
+    </div>
+  </div>`;
+}
+
+function render() {
+  document.getElementById('vendeurGrid').innerHTML = V.map(p=>card(p,true)).join('');
+  document.getElementById('acheteurGrid').innerHTML = A.map(p=>card(p,false)).join('');
+  document.getElementById('investGrid').innerHTML = I.map(p=>card(p,false)).join('');
+}
+
+function toggleBilling() {
+  annual = !annual;
+  const tog = document.getElementById('tog');
+  tog.classList.toggle('active', annual);
+  document.getElementById('lm').classList.toggle('on', !annual);
+  document.getElementById('la').classList.toggle('on', annual);
+  render();
+}
+
+function planClick(name, free) {
+  toast(free ? `★ ${name} activé gratuitement !` : `Redirection vers Stripe — ${name}`, free ? 'ok' : 'gold');
+}
+
+function calc() {
+  const prix = +document.getElementById('si-prix').value||0;
+  const loyer = +document.getElementById('si-loyer').value||0;
+  const charges = +document.getElementById('si-charges').value||0;
+  const notaire = +document.getElementById('si-notaire').value||0;
+  const total = prix + notaire;
+  const la = loyer * 12;
+  const brut = total > 0 ? la/total*100 : 0;
+  const net = total > 0 ? (la-charges)/total*100 : 0;
+  const cf = loyer - charges/12;
+  const rs = net > 0 ? 100/net : 0;
+  document.getElementById('sr-brut').textContent = brut.toFixed(1)+'%';
+  document.getElementById('sr-net').textContent = net.toFixed(1)+'%';
+  document.getElementById('sr-cf').textContent = (cf>=0?'+':'')+Math.round(cf)+' €';
+  document.getElementById('sr-rs').textContent = rs>0?rs.toFixed(1)+' ans':'—';
+  const ne = document.getElementById('sr-net').parentElement;
+  ne.className = 'sr '+(net>=5?'ok':net>=3?'warn':'');
+}
+
+function toast(msg, type='ok') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${type==='ok'?'✅':'⭐'}</span><span>${msg}</span>`;
+  document.getElementById('tw').appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='.3s'},3500);
+  setTimeout(()=>t.remove(),3800);
+}
+
+render();
+calc();
+</script>
+</body>
+</html>
