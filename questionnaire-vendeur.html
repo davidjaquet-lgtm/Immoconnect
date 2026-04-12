@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Questionnaire Vendeur</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0f0e;--warm:#1a1a18;--card:#1e1e1c;--line:#2a2a28;
+  --muted:#6b6b67;--text:#e8e8e4;--text2:#b0b0aa;
+  --gold:#c9a84c;--gold2:#e0c068;--purple:#7c5cbf;
+  --rose:#d45f7a;--teal:#3fa89a;--r:10px;--r-sm:6px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px 64px;}
+.container{width:100%;max-width:800px;animation:fadeUp .5s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.header{display:flex;align-items:center;gap:16px;margin-bottom:28px;}
+.logo{font-size:18px;font-weight:700;letter-spacing:-.5px;}
+.logo span{color:var(--gold);}
+.header-sub{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.progress-wrap{flex:1;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+.progress-label{font-size:11px;color:var(--muted);letter-spacing:1px;}
+.progress-bar{width:160px;height:4px;background:var(--line);border-radius:999px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:999px;transition:width .4s ease;}
+.steps-nav{display:flex;gap:4px;margin-bottom:24px;overflow-x:auto;padding-bottom:4px;}
+.step-btn{display:flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap;letter-spacing:.3px;}
+.step-btn .sn{width:20px;height:20px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;transition:all .2s;}
+.step-btn.done{color:var(--text2);}.step-btn.done .sn{background:var(--teal);color:#fff;}
+.step-btn.active{border-color:var(--gold);color:var(--gold2);}.step-btn.active .sn{background:var(--gold);color:#000;}
+.layout{display:grid;grid-template-columns:1fr 260px;gap:20px;align-items:start;}
+.sidebar{position:sticky;top:24px;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px 30px;margin-bottom:16px;animation:fadeUp .3s ease both;}
+.card-title{font-size:15px;font-weight:600;margin-bottom:4px;}
+.card-sub{font-size:13px;color:var(--muted);margin-bottom:22px;}
+.sl{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:12px;margin-top:22px;padding-top:22px;border-top:1px solid var(--line);}
+.sl:first-child{margin-top:0;padding-top:0;border-top:none;}
+.fg{margin-bottom:14px;}
+.fg label{display:block;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:6px;}
+.fg input,.fg select,.fg textarea{width:100%;padding:11px 14px;background:var(--warm);border:1px solid var(--line);border-radius:var(--r-sm);color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold);}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--muted);}
+.fg select option{background:var(--card);}
+.fg textarea{resize:vertical;min-height:80px;}
+.fg .hint{font-size:11px;color:var(--muted);margin-top:4px;}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fg-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.type-opt{text-align:center;padding:14px 8px;border:1.5px solid var(--line);border-radius:var(--r-sm);cursor:pointer;transition:all .2s;user-select:none;}
+.type-opt:hover{border-color:var(--gold);background:rgba(201,168,76,.06);}
+.type-opt.sel{border-color:var(--gold);background:rgba(201,168,76,.12);}
+.type-opt-icon{font-size:22px;display:block;margin-bottom:4px;}
+.type-opt-label{font-size:11px;font-weight:500;color:var(--text2);}
+.type-opt.sel .type-opt-label{color:var(--gold2);}
+.etat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px;}
+.etat-opt{padding:10px 6px;text-align:center;border:1.5px solid var(--line);border-radius:var(--r-sm);cursor:pointer;font-size:11px;font-weight:500;transition:all .2s;color:var(--text2);user-select:none;}
+.etat-opt:hover{border-color:var(--teal);}
+.etat-opt.sel{border-color:var(--teal);background:rgba(63,168,154,.1);color:var(--teal);}
+.prio-grid{display:flex;gap:10px;margin-bottom:14px;}
+.prio-opt{flex:1;padding:10px 8px;text-align:center;border:1.5px solid var(--line);border-radius:var(--r-sm);cursor:pointer;font-size:12px;font-weight:500;transition:all .2s;color:var(--text2);user-select:none;}
+.prio-opt.sel-h{border-color:var(--rose);background:rgba(212,95,122,.1);color:var(--rose);}
+.prio-opt.sel-m{border-color:var(--gold);background:rgba(201,168,76,.1);color:var(--gold2);}
+.prio-opt.sel-b{border-color:var(--teal);background:rgba(63,168,154,.1);color:var(--teal);}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.check-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;transition:all .2s;font-size:13px;user-select:none;}
+.check-item:hover{border-color:var(--gold);}
+.check-item.sel{border-color:var(--gold);background:rgba(201,168,76,.07);}
+.check-box{width:18px;height:18px;border:1.5px solid var(--line);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .2s;flex-shrink:0;}
+.check-item.sel .check-box{background:var(--gold);border-color:var(--gold);color:#000;}
+.dpe-grid{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.dpe-opt{padding:8px 14px;border:1.5px solid var(--line);border-radius:var(--r-sm);cursor:pointer;font-size:13px;font-weight:700;transition:all .2s;color:var(--text2);user-select:none;min-width:44px;text-align:center;}
+.dpe-opt:hover{opacity:.85;}
+.dpe-opt.sel{color:#000 !important;}
+.dpe-A.sel{background:#00b050;border-color:#00b050;}
+.dpe-B.sel{background:#70ad47;border-color:#70ad47;}
+.dpe-C.sel{background:#a9d18e;border-color:#a9d18e;}
+.dpe-D.sel{background:#ffcc00;border-color:#ffcc00;}
+.dpe-E.sel{background:#ffa500;border-color:#ffa500;}
+.dpe-F.sel{background:#ff5a1e;border-color:#ff5a1e;}
+.dpe-G.sel{background:#c00000;border-color:#c00000;color:#fff !important;}
+.dpe-opt.nd.sel{background:var(--muted);border-color:var(--muted);color:#fff !important;}
+.radio-row{display:flex;gap:16px;margin-top:4px;flex-wrap:wrap;}
+.radio-row label{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text2);font-weight:400;text-transform:none;letter-spacing:0;}
+.radio-row input[type=radio]{accent-color:var(--gold);width:16px;height:16px;}
+.upload-zone{border:2px dashed var(--line);border-radius:var(--r);padding:24px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px;position:relative;}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--gold);background:rgba(201,168,76,.04);}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:28px;margin-bottom:8px;}
+.upload-title{font-size:14px;font-weight:500;margin-bottom:4px;}
+.upload-sub{font-size:12px;color:var(--muted);}
+.file-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.file-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--warm);border:1px solid var(--line);border-radius:var(--r-sm);font-size:13px;}
+.file-name-wrap{display:flex;align-items:center;gap:8px;color:var(--text2);}
+.file-size{font-size:11px;color:var(--muted);}
+.file-remove{background:none;border:none;color:var(--rose);cursor:pointer;font-size:16px;padding:0 4px;line-height:1;}
+.rgpd-box{background:rgba(124,92,191,.07);border:1px solid rgba(124,92,191,.3);border-radius:var(--r-sm);padding:18px;margin-top:20px;}
+.rgpd-row{display:flex;align-items:flex-start;gap:14px;cursor:pointer;}
+.rgpd-check{width:22px;height:22px;border:2px solid var(--purple);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;transition:all .2s;font-size:13px;}
+.rgpd-check.checked{background:var(--purple);border-color:var(--purple);}
+.rgpd-text{font-size:13px;line-height:1.6;color:var(--text2);}
+.rgpd-text strong{color:var(--text);}
+.score-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:16px;}
+.score-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:16px;}
+.score-ring{display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
+.ring-svg{overflow:visible;}
+.ring-bg{fill:none;stroke:var(--line);stroke-width:6;}
+.ring-fill{fill:none;stroke:var(--gold);stroke-width:6;stroke-linecap:round;stroke-dasharray:251;stroke-dashoffset:251;transition:stroke-dashoffset .6s ease;transform:rotate(-90deg);transform-origin:50px 50px;}
+.ring-text{text-anchor:middle;dominant-baseline:middle;font-family:'Outfit',sans-serif;font-weight:700;font-size:18px;fill:var(--gold2);}
+.ring-sub{text-anchor:middle;dominant-baseline:middle;font-family:'Outfit',sans-serif;font-size:10px;fill:var(--muted);}
+.score-items{display:flex;flex-direction:column;gap:8px;}
+.score-item{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text2);}
+.score-dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.score-dot.ok{background:var(--teal);}
+.nav-btns{display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:20px;border-top:1px solid var(--line);}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:var(--r-sm);font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s;letter-spacing:.3px;}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text2);}
+.btn-ghost:hover{border-color:var(--muted);color:var(--text);}
+.btn-primary{background:var(--gold);color:#000;}
+.btn-primary:hover{background:var(--gold2);}
+.btn-success{background:var(--teal);color:#fff;}
+.btn-success:hover{background:#4dbdaf;}
+.success-screen{text-align:center;padding:48px 32px;animation:fadeUp .4s ease both;}
+.success-icon{font-size:56px;margin-bottom:16px;}
+.success-title{font-size:22px;font-weight:700;margin-bottom:8px;}
+.success-sub{font-size:14px;color:var(--muted);margin-bottom:32px;}
+.ref-box{display:inline-block;background:var(--warm);border:1px solid var(--gold);border-radius:var(--r-sm);padding:12px 24px;font-size:20px;font-weight:700;color:var(--gold2);letter-spacing:2px;margin-bottom:24px;}
+.ref-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+
+#toastContainer{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 18px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-sm);font-size:14px;box-shadow:var(--shadow);animation:toastIn .25s ease both;transition:opacity .3s;}
+.toast.success{border-color:var(--teal);}.toast.error{border-color:var(--rose);}.toast.info{border-color:var(--gold);}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:740px){
+  .layout{grid-template-columns:1fr;}.sidebar{position:static;}
+  .type-grid{grid-template-columns:repeat(2,1fr);}
+  .etat-grid{grid-template-columns:repeat(3,1fr);}
+  .fg-row,.fg-row3{grid-template-columns:1fr;}
+  .card{padding:18px 16px;}
+}
+</style>
+</head>
+<body>
+<div id="toastContainer"></div>
+<div class="container">
+
+  <div class="header">
+    <div>
+      <div class="logo">Immo<span>Connect</span></div>
+      <div class="header-sub">Questionnaire Vendeur</div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label" id="progressLabel">Étape 1 / 5</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:20%"></div></div>
+    </div>
+  </div>
+
+
+
+  <div class="steps-nav" id="stepsNav"></div>
+
+  <div class="layout">
+    <div id="formArea"></div>
+    <div class="sidebar" id="sidebarArea">
+      <div class="score-card">
+        <div class="score-title">Complétude du dossier</div>
+        <div class="score-ring">
+          <svg class="ring-svg" width="100" height="100" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="40"/>
+            <circle class="ring-fill" id="ringFill" cx="50" cy="50" r="40"/>
+            <text class="ring-text" x="50" y="47" id="ringPct">0%</text>
+            <text class="ring-sub" x="50" y="62">complété</text>
+          </svg>
+        </div>
+        <div class="score-items" id="scoreItems"></div>
+      </div>
+      <div class="score-card">
+        <div class="score-title">Estimation rapide</div>
+        <div id="estimCard" style="font-size:13px;color:var(--muted)">Renseignez surface, ville et état pour obtenir une fourchette.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   ⚙️ CONFIG SUPABASE — remplacez vos valeurs
+═══════════════════════════════════════════════ */
+const SUPABASE_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGh5ZWZhamZ3cWN4Y2Z4cG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjYwNDAsImV4cCI6MjA5MTUwMjA0MH0.jB8Z_9eT9lYkqxUUD0G001Y87iSAv94fSu_gVOdqa-A';
+const STORAGE_BUCKET = 'vendeurs-docs';
+
+/*
+══════════════════════════════════════════════════════
+  SCHÉMA SQL — coller dans l'éditeur SQL Supabase
+══════════════════════════════════════════════════════
+
+create table vendeurs (
+  id                    uuid primary key default gen_random_uuid(),
+  created_at            timestamptz default now(),
+  ref                   text unique,
+
+  -- Contact
+  prenom                text,
+  nom                   text,
+  email                 text,
+  tel                   text,
+  source                text,
+
+  -- Bien
+  type_bien             text,
+  adresse               text,
+  code_postal           text,
+  ville                 text,
+  surface               numeric,
+  surface_carrez        numeric,
+  pieces                int,
+  etage                 int,
+  annee_construction    int,
+  date_achat            date,
+  prix_achat            numeric,
+  etat                  text,
+  dpe                   text,
+  tout_a_legout         boolean,
+
+  -- Copropriété
+  en_copropriete        boolean,
+  frais_copro_annuels   numeric,
+  nb_lots_habitation    int,
+  nb_lots_parking       int,
+  nb_lots_caves         int,
+
+  -- Équipements
+  equipements           text[],
+
+  -- Travaux & Garanties
+  travaux_recents       text,
+  montant_travaux_prev  numeric,
+  decennale_presente    boolean,
+  date_fin_decennale    date,
+
+  -- Valorisation
+  valeur_mobilier       numeric,
+  valeur_locative       numeric,
+  bien_loue             boolean,
+
+  -- Projet
+  prix_souhaite         numeric,
+  prix_estime           numeric,
+  urgence               text,
+  delai_vente           text,
+  raison_vente          text,
+  deja_estime           boolean,
+  agence_en_cours       boolean,
+
+  -- Documents (chemins Supabase Storage)
+  documents             text[],
+
+  -- RGPD
+  consentement_rgpd     boolean not null default false,
+  consentement_date     timestamptz,
+
+  -- Back-office
+  notes                 text,
+  statut                text default 'Nouveau',
+  priorite              text default 'Moyenne',
+  assigne_a             text
+);
+
+-- Bucket Storage :
+-- insert into storage.buckets (id, name, public)
+-- values ('vendeurs-docs', 'vendeurs-docs', false);
+══════════════════════════════════════════════════════
+*/
+
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+let currentStep = 0;
+let formData = {};
+let uploadedFiles = [];
+
+const STEPS = [
+  {id:'contact', label:'Contact',      icon:'👤'},
+  {id:'bien',    label:'Le bien',      icon:'🏠'},
+  {id:'copro',   label:'Copro & +',    icon:'🏢'},
+  {id:'projet',  label:'Projet',       icon:'🎯'},
+  {id:'docs',    label:'Docs & Envoi', icon:'📁'},
+];
+
+const SCORE_FIELDS = [
+  {key:'prenom',           label:'Prénom'},
+  {key:'nom',              label:'Nom'},
+  {key:'email',            label:'Email'},
+  {key:'tel',              label:'Téléphone'},
+  {key:'type_bien',        label:'Type de bien'},
+  {key:'ville',            label:'Ville'},
+  {key:'surface',          label:'Surface'},
+  {key:'date_achat',       label:"Date d'achat"},
+  {key:'etat',             label:'État du bien'},
+  {key:'dpe',              label:'DPE'},
+  {key:'prix_souhaite',    label:'Prix souhaité'},
+  {key:'urgence',          label:'Urgence'},
+  {key:'consentement_rgpd',label:'Consentement RGPD'},
+];
+
+/* ═══════════════════════════════════════════════
+   RENDER ENGINE
+═══════════════════════════════════════════════ */
+function render(){
+  renderSteps(); renderForm(); renderScore(); renderEstim(); updateProgress();
+}
+
+function renderSteps(){
+  document.getElementById('stepsNav').innerHTML = STEPS.map((s,i)=>{
+    const cls = i<currentStep?'done':i===currentStep?'active':'';
+    return `<button class="step-btn ${cls}" onclick="goStep(${i})">
+      <span class="sn">${i<currentStep?'✓':i+1}</span>${s.icon} ${s.label}
+    </button>`;
+  }).join('');
+}
+
+function goStep(i){ if(i>=currentStep) return; currentStep=i; render(); }
+
+function updateProgress(){
+  const pct=Math.round(((currentStep+1)/STEPS.length)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressLabel').textContent=`Étape ${currentStep+1} / ${STEPS.length}`;
+}
+
+function renderForm(){
+  const fns=[step0_contact,step1_bien,step2_copro,step3_projet,step4_docs];
+  document.getElementById('formArea').innerHTML=fns[currentStep]();
+  restoreValues();
+}
+
+/* ═══════════════════════════════════════════════
+   ÉTAPE 0 — CONTACT
+═══════════════════════════════════════════════ */
+function step0_contact(){
+  return `<div class="card">
+    <div class="card-title">Coordonnées du vendeur</div>
+    <div class="card-sub">Ces informations restent strictement confidentielles.</div>
+    <div class="sl">Identité</div>
+    <div class="fg-row">
+      <div class="fg"><label>Prénom *</label><input id="f_prenom" type="text" placeholder="Marie"></div>
+      <div class="fg"><label>Nom *</label><input id="f_nom" type="text" placeholder="Dupont"></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Email *</label><input id="f_email" type="email" placeholder="marie@email.com"></div>
+      <div class="fg"><label>Téléphone *</label><input id="f_tel" type="tel" placeholder="06 12 34 56 78"></div>
+    </div>
+    <div class="fg">
+      <label>Comment nous avez-vous connus ?</label>
+      <select id="f_source">
+        <option value="">-- Sélectionner --</option>
+        <option>Recommandation</option><option>Google</option><option>Réseaux sociaux</option>
+        <option>Panneau / Affichage</option><option>Portail immobilier</option><option>Autre</option>
+      </select>
+    </div>
+    ${navBtns(false,true)}
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════
+   ÉTAPE 1 — LE BIEN
+═══════════════════════════════════════════════ */
+function step1_bien(){
+  const types=[
+    {icon:'🏢',label:'Appartement'},{icon:'🏡',label:'Maison'},{icon:'🏖',label:'Villa'},
+    {icon:'🌿',label:'Terrain'},{icon:'🏬',label:'Local commercial'},{icon:'🏗',label:'Immeuble'},
+    {icon:'🌾',label:'Maison de campagne'},{icon:'⬜',label:'Autre'}
+  ];
+  const etats=['Neuf / VEFA','Excellent','Bon','À rafraîchir','À rénover'];
+  const dpes=['A','B','C','D','E','F','G','ND'];
+  const equip=['Garage / Parking','Cave','Balcon / Terrasse','Jardin','Piscine','Ascenseur','Digicode / Interphone','Gardien','Cellier','Sous-sol'];
+
+  return `<div class="card">
+    <div class="card-title">Le bien à vendre</div>
+    <div class="card-sub">Décrivez précisément votre bien pour le valoriser au mieux.</div>
+
+    <div class="sl">Type de bien *</div>
+    <div class="type-grid" id="typeGrid">
+      ${types.map(t=>`<div class="type-opt ${formData.type_bien===t.label?'sel':''}" onclick="selectType(this,'${t.label}')">
+        <span class="type-opt-icon">${t.icon}</span><span class="type-opt-label">${t.label}</span>
+      </div>`).join('')}
+    </div>
+
+    <div class="sl">Localisation *</div>
+    <div class="fg"><label>Adresse complète</label><input id="f_adresse" type="text" placeholder="12 rue de la Paix"></div>
+    <div class="fg-row">
+      <div class="fg"><label>Code postal *</label><input id="f_code_postal" type="text" placeholder="75001" oninput="onFieldChange()"></div>
+      <div class="fg"><label>Ville *</label><input id="f_ville" type="text" placeholder="Paris" oninput="onFieldChange()"></div>
+    </div>
+    <div class="fg">
+      <label>Raccordement tout-à-l'égout</label>
+      <div class="radio-row">
+        ${['Oui','Non','Inconnu'].map(v=>`<label><input type="radio" name="egout_r" value="${v}" ${formData.tout_a_legout_str===v?'checked':''} onchange="formData.tout_a_legout_str=this.value;formData.tout_a_legout=(this.value==='Oui');onFieldChange()"> ${v}</label>`).join('')}
+      </div>
+    </div>
+
+    <div class="sl">Surfaces & Caractéristiques *</div>
+    <div class="fg-row3">
+      <div class="fg"><label>Surface habitable (m²) *</label><input id="f_surface" type="number" placeholder="85" oninput="onFieldChange()"></div>
+      <div class="fg"><label>Surface loi Carrez (m²)</label><input id="f_surface_carrez" type="number" placeholder="82"><div class="hint">Appartements en copropriété</div></div>
+      <div class="fg"><label>Nb pièces</label><input id="f_pieces" type="number" placeholder="4"></div>
+    </div>
+    <div class="fg-row3">
+      <div class="fg"><label>Étage</label><input id="f_etage" type="number" placeholder="2"></div>
+      <div class="fg"><label>Année de construction</label><input id="f_annee_construction" type="number" placeholder="1985"></div>
+      <div class="fg"><label>Date d'achat *</label><input id="f_date_achat" type="date" oninput="onFieldChange()"></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Prix d'achat (€)</label><input id="f_prix_achat" type="number" placeholder="280 000"></div>
+      <div class="fg"></div>
+    </div>
+
+    <div class="sl">DPE — Classe énergétique</div>
+    <div class="dpe-grid">
+      ${dpes.map(d=>`<div class="dpe-opt dpe-${d} ${d==='ND'?'nd':''} ${formData.dpe===d?'sel':''}" onclick="selectDpe(this,'${d}')">${d==='ND'?'Non réal.':d}</div>`).join('')}
+    </div>
+
+    <div class="sl">État général *</div>
+    <div class="etat-grid">
+      ${etats.map(e=>`<div class="etat-opt ${formData.etat===e?'sel':''}" onclick="selectEtat(this,'${e}')">${e}</div>`).join('')}
+    </div>
+
+    <div class="sl">Équipements inclus</div>
+    <div class="check-grid" id="equipGrid">
+      ${equip.map(eq=>{const sel=(formData.equipements||[]).includes(eq);return `<div class="check-item ${sel?'sel':''}" onclick="toggleEquip(this,'${eq}')"><div class="check-box">${sel?'✓':''}</div>${eq}</div>`;}).join('')}
+    </div>
+
+    ${navBtns(true,true)}
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════
+   ÉTAPE 2 — COPROPRIÉTÉ + TRAVAUX + VALORISATION
+═══════════════════════════════════════════════ */
+function step2_copro(){
+  return `<div class="card">
+    <div class="card-title">Copropriété, travaux & valorisation</div>
+    <div class="card-sub">Informations essentielles pour les acheteurs et les diagnostiqueurs.</div>
+
+    <div class="sl">Copropriété</div>
+    <div class="fg">
+      <label>Le bien est-il en copropriété ?</label>
+      <div class="radio-row">
+        ${['Oui','Non'].map(v=>`<label><input type="radio" name="copro_r" value="${v}" ${formData.en_copropriete_str===v?'checked':''} onchange="formData.en_copropriete_str=this.value;formData.en_copropriete=(this.value==='Oui');toggleCopro();onFieldChange()"> ${v}</label>`).join('')}
+      </div>
+    </div>
+    <div id="copro_fields" style="${formData.en_copropriete?'':'display:none'}">
+      <div class="fg-row">
+        <div class="fg"><label>Frais de copropriété (€/an)</label><input id="f_frais_copro_annuels" type="number" placeholder="2 400"><div class="hint">Charges courantes annuelles</div></div>
+        <div class="fg"><label>Surface loi Carrez (m²)</label><input id="f_surface_carrez2" type="number" placeholder="82"></div>
+      </div>
+      <div class="fg-row3">
+        <div class="fg"><label>Lots d'habitation</label><input id="f_nb_lots_habitation" type="number" placeholder="24"><div class="hint">Total dans la copropriété</div></div>
+        <div class="fg"><label>Lots de parking</label><input id="f_nb_lots_parking" type="number" placeholder="20"></div>
+        <div class="fg"><label>Lots de caves</label><input id="f_nb_lots_caves" type="number" placeholder="18"></div>
+      </div>
+    </div>
+
+    <div class="sl">Travaux</div>
+    <div class="fg">
+      <label>Travaux réalisés récemment</label>
+      <textarea id="f_travaux_recents" placeholder="Ex : toiture refaite en 2022, cuisine rénovée en 2023, isolation des combles…"></textarea>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Montant approx. des travaux à prévoir (€)</label><input id="f_montant_travaux_prev" type="number" placeholder="15 000"><div class="hint">Estimation des travaux restants</div></div>
+      <div class="fg"></div>
+    </div>
+
+    <div class="sl">Garantie décennale</div>
+    <div class="fg">
+      <label>Une garantie décennale est-elle en cours ?</label>
+      <div class="radio-row">
+        ${['Oui','Non','Inconnu'].map(v=>`<label><input type="radio" name="decennale_r" value="${v}" ${formData.decennale_str===v?'checked':''} onchange="formData.decennale_str=this.value;formData.decennale_presente=(this.value==='Oui');toggleDecennale();onFieldChange()"> ${v}</label>`).join('')}
+      </div>
+    </div>
+    <div id="decennale_date" style="${formData.decennale_presente?'':'display:none'}">
+      <div class="fg-row">
+        <div class="fg"><label>Date de fin de la décennale</label><input id="f_date_fin_decennale" type="date"></div>
+        <div class="fg"></div>
+      </div>
+    </div>
+
+    <div class="sl">Valorisation complémentaire</div>
+    <div class="fg"><label>Valeur du mobilier inclus dans la vente (€)</label><input id="f_valeur_mobilier" type="number" placeholder="8 000"><div class="hint">Cuisine équipée, meubles, électroménager…</div></div>
+
+    <div class="fg">
+      <label>Le bien est-il actuellement loué ?</label>
+      <div class="radio-row">
+        ${['Oui','Non'].map(v=>`<label><input type="radio" name="loue_r" value="${v}" ${formData.bien_loue_str===v?'checked':''} onchange="formData.bien_loue_str=this.value;formData.bien_loue=(this.value==='Oui');toggleLoue();onFieldChange()"> ${v}</label>`).join('')}
+      </div>
+    </div>
+
+    <div id="loue_fields" style="${formData.bien_loue===true?'':'display:none'}">
+      <div class="fg">
+        <label>Loyer mensuel actuel (€) *</label>
+        <input id="f_valeur_locative" type="number" placeholder="800" oninput="onFieldChange()">
+        <div class="hint">Obligatoire si bien loué</div>
+      </div>
+    </div>
+
+    <div id="non_loue_fields" style="${formData.bien_loue===false?'':'display:none'}">
+      <div class="fg">
+        <label>Connaissez-vous la valeur locative estimée ?</label>
+        <div class="radio-row">
+          ${['Oui','Non'].map(v=>`<label><input type="radio" name="connait_loyer_r" value="${v}" ${formData.connait_loyer_str===v?'checked':''} onchange="formData.connait_loyer_str=this.value;toggleConnaissezLoyer();onFieldChange()"> ${v}</label>`).join('')}
+        </div>
+      </div>
+      <div id="loyer_estime_field" style="${formData.connait_loyer_str==='Oui'?'':'display:none'}">
+        <div class="fg">
+          <label>Valeur locative estimée (€/mois)</label>
+          <input id="f_valeur_locative" type="number" placeholder="750" oninput="onFieldChange()">
+          <div class="hint">Estimation du loyer si le bien était mis en location</div>
+        </div>
+      </div>
+    </div>
+
+    ${navBtns(true,true)}
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════
+   ÉTAPE 3 — PROJET DE VENTE
+═══════════════════════════════════════════════ */
+function step3_projet(){
+  const urgences=[{val:'Haute',icon:'🔴',label:'Urgente',sub:'< 3 mois'},{val:'Moyenne',icon:'🟡',label:'Normale',sub:'3–6 mois'},{val:'Basse',icon:'🟢',label:'Flexible',sub:'> 6 mois'}];
+  const delais=['Moins de 1 mois','1 à 3 mois','3 à 6 mois','6 mois à 1 an',"Plus d'1 an",'Pas de contrainte'];
+  const raisons=["Achat d'un nouveau bien",'Déménagement','Séparation / divorce','Succession','Investissement','Difficultés financières',"Départ à l'étranger",'Autre'];
+
+  return `<div class="card">
+    <div class="card-title">Votre projet de vente</div>
+    <div class="card-sub">Mieux comprendre votre situation nous permet de trouver l'acheteur idéal.</div>
+
+    <div class="sl">Prix *</div>
+    <div class="fg-row">
+      <div class="fg"><label>Prix demandé (€) *</label><input id="f_prix_souhaite" type="number" placeholder="350 000" oninput="onFieldChange()"></div>
+      <div class="fg"><label>Prix estimé (si connu)</label><input id="f_prix_estime" type="number" placeholder="330 000"></div>
+    </div>
+
+    <div class="sl">Urgence *</div>
+    <div class="prio-grid">
+      ${urgences.map(u=>{
+        const cls=formData.urgence===u.val?'sel-'+{Haute:'h',Moyenne:'m',Basse:'b'}[u.val]:'';
+        return `<div class="prio-opt ${cls}" onclick="selectUrgence(this,'${u.val}')">${u.icon} ${u.label}<br><small style="font-size:10px;color:var(--muted)">${u.sub}</small></div>`;
+      }).join('')}
+    </div>
+
+    <div class="sl">Délai & Raison</div>
+    <div class="fg">
+      <label>Délai de vente souhaité</label>
+      <select id="f_delai_vente">
+        <option value="">-- Sélectionner --</option>
+        ${delais.map(d=>`<option ${formData.delai_vente===d?'selected':''}>${d}</option>`).join('')}
+      </select>
+    </div>
+    <div class="fg"><label>Raison principale de la vente</label></div>
+    <div class="check-grid" id="raisonGrid">
+      ${raisons.map(r=>{const sel=formData.raison_vente===r;return `<div class="check-item ${sel?'sel':''}" onclick="selectRaison(this,'${r}')"><div class="check-box">${sel?'✓':''}</div>${r}</div>`;}).join('')}
+    </div>
+
+    <div class="fg-row">
+      <div class="fg"><label>Bien déjà estimé ?</label>
+        <select id="f_deja_estime">
+          <option value="">--</option>
+          <option value="true" ${formData.deja_estime===true||formData.deja_estime==='true'?'selected':''}>Oui</option>
+          <option value="false" ${formData.deja_estime===false||formData.deja_estime==='false'?'selected':''}>Non</option>
+        </select>
+      </div>
+      <div class="fg"><label>Agence déjà mandatée ?</label>
+        <select id="f_agence_en_cours">
+          <option value="">--</option>
+          <option value="true" ${formData.agence_en_cours===true||formData.agence_en_cours==='true'?'selected':''}>Oui</option>
+          <option value="false" ${formData.agence_en_cours===false||formData.agence_en_cours==='false'?'selected':''}>Non</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="sl">Notes complémentaires</div>
+    <div class="fg">
+      <textarea id="f_notes" placeholder="Voisinage, vue, servitudes, particularités, informations importantes pour les acheteurs…" style="min-height:100px"></textarea>
+    </div>
+
+    ${navBtns(true,true)}
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════
+   ÉTAPE 4 — DOCUMENTS + RÉCAP + RGPD
+═══════════════════════════════════════════════ */
+
+// Conditions dossier Gold :
+// - Carte d'identité toujours requise
+// - Au moins 1 photo du bien obligatoire
+// - Copro = Oui → compte rendu copro requis
+// - DPE renseigné (pas ND) → diagnostic DPE requis
+// - Bien loué → bail requis
+function isGold(){
+  if(!uploadedFiles.find(f=>f.type==='cni'&&f.checked)) return false;
+  if(!uploadedFiles.find(f=>f.type==='photo')) return false; // au moins 1 photo
+  if(formData.en_copropriete===true && !uploadedFiles.find(f=>f.type==='copro'&&f.checked)) return false;
+  if(formData.dpe && formData.dpe!=='ND' && !uploadedFiles.find(f=>f.type==='dpe'&&f.checked)) return false;
+  if(formData.bien_loue===true && !uploadedFiles.find(f=>f.type==='bail'&&f.checked)) return false;
+  return true;
+}
+
+function docZone(type, icon, title, sub){
+  const f = uploadedFiles.find(f=>f.type===type);
+  const checked = !!(f && f.checked);
+  const gold = checked;
+  const border = gold ? 'var(--gold)' : 'var(--line)';
+  const bg = gold ? 'rgba(201,168,76,.05)' : 'transparent';
+  return `
+  <div style="border:1.5px solid ${border};border-radius:var(--r);padding:16px 18px;margin-bottom:12px;transition:all .3s;background:${bg}">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:${f?'12px':'10px'}">
+      <div style="font-size:22px">${gold?'⭐':icon}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;color:${gold?'var(--gold2)':'var(--text)'}">${title}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${sub}</div>
+      </div>
+      ${gold?'<div style="font-size:11px;font-weight:700;color:var(--gold);letter-spacing:1px">✓ OK</div>':'<span style="font-size:10px;color:var(--rose);font-weight:600;letter-spacing:1px">Requis</span>'}
+    </div>
+    ${f ? `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--warm);border:1px solid var(--line);border-radius:var(--r-sm);margin-bottom:10px;font-size:13px">
+        <div style="display:flex;align-items:center;gap:8px;color:var(--text2)">📄 <span>${f.name}</span><span style="font-size:11px;color:var(--muted)">${fmtSize(f.size)}</span></div>
+        <button class="file-remove" onclick="removeDocFile('${type}')">✕</button>
+      </div>
+      <div class="check-item ${checked?'sel':''}" onclick="toggleDocCheck('${type}')" style="margin-bottom:0">
+        <div class="check-box">${checked?'✓':''}</div>
+        <span>Je confirme que ce document est le bon</span>
+      </div>
+    ` : `
+      <div class="upload-zone" style="padding:14px;margin-bottom:0">
+        <input type="file" accept=".pdf,.jpg,.jpeg,.png" onchange="handleDocFile('${type}',this.files)">
+        <div style="font-size:13px;color:var(--muted)">📎 Glissez ou cliquez pour déposer</div>
+      </div>
+    `}
+  </div>`;
+}
+
+function step4_docs(){
+  const rgpdChecked = formData.consentement_rgpd===true;
+  const needCopro   = formData.en_copropriete===true;
+  const needDpe     = formData.dpe && formData.dpe!=='ND';
+  const needBail    = formData.bien_loue===true;
+  const goldReady   = isGold();
+
+  return `<div class="card">
+    <div class="card-title">Documents & Envoi</div>
+    <div class="card-sub">Déposez les documents requis pour obtenir le statut Dossier Gold ⭐.</div>
+
+    ${goldReady
+      ? `<div style="background:rgba(201,168,76,.1);border:1.5px solid var(--gold);border-radius:var(--r-sm);padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px">
+           <span style="font-size:28px">⭐</span>
+           <div><div style="font-size:14px;font-weight:700;color:var(--gold2)">Dossier Gold — Complet !</div>
+           <div style="font-size:12px;color:var(--muted)">Tous les documents requis sont fournis. Votre dossier sera traité en priorité.</div></div>
+         </div>`
+      : `<div style="background:rgba(107,107,103,.08);border:1px solid var(--line);border-radius:var(--r-sm);padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px">
+           <span style="font-size:22px">📋</span>
+           <div><div style="font-size:13px;font-weight:600;color:var(--text2)">Dossier en cours</div>
+           <div style="font-size:12px;color:var(--muted)">Déposez les documents marqués <span style="color:var(--rose);font-weight:600">Requis</span> pour obtenir le statut ⭐ Gold.</div></div>
+         </div>`}
+
+    <div class="sl">Photos du bien *</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Au moins 1 photo obligatoire pour le statut Gold. Ajoutez-en plusieurs pour valoriser votre bien.</div>
+    ${(()=>{
+      const photos = uploadedFiles.filter(f=>f.type==='photo');
+      return `<div class="upload-zone" style="padding:16px;margin-bottom:10px" id="photoZone">
+        <input type="file" accept=".jpg,.jpeg,.png,.webp,.heic" multiple onchange="handlePhotoFiles(this.files)">
+        <div style="font-size:22px;margin-bottom:6px">📸</div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px">Glissez vos photos ou cliquez</div>
+        <div style="font-size:11px;color:var(--muted)">JPG, PNG, WEBP — Max 10 Mo/photo</div>
+      </div>
+      ${photos.length ? `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+        ${photos.map((f,i)=>`
+          <div style="position:relative;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--line)">
+            <img src="${f.preview}" style="width:100%;height:80px;object-fit:cover;display:block">
+            <button onclick="removePhotoFile(${i})" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);border:none;color:#fff;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center">✕</button>
+          </div>`).join('')}
+      </div>` : ''}
+      ${photos.length===0 ? '<div style="font-size:12px;color:var(--rose);margin-bottom:12px">⚠ Aucune photo — requise pour le statut Gold</div>' : `<div style="font-size:12px;color:var(--teal);margin-bottom:12px">✓ ${photos.length} photo${photos.length>1?'s':''} ajoutée${photos.length>1?'s':''}</div>`}`;
+    })()}
+
+    <div class="sl">Documents obligatoires pour le statut Gold</div>
+    ${docZone('cni','🪪',"Carte d'identité ou passeport","Recto-verso · PDF ou photo — Toujours requis")}
+    ${needDpe   ? docZone('dpe','📊',"Diagnostic de performance énergétique (DPE)","Document officiel du diagnostiqueur — PDF") : ''}
+    ${needCopro ? docZone('copro','🏢',"Compte rendu d'assemblée générale","Dernier PV d'AG ou règlement de copropriété — PDF") : ''}
+    ${needBail  ? docZone('bail','📋',"Bail de location en cours","Contrat de bail signé — PDF") : ''}
+
+    <div class="sl">Autres documents (optionnels)</div>
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="handleFiles(this.files)">
+      <div class="upload-icon">📂</div>
+      <div class="upload-title">Autres fichiers à joindre</div>
+      <div class="upload-sub">Plans · Photos · Titre de propriété · Factures · Garanties…<br>PDF, JPG, PNG, Word — Max 10 Mo par fichier</div>
+    </div>
+    ${uploadedFiles.filter(f=>!f.type).length ? `<div class="file-list">${uploadedFiles.filter(f=>!f.type).map((f,i)=>`
+      <div class="file-item">
+        <div class="file-name-wrap">📄 <span>${f.name}</span><span class="file-size">${fmtSize(f.size)}</span></div>
+        <button class="file-remove" onclick="removeFile(${uploadedFiles.indexOf(f)})">✕</button>
+      </div>`).join('')}</div>` : ''}
+
+    <div class="sl">Récapitulatif du dossier</div>
+    <div id="recap" style="font-size:13px;line-height:1.9;color:var(--text2);background:var(--warm);border:1px solid var(--line);border-radius:var(--r-sm);padding:16px;margin-bottom:4px"></div>
+
+    <div class="rgpd-box">
+      <div class="rgpd-row" onclick="toggleRgpd()">
+        <div class="rgpd-check ${rgpdChecked?'checked':''}" id="rgpdBox">${rgpdChecked?'✓':''}</div>
+        <div class="rgpd-text">
+          <strong>Consentement RGPD *</strong><br>
+          J'autorise ImmoConnect à collecter, traiter et conserver mes données personnelles et les informations relatives à mon bien immobilier dans le cadre de ma demande de vente. J'accepte que ces données puissent être transmises à des <strong>acheteurs potentiels qualifiés</strong> et à des <strong>agents immobiliers partenaires</strong> dans le but de réaliser la transaction. Je dispose d'un droit d'accès, de rectification et de suppression (contact : rgpd@immoconnect.fr). Ce consentement est révocable à tout moment.
+        </div>
+      </div>
+    </div>
+
+    ${navBtns(true,false,true)}
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════
+   INTERACTIONS
+═══════════════════════════════════════════════ */
+function selectType(el,val){document.querySelectorAll('#typeGrid .type-opt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');formData.type_bien=val;onFieldChange();}
+function selectDpe(el,val){document.querySelectorAll('.dpe-opt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');formData.dpe=val;onFieldChange();}
+function selectEtat(el,val){document.querySelectorAll('.etat-opt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');formData.etat=val;onFieldChange();}
+function selectUrgence(el,val){
+  document.querySelectorAll('.prio-opt').forEach(o=>o.classList.remove('sel-h','sel-m','sel-b'));
+  el.classList.add('sel-'+{Haute:'h',Moyenne:'m',Basse:'b'}[val]);
+  formData.urgence=val;onFieldChange();
+}
+function selectRaison(el,val){
+  document.querySelectorAll('#raisonGrid .check-item').forEach(o=>{o.classList.remove('sel');o.querySelector('.check-box').textContent='';});
+  el.classList.add('sel');el.querySelector('.check-box').textContent='✓';formData.raison_vente=val;onFieldChange();
+}
+function toggleEquip(el,val){
+  if(!formData.equipements) formData.equipements=[];
+  if(formData.equipements.includes(val)){formData.equipements=formData.equipements.filter(e=>e!==val);el.classList.remove('sel');el.querySelector('.check-box').textContent='';}
+  else{formData.equipements.push(val);el.classList.add('sel');el.querySelector('.check-box').textContent='✓';}
+  onFieldChange();
+}
+function toggleCopro(){const f=document.getElementById('copro_fields');if(f)f.style.display=formData.en_copropriete?'':'none';}
+function toggleDecennale(){const f=document.getElementById('decennale_date');if(f)f.style.display=formData.decennale_presente?'':'none';}
+function toggleLoue(){
+  const fl=document.getElementById('loue_fields');
+  const fnl=document.getElementById('non_loue_fields');
+  if(fl) fl.style.display=formData.bien_loue===true?'':'none';
+  if(fnl) fnl.style.display=formData.bien_loue===false?'':'none';
+}
+function toggleConnaissezLoyer(){
+  const f=document.getElementById('loyer_estime_field');
+  if(f) f.style.display=formData.connait_loyer_str==='Oui'?'':'none';
+}
+function toggleRgpd(){
+  formData.consentement_rgpd=!formData.consentement_rgpd;
+  const box=document.getElementById('rgpdBox');
+  if(box){box.classList.toggle('checked',formData.consentement_rgpd);box.textContent=formData.consentement_rgpd?'✓':'';}
+  onFieldChange();
+}
+
+/* ═══════════════════════════════════════════════
+   UPLOAD
+═══════════════════════════════════════════════ */
+
+// Upload fichier typé (cni, dpe, copro)
+function handleDocFile(type, files){
+  const file = files[0]; if(!file) return;
+  if(file.size>10*1024*1024){toast(`${file.name} dépasse 10 Mo`,'error');return;}
+  // Supprimer l'ancien fichier de ce type s'il existe
+  uploadedFiles = uploadedFiles.filter(f=>f.type!==type);
+  uploadedFiles.push({name:file.name, size:file.size, file, type, checked:false});
+  renderForm(); restoreValues();
+}
+
+// Cocher/décocher la confirmation d'un fichier typé
+function toggleDocCheck(type){
+  const f = uploadedFiles.find(f=>f.type===type);
+  if(f){ f.checked=!f.checked; renderForm(); restoreValues(); renderScore(); }
+}
+
+// Supprimer un fichier typé
+function removeDocFile(type){
+  uploadedFiles = uploadedFiles.filter(f=>f.type!==type);
+  renderForm(); restoreValues(); renderScore();
+}
+
+// Upload fichiers libres (sans type)
+function handleFiles(files){
+  Array.from(files).forEach(file=>{
+    if(file.size>10*1024*1024){toast(`${file.name} dépasse 10 Mo`,'error');return;}
+    if(uploadedFiles.find(f=>f.name===file.name&&!f.type)){toast(`${file.name} déjà ajouté`,'info');return;}
+    uploadedFiles.push({name:file.name,size:file.size,file,type:null,checked:false});
+  });
+  renderForm(); restoreValues();
+}
+function removeFile(i){uploadedFiles.splice(i,1);renderForm();restoreValues();}
+
+// Photos du bien
+function handlePhotoFiles(files){
+  Array.from(files).forEach(file=>{
+    if(file.size>10*1024*1024){toast(`${file.name} dépasse 10 Mo`,'error');return;}
+    const preview = URL.createObjectURL(file);
+    uploadedFiles.push({name:file.name,size:file.size,file,type:'photo',checked:true,preview});
+  });
+  renderForm(); restoreValues(); renderScore();
+}
+function removePhotoFile(idx){
+  const photos = uploadedFiles.filter(f=>f.type==='photo');
+  const target = photos[idx];
+  if(target){
+    const i = uploadedFiles.indexOf(target);
+    uploadedFiles.splice(i,1);
+  }
+  renderForm(); restoreValues(); renderScore();
+}
+function fmtSize(b){return b>1048576?(b/1048576).toFixed(1)+' Mo':(b/1024).toFixed(0)+' Ko';}
+
+document.addEventListener('dragover',e=>{e.preventDefault();const z=document.getElementById('uploadZone');if(z)z.classList.add('dragover');});
+document.addEventListener('dragleave',()=>{const z=document.getElementById('uploadZone');if(z)z.classList.remove('dragover');});
+document.addEventListener('drop',e=>{e.preventDefault();const z=document.getElementById('uploadZone');if(z)z.classList.remove('dragover');if(e.dataTransfer.files.length)handleFiles(e.dataTransfer.files);});
+
+/* ═══════════════════════════════════════════════
+   SAVE / RESTORE
+═══════════════════════════════════════════════ */
+const fieldMap=[
+  'f_prenom','f_nom','f_email','f_tel','f_source',
+  'f_adresse','f_code_postal','f_ville',
+  'f_surface','f_surface_carrez','f_pieces','f_etage','f_annee_construction','f_date_achat','f_prix_achat',
+  'f_frais_copro_annuels','f_surface_carrez2','f_nb_lots_habitation','f_nb_lots_parking','f_nb_lots_caves',
+  'f_travaux_recents','f_montant_travaux_prev','f_date_fin_decennale',
+  'f_valeur_mobilier','f_valeur_locative',
+  'f_prix_souhaite','f_prix_estime','f_delai_vente','f_deja_estime','f_agence_en_cours','f_valeur_locative_approx',
+  'f_notes'
+];
+
+function saveValues(){
+  fieldMap.forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    const key=id.replace('f_','');
+    if(el.type==='number') formData[key]=el.value?parseFloat(el.value):null;
+    else if(el.value==='true') formData[key]=true;
+    else if(el.value==='false') formData[key]=false;
+    else formData[key]=el.value;
+  });
+  // Sync surface_carrez entre étape 1 et 2
+  if(formData.surface_carrez2&&!formData.surface_carrez) formData.surface_carrez=formData.surface_carrez2;
+  if(formData.surface_carrez&&!formData.surface_carrez2) formData.surface_carrez2=formData.surface_carrez;
+}
+
+function restoreValues(){
+  fieldMap.forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    const key=id.replace('f_','');
+    const val=formData[key];
+    if(val===undefined||val===null) return;
+    if(val===true) el.value='true';
+    else if(val===false) el.value='false';
+    else el.value=val;
+  });
+  if(currentStep===4) renderRecap();
+}
+
+function onFieldChange(){saveValues();renderScore();renderEstim();}
+
+/* ═══════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════ */
+function nextStep(){
+  saveValues();
+  if(!validateStep()) return;
+  if(currentStep<STEPS.length-1){currentStep++;render();window.scrollTo({top:0,behavior:'smooth'});}
+}
+function prevStep(){
+  saveValues();
+  if(currentStep>0){currentStep--;render();window.scrollTo({top:0,behavior:'smooth'});}
+}
+
+function validateStep(){
+  const checks=[
+    ()=>{
+      if(!formData.prenom||!formData.nom){toast('Prénom et nom obligatoires','error');return false;}
+      if(!formData.email||!formData.email.includes('@')){toast('Email invalide','error');return false;}
+      if(!formData.tel){toast('Téléphone obligatoire','error');return false;}
+      return true;
+    },
+    ()=>{
+      if(!formData.type_bien){toast('Sélectionnez un type de bien','error');return false;}
+      if(!formData.ville||!formData.code_postal){toast('Ville et code postal obligatoires','error');return false;}
+      if(!formData.surface){toast('Surface obligatoire','error');return false;}
+      if(!formData.etat){toast("Sélectionnez l'état du bien",'error');return false;}
+      if(!formData.date_achat){toast("Date d'achat obligatoire",'error');return false;}
+      return true;
+    },
+    ()=>true,
+    ()=>{
+      if(!formData.prix_souhaite){toast('Prix souhaité obligatoire','error');return false;}
+      if(!formData.urgence){toast("Sélectionnez l'urgence de vente",'error');return false;}
+      return true;
+    },
+    ()=>{
+      if(!formData.consentement_rgpd){toast('Vous devez accepter le consentement RGPD','error');return false;}
+      return true;
+    },
+  ];
+  return checks[currentStep]();
+}
+
+/* ═══════════════════════════════════════════════
+   RÉCAPITULATIF
+═══════════════════════════════════════════════ */
+function renderRecap(){
+  const el=document.getElementById('recap'); if(!el) return;
+  const d=formData;
+  const s=v=>v||'—';
+  el.innerHTML=`
+    <strong>👤 Contact :</strong> ${s(d.prenom)} ${s(d.nom)} — ${s(d.email)} — ${s(d.tel)}<br>
+    <strong>🏠 Bien :</strong> ${s(d.type_bien)}, ${s(d.surface)} m² hab.${d.surface_carrez?` / ${d.surface_carrez} m² Carrez`:''}${d.pieces?`, ${d.pieces} p.`:''} — ${s(d.ville)} (${s(d.code_postal)})<br>
+    <strong>📅 Acquis le :</strong> ${s(d.date_achat)}${d.prix_achat?` pour ${fmtK(d.prix_achat)}`:''}<br>
+    <strong>🔧 État :</strong> ${s(d.etat)} — DPE : ${s(d.dpe)}<br>
+    <strong>🚿 Tout-à-l'égout :</strong> ${s(d.tout_a_legout_str)}<br>
+    ${d.en_copropriete?`<strong>🏢 Copropriété :</strong> ${fmtK(d.frais_copro_annuels)}/an — ${d.nb_lots_habitation||'?'} lots hab. / ${d.nb_lots_parking||'?'} parking / ${d.nb_lots_caves||'?'} caves<br>`:''}
+    ${d.montant_travaux_prev?`<strong>🔨 Travaux à prévoir :</strong> ~${fmtK(d.montant_travaux_prev)}<br>`:''}
+    <strong>🛡 Décennale :</strong> ${s(d.decennale_str)}${d.date_fin_decennale?` (fin : ${d.date_fin_decennale})`:''}<br>
+    ${d.valeur_mobilier?`<strong>🛋 Mobilier inclus :</strong> ${fmtK(d.valeur_mobilier)}<br>`:''}
+    ${d.valeur_locative?`<strong>💰 Valeur locative :</strong> ${fmtK(d.valeur_locative)}/mois — loué : ${s(d.bien_loue_str)}<br>`:''}
+    <strong>💶 Prix :</strong> ${d.prix_souhaite?fmtK(d.prix_souhaite):'—'}${d.prix_estime?` (estimé ${fmtK(d.prix_estime)})`:''}<br>
+    <strong>⏱ Urgence :</strong> ${s(d.urgence)} — Délai : ${s(d.delai_vente)}<br>
+    <strong>📌 Raison :</strong> ${s(d.raison_vente)}<br>
+    ${d.equipements?.length?`<strong>🔑 Équipements :</strong> ${d.equipements.join(', ')}<br>`:''}
+    ${uploadedFiles.length?`<strong>📎 Documents :</strong> ${uploadedFiles.map(f=>f.name).join(', ')}<br>`:'<strong>📎 Documents :</strong> Aucun<br>'}
+    <strong>✅ RGPD :</strong> ${formData.consentement_rgpd?'Consenti':'Non accepté'}
+  `;
+}
+
+/* ═══════════════════════════════════════════════
+   SCORE
+═══════════════════════════════════════════════ */
+function renderScore(){
+  const count=SCORE_FIELDS.filter(f=>{
+    const v=formData[f.key];
+    if(f.key==='consentement_rgpd') return v===true;
+    return v!==undefined&&v!==null&&v!==''&&v!==0;
+  }).length;
+  const pct=Math.round((count/SCORE_FIELDS.length)*100);
+  const circ=251;
+  const gold=isGold();
+  const ring=document.getElementById('ringFill');
+  if(ring){
+    ring.style.strokeDashoffset=circ-(circ*pct/100);
+    ring.style.stroke=gold?'#e0c068':'var(--gold)';
+  }
+  const pctEl=document.getElementById('ringPct');
+  if(pctEl){pctEl.textContent=gold?'⭐':pct+'%';pctEl.style.fontSize=gold?'13px':'18px';}
+  const si=document.getElementById('scoreItems');
+  if(si){
+    const rows=SCORE_FIELDS.map(f=>{
+      const v=formData[f.key];
+      const ok=f.key==='consentement_rgpd'?v===true:(v!==undefined&&v!==null&&v!==''&&v!==0);
+      return `<div class="score-item"><span>${f.label}</span><div class="score-dot ${ok?'ok':''}"></div></div>`;
+    }).join('');
+    const cniOk  = !!uploadedFiles.find(f=>f.type==='cni'&&f.checked);
+    const photoOk = !!uploadedFiles.find(f=>f.type==='photo');
+    const dpeOk   = !formData.dpe||formData.dpe==='ND'||!!uploadedFiles.find(f=>f.type==='dpe'&&f.checked);
+    const cproOk  = formData.en_copropriete!==true||!!uploadedFiles.find(f=>f.type==='copro'&&f.checked);
+    const bailOk  = formData.bien_loue!==true||!!uploadedFiles.find(f=>f.type==='bail'&&f.checked);
+    const docRows=`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)">
+      <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:8px">Docs Gold</div>
+      <div class="score-item"><span>Carte d'identité</span><div class="score-dot ${cniOk?'ok':''}" style="${cniOk?'background:var(--gold2)':''}"></div></div>
+      <div class="score-item"><span>Photos du bien</span><div class="score-dot ${photoOk?'ok':''}" style="${photoOk?'background:var(--gold2)':''}"></div></div>
+      ${formData.dpe&&formData.dpe!=='ND'?`<div class="score-item"><span>Diagnostic DPE</span><div class="score-dot ${dpeOk?'ok':''}" style="${dpeOk?'background:var(--gold2)':''}"></div></div>`:''}
+      ${formData.en_copropriete===true?`<div class="score-item"><span>CR Copropriété</span><div class="score-dot ${cproOk?'ok':''}" style="${cproOk?'background:var(--gold2)':''}"></div></div>`:''}
+      ${formData.bien_loue===true?`<div class="score-item"><span>Bail de location</span><div class="score-dot ${bailOk?'ok':''}" style="${bailOk?'background:var(--gold2)':''}"></div></div>`:''}
+      ${gold?'<div style="margin-top:8px;font-size:11px;font-weight:700;color:var(--gold2);text-align:center">⭐ Dossier Gold</div>':''}
+    </div>`;
+    si.innerHTML=rows+docRows;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   ESTIMATION
+═══════════════════════════════════════════════ */
+function renderEstim(){
+  const el=document.getElementById('estimCard'); if(!el) return;
+  const surf=parseFloat(formData.surface)||0;
+  const ville=(formData.ville||'').toLowerCase();
+  const etat=formData.etat||'';
+  if(!surf||!ville){el.innerHTML='<span style="color:var(--muted);font-size:13px">Renseignez surface, ville et état pour une estimation.</span>';return;}
+  let base=3500;
+  if(ville.includes('paris')) base=9500;
+  else if(['lyon','bordeaux','marseille','nice','toulouse','nantes'].some(v=>ville.includes(v))) base=4500;
+  else if(['montpellier','lille','strasbourg','rennes','grenoble'].some(v=>ville.includes(v))) base=3800;
+  else if(ville.includes('saint-gaudens')||ville.includes('occitanie')) base=1800;
+  const coeff=etat==='Neuf / VEFA'?1.2:etat==='Excellent'?1.1:etat==='Bon'?1.0:etat==='À rafraîchir'?0.9:0.8;
+  const min=Math.round(surf*base*coeff*0.92/1000)*1000;
+  const max=Math.round(surf*base*coeff*1.08/1000)*1000;
+  const moy=(min+max)/2;
+  const loyer=formData.valeur_locative&&moy>0?`<div style="margin-top:8px;font-size:12px;color:var(--teal)">🏦 Rendement brut estimé : ~${((formData.valeur_locative*12)/moy*100).toFixed(1)}%</div>`:'';
+  el.innerHTML=`
+    <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Fourchette estimée</div>
+    <div style="font-size:20px;font-weight:700;color:var(--gold2);margin-bottom:4px">${fmtK(min)} – ${fmtK(max)}</div>
+    <div style="font-size:12px;color:var(--muted)">≈ ${Math.round(base*coeff).toLocaleString()} €/m² · ${surf} m²</div>
+    ${loyer}
+    <div style="font-size:11px;color:var(--muted);margin-top:8px">⚠ Indicatif — analyse complète par nos agents.</div>`;
+}
+
+function fmtK(v){if(!v) return '—';return v>=1000000?(v/1000000).toFixed(2)+'M €':(v/1000).toFixed(0)+'k €';}
+
+/* ═══════════════════════════════════════════════
+   SOUMISSION → SUPABASE
+═══════════════════════════════════════════════ */
+async function submitForm(){
+  saveValues();
+  if(!validateStep()) return;
+  const ref='VEN-'+Date.now().toString(36).toUpperCase();
+  const demo=SUPABASE_URL.includes('VOTRE_PROJET');
+
+  // Upload fichiers obligatoires (cni, dpe, copro) + libres
+  const docPaths=[];
+  let pathCni=null, pathDpe=null, pathCopro=null, pathBail=null;
+
+  if(!demo && uploadedFiles.length){
+    toast('Upload des documents…','info');
+    for(const f of uploadedFiles){
+      const path=`${ref}/${f.type||'autres'}/${f.name}`;
+      const res=await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${path}`,{
+        method:'POST',
+        headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':f.file.type},
+        body:f.file
+      });
+      if(res.ok){
+        docPaths.push(path);
+        if(f.type==='photo') {}  // stored in documents[]
+        if(f.type==='cni')   pathCni=path;
+        if(f.type==='dpe')   pathDpe=path;
+        if(f.type==='copro') pathCopro=path;
+        if(f.type==='bail')  pathBail=path;
+      } else console.warn('Upload failed:',f.name,await res.text());
+    }
+  }
+
+  const gold=isGold();
+
+  const payload={
+    ref,
+    prenom:formData.prenom,nom:formData.nom,email:formData.email,tel:formData.tel,source:formData.source||'Formulaire web',
+    type_bien:formData.type_bien,adresse:formData.adresse,code_postal:formData.code_postal,ville:formData.ville,
+    surface:formData.surface||null,
+    surface_carrez:formData.surface_carrez||formData.surface_carrez2||null,
+    pieces:formData.pieces||null,etage:formData.etage||null,annee_construction:formData.annee_construction||null,
+    date_achat:formData.date_achat||null,prix_achat:formData.prix_achat||null,
+    etat:formData.etat,dpe:formData.dpe,
+    tout_a_legout:formData.tout_a_legout===true,
+    en_copropriete:formData.en_copropriete===true,
+    frais_copro_annuels:formData.frais_copro_annuels||null,
+    nb_lots_habitation:formData.nb_lots_habitation||null,
+    nb_lots_parking:formData.nb_lots_parking||null,
+    nb_lots_caves:formData.nb_lots_caves||null,
+    equipements:formData.equipements||[],
+    travaux_recents:formData.travaux_recents||null,
+    montant_travaux_prev:formData.montant_travaux_prev||null,
+    decennale_presente:formData.decennale_presente===true,
+    date_fin_decennale:formData.date_fin_decennale||null,
+    valeur_mobilier:formData.valeur_mobilier||null,
+    valeur_locative:formData.valeur_locative||null,
+    bien_loue:formData.bien_loue===true,
+    prix_souhaite:formData.prix_souhaite,prix_estime:formData.prix_estime||null,
+    urgence:formData.urgence,delai_vente:formData.delai_vente||null,
+    raison_vente:formData.raison_vente||null,
+    deja_estime:formData.deja_estime===true||formData.deja_estime==='true',
+    agence_en_cours:formData.agence_en_cours===true||formData.agence_en_cours==='true',
+    documents:docPaths,
+    doc_cni:pathCni,
+    doc_dpe:pathDpe,
+    doc_copro:pathCopro,
+    doc_bail:pathBail,
+    dossier_gold:gold,
+    consentement_rgpd:true,
+    consentement_date:new Date().toISOString(),
+    notes:formData.notes||null,
+    statut:'Nouveau',
+    priorite:formData.urgence==='Haute'?'Haute':gold?'Haute':'Moyenne',
+  };
+
+  if(demo){
+    toast('⚠ Mode démo — Supabase non configuré','info');
+    console.log('Payload Supabase :', payload);
+    setTimeout(()=>showSuccess(ref),900);
+    return;
+  }
+  try{
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/vendeurs`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Prefer':'return=minimal'},
+      body:JSON.stringify(payload)
+    });
+    if(res.ok||res.status===201) showSuccess(ref);
+    else{const err=await res.text();console.error(err);toast('Erreur Supabase : '+res.status,'error');}
+  }catch(e){console.error(e);toast('Erreur réseau — vérifiez Supabase','error');}
+}
+
+function showSuccess(ref){
+  document.querySelector('.layout').innerHTML=`
+    <div class="card success-screen" style="grid-column:1/-1">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Dossier envoyé avec succès !</div>
+      <div class="success-sub">Votre conseiller ImmoConnect prendra contact avec vous dans les 24h ouvrées.</div>
+      <div class="ref-label">Référence de votre dossier</div>
+      <div class="ref-box">${ref}</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:24px">Conservez cette référence pour tout échange avec nos équipes.</div>
+      <button class="btn btn-ghost" onclick="location.reload()">Nouveau formulaire</button>
+    </div>`;
+  document.getElementById('stepsNav').innerHTML='';
+  document.getElementById('sidebarArea').innerHTML='';
+}
+
+/* ═══════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════ */
+function navBtns(prev=true,next=true,submit=false){
+  return `<div class="nav-btns">
+    <div>${prev?`<button class="btn btn-ghost" onclick="prevStep()">← Précédent</button>`:'<span></span>'}</div>
+    <div>
+      ${next?`<button class="btn btn-primary" onclick="nextStep()">Suivant →</button>`:''}
+      ${submit?`<button class="btn btn-success" onclick="submitForm()">✅ Envoyer le dossier</button>`:''}
+    </div>
+  </div>`;
+}
+
+function toast(msg,type='info'){
+  const icons={success:'✅',error:'❌',info:'ℹ️'};
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<span>${icons[type]}</span><span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(t);
+  setTimeout(()=>t.style.opacity='0',3500);
+  setTimeout(()=>t.remove(),3800);
+}
+
+render();
+</script>
+</body>
+</html>
