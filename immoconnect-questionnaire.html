@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Déposer mon bien</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;
+  --line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff}.nav-logo span{color:var(--gold)}
+.page{max-width:780px;margin:0 auto;padding:36px 24px 80px}
+.niveau-banner{display:flex;align-items:center;gap:8px;background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:14px 20px;margin-bottom:20px;flex-wrap:wrap}
+.niveau-title{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:600;flex-shrink:0;margin-right:4px}
+.niv-step{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:5px 12px;border-radius:20px;transition:all .3s;color:var(--muted)}
+.niv-step.done{color:var(--teal);background:#EAF3DE}
+.niv-step.cur-standard{color:var(--ink);background:#F1EFE8;font-weight:600}
+.niv-step.cur-silver{color:var(--blue);background:#E6F1FB;font-weight:600}
+.niv-step.cur-gold{color:#854F0B;background:#FAEEDA;font-weight:600}
+.niv-step.cur-platinium{color:var(--teal);background:#E1F5EE;font-weight:600}
+.niv-sep{width:18px;height:1px;background:var(--line);flex-shrink:0}
+.niv-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
+.progress-wrap{height:4px;border-radius:2px;background:var(--line);margin-bottom:28px;overflow:hidden}
+.progress-bar{height:100%;border-radius:2px;transition:width .5s ease,background .5s ease}
+.pb-standard{background:#888780}.pb-silver{background:var(--blue)}.pb-gold{background:var(--gold)}.pb-platinium{background:var(--teal)}
+.section{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
+.section-head{padding:13px 20px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.sec-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.num-std{background:#F1EFE8;color:var(--ink)}
+.num-silver{background:#E6F1FB;color:var(--blue)}
+.num-gold{background:#FAEEDA;color:#854F0B}
+.num-plat{background:#E1F5EE;color:var(--teal)}
+.sec-ttl{font-size:13px;font-weight:500;flex:1}
+.sec-sub{font-size:11px;color:var(--muted);font-weight:400}
+.sec-badge{font-size:9px;font-weight:600;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.8px;flex-shrink:0}
+.b-std{background:#F1EFE8;color:#555}
+.b-silver{background:#E6F1FB;color:var(--blue)}
+.b-gold{background:#FAEEDA;color:#854F0B}
+.b-plat{background:#E1F5EE;color:var(--teal)}
+.sec-arrow{font-size:11px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.sec-arrow.open{transform:rotate(180deg)}
+.sec-body{padding:0 20px 20px;display:none}
+.sec-body.open{display:block}
+.unlock-info{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:12px;line-height:1.5}
+.ui-silver{background:#E6F1FB;border:1px solid rgba(24,95,165,.25);color:var(--blue)}
+.ui-gold{background:#FAEEDA;border:1px solid rgba(192,155,90,.35);color:#854F0B}
+.ui-plat{background:#E1F5EE;border:1px solid rgba(30,122,98,.25);color:var(--teal)}
+.ui-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.ui-txt strong{display:block;font-weight:600;margin-bottom:2px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-grid.col1{grid-template-columns:1fr}
+.form-grid.col3{grid-template-columns:1fr 1fr 1fr}
+.field{display:flex;flex-direction:column;gap:5px}
+label.lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+input[type=text],input[type=number],input[type=tel],input[type=email],select,textarea{
+  background:var(--bg);border:1px solid var(--line);border-radius:8px;
+  padding:10px 12px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink);
+  outline:none;transition:border .15s;width:100%
+}
+input:focus,select:focus,textarea:focus{border-color:var(--ink)}
+textarea{resize:vertical;min-height:90px}
+.hint{font-size:10px;color:var(--muted);line-height:1.5;margin-top:2px}
+hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
+.radio-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.radio-opt{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;border:1px solid var(--line);cursor:pointer;font-size:12px;font-weight:500;background:var(--bg);transition:all .15s;user-select:none}
+.radio-opt input[type=radio]{display:none}
+.radio-opt.selected{background:var(--ink);color:#fff;border-color:var(--ink)}
+.upload-zone{border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);position:relative;margin-bottom:6px}
+.upload-zone:hover{border-color:var(--ink);background:#EFEDE7}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:22px;margin-bottom:5px}
+.upload-title{font-size:12px;font-weight:500;margin-bottom:2px}
+.upload-sub{font-size:11px;color:var(--muted)}
+.uz-silver{border-color:rgba(24,95,165,.3)}.uz-silver:hover{border-color:var(--blue);background:rgba(24,95,165,.04)}
+.uz-gold{border-color:rgba(192,155,90,.4)}.uz-gold:hover{border-color:var(--gold);background:rgba(192,155,90,.04)}
+.uz-plat{border-color:rgba(30,122,98,.3)}.uz-plat:hover{border-color:var(--teal);background:rgba(30,122,98,.04)}
+.file-status{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;font-size:12px}
+.fs-none{background:var(--bg);border:1px solid var(--line);color:var(--muted)}
+.fs-ok{background:#EAF3DE;border:1px solid #9FD9C0;color:#27500A}
+.fs-loading{background:#E6F1FB;border:1px solid rgba(24,95,165,.2);color:var(--blue)}
+.photos-limit-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;padding:4px 10px;border-radius:20px}
+.plb-std{background:#F1EFE8;border:1px solid var(--line);color:var(--muted)}
+.plb-silver{background:#E6F1FB;border:1px solid rgba(24,95,165,.2);color:var(--blue)}
+.plb-gold{background:#EAF3DE;border:1px solid #9FD9C0;color:#27500A}
+.plb-platinium{background:#EAF3DE;border:1px solid #9FD9C0;color:#27500A}
+.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.photo-thumb{aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid var(--line);position:relative}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-del{position:absolute;top:4px;right:4px;background:rgba(15,15,14,.75);color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center}
+.photo-add{aspect-ratio:1;border-radius:8px;border:1.5px dashed var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:11px;color:var(--muted);gap:4px;position:relative;background:var(--bg);transition:all .15s}
+.photo-add:hover{border-color:var(--ink);color:var(--ink)}
+.photo-add input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.alerte-rouge{background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:9px 14px;font-size:12px;color:#712B13;margin-bottom:10px;display:none}
+.submit-zone{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-top:20px}
+.submit-niveau{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:8px;margin-bottom:14px}
+.sn-standard{background:#F1EFE8;border:1px solid #D3D1C7}
+.sn-silver{background:#E6F1FB;border:1px solid rgba(24,95,165,.2)}
+.sn-gold{background:#FAEEDA;border:1px solid rgba(192,155,90,.3)}
+.sn-platinium{background:#E1F5EE;border:1px solid rgba(30,122,98,.2)}
+.sn-icon{font-size:22px}
+.sn-info{flex:1}
+.sn-label{font-size:12px;font-weight:600;margin-bottom:2px}
+.sn-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.btn-submit{width:100%;padding:12px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:none;background:var(--ink);color:#fff;transition:opacity .15s}
+.btn-submit:hover{opacity:.85}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed}
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:999;transform:translateY(80px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.t-ok{background:#1E7A62;color:#fff}.t-err{background:#C0392B;color:#fff}.t-info{background:var(--ink);color:#fff}
+@media(max-width:600px){
+  .form-grid,.form-grid.col3{grid-template-columns:1fr}
+  .photo-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+
+<nav><div class="nav-logo">Immo<span>Connect</span></div></nav>
+
+<div class="page">
+
+  <div style="margin-bottom:22px">
+    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:500">Vendeur</div>
+    <div style="font-size:22px;font-weight:500;margin-bottom:6px">Déposer mon bien</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.7;max-width:580px">Votre niveau est calculé <strong>automatiquement</strong> selon les documents fournis. Tout est gratuit.</div>
+  </div>
+
+  <!-- NIVEAU BANNER -->
+  <div class="niveau-banner">
+    <span class="niveau-title">Mon niveau</span>
+    <div class="niv-step cur-standard" id="niv-standard"><div class="niv-dot"></div>Standard</div>
+    <div class="niv-sep"></div>
+    <div class="niv-step" id="niv-silver"><div class="niv-dot"></div>Silver</div>
+    <div class="niv-sep"></div>
+    <div class="niv-step" id="niv-gold"><div class="niv-dot"></div>Gold</div>
+    <div class="niv-sep"></div>
+    <div class="niv-step" id="niv-platinium"><div class="niv-dot"></div>Platinium</div>
+  </div>
+  <div class="progress-wrap"><div class="progress-bar pb-standard" id="prog" style="width:10%"></div></div>
+
+  <!-- ══ 1 : INFOS BIEN ══ -->
+  <div class="section">
+    <div class="section-head" onclick="toggle('s1')">
+      <div class="sec-num num-std">1</div>
+      <div class="sec-ttl">Informations du bien</div>
+      <span class="sec-badge b-std">Standard</span>
+      <span class="sec-arrow open" id="arr-s1">▼</span>
+    </div>
+    <div class="sec-body open" id="s1">
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Type de bien *</label>
+          <select id="type_bien">
+            <option value="">Sélectionner</option>
+            <option>Appartement</option><option>Maison</option><option>Villa</option>
+            <option>Studio</option><option>Loft</option><option>Local commercial</option>
+            <option>Terrain</option><option>Immeuble</option><option>Parking / Box</option><option>Autre</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="lbl">Statut d'occupation *</label>
+          <select id="statut_occupation">
+            <option value="">Sélectionner</option>
+            <option>Occupé par le propriétaire</option>
+            <option>Loué</option><option>Vacant</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid col1">
+        <div class="field">
+          <label class="lbl">Titre de l'annonce *</label>
+          <input type="text" id="titre" placeholder="Ex : Bel appartement T3 avec balcon — Toulouse centre">
+        </div>
+      </div>
+      <div class="form-grid col1">
+        <div class="field">
+          <label class="lbl">Description *</label>
+          <textarea id="description" placeholder="Décrivez votre bien : état général, atouts, environnement, transports…"></textarea>
+        </div>
+      </div>
+      <div class="form-grid col3">
+        <div class="field">
+          <label class="lbl">Surface (m²) *</label>
+          <input type="number" id="surface" placeholder="75" min="1">
+        </div>
+        <div class="field">
+          <label class="lbl">Nb de pièces *</label>
+          <input type="number" id="nb_pieces" placeholder="3" min="1">
+        </div>
+        <div class="field">
+          <label class="lbl">Nb de chambres</label>
+          <input type="number" id="nb_chambres" placeholder="2" min="0">
+        </div>
+      </div>
+      <div class="form-grid col3">
+        <div class="field">
+          <label class="lbl">Étage</label>
+          <input type="number" id="etage" placeholder="2" min="0">
+        </div>
+        <div class="field">
+          <label class="lbl">Nb étages total</label>
+          <input type="number" id="nb_etages" placeholder="5" min="0">
+        </div>
+        <div class="field">
+          <label class="lbl">Année construction</label>
+          <input type="number" id="annee_construction" placeholder="1990" min="1800" max="2025">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Prix demandé (€) *</label>
+          <input type="number" id="prix" placeholder="250000" min="0">
+        </div>
+        <div class="field">
+          <label class="lbl">Prix négociable ?</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'negociable')"><input type="radio" name="negociable" value="Oui">Oui</label>
+            <label class="radio-opt" onclick="setRadio(this,'negociable')"><input type="radio" name="negociable" value="Non">Non</label>
+          </div>
+        </div>
+      </div>
+      <hr class="div">
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Ville *</label>
+          <input type="text" id="ville" placeholder="Toulouse">
+        </div>
+        <div class="field">
+          <label class="lbl">Code postal *</label>
+          <input type="text" id="code_postal" placeholder="31000" maxlength="5">
+        </div>
+      </div>
+      <div class="form-grid col1">
+        <div class="field">
+          <label class="lbl">Adresse exacte <span style="font-size:10px;color:var(--muted);text-transform:none;font-weight:400;letter-spacing:0">(visible Gold & Platinium uniquement)</span></label>
+          <input type="text" id="adresse" placeholder="12 rue des Lilas">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 2 : ÉQUIPEMENTS ══ -->
+  <div class="section">
+    <div class="section-head" onclick="toggle('s2')">
+      <div class="sec-num num-std">2</div>
+      <div class="sec-ttl">Équipements & caractéristiques</div>
+      <span class="sec-badge b-std">Standard</span>
+      <span class="sec-arrow" id="arr-s2">▼</span>
+    </div>
+    <div class="sec-body" id="s2">
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Chauffage</label>
+          <select id="chauffage">
+            <option value="">Non précisé</option>
+            <option>Gaz individuel</option><option>Gaz collectif</option>
+            <option>Électrique</option><option>Pompe à chaleur</option>
+            <option>Fioul</option><option>Poêle à bois</option><option>Sans</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="lbl">Eau chaude</label>
+          <select id="eau_chaude">
+            <option value="">Non précisé</option>
+            <option>Individuelle</option><option>Collective</option><option>Chauffe-eau solaire</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Parking</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'parking')"><input type="radio" name="parking" value="Non">Non</label>
+            <label class="radio-opt" onclick="setRadio(this,'parking')"><input type="radio" name="parking" value="Box fermé">Box fermé</label>
+            <label class="radio-opt" onclick="setRadio(this,'parking')"><input type="radio" name="parking" value="Place ext.">Place ext.</label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">Extérieur</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'exterieur')"><input type="radio" name="exterieur" value="Aucun">Aucun</label>
+            <label class="radio-opt" onclick="setRadio(this,'exterieur')"><input type="radio" name="exterieur" value="Balcon">Balcon</label>
+            <label class="radio-opt" onclick="setRadio(this,'exterieur')"><input type="radio" name="exterieur" value="Terrasse">Terrasse</label>
+            <label class="radio-opt" onclick="setRadio(this,'exterieur')"><input type="radio" name="exterieur" value="Jardin">Jardin</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Cave / Grenier</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'cave')"><input type="radio" name="cave" value="Non">Non</label>
+            <label class="radio-opt" onclick="setRadio(this,'cave')"><input type="radio" name="cave" value="Cave">Cave</label>
+            <label class="radio-opt" onclick="setRadio(this,'cave')"><input type="radio" name="cave" value="Grenier">Grenier</label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">Ascenseur</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'ascenseur')"><input type="radio" name="ascenseur" value="Non">Non</label>
+            <label class="radio-opt" onclick="setRadio(this,'ascenseur')"><input type="radio" name="ascenseur" value="Oui">Oui</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Digicode / Interphone</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'digicode')"><input type="radio" name="digicode" value="Non">Non</label>
+            <label class="radio-opt" onclick="setRadio(this,'digicode')"><input type="radio" name="digicode" value="Digicode">Digicode</label>
+            <label class="radio-opt" onclick="setRadio(this,'digicode')"><input type="radio" name="digicode" value="Interphone">Interphone</label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">Piscine</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'piscine')"><input type="radio" name="piscine" value="Non">Non</label>
+            <label class="radio-opt" onclick="setRadio(this,'piscine')"><input type="radio" name="piscine" value="Oui">Oui</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 3 : CONTACT ══ -->
+  <div class="section">
+    <div class="section-head" onclick="toggle('s3')">
+      <div class="sec-num num-std">3</div>
+      <div class="sec-ttl">Coordonnées de contact <span style="font-size:11px;color:#C0392B;font-weight:500">— obligatoires</span></div>
+      <span class="sec-badge b-std">Standard</span>
+      <span class="sec-arrow open" id="arr-s3">▼</span>
+    </div>
+    <div class="sec-body open" id="s3">
+      <div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#712B13;line-height:1.5">
+        📞 Ces coordonnées sont <strong>obligatoires</strong> pour publier votre annonce. Elles ne seront visibles que pour les acheteurs autorisés selon votre niveau.
+      </div>
+      <div class="form-grid col1">
+        <div class="field">
+          <label class="lbl">Nom / Prénom *</label>
+          <input type="text" id="nom_vendeur" placeholder="Jean Dupont">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Téléphone *</label>
+          <input type="tel" id="telephone" placeholder="06 12 34 56 78">
+        </div>
+        <div class="field">
+          <label class="lbl">Email *</label>
+          <input type="email" id="email_contact" placeholder="votre@email.fr">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 4 : PHOTOS ══ -->
+  <div class="section">
+    <div class="section-head" onclick="toggle('s4')">
+      <div class="sec-num num-std">4</div>
+      <div class="sec-ttl">Photos du bien <span style="font-size:11px;color:#C0392B;font-weight:500">— 3 minimum obligatoires</span></div>
+      <span class="sec-badge b-std">Standard</span>
+      <span class="sec-arrow open" id="arr-s4">▼</span>
+    </div>
+    <div class="sec-body open" id="s4">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <div class="photos-limit-badge plb-std" id="plb">📷 3 photos minimum obligatoires (Standard : max 3)</div>
+        <div id="photo-counter" style="font-size:12px;font-weight:600;color:#C0392B">0 / 3 minimum</div>
+      </div>
+      <div class="alerte-rouge" id="photos-warning">⚠️ Minimum 3 photos obligatoires pour publier votre annonce</div>
+      <div class="photo-grid" id="photo-grid"></div>
+      <p class="hint" style="margin-top:8px">JPG, PNG — max 5 Mo par photo. La 1ère sera la photo principale.</p>
+    </div>
+  </div>
+
+  <!-- ══ 5 : SILVER — VALEUR LOCATIVE ══ -->
+  <div class="section">
+    <div class="section-head" onclick="toggle('s5')">
+      <div class="sec-num num-silver">5</div>
+      <div class="sec-ttl">Valeur locative ou bail <span class="sec-sub">→ débloque Silver</span></div>
+      <span class="sec-badge b-silver">Silver</span>
+      <span class="sec-arrow" id="arr-s5">▼</span>
+    </div>
+    <div class="sec-body" id="s5">
+      <div class="unlock-info ui-silver">
+        <div class="ui-icon">🏅</div>
+        <div class="ui-txt">
+          <strong>Niveau Silver — Photos illimitées + Matching investisseurs</strong>
+          Fournissez la valeur locative cadastrale (sur votre avis de taxe foncière) ou un bail en cours.
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Valeur locative cadastrale (€/an)</label>
+          <input type="number" id="valeur_locative" placeholder="1 200" min="0" oninput="calcNiveau()">
+          <span class="hint">Mentionnée sur votre avis de taxe foncière</span>
+        </div>
+        <div class="field">
+          <label class="lbl">Loyer mensuel actuel (€) <span style="font-weight:400;text-transform:none;font-size:10px">si loué</span></label>
+          <input type="number" id="loyer_mensuel" placeholder="850" min="0">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:4px">
+        <label class="lbl">Justificatif — Valeur locative ou bail *</label>
+        <div class="upload-zone uz-silver">
+          <input type="file" id="file-valeur-loc" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc('valeur_locative_doc','file-valeur-loc','fs-valeur-loc')">
+          <div class="upload-icon">📄</div>
+          <div class="upload-title">Déposer le justificatif</div>
+          <div class="upload-sub">Avis valeur locative · Bail signé — PDF ou image</div>
+        </div>
+        <div class="file-status fs-none" id="fs-valeur-loc">📎 Aucun fichier sélectionné</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 6 : GOLD — TAXE FONCIÈRE + COPRO ══ -->
+  <div class="section">
+    <div class="section-head" onclick="toggle('s6')">
+      <div class="sec-num num-gold">6</div>
+      <div class="sec-ttl">Taxe foncière & Copropriété <span class="sec-sub">→ débloque Gold</span></div>
+      <span class="sec-badge b-gold">Gold</span>
+      <span class="sec-arrow" id="arr-s6">▼</span>
+    </div>
+    <div class="sec-body" id="s6">
+      <div class="unlock-info ui-gold">
+        <div class="ui-icon">🥇</div>
+        <div class="ui-txt">
+          <strong>Niveau Gold — Adresse exacte visible + Contact gratuit</strong>
+          Nécessite le niveau Silver + la taxe foncière (justificatif papier) + compte rendu de copro si applicable.
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Taxe foncière annuelle (€)</label>
+          <input type="number" id="taxe_fonciere_montant" placeholder="1 400" min="0" oninput="calcNiveau()">
+        </div>
+        <div class="field">
+          <label class="lbl">Bien en copropriété ?</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'is_copro');showCopro(false);calcNiveau()"><input type="radio" name="is_copro" value="Non">Non</label>
+            <label class="radio-opt" onclick="setRadio(this,'is_copro');showCopro(true);calcNiveau()"><input type="radio" name="is_copro" value="Oui">Oui</label>
+          </div>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:4px">
+        <label class="lbl">Justificatif taxe foncière (papier) *</label>
+        <div class="upload-zone uz-gold">
+          <input type="file" id="file-taxe" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc('taxe_fonciere_doc','file-taxe','fs-taxe')">
+          <div class="upload-icon">🧾</div>
+          <div class="upload-title">Avis de taxe foncière</div>
+          <div class="upload-sub">Votre dernier avis d'imposition foncier — PDF ou image</div>
+        </div>
+        <div class="file-status fs-none" id="fs-taxe">📎 Aucun fichier sélectionné</div>
+      </div>
+      <div id="bloc-copro" style="display:none">
+        <hr class="div">
+        <div class="form-grid">
+          <div class="field">
+            <label class="lbl">Charges copro (€/mois)</label>
+            <input type="number" id="charges_copro" placeholder="180" min="0">
+          </div>
+          <div class="field">
+            <label class="lbl">Nombre de lots</label>
+            <input type="number" id="nb_lots_copro" placeholder="12" min="1">
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:4px">
+          <label class="lbl">Compte rendu d'assemblée générale *</label>
+          <div class="upload-zone uz-gold">
+            <input type="file" id="file-copro" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc('copro_doc','file-copro','fs-copro');calcNiveau()">
+            <div class="upload-icon">🏢</div>
+            <div class="upload-title">PV d'assemblée générale</div>
+            <div class="upload-sub">Dernier compte rendu signé — PDF</div>
+          </div>
+          <div class="file-status fs-none" id="fs-copro">📎 Aucun fichier sélectionné</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 7 : PLATINIUM — DPE ══ -->
+  <div class="section">
+    <div class="section-head" onclick="toggle('s7')">
+      <div class="sec-num num-plat">7</div>
+      <div class="sec-ttl">DPE — Diagnostic de Performance Énergétique <span class="sec-sub">→ débloque Platinium</span></div>
+      <span class="sec-badge b-plat">Platinium</span>
+      <span class="sec-arrow" id="arr-s7">▼</span>
+    </div>
+    <div class="sec-body" id="s7">
+      <div class="unlock-info ui-plat">
+        <div class="ui-icon">💎</div>
+        <div class="ui-txt">
+          <strong>Niveau Platinium — Mise en avant + Contact libre acheteurs & agents</strong>
+          Nécessite le niveau Gold + le DPE officiel réalisé par un diagnostiqueur certifié.
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Classe énergie (DPE)</label>
+          <select id="classe_dpe" onchange="calcNiveau()">
+            <option value="">Non renseigné</option>
+            <option>A</option><option>B</option><option>C</option>
+            <option>D</option><option>E</option><option>F</option><option>G</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="lbl">Classe GES</label>
+          <select id="classe_ges">
+            <option value="">Non renseigné</option>
+            <option>A</option><option>B</option><option>C</option>
+            <option>D</option><option>E</option><option>F</option><option>G</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Consommation énergie (kWh/m²/an)</label>
+          <input type="number" id="conso_energie" placeholder="180" min="0">
+        </div>
+        <div class="field">
+          <label class="lbl">Émissions GES (kg CO₂/m²/an)</label>
+          <input type="number" id="emission_ges" placeholder="35" min="0">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:4px">
+        <label class="lbl">Rapport DPE officiel *</label>
+        <div class="upload-zone uz-plat">
+          <input type="file" id="file-dpe" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc('dpe_doc','file-dpe','fs-dpe');calcNiveau()">
+          <div class="upload-icon">⚡</div>
+          <div class="upload-title">Rapport DPE</div>
+          <div class="upload-sub">DPE réalisé par un professionnel certifié — PDF</div>
+        </div>
+        <div class="file-status fs-none" id="fs-dpe">📎 Aucun fichier sélectionné</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SUBMIT ══ -->
+  <div class="submit-zone">
+    <div class="submit-niveau sn-standard" id="submit-niveau">
+      <div class="sn-icon" id="sn-icon">🏠</div>
+      <div class="sn-info">
+        <div class="sn-label" id="sn-label">Niveau Standard</div>
+        <div class="sn-desc" id="sn-desc">3 photos · Ville uniquement · Contact acheteur payant (19,99 €)</div>
+      </div>
+    </div>
+    <button class="btn-submit" id="btn-submit" onclick="soumettre()">Publier mon annonce</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   CONFIGURATION SUPABASE
+   → Remplacez ces deux valeurs
+══════════════════════════════════════════ */
+const SUPABASE_URL  = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGh5ZWZhamZ3cWN4Y2Z4cG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjYwNDAsImV4cCI6MjA5MTUwMjA0MH0.jB8Z_9eT9lYkqxUUD0G001Y87iSAv94fSu_gVOdqa-A';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+const BUCKET = 'immoconnect-docs';
+
+/* ÉTAT */
+var niveau    = 'standard';
+var photos    = [];
+var docs      = {};
+var maxPhotos = 3;
+
+/* SECTIONS */
+function toggle(id) {
+  var b = document.getElementById(id);
+  var a = document.getElementById('arr-' + id);
+  var o = b.classList.contains('open');
+  b.classList.toggle('open', !o);
+  a.classList.toggle('open', !o);
+}
+
+/* RADIOS */
+function setRadio(el, name) {
+  document.querySelectorAll('[name="' + name + '"]').forEach(function(r) {
+    r.closest('.radio-opt').classList.remove('selected');
+  });
+  el.classList.add('selected');
+}
+function getRadio(name) {
+  var s = document.querySelector('.radio-opt.selected input[name="' + name + '"]');
+  return s ? s.value : '';
+}
+function showCopro(v) {
+  document.getElementById('bloc-copro').style.display = v ? 'block' : 'none';
+}
+
+/* CALCUL NIVEAU */
+function calcNiveau() {
+  var hasSilver = docs['valeur_locative_doc'] ||
+                  (+document.getElementById('valeur_locative').value > 0);
+  var hasTaxe   = docs['taxe_fonciere_doc'] ||
+                  (+document.getElementById('taxe_fonciere_montant').value > 0);
+  var isCopro   = getRadio('is_copro') === 'Oui';
+  var hasCopro  = !isCopro || !!docs['copro_doc'];
+  var hasDpe    = docs['dpe_doc'] || document.getElementById('classe_dpe').value;
+
+  var n = 'standard';
+  if (hasSilver)                               n = 'silver';
+  if (hasSilver && hasTaxe && hasCopro)        n = 'gold';
+  if (hasSilver && hasTaxe && hasCopro && hasDpe) n = 'platinium';
+
+  niveau = n;
+  updateUI();
+}
+
+/* CONFIG NIVEAUX */
+var NIV = {
+  standard:  { prog:10,  pb:'pb-standard', icon:'🏠', label:'Niveau Standard',
+               desc:'3 photos · Ville uniquement · Contact acheteur payant (19,99 €)', sn:'sn-standard' },
+  silver:    { prog:40,  pb:'pb-silver',   icon:'🏅', label:'Niveau Silver',
+               desc:'Photos illimitées · Matching investisseurs · Contact payant',     sn:'sn-silver' },
+  gold:      { prog:72,  pb:'pb-gold',     icon:'🥇', label:'Niveau Gold',
+               desc:'Photos illimitées · Adresse exacte visible · Contact gratuit',    sn:'sn-gold' },
+  platinium: { prog:100, pb:'pb-platinium',icon:'💎', label:'Niveau Platinium',
+               desc:'Mise en avant · Contact libre acheteurs + agents immobiliers',    sn:'sn-platinium' }
+};
+var KEYS = ['standard','silver','gold','platinium'];
+
+/* UPDATE UI */
+function updateUI() {
+  var cfg = NIV[niveau];
+  var idx = KEYS.indexOf(niveau);
+
+  var bar = document.getElementById('prog');
+  bar.style.width = cfg.prog + '%';
+  bar.className = 'progress-bar ' + cfg.pb;
+
+  KEYS.forEach(function(k, i) {
+    var el = document.getElementById('niv-' + k);
+    el.className = 'niv-step';
+    if (i < idx)   el.classList.add('done');
+    if (i === idx)  el.classList.add('cur-' + k);
+  });
+
+  maxPhotos = niveau === 'standard' ? 3 : 9999;
+  var plb = document.getElementById('plb');
+  if (plb) {
+    plb.textContent = niveau === 'standard'
+      ? '📷 3 photos minimum obligatoires (Standard : max 3)'
+      : '📷 Photos illimitées (' + cfg.label + ') — 3 minimum obligatoires';
+    plb.className = 'photos-limit-badge plb-' + niveau;
+  }
+  renderPhotos();
+
+  document.getElementById('sn-icon').textContent  = cfg.icon;
+  document.getElementById('sn-label').textContent = cfg.label;
+  document.getElementById('sn-desc').textContent  = cfg.desc;
+  document.getElementById('submit-niveau').className = 'submit-niveau ' + cfg.sn;
+}
+
+/* PHOTOS */
+function renderPhotos() {
+  var g = document.getElementById('photo-grid');
+  var h = '';
+  photos.forEach(function(p, i) {
+    h += '<div class="photo-thumb"><img src="' + p.url + '"><button class="photo-del" onclick="delPhoto(' + i + ')">✕</button></div>';
+  });
+  if (photos.length < maxPhotos) {
+    h += '<label class="photo-add"><input type="file" accept="image/*" multiple onchange="addPhotos(this)"><span style="font-size:22px">＋</span><span>Ajouter</span></label>';
+  }
+  g.innerHTML = h;
+
+  var count   = photos.length;
+  var counter = document.getElementById('photo-counter');
+  var warning = document.getElementById('photos-warning');
+  if (counter) {
+    counter.textContent = count + ' / 3 minimum';
+    counter.style.color = count >= 3 ? '#1E7A62' : '#C0392B';
+  }
+  if (warning) {
+    warning.style.display = (count > 0 && count < 3) ? 'block' : 'none';
+  }
+}
+function addPhotos(inp) {
+  Array.from(inp.files).slice(0, maxPhotos - photos.length).forEach(function(f) {
+    photos.push({ file:f, url:URL.createObjectURL(f) });
+  });
+  renderPhotos(); inp.value = '';
+}
+function delPhoto(i) { photos.splice(i,1); renderPhotos(); }
+
+/* UPLOAD DOCUMENT */
+async function uploadDoc(champ, inputId, statusId) {
+  var file = document.getElementById(inputId).files[0];
+  var st   = document.getElementById(statusId);
+  if (!file) return;
+  st.className = 'file-status fs-loading';
+  st.textContent = '⏳ Upload en cours…';
+  var ext  = file.name.split('.').pop();
+  var path = 'vendeurs/' + champ + '_' + Date.now() + '.' + ext;
+  var { error } = await db.storage.from(BUCKET).upload(path, file, { upsert:true });
+  if (error) {
+    st.className = 'file-status fs-none';
+    st.textContent = '❌ Erreur — ' + error.message;
+    return;
+  }
+  var { data: pub } = db.storage.from(BUCKET).getPublicUrl(path);
+  docs[champ] = { path:path, url:pub.publicUrl };
+  st.className = 'file-status fs-ok';
+  st.textContent = '✅ ' + file.name;
+  calcNiveau();
+}
+
+/* UPLOAD PHOTOS */
+async function uploadPhotos() {
+  var urls = [];
+  for (var i = 0; i < photos.length; i++) {
+    var f    = photos[i].file;
+    var ext  = f.name.split('.').pop();
+    var path = 'vendeurs/photos/' + Date.now() + '_' + i + '.' + ext;
+    var { error } = await db.storage.from(BUCKET).upload(path, f, { upsert:true });
+    if (!error) {
+      var { data: pub } = db.storage.from(BUCKET).getPublicUrl(path);
+      urls.push(pub.publicUrl);
+    }
+  }
+  return urls;
+}
+
+/* SOUMISSION */
+async function soumettre() {
+  var btn = document.getElementById('btn-submit');
+
+  // Champs texte obligatoires
+  var required = {
+    type_bien:'Type de bien', titre:'Titre', description:'Description',
+    surface:'Surface', nb_pieces:'Nb de pièces', prix:'Prix',
+    ville:'Ville', code_postal:'Code postal',
+    nom_vendeur:'Nom / Prénom', telephone:'Téléphone', email_contact:'Email'
+  };
+  var missing = [];
+  Object.keys(required).forEach(function(id) {
+    var v = document.getElementById(id).value;
+    if (!v || !v.trim()) {
+      document.getElementById(id).style.borderColor = '#C0392B';
+      missing.push(required[id]);
+    } else {
+      document.getElementById(id).style.borderColor = '';
+    }
+  });
+
+  // Validation email
+  var emailVal = document.getElementById('email_contact').value;
+  if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+    document.getElementById('email_contact').style.borderColor = '#C0392B';
+    if (missing.indexOf('Email invalide') === -1) missing.push('Email invalide');
+  }
+
+  // Validation téléphone
+  var telVal = document.getElementById('telephone').value.replace(/\s/g,'');
+  if (telVal && !/^(\+33|0)[1-9][0-9]{8}$/.test(telVal)) {
+    document.getElementById('telephone').style.borderColor = '#C0392B';
+    if (missing.indexOf('Téléphone invalide') === -1) missing.push('Téléphone invalide');
+  }
+
+  // Validation photos minimum 3
+  var warn = document.getElementById('photos-warning');
+  if (photos.length < 3) {
+    if (warn) warn.style.display = 'block';
+    missing.push('3 photos minimum obligatoires (actuellement : ' + photos.length + ')');
+  } else {
+    if (warn) warn.style.display = 'none';
+  }
+
+  if (missing.length) {
+    showToast('⚠️ ' + missing[0], 'err');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Publication en cours…';
+  showToast('Upload des photos…', 'info');
+  var photoUrls = await uploadPhotos();
+
+  var payload = {
+    /* Contact */
+    nom_vendeur:             document.getElementById('nom_vendeur').value,
+    telephone:               document.getElementById('telephone').value,
+    email_contact:           document.getElementById('email_contact').value,
+    /* Standard */
+    type_bien:               document.getElementById('type_bien').value,
+    statut_occupation:       document.getElementById('statut_occupation').value,
+    titre:                   document.getElementById('titre').value,
+    description:             document.getElementById('description').value,
+    surface:                 +document.getElementById('surface').value || null,
+    nb_pieces:               +document.getElementById('nb_pieces').value || null,
+    nb_chambres:             +document.getElementById('nb_chambres').value || null,
+    etage:                   +document.getElementById('etage').value || null,
+    nb_etages:               +document.getElementById('nb_etages').value || null,
+    annee_construction:      +document.getElementById('annee_construction').value || null,
+    prix:                    +document.getElementById('prix').value || null,
+    negociable:              getRadio('negociable') === 'Oui',
+    ville:                   document.getElementById('ville').value,
+    code_postal:             document.getElementById('code_postal').value,
+    adresse:                 document.getElementById('adresse').value,
+    chauffage:               document.getElementById('chauffage').value,
+    eau_chaude:              document.getElementById('eau_chaude').value,
+    parking:                 getRadio('parking'),
+    exterieur:               getRadio('exterieur'),
+    cave:                    getRadio('cave'),
+    ascenseur:               getRadio('ascenseur') === 'Oui',
+    digicode:                getRadio('digicode'),
+    piscine:                 getRadio('piscine') === 'Oui',
+    photos_urls:             photoUrls,
+    photo_principale:        photoUrls[0] || null,
+    /* Silver */
+    valeur_locative:         +document.getElementById('valeur_locative').value || null,
+    loyer_mensuel:           +document.getElementById('loyer_mensuel').value || null,
+    valeur_locative_doc_url: docs['valeur_locative_doc'] ? docs['valeur_locative_doc'].url : null,
+    /* Gold */
+    taxe_fonciere_montant:   +document.getElementById('taxe_fonciere_montant').value || null,
+    taxe_fonciere_doc_url:   docs['taxe_fonciere_doc'] ? docs['taxe_fonciere_doc'].url : null,
+    is_copropriete:          getRadio('is_copro') === 'Oui',
+    charges_copro:           +document.getElementById('charges_copro').value || null,
+    nb_lots_copro:           +document.getElementById('nb_lots_copro').value || null,
+    copro_doc_url:           docs['copro_doc'] ? docs['copro_doc'].url : null,
+    /* Platinium */
+    classe_dpe:              document.getElementById('classe_dpe').value,
+    classe_ges:              document.getElementById('classe_ges').value,
+    conso_energie:           +document.getElementById('conso_energie').value || null,
+    emission_ges:            +document.getElementById('emission_ges').value || null,
+    dpe_doc_url:             docs['dpe_doc'] ? docs['dpe_doc'].url : null,
+    /* Méta */
+    niveau_vendeur:          niveau,
+    statut_annonce:          'en_attente',
+    created_at:              new Date().toISOString()
+  };
+
+  var { error } = await db.from('annonces_vendeurs').insert([payload]);
+  if (error) {
+    showToast('Erreur Supabase : ' + error.message, 'err');
+    btn.disabled = false;
+    btn.textContent = 'Publier mon annonce';
+    return;
+  }
+  showToast('✅ Annonce publiée — ' + NIV[niveau].label, 'ok');
+  btn.textContent = '✓ Annonce publiée';
+}
+
+/* TOAST */
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast t-' + type + ' show';
+  setTimeout(function(){ t.classList.remove('show'); }, 3500);
+}
+
+/* INIT */
+renderPhotos();
+updateUI();
+</script>
+</body>
+</html>
