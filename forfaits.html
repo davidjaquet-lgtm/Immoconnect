@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Forfaits</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;
+  --line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--rose:#C0392B;
+  --amber:#D4732A;--blue:#185FA5;--r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+
+/* NAV */
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff}.nav-logo span{color:var(--gold)}
+
+/* PAGE */
+.page{max-width:1080px;margin:0 auto;padding:36px 24px 60px}
+
+/* TABS */
+.tabs{display:flex;gap:4px;background:rgba(15,15,14,.06);border-radius:var(--r);padding:4px;margin-bottom:28px}
+.tab{flex:1;padding:9px 8px;border-radius:8px;border:none;background:transparent;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);font-family:'Outfit',sans-serif;transition:all .15s;text-align:center}
+.tab.active{background:var(--warm);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+
+/* PANELS */
+.panel{display:none}
+.panel.active{display:block}
+
+/* SECTION HEADER */
+.sec-eye{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:500}
+.sec-title{font-size:22px;font-weight:500;margin-bottom:6px}
+.sec-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px;max-width:600px}
+
+/* GRID */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+
+/* CARDS */
+.card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.card.featured{border:2px solid var(--gold)}
+.card-bar{height:4px}
+.bar-gray{background:#888780}.bar-green{background:#1E7A62}.bar-teal{background:#0F6E56}
+.bar-blue{background:#185FA5}.bar-coral{background:#993C1D}.bar-amber{background:#BA7517}
+.card-head{height:88px;display:flex;align-items:center;justify-content:center;position:relative}
+.bg-gray{background:#F1EFE8}.bg-green{background:#E1F5EE}.bg-teal{background:#E1F5EE}
+.bg-blue{background:#E6F1FB}.bg-coral{background:#FAECE7}.bg-amber{background:#FAEEDA}
+.badge{position:absolute;font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px}
+.badge-right{top:10px;right:10px}
+.badge-left{top:10px;left:10px}
+.badge-green{background:#EAF3DE;color:#27500A}
+.badge-blue{background:#E6F1FB;color:#0C447C}
+.badge-amber{background:#FAEEDA;color:#633806}
+.badge-dark{background:#0F0F0E;color:#E2C07A}
+.card-body{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column}
+.plan-name{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:4px}
+.price-main{font-size:26px;font-weight:500;line-height:1;margin-bottom:2px}
+.price-green{color:var(--teal)}
+.price-sub{font-size:11px;color:var(--muted);margin-bottom:6px}
+.plan-tag{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:12px;flex-shrink:0}
+
+/* PRIX CONDITIONNEL */
+.price-cond{background:var(--bg);border-radius:8px;padding:8px 10px;margin-bottom:10px}
+.price-cond-lbl{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:600}
+.price-row{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-radius:6px;margin-bottom:4px}
+.price-row:last-child{margin-bottom:0}
+.price-row.warn{background:#FEF9EE;border:1px solid #FAC775}
+.price-row.ok{background:#EAF5F0;border:1px solid #9FD9C0}
+.price-row-lbl{font-size:10px;flex:1}
+.price-row.warn .price-row-lbl{color:#854F0B}
+.price-row.ok .price-row-lbl{color:#0F6E56}
+.price-row-val{font-size:15px;font-weight:600;margin-left:8px}
+.price-row.warn .price-row-val{color:#854F0B}
+.price-row.ok .price-row-val{color:#0F6E56}
+
+/* PAY-PER-LEAD */
+.pay-box{display:flex;align-items:center;gap:8px;background:#FEF9EE;border:1px solid #FAC775;border-radius:8px;padding:6px 10px;margin-bottom:6px}
+.pay-lbl{font-size:11px;color:#854F0B;flex:1;font-weight:500}
+.pay-val{font-size:14px;font-weight:600;color:#854F0B}
+
+/* GOLD BOX */
+.gold-box{background:#FEF9EE;border:1px solid #FAC775;border-radius:8px;padding:8px 10px;margin-bottom:6px}
+.gold-box-title{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#854F0B;margin-bottom:4px}
+.gold-box-docs{font-size:10px;color:#633806;line-height:1.6}
+.gold-box-inc{font-size:10px;font-weight:600;color:#0F6E56;margin-top:4px}
+
+/* FEATURES */
+.divider{border:none;border-top:1px solid var(--line);margin:8px 0}
+.feats{display:flex;flex-direction:column;gap:5px;flex:1;margin-bottom:12px}
+.feat{display:flex;align-items:flex-start;gap:6px;font-size:11px;line-height:1.4}
+.feat-dot{width:13px;height:13px;border-radius:50%;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700}
+.feat-dot.y{background:#EAF3DE;color:#27500A}
+.feat-dot.n{background:#F1EFE8;color:#888780}
+.feat-txt{color:var(--muted)}
+.feat-txt.bold{color:var(--ink);font-weight:500}
+.feat.dim .feat-txt{color:rgba(136,135,128,.4)}
+.feat-ok{display:flex;align-items:flex-start;gap:6px;font-size:11px;line-height:1.4;background:#EAF5F0;border-radius:6px;padding:4px 8px;margin-bottom:4px}
+.feat-ok-dot{width:13px;height:13px;border-radius:50%;flex-shrink:0;margin-top:1px;background:#EAF3DE;color:#27500A;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700}
+.feat-ok-txt{color:#0F6E56;font-weight:500}
+
+/* BUTTONS */
+.btn{width:100%;padding:10px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:opacity .15s;flex-shrink:0}
+.btn-dark{background:var(--ink);color:#fff}.btn-dark:hover{opacity:.85}
+.btn-out{background:transparent;border:1px solid var(--line);color:var(--muted)}.btn-out:hover{color:var(--ink)}
+.btn-green{background:#EAF3DE;color:#27500A;border:1px solid #9FD9C0}
+.btn-amber{background:#FAEEDA;color:#633806;border:1px solid #FAC775}
+
+/* TOGGLE ANNUEL */
+.toggle-wrap{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.toggle-lbl{font-size:13px;color:var(--muted)}.toggle-lbl.active{color:var(--ink);font-weight:500}
+.toggle-sw{width:44px;height:23px;border-radius:12px;background:#D3D1C7;border:none;cursor:pointer;position:relative;flex-shrink:0;transition:background .2s}
+.toggle-sw.on{background:var(--ink)}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle-sw.on .toggle-thumb{transform:translateX(21px)}
+.ann-pill{font-size:10px;background:#EAF3DE;color:#27500A;padding:2px 8px;border-radius:20px;font-weight:500}
+
+/* TIMING */
+.timing{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:20px}
+.timing-head{padding:12px 18px;border-bottom:1px solid var(--line);font-size:13px;font-weight:500}
+.timing-grid{display:grid;grid-template-columns:repeat(4,1fr)}
+.timing-cell{text-align:center;padding:14px 8px;border-right:1px solid var(--line)}
+.timing-cell:last-child{border-right:none}
+.timing-plan{font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:600}
+.timing-val{font-size:18px;font-weight:500;margin-bottom:2px}
+.timing-desc{font-size:10px;color:var(--muted)}
+
+/* TABLE */
+.table-wrap{overflow:hidden;border-radius:var(--r);border:1px solid var(--line);margin-bottom:20px}
+table{width:100%;border-collapse:collapse;background:var(--warm);font-size:12px}
+th{padding:10px 14px;text-align:center;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line);font-weight:600}
+th:first-child{text-align:left}
+td{padding:10px 14px;text-align:center;border-bottom:1px solid var(--line);color:var(--muted)}
+td:first-child{text-align:left;font-weight:500;color:var(--ink)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#F9F7F2}
+.td-yes{color:#1E7A62;font-weight:600}
+.td-no{color:rgba(136,135,128,.35);font-size:16px}
+.td-gold{background:rgba(192,155,90,.05)}
+.td-lead{background:rgba(30,122,98,.05)}
+.td-lead td:first-child{color:#1E7A62}
+.td-price{background:var(--bg);font-weight:600}
+
+/* CASTORUS */
+.castorus{background:var(--bg);border-radius:var(--r);padding:16px 20px}
+.castorus-title{font-size:12px;font-weight:500;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.castorus-pill{font-size:10px;background:#E6F1FB;color:#0C447C;padding:2px 8px;border-radius:20px;font-weight:500}
+.castorus-median{font-size:11px;color:var(--muted);margin-bottom:12px}
+.castorus-median strong{color:var(--ink)}
+.bien{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.bien:last-child{margin-bottom:0}
+.bien-info{flex:1}
+.bien-addr{font-size:12px;font-weight:500;margin-bottom:2px}
+.bien-meta{font-size:10px;color:var(--muted)}
+.bien-bar-wrap{width:72px;flex-shrink:0}
+.bien-bar-bg{height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.bien-bar-fill{height:100%;border-radius:3px}
+.fill-ok{background:#1E7A62}.fill-warn{background:#D4732A}.fill-bad{background:#C0392B}
+.bien-price{text-align:right;flex-shrink:0;min-width:90px}
+.bien-pm2{font-size:13px;font-weight:600}
+.bien-pm2.ok{color:#1E7A62}.bien-pm2.warn{color:#D4732A}.bien-pm2.bad{color:#C0392B}
+.bien-lbl{font-size:10px;color:var(--muted);margin-top:1px}
+.castorus-note{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.65}
+
+@media(max-width:860px){.grid4{grid-template-columns:1fr 1fr}.timing-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:580px){.grid2,.grid4{grid-template-columns:1fr}.tabs{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+
+<nav><div class="nav-logo">Immo<span>Connect</span></div></nav>
+
+<div class="page">
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" data-target="vendeurs">Vendeurs</button>
+    <button class="tab" data-target="acheteurs">Acheteurs</button>
+    <button class="tab" data-target="investisseur">Investisseur</button>
+    <button class="tab" data-target="agents">Agents</button>
+  </div>
+
+  <!-- ═══════════ VENDEURS ═══════════ -->
+  <div id="vendeurs" class="panel active">
+    <div class="sec-eye">Stratégie marketplace</div>
+    <div class="sec-title">Plans vendeurs — 100% gratuits</div>
+    <div class="sec-sub">Tous les niveaux sont gratuits. Plus vous fournissez de justificatifs, plus votre annonce gagne en visibilité et en fonctionnalités.</div>
+
+    <div class="grid4" id="ve-cards"></div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Critère</th>
+          <th>Standard</th>
+          <th style="background:rgba(24,95,165,.05)">Silver</th>
+          <th style="background:rgba(192,155,90,.06)">Gold</th>
+          <th style="background:rgba(30,122,98,.05)">Platinium</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>Tarif</td>
+            <td style="color:#1E7A62;font-weight:600">Gratuit</td>
+            <td style="color:#1E7A62;font-weight:600">Gratuit</td>
+            <td style="color:#1E7A62;font-weight:600">Gratuit</td>
+            <td style="color:#1E7A62;font-weight:600">Gratuit</td>
+          </tr>
+          <tr><td>Photos</td>
+            <td>3 max</td>
+            <td style="color:#185FA5;font-weight:600">Illimitées</td>
+            <td style="color:#854F0B;font-weight:600">Illimitées</td>
+            <td style="color:#1E7A62;font-weight:600">Illimitées</td>
+          </tr>
+          <tr><td>Adresse visible</td>
+            <td><span class="td-no">—</span> Ville seule</td>
+            <td><span class="td-no">—</span> Ville seule</td>
+            <td style="color:#854F0B;font-size:11px;font-weight:600">✓ Acheteurs éligibles</td>
+            <td><span class="td-yes">✓ Acheteurs éligibles</span></td>
+          </tr>
+          <tr><td>Contact acheteurs</td>
+            <td style="color:#854F0B;font-size:11px">Acheteur paie 19,99 €</td>
+            <td style="color:#854F0B;font-size:11px">Acheteur paie 19,99 €</td>
+            <td><span class="td-yes">✓ Gratuit & direct</span></td>
+            <td><span class="td-yes">✓ Gratuit & direct</span></td>
+          </tr>
+          <tr><td>Matching investisseurs</td>
+            <td><span class="td-no">—</span></td>
+            <td style="color:#185FA5;font-weight:600">✓</td>
+            <td><span class="td-yes">✓</span></td>
+            <td><span class="td-yes">✓</span></td>
+          </tr>
+          <tr><td>Contact agents immobiliers</td>
+            <td><span class="td-no">—</span></td>
+            <td><span class="td-no">—</span></td>
+            <td><span class="td-no">—</span></td>
+            <td><span class="td-yes">✓</span></td>
+          </tr>
+          <tr><td>Mise en avant</td>
+            <td><span class="td-no">—</span></td>
+            <td><span class="td-no">—</span></td>
+            <td><span class="td-no">—</span></td>
+            <td><span class="td-yes">✓ Prioritaire</span></td>
+          </tr>
+          <tr><td>Documents requis</td>
+            <td>Aucun</td>
+            <td style="font-size:11px">Val. locative ou bail</td>
+            <td style="font-size:11px">Silver + Copro + Taxe foncière</td>
+            <td style="font-size:11px">Gold + DPE</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════ ACHETEURS ═══════════ -->
+  <div id="acheteurs" class="panel">
+    <div class="sec-eye">Freemium · 2 plans</div>
+    <div class="sec-title">Plans acheteurs</div>
+    <div class="sec-sub">Gratuit avec calcul capacité d'emprunt. Essentiel à 29€ avec matching et 3 leads — ou 19€ Gold avec dossier complet.</div>
+
+    <div class="grid2" id="ac-cards"></div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Critère</th><th>Gratuit</th><th>Essentiel Gold</th><th style="background:rgba(192,155,90,.06)">Essentiel</th></tr></thead>
+        <tbody>
+          <tr class="td-lead"><td>Leads vendeurs offerts</td><td><span class="td-no">—</span></td><td style="color:#1E7A62;font-weight:600">3 leads</td><td class="td-gold"><span class="td-yes">3 leads</span></td></tr>
+          <tr><td>Matching IA automatique</td><td><span class="td-no">—</span></td><td><span class="td-yes">✓</span></td><td class="td-gold"><span class="td-yes">✓</span></td></tr>
+          <tr><td>Calcul capacité emprunt</td><td style="color:#1E7A62;font-weight:500">Offert (déclaratif)</td><td style="color:#1E7A62;font-weight:500">Vérifié ±3%</td><td class="td-gold"><span class="td-yes">Vérifié ±3%</span></td></tr>
+          <tr><td>Mise en relation</td><td>Sous 48h</td><td>Sous 24h</td><td class="td-gold"><span class="td-yes">Sous 24h</span></td></tr>
+          <tr><td>Alertes annonces</td><td>Quotidien</td><td>Temps réel</td><td class="td-gold"><span class="td-yes">Temps réel</span></td></tr>
+          <tr><td>Accès données DVF</td><td><span class="td-no">—</span></td><td><span class="td-yes">✓</span></td><td class="td-gold"><span class="td-yes">✓</span></td></tr>
+          <tr><td>Rapport estimation</td><td><span class="td-no">—</span></td><td>1/mois</td><td class="td-gold"><span class="td-yes">1/mois</span></td></tr>
+          <tr><td>Support</td><td>FAQ</td><td>7j/7</td><td class="td-gold"><span class="td-yes">7j/7</span></td></tr>
+          <tr class="td-price"><td>Tarif</td><td>0 €</td><td style="color:#854F0B;font-weight:600">19 €/mois</td><td class="td-gold">29 €/mois</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════ INVESTISSEUR ═══════════ -->
+  <div id="investisseur" class="panel">
+    <div class="sec-eye">1 seul plan</div>
+    <div class="sec-title">Investisseur Pro</div>
+    <div class="sec-sub">Un seul plan à 39€/mois — matching rendement, 3 leads, dossier vendeur et comparaison prix/m² en temps réel.</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+      <div class="card featured">
+        <div class="card-bar bar-coral"></div>
+        <div class="card-head bg-coral">
+          <div class="badge badge-right badge-amber">39 €/mois</div>
+          <div class="badge badge-left badge-green">3 leads offerts</div>
+        </div>
+        <div class="card-body">
+          <div class="plan-name">Investisseur Pro</div>
+          <div class="price-main">39 €</div>
+          <div class="price-sub">/mois · annuel 32 €</div>
+          <div class="plan-tag">Matching · comparaison prix/m² · dossier vendeur</div>
+          <hr class="divider">
+          <div class="feats">
+            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span class="feat-ok-txt">Matching biens à fort rendement</span></div>
+            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span class="feat-ok-txt">3 leads vendeurs offerts</span></div>
+            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span class="feat-ok-txt">Accès dossier complet vendeur</span></div>
+            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span class="feat-ok-txt">Comparaison prix/m² vs marché</span></div>
+            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Simulateur rendement net</span></div>
+            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Alertes dès que le seuil est atteint</span></div>
+            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt">Historique loyers DVF</span></div>
+            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt">Cash-flow + retour sur invest.</span></div>
+            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt">Analyse multi-biens · export Excel/PDF</span></div>
+            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt">Support 7j/7</span></div>
+          </div>
+          <button class="btn btn-amber">Choisir Investisseur Pro</button>
+        </div>
+      </div>
+
+      <div class="castorus">
+        <div class="castorus-title">Comparaison prix/m² <span class="castorus-pill">Inclus Pro</span></div>
+        <div class="castorus-median">Médiane DVF 2024 — Lons (64) : <strong>2 750 €/m²</strong></div>
+        <div class="bien">
+          <div class="bien-info"><div class="bien-addr">T2 · 45 m² — Allée du Pic d'Anie</div><div class="bien-meta">Lons · 12 jours · 89 000 €</div></div>
+          <div class="bien-bar-wrap"><div class="bien-bar-bg"><div class="bien-bar-fill fill-ok" style="width:72%"></div></div></div>
+          <div class="bien-price"><div class="bien-pm2 ok">1 978 €/m²</div><div class="bien-lbl">−28 % vs marché</div></div>
+        </div>
+        <div class="bien">
+          <div class="bien-info"><div class="bien-addr">T3 · 62 m² — Av. de Santona</div><div class="bien-meta">Lons · 45 jours · 167 000 €</div></div>
+          <div class="bien-bar-wrap"><div class="bien-bar-bg"><div class="bien-bar-fill fill-warn" style="width:90%"></div></div></div>
+          <div class="bien-price"><div class="bien-pm2 warn">2 694 €/m²</div><div class="bien-lbl">−2 % vs marché</div></div>
+        </div>
+        <div class="bien">
+          <div class="bien-info"><div class="bien-addr">T2 · 45 m² — Chemin Mirassou</div><div class="bien-meta">Lons · 6 mois · 124 800 €</div></div>
+          <div class="bien-bar-wrap"><div class="bien-bar-bg"><div class="bien-bar-fill fill-warn" style="width:93%"></div></div></div>
+          <div class="bien-price"><div class="bien-pm2 warn">2 773 €/m²</div><div class="bien-lbl">+1 % vs marché</div></div>
+        </div>
+        <div class="bien">
+          <div class="bien-info"><div class="bien-addr">T2 · 41 m² — Rue des Chênes</div><div class="bien-meta">Lons · 91 jours · 175 000 €</div></div>
+          <div class="bien-bar-wrap"><div class="bien-bar-bg"><div class="bien-bar-fill fill-bad" style="width:100%"></div></div></div>
+          <div class="bien-price"><div class="bien-pm2 bad">4 268 €/m²</div><div class="bien-lbl">+55 % vs marché</div></div>
+        </div>
+        <div class="castorus-note">Vert = sous-évalué · Orange = prix marché · Rouge = surévalué. Données DVF actualisées en temps réel.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ AGENTS ═══════════ -->
+  <div id="agents" class="panel">
+    <div class="sec-eye">10 agents max / région · Abonnements</div>
+    <div class="sec-title">Plans agents immobiliers</div>
+    <div class="sec-sub">Platinium seul avec leads acheteurs ET vendeurs illimités, dossiers Or à H+0.</div>
+
+    <div class="toggle-wrap">
+      <span class="toggle-lbl active" id="lbl-m">Mensuel</span>
+      <button class="toggle-sw" id="ag-toggle"><div class="toggle-thumb"></div></button>
+      <span class="toggle-lbl" id="lbl-a">Annuel <span class="ann-pill">2 mois offerts</span></span>
+    </div>
+
+    <div class="grid4" id="ag-cards"></div>
+
+    <div class="timing">
+      <div class="timing-head">Diffusion dossiers Or (score ≥ 95%)</div>
+      <div class="timing-grid">
+        <div class="timing-cell"><div class="timing-plan" style="color:#BA7517">Platinium</div><div class="timing-val">H+0</div><div class="timing-desc">SMS immédiat</div></div>
+        <div class="timing-cell"><div class="timing-plan" style="color:#1E7A62">Expert</div><div class="timing-val">H+48</div><div class="timing-desc">Email prioritaire</div></div>
+        <div class="timing-cell"><div class="timing-plan" style="color:#185FA5">Pro</div><div class="timing-val">J+4</div><div class="timing-desc">Dashboard</div></div>
+        <div class="timing-cell"><div class="timing-plan" style="color:#888780">Starter</div><div class="timing-val">J+7</div><div class="timing-desc">Dashboard</div></div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Critère</th><th>Starter</th><th style="background:rgba(192,155,90,.06)">Pro</th><th>Expert</th><th>Platinium</th></tr></thead>
+        <tbody>
+          <tr><td>Leads / mois</td><td>8</td><td class="td-gold">15</td><td>30</td><td>Illimités</td></tr>
+          <tr><td>Zone</td><td>1 dépt.</td><td class="td-gold">3 dépts.</td><td>1 région</td><td>Multi</td></tr>
+          <tr><td>Alertes</td><td>Email quotidien</td><td class="td-gold">Email immédiat</td><td>SMS immédiat</td><td>SMS immédiat</td></tr>
+          <tr><td>Rapport DVF</td><td><span class="td-no">—</span></td><td class="td-gold">Mensuel</td><td>Hebdo</td><td>Temps réel</td></tr>
+          <tr><td>Dossiers Or</td><td>J+7</td><td class="td-gold">J+4</td><td>H+48</td><td>H+0 SMS</td></tr>
+          <tr class="td-lead"><td>Leads acheteurs</td><td><span class="td-no">—</span></td><td class="td-gold"><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td><span class="td-yes">Illimités</span></td></tr>
+          <tr class="td-lead"><td>Leads vendeurs</td><td><span class="td-no">—</span></td><td class="td-gold"><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td><span class="td-yes">Illimités</span></td></tr>
+          <tr><td>Dossier complet vendeur</td><td><span class="td-no">—</span></td><td class="td-gold"><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td><span class="td-yes">✓</span></td></tr>
+          <tr class="td-price"><td>Mensuel</td><td id="p-starter">49 €</td><td class="td-gold" id="p-pro">99 €</td><td id="p-expert">149 €</td><td id="p-plat">199 €</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+/* ══════════════════════════════════════════
+   NAVIGATION ONGLETS
+══════════════════════════════════════════ */
+document.querySelectorAll('.tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    var target = this.getAttribute('data-target');
+    // désactiver tous
+    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+    // activer le bon
+    this.classList.add('active');
+    document.getElementById(target).classList.add('active');
+  });
+});
+
+/* ══════════════════════════════════════════
+   DONNÉES
+══════════════════════════════════════════ */
+var annuel = false;
+
+var AG = [
+  { n:'Starter', bar:'bar-gray', bg:'bg-gray', p:49, pa:41, tag:'Pour démarrer',
+    feats:[{y:1,b:1,t:'8 leads / mois'},{y:1,t:'1 département'},{y:1,t:'Alertes email quotidiennes'},{y:0,t:'Alertes SMS'},{y:0,t:'Rapport DVF'},{y:0,t:'Badge certifié'}],
+    btn:'btn-out', ct:'Démarrer' },
+  { n:'Pro', bar:'bar-blue', bg:'bg-blue', p:99, pa:82, tag:'Le plus populaire', feat:true, badge:{t:'Populaire',c:'badge-blue'},
+    feats:[{y:1,b:1,t:'15 leads / mois'},{y:1,t:'3 départements'},{y:1,b:1,t:'Alertes email immédiates'},{y:1,t:'Rapport DVF mensuel'},{y:0,t:'Alertes SMS'},{y:0,t:'Badge certifié'}],
+    btn:'btn-dark', ct:'Choisir Pro' },
+  { n:'Expert', bar:'bar-teal', bg:'bg-teal', p:149, pa:124, tag:'Pour les agents actifs',
+    feats:[{y:1,b:1,t:'30 leads / mois'},{y:1,t:'1 région complète'},{y:1,b:1,t:'Alertes SMS immédiates'},{y:1,t:'Badge certifié'},{y:1,t:'Rapport DVF hebdo'},{y:1,t:'Dossiers Or H+48'}],
+    btn:'btn-dark', ct:'Choisir Expert' },
+  { n:'Platinium', bar:'bar-amber', bg:'bg-amber', p:199, pa:166, tag:'Leads illimités', badge:{t:'Premium',c:'badge-dark'},
+    feats:[{y:1,b:1,t:'Leads illimités'},{y:1,b:1,t:'Leads acheteurs illimités'},{y:1,b:1,t:'Leads vendeurs illimités'},{y:1,b:1,t:'Dossiers Or H+0 SMS'},{y:1,t:'Dossier complet vendeur'},{y:1,t:'Multi-régions'}],
+    btn:'btn-amber', ct:'Choisir Platinium' }
+];
+
+var VE = [
+  { n:'Standard', bar:'bar-gray', bg:'bg-gray',
+    tag:'Publiez gratuitement · ville uniquement · contact payant',
+    badge:null, docs:null,
+    feats:[
+      {y:1,t:'1 annonce active'},
+      {y:1,t:'3 photos maximum'},
+      {y:1,t:'Ville affichée uniquement (adresse masquée)'},
+      {y:0,t:'Photos illimitées'},
+      {y:0,t:'Matching investisseurs'},
+      {y:0,t:'Mise en avant prioritaire'}
+    ],
+    contact:'Acheteur paie 19,99 € pour vous contacter',
+    btn:'btn-out', ct:'Publier gratuitement' },
+
+  { n:'Silver', bar:'bar-blue', bg:'bg-blue',
+    tag:'Valeur locative ou bail · photos illimitées · matching investisseurs',
+    badge:{t:'Silver',c:'badge-blue'},
+    docs:'Valeur locative (justificatif papier) OU bail en cours',
+    feats:[
+      {y:1,b:1,t:'Photos illimitées'},
+      {y:1,b:1,t:'Matching automatique avec les investisseurs'},
+      {y:1,t:'Ville affichée (adresse masquée)'},
+      {y:1,t:'Badge Silver affiché'},
+      {y:0,t:'Adresse exacte visible'},
+      {y:0,t:'Mise en avant prioritaire'}
+    ],
+    contact:'Acheteur paie 19,99 € pour vous contacter',
+    btn:'btn-out', ct:'Passer Silver — gratuit' },
+
+  { n:'Gold', bar:'bar-amber', bg:'bg-amber',
+    tag:'Copro + Taxe foncière · adresse visible · contact gratuit',
+    badge:{t:'Gold',c:'badge-amber'}, feat:true,
+    docs:'Documents Silver + Compte rendu copropriété (si copro) + Taxe foncière (justificatif papier)',
+    feats:[
+      {y:1,b:1,t:'Photos illimitées'},
+      {y:1,b:1,t:'Adresse exacte visible (acheteurs éligibles)'},
+      {y:1,b:1,t:'Contact direct — gratuit'},
+      {y:1,b:1,t:'Matching automatique avec les investisseurs'},
+      {y:1,t:'Badge Gold affiché'},
+      {y:0,t:'Mise en avant prioritaire'}
+    ],
+    contact:null,
+    btn:'btn-amber', ct:'Passer Gold — gratuit' },
+
+  { n:'Platinium', bar:'bar-teal', bg:'bg-teal',
+    tag:'DPE requis · visibilité maximale · contact libre · agents immobiliers',
+    badge:{t:'Platinium',c:'badge-dark'},
+    docs:'Documents Gold + DPE (Diagnostic de Performance Énergétique)',
+    feats:[
+      {y:1,b:1,t:'Photos illimitées'},
+      {y:1,b:1,t:'Adresse exacte visible (acheteurs éligibles)'},
+      {y:1,b:1,t:'Contact direct — tous les acheteurs'},
+      {y:1,b:1,t:'Contact direct — agents immobiliers'},
+      {y:1,b:1,t:'Matching investisseurs + acheteurs'},
+      {y:1,b:1,t:'Mise en avant prioritaire'},
+      {y:1,t:'Badge Platinium affiché'}
+    ],
+    contact:null,
+    btn:'btn-dark', ct:'Passer Platinium — gratuit' }
+];
+
+var AC = [
+  { n:'Gratuit', bar:'bar-gray', bg:'bg-gray', tag:'Explorer · calculer votre budget',
+    okFeats:['Calcul capacité emprunt offert'],
+    feats:[{y:1,t:'1 projet déposé'},{y:1,t:'Mise en relation sous 48h'},{y:1,t:'Alertes quotidiennes'},{y:0,t:'Leads vendeurs offerts'},{y:0,t:'Accès données DVF'},{y:0,t:'Matching IA'}],
+    price:'0 €', priceGreen:true, priceSub:'pour toujours', btn:'btn-out', ct:'Commencer gratuitement' },
+  { n:'Essentiel', bar:'bar-blue', bg:'bg-blue', tag:'Matching IA · 3 leads · Gold si dossier complet', feat:true,
+    badge:{t:'Populaire',c:'badge-blue'}, leadBadge:'3 leads offerts',
+    cond:{ std:'29 €', gold:'19 €', docs:'Bulletins de salaire · CIN · Crédits en cours · Avis d\'imposition', inc:'✓ Capacité emprunt vérifiée ±3% · ✓ Tarif à 19 €/mois' },
+    okFeats:['3 leads vendeurs offerts','Matching IA automatique'],
+    feats:[{y:1,b:1,t:'Mise en relation sous 24h'},{y:1,t:'Accès données DVF'},{y:1,t:'Alertes temps réel'},{y:1,t:'1 rapport estimation/mois'},{y:1,t:'Support 7j/7'}],
+    btn:'btn-dark', ct:'Choisir Essentiel' }
+];
+
+/* ══════════════════════════════════════════
+   RENDU CARTES
+══════════════════════════════════════════ */
+function renderAgents() {
+  var html = '';
+  AG.forEach(function(p) {
+    var price = annuel ? p.pa : p.p;
+    var sub = annuel ? '/mois · annuel' : '/mois';
+    html += '<div class="card' + (p.feat ? ' featured' : '') + '">';
+    html += '<div class="card-bar ' + p.bar + '"></div>';
+    html += '<div class="card-head ' + p.bg + '">';
+    if (p.badge) html += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
+    html += '</div>';
+    html += '<div class="card-body">';
+    html += '<div class="plan-name">' + p.n + '</div>';
+    html += '<div class="price-main">' + price + ' €</div>';
+    html += '<div class="price-sub">' + sub + '</div>';
+    html += '<div class="plan-tag">' + p.tag + '</div>';
+    html += '<hr class="divider">';
+    html += '<div class="feats">';
+    p.feats.forEach(function(f) {
+      html += '<div class="feat' + (!f.y ? ' dim' : '') + '">';
+      html += '<div class="feat-dot ' + (f.y ? 'y' : 'n') + '">' + (f.y ? '✓' : '✗') + '</div>';
+      html += '<span class="feat-txt' + (f.b ? ' bold' : '') + '">' + f.t + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '<button class="btn ' + p.btn + '">' + p.ct + '</button>';
+    html += '</div></div>';
+  });
+  document.getElementById('ag-cards').innerHTML = html;
+}
+
+function renderVendeurs() {
+  var html = '';
+  VE.forEach(function(p) {
+    html += '<div class="card' + (p.feat ? ' featured' : '') + '">';
+    html += '<div class="card-bar ' + p.bar + '"></div>';
+    html += '<div class="card-head ' + p.bg + '">';
+    if (p.badge) html += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
+    html += '</div>';
+    html += '<div class="card-body">';
+    html += '<div class="plan-name">' + p.n + '</div>';
+    html += '<div class="price-main price-green">0 €</div>';
+    html += '<div class="price-sub">gratuit — toujours</div>';
+    html += '<div class="plan-tag">' + p.tag + '</div>';
+    if (p.docs) {
+      html += '<div class="gold-box"><div class="gold-box-title">Documents requis</div>';
+      html += '<div class="gold-box-docs">' + p.docs + '</div></div>';
+    }
+    if (p.contact) {
+      html += '<div class="pay-box"><span class="pay-lbl">' + p.contact + '</span></div>';
+    }
+    html += '<hr class="divider">';
+    html += '<div class="feats">';
+    p.feats.forEach(function(f) {
+      html += '<div class="feat' + (!f.y ? ' dim' : '') + '">';
+      html += '<div class="feat-dot ' + (f.y ? 'y' : 'n') + '">' + (f.y ? '✓' : '✗') + '</div>';
+      html += '<span class="feat-txt' + (f.b ? ' bold' : '') + '">' + f.t + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '<button class="btn ' + p.btn + '">' + p.ct + '</button>';
+    html += '</div></div>';
+  });
+  document.getElementById('ve-cards').innerHTML = html;
+}
+
+function renderAcheteurs() {
+  var html = '';
+  AC.forEach(function(p) {
+    html += '<div class="card' + (p.feat ? ' featured' : '') + '">';
+    html += '<div class="card-bar ' + p.bar + '"></div>';
+    html += '<div class="card-head ' + p.bg + '">';
+    if (p.badge) html += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
+    if (p.leadBadge) html += '<div class="badge badge-left badge-green">' + p.leadBadge + '</div>';
+    html += '</div>';
+    html += '<div class="card-body">';
+    html += '<div class="plan-name">' + p.n + '</div>';
+    if (p.cond) {
+      html += '<div class="price-cond"><div class="price-cond-lbl">Tarif selon votre dossier</div>';
+      html += '<div class="price-row warn"><span class="price-row-lbl">Sans justificatifs</span><span class="price-row-val">' + p.cond.std + '/mois</span></div>';
+      html += '<div class="price-row ok"><span class="price-row-lbl">Gold — dossier complet</span><span class="price-row-val">' + p.cond.gold + '/mois</span></div>';
+      html += '</div>';
+    } else {
+      html += '<div class="price-main' + (p.priceGreen ? ' price-green' : '') + '">' + p.price + '</div>';
+      html += '<div class="price-sub">' + p.priceSub + '</div>';
+    }
+    html += '<div class="plan-tag">' + p.tag + '</div>';
+    html += '<hr class="divider">';
+    html += '<div class="feats">';
+    if (p.okFeats) {
+      p.okFeats.forEach(function(f) {
+        html += '<div class="feat-ok"><div class="feat-ok-dot">✓</div><span class="feat-ok-txt">' + f + '</span></div>';
+      });
+    }
+    if (p.cond) {
+      html += '<div class="gold-box"><div class="gold-box-title">Gold — dossier emprunteur</div>';
+      html += '<div class="gold-box-docs">' + p.cond.docs + '</div>';
+      html += '<div class="gold-box-inc">' + p.cond.inc + '</div></div>';
+    }
+    p.feats.forEach(function(f) {
+      html += '<div class="feat' + (!f.y ? ' dim' : '') + '">';
+      html += '<div class="feat-dot ' + (f.y ? 'y' : 'n') + '">' + (f.y ? '✓' : '✗') + '</div>';
+      html += '<span class="feat-txt' + (f.b ? ' bold' : '') + '">' + f.t + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '<button class="btn ' + p.btn + '">' + p.ct + '</button>';
+    html += '</div></div>';
+  });
+  document.getElementById('ac-cards').innerHTML = html;
+}
+
+/* TOGGLE ANNUEL */
+document.getElementById('ag-toggle').addEventListener('click', function() {
+  annuel = !annuel;
+  this.classList.toggle('on', annuel);
+  document.getElementById('lbl-m').classList.toggle('active', !annuel);
+  document.getElementById('lbl-a').classList.toggle('active', annuel);
+  // Mettre à jour les prix dans le tableau
+  var prices = [{id:'p-starter',m:49,a:41},{id:'p-pro',m:99,a:82},{id:'p-expert',m:149,a:124},{id:'p-plat',m:199,a:166}];
+  prices.forEach(function(p) {
+    var el = document.getElementById(p.id);
+    if (el) el.textContent = (annuel ? p.a : p.m) + ' €';
+  });
+  renderAgents();
+});
+
+/* LANCEMENT */
+renderAgents();
+renderVendeurs();
+renderAcheteurs();
+</script>
+</body>
+</html>
