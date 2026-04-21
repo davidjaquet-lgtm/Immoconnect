@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Mon espace</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--coral:#993C1D;--amber:#D4732A;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;min-height:100vh}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none;margin-right:32px}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:24px;align-items:center;flex:1}
+.nav-links a{text-decoration:none;color:#888780;font-size:13px}
+.nav-links a:hover{color:#fff}
+.nav-gold{padding:7px 16px;background:var(--gold);color:var(--ink)!important;border-radius:4px;font-weight:500}
+.nav-out{padding:8px 20px;border:1px solid #444;color:#fff!important;border-radius:4px;font-size:13px;font-weight:500;text-decoration:none}
+
+/* LOGIN */
+.login-wrap{max-width:480px;margin:0 auto;padding:48px 24px 80px}
+.login-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:32px}
+.auth-tabs{display:flex;border-bottom:2px solid var(--line);margin-bottom:22px}
+.auth-tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:none;font-family:'Outfit',sans-serif;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
+.auth-tab.active{color:var(--ink);border-bottom-color:var(--ink)}
+
+/* PROFILS MULTI-SELECT */
+.profil-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.profil-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+.profil-card{border:2px solid var(--line);border-radius:8px;padding:11px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);user-select:none;position:relative}
+.profil-card:hover{border-color:var(--muted)}
+.profil-card.checked{border-color:var(--teal);background:#E1F5EE}
+.profil-card.checked.p-acheteur{border-color:var(--blue);background:#E6F1FB}
+.profil-card.checked.p-investisseur{border-color:var(--coral);background:#FAECE7}
+.profil-card.checked.p-agent{border-color:var(--amber);background:#FEF3E7}
+.check-mark{position:absolute;top:6px;right:8px;font-size:12px;display:none}
+.profil-card.checked .check-mark{display:block}
+.profil-icon{font-size:20px;margin-bottom:3px}
+.profil-name{font-size:12px;font-weight:600}
+.profil-desc{font-size:10px;color:var(--muted);margin-top:1px}
+
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+label.lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+input,select{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:11px 14px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink);outline:none;transition:border .15s;width:100%}
+input:focus,select:focus{border-color:var(--ink)}
+.btn-main{width:100%;padding:12px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:none;background:var(--ink);color:#fff;transition:opacity .15s;margin-top:6px}
+.btn-main:hover{opacity:.85}
+.btn-main:disabled{opacity:.5;cursor:not-allowed}
+.btn-google{width:100%;padding:11px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--line);background:var(--warm);color:var(--ink);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;transition:all .15s}
+.btn-google:hover{border-color:var(--muted)}
+.btn-fb{width:100%;padding:11px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;background:#1877F2;color:#fff;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px}
+.btn-fb:hover{opacity:.9}
+.divider-or{display:flex;align-items:center;gap:12px;margin:14px 0;font-size:12px;color:var(--muted)}
+.divider-or::before,.divider-or::after{content:'';flex:1;height:1px;background:var(--line)}
+.err-box{background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:10px 14px;font-size:12px;color:#712B13;margin-bottom:14px;display:none}
+.ok-box{background:#EAF3DE;border:1px solid #9FD9C0;border-radius:8px;padding:10px 14px;font-size:12px;color:#27500A;margin-bottom:14px;display:none}
+.forgot{font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;display:block;text-align:right;margin-bottom:14px}
+
+/* DASHBOARD */
+.dash-wrap{max-width:1020px;margin:0 auto;padding:28px 24px 80px;display:none}
+
+/* HEADER DASHBOARD */
+.dash-header{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:16px 20px;display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+.dash-avatar{width:48px;height:48px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.dash-info{flex:1}
+.dash-name{font-size:16px;font-weight:500;margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.profil-badge{font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;text-transform:uppercase}
+.pb-vendeur{background:#E1F5EE;color:var(--teal)}
+.pb-acheteur{background:#E6F1FB;color:var(--blue)}
+.pb-investisseur{background:#FAECE7;color:var(--coral)}
+.pb-agent{background:#FEF3E7;color:var(--amber)}
+.dash-sub{font-size:12px;color:var(--muted)}
+.btn-logout{padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;color:var(--muted);flex-shrink:0}
+.btn-logout:hover{color:var(--ink);border-color:var(--ink)}
+
+/* ONGLETS DASHBOARD */
+.dash-tabs{display:flex;gap:4px;background:rgba(15,15,14,.06);border-radius:var(--r);padding:4px;margin-bottom:22px;flex-wrap:wrap}
+.dash-tab{flex:1;min-width:100px;padding:9px 8px;border-radius:8px;border:none;background:transparent;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);font-family:'Outfit',sans-serif;transition:all .15s;text-align:center}
+.dash-tab.active{background:var(--warm);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.dash-panel{display:none}.dash-panel.active{display:block}
+
+/* STATS */
+.stats-row{display:grid;gap:12px;margin-bottom:20px}
+.s4{grid-template-columns:repeat(4,1fr)}
+.s3{grid-template-columns:repeat(3,1fr)}
+.s2{grid-template-columns:repeat(2,1fr)}
+.stat-box{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:16px;text-align:center}
+.st-teal{background:#E1F5EE;border-color:#9FE1CB}
+.st-blue{background:#E6F1FB;border-color:rgba(24,95,165,.2)}
+.st-coral{background:#FAECE7;border-color:rgba(153,60,29,.2)}
+.st-amber{background:#FEF3E7;border-color:rgba(212,115,42,.2)}
+.stat-val{font-size:26px;font-weight:500;margin-bottom:4px;color:var(--teal)}
+.stat-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+
+/* ANNONCE CARD */
+.ann-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
+.ann-top{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.ann-img{width:60px;height:60px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:22px}
+.ann-info{flex:1}
+.ann-titre{font-size:13px;font-weight:500;margin-bottom:3px}
+.ann-meta{font-size:11px;color:var(--muted);line-height:1.6}
+.ann-niv{font-size:9px;font-weight:600;padding:2px 8px;border-radius:20px;text-transform:uppercase;flex-shrink:0}
+.nv-standard{background:#F1EFE8;color:#555}
+.nv-silver{background:#E6F1FB;color:var(--blue)}
+.nv-gold{background:#FAEEDA;color:#854F0B}
+.nv-platinium{background:#E1F5EE;color:var(--teal)}
+.ann-kpis{display:grid;grid-template-columns:repeat(4,1fr)}
+.kpi{text-align:center;padding:11px 6px;border-right:1px solid var(--line)}
+.kpi:last-child{border-right:none}
+.kpi-val{font-size:20px;font-weight:500;color:var(--teal)}
+.kpi-lbl{font-size:10px;color:var(--muted);margin-top:1px}
+.ann-acts{display:flex;gap:8px;padding:10px 16px;background:var(--bg);flex-wrap:wrap}
+.btn-a{padding:7px 13px;border-radius:8px;border:1px solid var(--line);background:var(--warm);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;color:var(--ink)}
+.btn-a:hover{border-color:var(--muted)}
+.btn-a.red{color:#C0392B;border-color:#F5C4B3}
+.btn-add{padding:8px 16px;border-radius:8px;border:none;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;text-decoration:none;display:inline-block;color:#fff}
+.ba-teal{background:var(--teal)}
+.ba-blue{background:var(--blue)}
+.ba-coral{background:var(--coral)}
+.ba-amber{background:var(--amber)}
+
+/* MESSAGES */
+.msg-card{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:8px;display:flex;gap:12px}
+.msg-card.new{border-left:3px solid var(--teal)}
+.msg-av{width:36px;height:36px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0}
+.msg-body{flex:1}
+.msg-name{font-size:12px;font-weight:600;margin-bottom:3px}
+.msg-txt{font-size:12px;color:var(--muted);line-height:1.5}
+.msg-contact{font-size:11px;color:var(--blue);margin-top:4px}
+.msg-date{font-size:10px;color:var(--muted);flex-shrink:0}
+.new-badge{font-size:9px;font-weight:700;background:var(--teal);color:#fff;border-radius:20px;padding:2px 7px;margin-left:6px}
+
+/* PROJET ACHETEUR */
+.projet-box{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:12px}
+.projet-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pj-item{background:var(--bg);border-radius:8px;padding:10px 12px}
+.pj-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+.pj-val{font-size:14px;font-weight:500}
+.cap-wrap{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:6px 0}
+.cap-fill{height:100%;border-radius:4px}
+
+/* LEADS AGENT */
+.leads-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.lead-card{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:14px}
+.lead-badge{font-size:9px;font-weight:600;padding:2px 8px;border-radius:20px;text-transform:uppercase;margin-bottom:8px;display:inline-block}
+.lb-plat{background:#E1F5EE;color:var(--teal)}
+.lb-gold{background:#FAEEDA;color:#854F0B}
+.lb-silver{background:#E6F1FB;color:var(--blue)}
+.lead-titre{font-size:13px;font-weight:500;margin-bottom:5px}
+.lead-meta{font-size:12px;color:var(--muted);line-height:1.7}
+.lead-acts{display:flex;gap:8px;margin-top:10px}
+.btn-l{padding:7px 13px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border:none}
+.bl-ink{background:var(--ink);color:#fff}
+.bl-out{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.excl-box{background:#FEF3E7;border:1px solid rgba(212,115,42,.3);border-radius:8px;padding:14px 16px;margin-bottom:16px}
+.excl-title{font-size:11px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.excl-btns{display:flex;gap:8px}
+.btn-excl{padding:8px 16px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(212,115,42,.4);background:var(--warm);color:var(--amber)}
+.btn-excl:hover{background:var(--amber);color:#fff}
+
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;margin-top:20px}
+.sec-ttl{font-size:15px;font-weight:500}
+.empty{text-align:center;padding:36px;color:var(--muted);font-size:13px;background:var(--warm);border:1px solid var(--line);border-radius:var(--r)}
+.empty-ico{font-size:32px;margin-bottom:10px}
+.spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin:60px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:640px){.s4,.s3{grid-template-columns:1fr 1fr}.ann-kpis{grid-template-columns:1fr 1fr}.leads-grid,.projet-grid{grid-template-columns:1fr}.profil-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-links">
+    <a href="forfaits.html">Forfaits</a>
+    <a href="questionnaire-vendeur.html" class="nav-gold">Vendre</a>
+    <a href="questionnaire-acheteur.html">Acheter</a>
+    <a href="index.html#agents">Agents immo</a>
+  </div>
+  <a href="index.html" class="nav-out">Accueil</a>
+</nav>
+
+<!-- ══ PAGE LOGIN ══ -->
+<div class="login-wrap" id="login-page">
+  <div style="text-align:center;margin-bottom:28px">
+    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Espace personnel</div>
+    <div style="font-size:24px;font-weight:500;margin-bottom:6px">Mon espace ImmoConnect</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.6">Vendeur · Acheteur · Investisseur · Agent immo<br>Un seul compte, plusieurs profils</div>
+  </div>
+  <div class="login-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Se connecter</button>
+      <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">Créer un compte</button>
+    </div>
+    <div id="err-box" class="err-box"></div>
+    <div id="ok-box" class="ok-box"></div>
+    <button class="btn-google" onclick="loginGoogle()">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Continuer avec Google
+    </button>
+    <button class="btn-fb" onclick="loginFacebook()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      Continuer avec Facebook
+    </button>
+    <div class="divider-or">ou par email</div>
+
+    <!-- INSCRIPTION UNIQUEMENT -->
+    <div id="signup-fields" style="display:none">
+      <div class="field"><label class="lbl">Nom / Prénom *</label><input type="text" id="signup-nom" placeholder="Jean Dupont"></div>
+      <div class="profil-label">Je suis (plusieurs choix possibles)</div>
+      <div class="profil-grid">
+        <div class="profil-card p-vendeur" id="pc-vendeur" onclick="toggleProfil('vendeur')">
+          <div class="check-mark">✓</div>
+          <div class="profil-icon">🏠</div>
+          <div class="profil-name">Vendeur</div>
+          <div class="profil-desc">Je vends mon bien</div>
+        </div>
+        <div class="profil-card p-acheteur" id="pc-acheteur" onclick="toggleProfil('acheteur')">
+          <div class="check-mark">✓</div>
+          <div class="profil-icon">🔑</div>
+          <div class="profil-name">Acheteur</div>
+          <div class="profil-desc">Je cherche un bien</div>
+        </div>
+        <div class="profil-card p-investisseur" id="pc-investisseur" onclick="toggleProfil('investisseur')">
+          <div class="check-mark">✓</div>
+          <div class="profil-icon">📈</div>
+          <div class="profil-name">Investisseur</div>
+          <div class="profil-desc">Je cherche un rendement</div>
+        </div>
+        <div class="profil-card p-agent" id="pc-agent" onclick="toggleProfil('agent')">
+          <div class="check-mark">✓</div>
+          <div class="profil-icon">🤝</div>
+          <div class="profil-name">Agent immo</div>
+          <div class="profil-desc">Je suis professionnel</div>
+        </div>
+      </div>
+      <div class="field" id="field-agence" style="display:none">
+        <label class="lbl">Agence immobilière</label>
+        <input type="text" id="signup-agence" placeholder="Nom de votre agence">
+      </div>
+    </div>
+
+    <div class="field"><label class="lbl">Email *</label><input type="email" id="auth-email" placeholder="votre@email.fr"></div>
+    <div class="field"><label class="lbl">Mot de passe *</label><input type="password" id="auth-password" placeholder="••••••••" minlength="8"></div>
+    <span class="forgot" id="forgot-link" onclick="resetPassword()">Mot de passe oublié ?</span>
+    <button class="btn-main" id="btn-auth" onclick="handleAuth()">Se connecter</button>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div class="dash-wrap" id="dash-page">
+  <div id="dash-loading"><div class="spin"></div></div>
+  <div id="dash-content" style="display:none"></div>
+</div>
+
+<script>
+const SB_URL  = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGh5ZWZhamZ3cWN4Y2Z4cG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjYwNDAsImV4cCI6MjA5MTUwMjA0MH0.jB8Z_9eT9lYkqxUUD0G001Y87iSAv94fSu_gVOdqa-A';
+const { createClient } = supabase;
+const db = createClient(SB_URL, SB_KEY);
+
+var currentTab = 'login';
+var selectedProfils = ['vendeur'];
+var currentUser = null;
+
+// ── TABS LOGIN ──
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-signup').classList.toggle('active', tab==='signup');
+  document.getElementById('signup-fields').style.display = tab==='signup' ? 'block' : 'none';
+  document.getElementById('forgot-link').style.display = tab==='login' ? 'block' : 'none';
+  document.getElementById('btn-auth').textContent = tab==='login' ? 'Se connecter' : 'Créer mon compte';
+  hideMsg();
+}
+
+// ── PROFILS MULTI-SELECT ──
+function toggleProfil(p) {
+  var idx = selectedProfils.indexOf(p);
+  if (idx === -1) selectedProfils.push(p);
+  else if (selectedProfils.length > 1) selectedProfils.splice(idx, 1);
+  ['vendeur','acheteur','investisseur','agent'].forEach(function(k) {
+    var el = document.getElementById('pc-' + k);
+    el.classList.toggle('checked', selectedProfils.indexOf(k) !== -1);
+  });
+  document.getElementById('field-agence').style.display = selectedProfils.indexOf('agent') !== -1 ? 'block' : 'none';
+}
+
+function showErr(m) { var b=document.getElementById('err-box'); b.textContent=m; b.style.display='block'; document.getElementById('ok-box').style.display='none'; }
+function showOk(m)  { var b=document.getElementById('ok-box');  b.textContent=m; b.style.display='block'; document.getElementById('err-box').style.display='none'; }
+function hideMsg()  { document.getElementById('err-box').style.display='none'; document.getElementById('ok-box').style.display='none'; }
+
+// ── AUTH EMAIL ──
+async function handleAuth() {
+  var email = document.getElementById('auth-email').value.trim();
+  var pwd   = document.getElementById('auth-password').value;
+  var btn   = document.getElementById('btn-auth');
+  if (!email || !pwd) { showErr('Remplissez tous les champs.'); return; }
+  btn.disabled = true;
+  hideMsg();
+  if (currentTab === 'login') {
+    btn.textContent = 'Connexion…';
+    var { data, error } = await db.auth.signInWithPassword({ email, password: pwd });
+    if (error) { showErr('Email ou mot de passe incorrect.'); btn.disabled=false; btn.textContent='Se connecter'; return; }
+    afficherDashboard(data.user);
+  } else {
+    btn.textContent = 'Création…';
+    var nom = document.getElementById('signup-nom').value.trim();
+    var agence = document.getElementById('signup-agence').value.trim();
+    if (!nom) { showErr('Renseignez votre nom.'); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
+    if (!selectedProfils.length) { showErr('Choisissez au moins un profil.'); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
+    var { data, error } = await db.auth.signUp({
+      email, password: pwd,
+      options: { data: { nom, profils: selectedProfils, agence: agence||null } }
+    });
+    if (error) { showErr('Erreur : ' + error.message); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
+    showOk('Compte créé ! Confirmez votre email puis connectez-vous.');
+    btn.disabled=false; btn.textContent='Créer mon compte';
+  }
+}
+
+async function loginGoogle()   { await db.auth.signInWithOAuth({ provider:'google',   options:{ redirectTo: window.location.href } }); }
+async function loginFacebook() { await db.auth.signInWithOAuth({ provider:'facebook', options:{ redirectTo: window.location.href } }); }
+
+async function resetPassword() {
+  var email = document.getElementById('auth-email').value.trim();
+  if (!email) { showErr('Entrez votre email.'); return; }
+  var { error } = await db.auth.resetPasswordForEmail(email);
+  if (error) { showErr('Erreur : ' + error.message); return; }
+  showOk('Email de réinitialisation envoyé !');
+}
+
+// ── AFFICHER DASHBOARD ──
+async function afficherDashboard(user) {
+  currentUser = user;
+  document.getElementById('login-page').style.display  = 'none';
+  document.getElementById('dash-page').style.display   = 'block';
+  document.getElementById('dash-loading').style.display = 'block';
+  document.getElementById('dash-content').style.display = 'none';
+
+  var meta   = user.user_metadata || {};
+  var profils = meta.profils || ['vendeur'];
+  var nom    = meta.nom || user.email.split('@')[0];
+
+  // Charger données selon profils
+  var annonces = [], projets = [], messages = [], leads = [];
+
+  if (profils.indexOf('vendeur') !== -1 || profils.indexOf('agent') !== -1) {
+    var r = await db.from('annonces_vendeurs').select('*').eq('email_contact', user.email).order('created_at', {ascending:false});
+    annonces = r.data || [];
+  }
+  if (profils.indexOf('acheteur') !== -1 || profils.indexOf('investisseur') !== -1) {
+    var r2 = await db.from('projets_acheteurs').select('*').eq('email', user.email).order('created_at', {ascending:false});
+    projets = r2.data || [];
+  }
+  if (profils.indexOf('vendeur') !== -1) {
+    var r3 = await db.from('messages_annonces').select('*').eq('email_vendeur', user.email).order('created_at', {ascending:false}).limit(20);
+    messages = r3.data || [];
+  }
+  if (profils.indexOf('agent') !== -1) {
+    var r4 = await db.from('annonces_vendeurs').select('*').eq('statut_annonce', 'publiee').order('created_at', {ascending:false}).limit(40);
+    leads = r4.data || [];
+  }
+
+  // Construire les badges de profil
+  var badgeMap = { vendeur:'🏠 Vendeur', acheteur:'🔑 Acheteur', investisseur:'📈 Investisseur', agent:'🤝 Agent immo' };
+  var badgeClass = { vendeur:'pb-vendeur', acheteur:'pb-acheteur', investisseur:'pb-investisseur', agent:'pb-agent' };
+  var badgesHtml = profils.map(function(p) {
+    return '<span class="profil-badge ' + (badgeClass[p]||'') + '">' + (badgeMap[p]||p) + '</span>';
+  }).join(' ');
+
+  // Header
+  var html = '<div class="dash-header">';
+  html += '<div class="dash-avatar">' + nom.charAt(0).toUpperCase() + '</div>';
+  html += '<div class="dash-info"><div class="dash-name">Bonjour, ' + nom + ' ' + badgesHtml + '</div>';
+  html += '<div class="dash-sub">' + user.email + (meta.agence ? ' · ' + meta.agence : '') + '</div></div>';
+  html += '<button class="btn-logout" onclick="logout()">Déconnexion</button></div>';
+
+  // Onglets selon profils
+  html += '<div class="dash-tabs">';
+  profils.forEach(function(p, i) {
+    var icons = { vendeur:'🏠 Mes annonces', acheteur:'🔑 Mon projet achat', investisseur:'📈 Mon projet invest.', agent:'🤝 Espace agent' };
+    html += '<button class="dash-tab' + (i===0?' active':'') + '" id="dtab-'+p+'" onclick="switchDashTab(\''+p+'\')">' + (icons[p]||p) + '</button>';
+  });
+  html += '</div>';
+
+  // Panneaux
+  profils.forEach(function(p, i) {
+    html += '<div class="dash-panel' + (i===0?' active':'') + '" id="dpanel-'+p+'">';
+    if (p === 'vendeur') html += buildVendeurPanel(annonces, messages);
+    if (p === 'acheteur') html += buildAcheteurPanel(projets, false);
+    if (p === 'investisseur') html += buildAcheteurPanel(projets, true);
+    if (p === 'agent') html += buildAgentPanel(leads, meta);
+    html += '</div>';
+  });
+
+  document.getElementById('dash-content').innerHTML = html;
+  document.getElementById('dash-loading').style.display  = 'none';
+  document.getElementById('dash-content').style.display  = 'block';
+}
+
+function switchDashTab(p) {
+  document.querySelectorAll('.dash-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.dash-panel').forEach(function(t){ t.classList.remove('active'); });
+  var t = document.getElementById('dtab-' + p);
+  var pan = document.getElementById('dpanel-' + p);
+  if (t) t.classList.add('active');
+  if (pan) pan.classList.add('active');
+}
+
+// ══ PANNEAU VENDEUR ══
+function buildVendeurPanel(annonces, messages) {
+  var totalVues    = annonces.reduce(function(s,a){ return s+(a.nb_vues||0); }, 0);
+  var totalVisites = annonces.reduce(function(s,a){ return s+(a.nb_visites||0); }, 0);
+  var totalContacts= annonces.reduce(function(s,a){ return s+(a.nb_contacts||0); }, 0);
+  var nonLus = messages.filter(function(m){ return !m.lu; }).length;
+
+  var h = '<div class="stats-row s4">';
+  h += '<div class="stat-box"><div class="stat-val">' + annonces.length + '</div><div class="stat-lbl">Annonces</div></div>';
+  h += '<div class="stat-box st-teal"><div class="stat-val">' + totalVues + '</div><div class="stat-lbl">👁 Vues totales</div></div>';
+  h += '<div class="stat-box st-teal"><div class="stat-val">' + totalVisites + '</div><div class="stat-lbl">🗓 Visites demandées</div></div>';
+  h += '<div class="stat-box"><div class="stat-val">' + (nonLus>0?'<span style="color:var(--teal)">'+nonLus+'</span>':totalContacts) + '</div><div class="stat-lbl">💬 Messages' + (nonLus?' nouveaux':'') + '</div></div>';
+  h += '</div>';
+
+  // Annonces
+  h += '<div class="sec-head"><div class="sec-ttl">Mes annonces</div><a href="questionnaire-vendeur.html" class="btn-add ba-teal">+ Nouvelle annonce</a></div>';
+  if (!annonces.length) {
+    h += '<div class="empty"><div class="empty-ico">🏠</div>Aucune annonce.<br><br><a href="questionnaire-vendeur.html" class="btn-add ba-teal">Déposer mon bien</a></div>';
+  } else {
+    annonces.forEach(function(a) {
+      var niv = a.niveau_vendeur || 'standard';
+      h += '<div class="ann-card"><div class="ann-top">';
+      if (a.photo_principale) h += '<img class="ann-img" src="'+a.photo_principale+'" alt="" style="width:60px;height:60px;border-radius:8px;object-fit:cover;flex-shrink:0">';
+      else h += '<div class="ann-img">🏠</div>';
+      h += '<div class="ann-info"><div class="ann-titre">' + (a.titre||a.type_bien+' · '+a.ville) + '</div>';
+      h += '<div class="ann-meta">' + (a.surface||'—') + ' m² · ' + (a.ville||'—') + ' · ' + (a.prix?Math.round(a.prix).toLocaleString('fr-FR')+' €':'—') + '</div>';
+      h += '<div class="ann-meta">Publié le ' + new Date(a.created_at).toLocaleDateString('fr-FR') + '</div></div>';
+      h += '<div class="ann-niv nv-'+niv+'">'+niv.charAt(0).toUpperCase()+niv.slice(1)+'</div></div>';
+      h += '<div class="ann-kpis">';
+      h += '<div class="kpi"><div class="kpi-val">'+(a.nb_vues||0)+'</div><div class="kpi-lbl">👁 Vues</div></div>';
+      h += '<div class="kpi"><div class="kpi-val">'+(a.nb_visites||0)+'</div><div class="kpi-lbl">🗓 Visites</div></div>';
+      h += '<div class="kpi"><div class="kpi-val">'+(a.nb_contacts||0)+'</div><div class="kpi-lbl">💬 Contacts</div></div>';
+      h += '<div class="kpi"><div class="kpi-val">'+(a.statut_annonce==='publiee'?'✅':'⏳')+'</div><div class="kpi-lbl">'+(a.statut_annonce==='publiee'?'En ligne':'En attente')+'</div></div>';
+      h += '</div><div class="ann-acts">';
+      h += '<button class="btn-a" onclick="editAnnonce(\''+a.id+'\')">✏️ Modifier</button>';
+      h += '<button class="btn-a" onclick="">💬 Messages</button>';
+      h += '<button class="btn-a" onclick="">📊 Stats</button>';
+      h += '<button class="btn-a red" onclick="supprimerAnnonce(\''+a.id+'\')">🗑 Supprimer</button>';
+      h += '</div></div>';
+    });
+  }
+
+  // Messages
+  h += '<div class="sec-head" style="margin-top:24px"><div class="sec-ttl">Messages reçus</div></div>';
+  if (!messages.length) {
+    h += '<div class="empty"><div class="empty-ico">💬</div>Aucun message reçu.</div>';
+  } else {
+    messages.forEach(function(m) {
+      h += '<div class="msg-card' + (!m.lu?' new':'') + '">';
+      h += '<div class="msg-av">' + (m.nom_acheteur||'A').charAt(0).toUpperCase() + '</div>';
+      h += '<div class="msg-body"><div class="msg-name">' + (m.nom_acheteur||'Acheteur') + (!m.lu?'<span class="new-badge">Nouveau</span>':'') + '</div>';
+      h += '<div class="msg-txt">' + (m.message||'') + '</div>';
+      h += '<div class="msg-contact">' + (m.email_acheteur||'') + (m.telephone_acheteur?' · '+m.telephone_acheteur:'') + '</div></div>';
+      h += '<div class="msg-date">' + new Date(m.created_at).toLocaleDateString('fr-FR') + '</div></div>';
+    });
+  }
+  return h;
+}
+
+// ══ PANNEAU ACHETEUR / INVESTISSEUR ══
+function buildAcheteurPanel(projets, isInv) {
+  var color = isInv ? 'coral' : 'blue';
+  var h = '';
+
+  if (!projets.length) {
+    h += '<div class="empty"><div class="empty-ico">' + (isInv?'📈':'🔑') + '</div>';
+    h += 'Aucun projet déposé.<br><br>';
+    h += '<a href="questionnaire-acheteur.html" class="btn-add ba-' + color + '">Déposer mon projet</a></div>';
+    return h;
+  }
+
+  var p = projets[0];
+  h += '<div class="stats-row s3">';
+  h += '<div class="stat-box st-' + (isInv?'coral':'blue') + '"><div class="stat-val">' + (p.budget_total?Math.round(p.budget_total).toLocaleString('fr-FR')+' €':'—') + '</div><div class="stat-lbl">Budget total</div></div>';
+  h += '<div class="stat-box"><div class="stat-val">' + (p.capacite_emprunt?Math.round(p.capacite_emprunt).toLocaleString('fr-FR')+' €':'—') + '</div><div class="stat-lbl">Capacité emprunt</div></div>';
+  h += '<div class="stat-box"><div class="stat-val">' + (p.taux_endettement?p.taux_endettement+'%':'—') + '</div><div class="stat-lbl">Taux endettement</div></div>';
+  h += '</div>';
+
+  if (p.taux_endettement) {
+    var ratio = Math.min(parseFloat(p.taux_endettement)/50*100, 100);
+    var col = parseFloat(p.taux_endettement) <= 25 ? '#1E7A62' : parseFloat(p.taux_endettement) <= 35 ? '#D4732A' : '#C0392B';
+    h += '<div style="background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:16px">';
+    h += '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px"><span style="color:var(--muted)">Taux d\'endettement</span><span style="font-weight:600;color:'+col+'">'+p.taux_endettement+' %</span></div>';
+    h += '<div class="cap-wrap"><div class="cap-fill" style="width:'+ratio+'%;background:'+col+'"></div></div>';
+    h += '<div style="font-size:11px;color:var(--muted)">' + (parseFloat(p.taux_endettement)<=35 ? '✅ Dossier dans les normes bancaires' : '⚠️ Taux d\'endettement trop élevé') + '</div></div>';
+  }
+
+  h += '<div class="projet-box"><div class="projet-titre">Mon projet</div><div class="projet-grid">';
+  h += '<div class="pj-item"><div class="pj-lbl">Type de bien</div><div class="pj-val">' + (p.type_bien||'—') + '</div></div>';
+  h += '<div class="pj-item"><div class="pj-lbl">Localisation</div><div class="pj-val">' + (p.localisation||'—') + '</div></div>';
+  h += '<div class="pj-item"><div class="pj-lbl">Surface min.</div><div class="pj-val">' + (p.surface_souhaitee||'—') + (p.surface_souhaitee?' m²':'') + '</div></div>';
+  h += '<div class="pj-item"><div class="pj-lbl">Budget envisagé</div><div class="pj-val">' + (p.budget_envisage?Math.round(p.budget_envisage).toLocaleString('fr-FR')+' €':'—') + '</div></div>';
+  if (isInv) {
+    h += '<div class="pj-item"><div class="pj-lbl">Rendement min.</div><div class="pj-val">' + (p.rendement_min||'—') + (p.rendement_min?' %':'') + '</div></div>';
+    h += '<div class="pj-item"><div class="pj-lbl">Stratégie</div><div class="pj-val">' + (p.strategie||'—') + '</div></div>';
+  }
+  h += '</div></div>';
+  h += '<a href="questionnaire-acheteur.html" class="btn-add ba-'+color+'" style="margin-top:8px">Modifier mon projet</a>';
+  return h;
+}
+
+// ══ PANNEAU AGENT ══
+function buildAgentPanel(leads, meta) {
+  var goldPlat = leads.filter(function(l){ return l.niveau_vendeur==='gold'||l.niveau_vendeur==='platinium'; });
+  var silver   = leads.filter(function(l){ return l.niveau_vendeur==='silver'; });
+
+  var h = '<div class="stats-row s4">';
+  h += '<div class="stat-box st-amber"><div class="stat-val">' + leads.length + '</div><div class="stat-lbl">Dossiers disponibles</div></div>';
+  h += '<div class="stat-box"><div class="stat-val">' + goldPlat.length + '</div><div class="stat-lbl">Gold & Platinium</div></div>';
+  h += '<div class="stat-box"><div class="stat-val">' + silver.length + '</div><div class="stat-lbl">Silver</div></div>';
+  h += '<div class="stat-box"><div class="stat-val">H+0</div><div class="stat-lbl">Alerte Platinium</div></div>';
+  h += '</div>';
+
+  h += '<div class="excl-box"><div class="excl-title">🔒 Prendre une exclusivité</div>';
+  h += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Bloquez un dossier pour votre clientèle.</div>';
+  h += '<div class="excl-btns"><button class="btn-excl" onclick="demanderExclusivite(48)">48h — 49 €</button><button class="btn-excl" onclick="demanderExclusivite(96)">96h — 99 €</button></div></div>';
+
+  h += '<div class="sec-head"><div class="sec-ttl">🥇 Dossiers Gold & Platinium</div></div>';
+  if (!goldPlat.length) {
+    h += '<div class="empty"><div class="empty-ico">🏆</div>Aucun dossier Gold ou Platinium disponible.</div>';
+  } else {
+    h += '<div class="leads-grid">';
+    goldPlat.slice(0,6).forEach(function(l) {
+      var isP = l.niveau_vendeur==='platinium';
+      h += '<div class="lead-card"><div class="lead-badge '+(isP?'lb-plat':'lb-gold')+'">'+(isP?'💎 Platinium':'🥇 Gold')+'</div>';
+      h += '<div class="lead-titre">'+(l.type_bien||'Bien')+' · '+(l.surface||'—')+' m²</div>';
+      h += '<div class="lead-meta">📍 '+(l.adresse?l.adresse+', ':'')+(l.ville||'')+' ('+l.code_postal+')<br>';
+      h += '💶 '+(l.prix?Math.round(l.prix).toLocaleString('fr-FR')+' €':'—')+'<br>';
+      h += '🏠 '+(l.nb_pieces||'—')+' pièces · DPE '+(l.classe_dpe||'NC')+'<br>';
+      h += '📞 '+(l.nom_vendeur||'')+' · '+(l.telephone||'')+'</div>';
+      h += '<div class="lead-acts"><button class="btn-l bl-ink" onclick="alert(\'Contact vendeur\')">Contacter</button>';
+      h += '<button class="btn-l bl-out" onclick="window.open(\'rapport-hanae.html?annonce='+l.id+'\',\'_blank\')">Voir dossier</button></div></div>';
+    });
+    h += '</div>';
+  }
+
+  h += '<div class="sec-head"><div class="sec-ttl">🏅 Dossiers Silver</div></div>';
+  if (!silver.length) {
+    h += '<div class="empty"><div class="empty-ico">🏅</div>Aucun dossier Silver disponible.</div>';
+  } else {
+    h += '<div class="leads-grid">';
+    silver.slice(0,4).forEach(function(l) {
+      h += '<div class="lead-card"><div class="lead-badge lb-silver">🏅 Silver</div>';
+      h += '<div class="lead-titre">'+(l.type_bien||'Bien')+' · '+(l.surface||'—')+' m²</div>';
+      h += '<div class="lead-meta">📍 '+(l.ville||'')+' ('+l.code_postal+')<br>';
+      h += '💶 '+(l.prix?Math.round(l.prix).toLocaleString('fr-FR')+' €':'—')+'<br>';
+      h += '🏠 '+(l.nb_pieces||'—')+' pièces<br>';
+      h += '📞 '+(l.nom_vendeur||'')+' · '+(l.telephone||'')+'</div>';
+      h += '<div class="lead-acts"><button class="btn-l bl-ink" onclick="alert(\'Contact vendeur\')">Contacter</button>';
+      h += '<button class="btn-l bl-out" onclick="window.open(\'rapport-hanae.html?annonce='+l.id+'\',\'_blank\')">Voir dossier</button></div></div>';
+    });
+    h += '</div>';
+  }
+  return h;
+}
+
+// ── ACTIONS ──
+async function editAnnonce(id) { window.location.href = 'questionnaire-vendeur.html?edit=' + id; }
+async function supprimerAnnonce(id) {
+  if (!confirm('Supprimer cette annonce définitivement ?')) return;
+  await db.from('annonces_vendeurs').delete().eq('id', id);
+  afficherDashboard(currentUser);
+}
+function demanderExclusivite(d) { alert('Exclusivité '+d+'h — paiement Stripe à venir.'); }
+
+async function logout() {
+  await db.auth.signOut();
+  currentUser = null;
+  document.getElementById('dash-page').style.display  = 'none';
+  document.getElementById('login-page').style.display = 'block';
+  document.getElementById('auth-email').value = '';
+  document.getElementById('auth-password').value = '';
+  document.getElementById('btn-auth').disabled = false;
+  document.getElementById('btn-auth').textContent = 'Se connecter';
+}
+
+// ── INIT ──
+(async function() {
+  switchTab('login');
+  var { data: { session } } = await db.auth.getSession();
+  if (session && session.user) afficherDashboard(session.user);
+  db.auth.onAuthStateChange(function(event, session) {
+    if ((event==='SIGNED_IN') && session && session.user) afficherDashboard(session.user);
+  });
+})();
+</script>
+</body>
+</html>
