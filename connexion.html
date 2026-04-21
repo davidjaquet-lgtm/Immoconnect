@@ -167,6 +167,29 @@ input:focus,select:focus{border-color:var(--ink)}
 .spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin:60px auto}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:640px){.s4,.s3{grid-template-columns:1fr 1fr}.ann-kpis{grid-template-columns:1fr 1fr}.leads-grid,.projet-grid{grid-template-columns:1fr}.profil-grid{grid-template-columns:1fr 1fr}}
+
+/* POPUP PROFIL */
+.popup-overlay{position:fixed;inset:0;background:rgba(15,15,14,.6);backdrop-filter:blur(4px);z-index:999;display:flex;align-items:center;justify-content:center;padding:24px}
+.popup-box{background:var(--warm);border-radius:var(--r);padding:32px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.popup-title{font-size:18px;font-weight:500;margin-bottom:6px}
+.popup-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6}
+.popup-profil-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.popup-profil-card{border:2px solid var(--line);border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);position:relative;user-select:none}
+.popup-profil-card:hover{border-color:var(--muted)}
+.popup-profil-card.checked{border-color:var(--teal);background:#E1F5EE}
+.popup-profil-card.checked.p-acheteur{border-color:var(--blue);background:#E6F1FB}
+.popup-profil-card.checked.p-investisseur{border-color:var(--coral);background:#FAECE7}
+.popup-profil-card.checked.p-agent{border-color:var(--amber);background:#FEF3E7}
+.popup-check{position:absolute;top:8px;right:10px;font-size:14px;display:none;font-weight:700}
+.popup-profil-card.checked .popup-check{display:block;color:var(--teal)}
+.popup-profil-card.checked.p-acheteur .popup-check{color:var(--blue)}
+.popup-profil-card.checked.p-investisseur .popup-check{color:var(--coral)}
+.popup-profil-card.checked.p-agent .popup-check{color:var(--amber)}
+.popup-icon{font-size:26px;margin-bottom:6px}
+.popup-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.popup-desc{font-size:11px;color:var(--muted)}
+.popup-field{margin-bottom:16px}
+.popup-hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -334,12 +357,20 @@ async function resetPassword() {
 // ── AFFICHER DASHBOARD ──
 async function afficherDashboard(user) {
   currentUser = user;
+
+  // Premier login via Google/Facebook — pas encore de profil configuré
+  var meta = user.user_metadata || {};
+  var isOAuth = user.app_metadata && (user.app_metadata.provider === 'google' || user.app_metadata.provider === 'facebook');
+  if (isOAuth && !meta.profil_configure) {
+    afficherPopupProfil(user);
+    return;
+  }
+
   document.getElementById('login-page').style.display  = 'none';
   document.getElementById('dash-page').style.display   = 'block';
   document.getElementById('dash-loading').style.display = 'block';
   document.getElementById('dash-content').style.display = 'none';
 
-  var meta   = user.user_metadata || {};
   var profils = meta.profils || ['vendeur'];
   var nom    = meta.nom || user.email.split('@')[0];
 
@@ -594,6 +625,102 @@ async function logout() {
     if ((event==='SIGNED_IN') && session && session.user) afficherDashboard(session.user);
   });
 })();
+</script>
+<!-- POPUP CHOIX PROFIL (premier login Google/Facebook) -->
+<div class="popup-overlay" id="popup-profil" style="display:none">
+  <div class="popup-box">
+    <div class="popup-title">Bienvenue sur ImmoConnect 👋</div>
+    <div class="popup-sub">Vous vous connectez pour la première fois. Cochez tous les profils qui vous correspondent — vous pourrez en ajouter d'autres plus tard.</div>
+
+    <div class="popup-profil-grid">
+      <div class="popup-profil-card p-vendeur checked" id="pp-vendeur" onclick="togglePopupProfil('vendeur')">
+        <div class="popup-check">✓</div>
+        <div class="popup-icon">🏠</div>
+        <div class="popup-name">Vendeur</div>
+        <div class="popup-desc">Je vends mon bien</div>
+      </div>
+      <div class="popup-profil-card p-acheteur" id="pp-acheteur" onclick="togglePopupProfil('acheteur')">
+        <div class="popup-check">✓</div>
+        <div class="popup-icon">🔑</div>
+        <div class="popup-name">Acheteur</div>
+        <div class="popup-desc">Je cherche un bien</div>
+      </div>
+      <div class="popup-profil-card p-investisseur" id="pp-investisseur" onclick="togglePopupProfil('investisseur')">
+        <div class="popup-check">✓</div>
+        <div class="popup-icon">📈</div>
+        <div class="popup-name">Investisseur</div>
+        <div class="popup-desc">Je cherche un rendement</div>
+      </div>
+      <div class="popup-profil-card p-agent" id="pp-agent" onclick="togglePopupProfil('agent')">
+        <div class="popup-check">✓</div>
+        <div class="popup-icon">🤝</div>
+        <div class="popup-name">Agent immo</div>
+        <div class="popup-desc">Je suis professionnel</div>
+      </div>
+    </div>
+
+    <div class="popup-field" id="popup-field-agence" style="display:none">
+      <label class="lbl">Agence immobilière</label>
+      <input type="text" id="popup-agence" placeholder="Nom de votre agence" style="margin-top:6px">
+    </div>
+
+    <div class="popup-field">
+      <label class="lbl">Votre nom / prénom</label>
+      <input type="text" id="popup-nom" placeholder="Jean Dupont" style="margin-top:6px">
+      <div class="popup-hint">Sera affiché dans votre espace personnel et visible des acheteurs / agents selon votre niveau d'annonce.</div>
+    </div>
+
+    <button class="btn-main" onclick="validerPopupProfil()">Accéder à mon espace →</button>
+  </div>
+</div>
+
+<script>
+var popupProfils = ['vendeur'];
+
+function togglePopupProfil(p) {
+  var idx = popupProfils.indexOf(p);
+  if (idx === -1) popupProfils.push(p);
+  else if (popupProfils.length > 1) popupProfils.splice(idx, 1);
+  ['vendeur','acheteur','investisseur','agent'].forEach(function(k) {
+    var el = document.getElementById('pp-' + k);
+    if (!el) return;
+    el.classList.toggle('checked', popupProfils.indexOf(k) !== -1);
+  });
+  document.getElementById('popup-field-agence').style.display =
+    popupProfils.indexOf('agent') !== -1 ? 'block' : 'none';
+}
+
+async function validerPopupProfil() {
+  if (!popupProfils.length) { alert('Choisissez au moins un profil.'); return; }
+  var nom    = document.getElementById('popup-nom').value.trim();
+  var agence = document.getElementById('popup-agence').value.trim();
+  var btn    = document.querySelector('#popup-profil .btn-main');
+  btn.disabled = true; btn.textContent = 'Enregistrement…';
+
+  var { error } = await db.auth.updateUser({
+    data: {
+      profils: popupProfils,
+      nom: nom || null,
+      agence: agence || null,
+      profil_configure: true
+    }
+  });
+
+  if (error) { btn.disabled=false; btn.textContent='Accéder à mon espace →'; alert('Erreur : ' + error.message); return; }
+
+  document.getElementById('popup-profil').style.display = 'none';
+  var { data: { user } } = await db.auth.getUser();
+  afficherDashboard(user);
+}
+
+function afficherPopupProfil(user) {
+  // Pré-remplir le nom depuis Google
+  var meta = user.user_metadata || {};
+  var nomGoogle = meta.full_name || meta.name || '';
+  var emailPart = user.email ? user.email.split('@')[0] : '';
+  document.getElementById('popup-nom').value = nomGoogle || emailPart;
+  document.getElementById('popup-profil').style.display = 'flex';
+}
 </script>
 </body>
 </html>
