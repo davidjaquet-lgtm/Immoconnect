@@ -725,10 +725,10 @@
 
   </div>
 
-  <div class="profil-tabs">
-    <button class="profil-tab active" onclick="showProfil('vendeur',this)">🏠 Vendeurs</button>
-    <button class="profil-tab" onclick="showProfil('agent',this)">🤝 Agents immo</button>
-    <button class="profil-tab" onclick="showProfil('investisseur',this)">📈 Investisseurs</button>
+  <div class="profil-tabs" id="profil-tabs">
+    <button class="profil-tab active" data-profil="vendeur">🏠 Vendeurs</button>
+    <button class="profil-tab" data-profil="agent">🤝 Agents immo</button>
+    <button class="profil-tab" data-profil="investisseur">📈 Investisseurs</button>
   </div>
 
   <!-- VENDEURS -->
@@ -1094,15 +1094,16 @@ renderListings();
 renderAgents();
 
 // ── PROFIL TABS ──
-function showProfil(profil, el) {
-  var panels = document.querySelectorAll('.profil-panel');
-  var tabs = document.querySelectorAll('.profil-tab');
-  for (var i = 0; i < panels.length; i++) panels[i].classList.remove('active');
-  for (var j = 0; j < tabs.length; j++) tabs[j].classList.remove('active');
-  var target = document.getElementById('panel-' + profil);
-  if (target) target.classList.add('active');
-  if (el) el.classList.add('active');
-}
+document.querySelectorAll('#profil-tabs .profil-tab').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var profil = this.getAttribute('data-profil');
+    document.querySelectorAll('.profil-panel').forEach(function(p){ p.classList.remove('active'); });
+    document.querySelectorAll('#profil-tabs .profil-tab').forEach(function(t){ t.classList.remove('active'); });
+    var target = document.getElementById('panel-' + profil);
+    if (target) target.classList.add('active');
+    this.classList.add('active');
+  });
+});
 </script>
 </body>
 </html>
