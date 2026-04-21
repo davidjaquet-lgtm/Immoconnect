@@ -426,13 +426,11 @@ tr:hover td{background:#F9F7F2}
 /* ══════════════════════════════════════════
    NAVIGATION ONGLETS
 ══════════════════════════════════════════ */
-document.querySelectorAll('.tab').forEach(function(tab) {
+document.querySelectorAll('.tabs .tab').forEach(function(tab) {
   tab.addEventListener('click', function() {
     var target = this.getAttribute('data-target');
-    // désactiver tous
-    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+    document.querySelectorAll('.tabs .tab').forEach(function(t){ t.classList.remove('active'); });
     document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
-    // activer le bon
     this.classList.add('active');
     document.getElementById(target).classList.add('active');
   });
