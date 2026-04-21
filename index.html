@@ -317,9 +317,10 @@
   .how-section {
     padding: 80px;
     background: var(--charcoal);
+    display: block;
   }
   .how-intro {
-    text-align: center; margin-bottom: 56px;
+    text-align: center; margin-bottom: 40px;
   }
   .how-text .section-eyebrow { color: var(--gold); }
   .how-text .section-title { color: var(--cream); }
@@ -558,7 +559,7 @@
     .hero-right { height: 400px; }
     .listings-grid { grid-template-columns: repeat(2, 1fr); }
     .agents-grid { grid-template-columns: repeat(2, 1fr); }
-    .how-section { grid-template-columns: 1fr; }
+    .how-section { display: block; }
     .cta-section { grid-template-columns: 1fr; }
     footer { grid-template-columns: 1fr 1fr; }
     nav, .listings-section, .agents-section, .search-section, .search-tabs,
@@ -592,12 +593,12 @@
 <!-- HERO -->
 <section class="hero">
   <div class="hero-left">
-    <div class="hero-eyebrow">Vendeurs · Agents · Investisseurs</div>
+    <div class="hero-eyebrow">La plateforme immobilière qui démultiplie vos chances</div>
     <h1 class="hero-title">
-      Votre bien vu<br>par les acheteurs<br><em>et tous les agents</em>
+      Vendez plus vite,<br>investissez <em>mieux</em>,<br>sans intermédiaire
     </h1>
     <p class="hero-sub">
-      Sur LeBonCoin ou SeLoger vous publiez et vous espérez. Sur ImmoConnect, chaque agent immobilier inscrit peut proposer votre bien à sa clientèle dès la publication — dossier prêt, action immédiate. Si un agent vend, il prend sa commission. Si vous vendez directement à un acheteur, <strong>vous ne payez rien.</strong>
+      Publiez gratuitement. Votre bien est visible par les acheteurs <strong>et</strong> par tous les agents inscrits qui peuvent le proposer à leur clientèle — dossier déjà prêt, action immédiate. Investisseurs : filtrez directement sur le rendement.
     </p>
     <div class="hero-ctas">
       <button class="btn-primary" onclick="window.location.href='questionnaire-acheteur.html'">Explorer les biens</button>
@@ -628,7 +629,7 @@
 <div class="search-tabs">
   <button class="search-tab active" onclick="setTab(this,'Acheter')">Acheter</button>
   
-  <button class="search-tab" onclick="setTab(this,'Neuf')">Programme neuf</button>
+  
   <button class="search-tab" onclick="setTab(this,'Estimer')">Estimer</button>
 </div>
 <div class="search-section">
@@ -721,7 +722,7 @@
 <section class="how-section">
   <div class="how-intro how-text">
     <div class="section-eyebrow">Pourquoi ImmoConnect</div>
-    <h2 class="section-title" style="color:var(--cream);font-size:clamp(28px,4vw,44px)">Ce que les autres <em style="color:var(--gold-light)">ne font pas</em></h2>
+
   </div>
 
   <div class="profil-tabs">
@@ -874,7 +875,7 @@
     <a href="questionnaire-acheteur.html">Maisons</a>
     <a href="questionnaire-acheteur.html">Villas</a>
     <a href="questionnaire-acheteur.html">Terrains</a>
-    <a href="questionnaire-acheteur.html">Immobilier neuf</a>
+    
   </div>
   <div class="footer-col">
     <h4>Vendre</h4>
@@ -919,7 +920,7 @@
 // ── DATA ──
 const listings = [
   { type:'vente', badge:'badge-vente', label:'À vendre', price:'1 250 000', unit:'€', title:'Villa d'exception avec piscine', city:'Cannes, 06400', rooms:6, beds:4, area:280, agent:'Sophie M.', agentRole:'Agent Senior', img:'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600&q=80' },
-  { type:'vente', badge:'badge-neuf', label:'Programme neuf', price:'385 000', unit:'€', title:'Appartement T3 — résidence privée', city:'Lyon 6e, 69006', rooms:3, beds:2, area:72, agent:'Marc D.', agentRole:'Agent Conseil', img:'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&q=80' },
+  { type:'vente', badge:'badge-vente', label:'À vendre', price:'385 000', unit:'€', title:'Appartement T3 — résidence privée', city:'Lyon 6e, 69006', rooms:3, beds:2, area:72, agent:'Marc D.', agentRole:'Agent Conseil', img:'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&q=80' },
   { type:'location', badge:'badge-vente', label:'À louer', price:'2 800', unit:'€/mois', title:'Loft industriel au cœur du Marais', city:'Paris 4e, 75004', rooms:2, beds:1, area:95, agent:'Claire B.', agentRole:'Spécialiste Paris', img:'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=600&q=80' },
   { type:'vente', badge:'badge-vente', label:'À vendre', price:'620 000', unit:'€', title:'Maison bourgeoise avec jardin', city:'Bordeaux, 33000', rooms:7, beds:4, area:210, agent:'Antoine R.', agentRole:'Agent Immobilier', img:'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&q=80' },
   { type:'vente', badge:'badge-vente', label:'À vendre', price:'190 000', unit:'€', title:'Studio rénové proche métro', city:'Toulouse, 31000', rooms:1, beds:1, area:38, agent:'Léa F.', agentRole:'Agent Junior', img:'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80' },
