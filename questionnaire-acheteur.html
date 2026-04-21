@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Mon projet immobilier</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--coral:#993C1D;--amber:#D4732A;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff}.nav-logo span{color:var(--gold)}
+.page{max-width:780px;margin:0 auto;padding:36px 24px 80px}
+
+/* FORFAIT SELECTOR */
+.forfait-selector{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:28px}
+.forfait-card{background:var(--warm);border:2px solid var(--line);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;text-align:center}
+.forfait-card:hover{border-color:var(--muted)}
+.forfait-card.selected-gratuit{border-color:var(--muted);background:#F1EFE8}
+.forfait-card.selected-acheteur{border-color:var(--blue);background:#E6F1FB}
+.forfait-card.selected-investisseur{border-color:var(--coral);background:#FAECE7}
+.fc-icon{font-size:24px;margin-bottom:8px}
+.fc-name{font-size:13px;font-weight:600;margin-bottom:4px}
+.fc-price{font-size:11px;color:var(--muted)}
+.fc-desc{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.5}
+
+/* PROGRESSION */
+.prog-bar-wrap{height:4px;background:var(--line);border-radius:2px;margin-bottom:28px;overflow:hidden}
+.prog-bar{height:100%;border-radius:2px;transition:width .4s ease,background .4s ease}
+.pb-gratuit{background:var(--muted)}
+.pb-acheteur{background:var(--blue)}
+.pb-investisseur{background:var(--coral)}
+
+/* CAPACITE LIVE */
+.capacite-box{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:20px;display:none}
+.capacite-box.visible{display:block}
+.cap-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:14px}
+.cap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.cap-card{background:var(--bg);border-radius:8px;padding:12px;text-align:center}
+.cap-card.featured{background:#E1F5EE;border:1px solid #9FE1CB}
+.cap-val{font-size:20px;font-weight:500;color:var(--teal)}
+.cap-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+.cap-bar-wrap{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-bottom:6px}
+.cap-bar-fill{height:100%;border-radius:4px;transition:width .4s ease,background .4s ease}
+.cap-ratio-lbl{font-size:11px;color:var(--muted);text-align:right}
+.cap-warning{background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:8px 12px;font-size:12px;color:#712B13;display:none}
+.cap-ok{background:#EAF3DE;border:1px solid #9FD9C0;border-radius:8px;padding:8px 12px;font-size:12px;color:#27500A;display:none}
+
+/* SECTION */
+.section{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
+.section-head{padding:13px 20px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.sec-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;background:#F1EFE8;color:var(--ink)}
+.sec-num.inv{background:#FAECE7;color:var(--coral)}
+.sec-ttl{font-size:13px;font-weight:500;flex:1}
+.sec-badge{font-size:9px;font-weight:600;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.8px;flex-shrink:0}
+.b-base{background:#F1EFE8;color:#555}
+.b-inv{background:#FAECE7;color:var(--coral)}
+.sec-arrow{font-size:11px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.sec-arrow.open{transform:rotate(180deg)}
+.sec-body{padding:0 20px 20px;display:none}
+.sec-body.open{display:block}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-grid.col1{grid-template-columns:1fr}
+.form-grid.col3{grid-template-columns:1fr 1fr 1fr}
+.field{display:flex;flex-direction:column;gap:5px}
+label.lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+input[type=text],input[type=number],input[type=tel],input[type=email],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink);outline:none;transition:border .15s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--ink)}
+.hint{font-size:10px;color:var(--muted);line-height:1.5;margin-top:2px}
+hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
+.radio-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.radio-opt{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;border:1px solid var(--line);cursor:pointer;font-size:12px;font-weight:500;background:var(--bg);transition:all .15s;user-select:none}
+.radio-opt input[type=radio]{display:none}
+.radio-opt.selected{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* INFO BOX INVESTISSEUR */
+.inv-info{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:12px;line-height:1.5;background:#FAECE7;border:1px solid rgba(153,60,29,.2);color:var(--coral)}
+.inv-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.inv-txt strong{display:block;font-weight:600;margin-bottom:2px}
+
+/* MATCHING BOX */
+.matching-box{background:#E1F5EE;border:1px solid #9FE1CB;border-radius:var(--r);padding:16px 20px;margin-bottom:16px;display:none}
+.matching-box.visible{display:block}
+.mb-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#085041;margin-bottom:12px}
+.mb-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mb-field{display:flex;flex-direction:column;gap:5px}
+
+/* SUBMIT */
+.submit-zone{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-top:20px}
+.btn-submit{width:100%;padding:12px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:none;background:var(--ink);color:#fff;transition:opacity .15s}
+.btn-submit:hover{opacity:.85}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed}
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:999;transform:translateY(80px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.t-ok{background:#1E7A62;color:#fff}.t-err{background:#C0392B;color:#fff}.t-info{background:var(--ink);color:#fff}
+
+@media(max-width:600px){
+  .form-grid,.form-grid.col3{grid-template-columns:1fr}
+  .forfait-selector{grid-template-columns:1fr}
+  .cap-grid,.mb-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<nav><div class="nav-logo">Immo<span>Connect</span></div></nav>
+<div class="page">
+
+  <div style="margin-bottom:22px">
+    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:500">Acheteur</div>
+    <div style="font-size:22px;font-weight:500;margin-bottom:6px">Mon projet immobilier</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.7;max-width:580px">Déposez votre projet pour être mis en relation avec les meilleurs biens correspondant à vos critères.</div>
+  </div>
+
+  <!-- CHOIX FORFAIT -->
+  <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px">Votre forfait</div>
+  <div class="forfait-selector">
+    <div class="forfait-card selected-gratuit" id="fc-gratuit" onclick="setForfait('gratuit')">
+      <div class="fc-icon">🏠</div>
+      <div class="fc-name">Gratuit</div>
+      <div class="fc-price">0 € / toujours</div>
+      <div class="fc-desc">Explorer les annonces · Contact vendeur 19,99€</div>
+    </div>
+    <div class="forfait-card" id="fc-acheteur" onclick="setForfait('acheteur')">
+      <div class="fc-icon">🔑</div>
+      <div class="fc-name">Acheteur</div>
+      <div class="fc-price">19,99 € / mois</div>
+      <div class="fc-desc">Infos complètes · Rapport Hanaé · 1 contact/semaine</div>
+    </div>
+    <div class="forfait-card" id="fc-investisseur" onclick="setForfait('investisseur')">
+      <div class="fc-icon">📈</div>
+      <div class="fc-name">Investisseur</div>
+      <div class="fc-price">39 € / mois</div>
+      <div class="fc-desc">Matching rendement · 5 contacts/semaine · Vendeurs Platinium</div>
+    </div>
+  </div>
+
+  <div class="prog-bar-wrap"><div class="prog-bar pb-gratuit" id="prog" style="width:20%"></div></div>
+
+  <!-- CAPACITE D'EMPRUNT LIVE (investisseur uniquement) -->
+  <div class="capacite-box" id="capacite-box">
+    <div class="cap-title">📊 Capacité d'emprunt — calcul en temps réel</div>
+    <div class="cap-grid">
+      <div class="cap-card">
+        <div class="cap-val" id="cap-mensualite">— €</div>
+        <div class="cap-lbl">Mensualité max (35%)</div>
+      </div>
+      <div class="cap-card featured">
+        <div class="cap-val" id="cap-montant">— €</div>
+        <div class="cap-lbl">Capacité d'emprunt</div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-val" id="cap-budget">— €</div>
+        <div class="cap-lbl">Budget total (avec apport)</div>
+      </div>
+    </div>
+    <div style="margin-bottom:6px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
+        <span style="color:var(--muted)">Taux d'endettement actuel</span>
+        <span id="cap-ratio-txt" style="font-weight:600">0 %</span>
+      </div>
+      <div class="cap-bar-wrap">
+        <div class="cap-bar-fill" id="cap-bar" style="width:0%;background:var(--teal)"></div>
+      </div>
+    </div>
+    <div class="cap-warning" id="cap-warning">⚠️ Votre taux d'endettement dépasse 35% — réduisez vos charges ou augmentez votre apport.</div>
+    <div class="cap-ok" id="cap-ok">✅ Votre dossier est dans les normes bancaires (taux d'endettement ≤ 35%).</div>
+  </div>
+
+  <!-- MATCHING FILTRES (investisseur uniquement) -->
+  <div class="matching-box" id="matching-box">
+    <div class="mb-title">🎯 Filtres matching automatique</div>
+    <div class="mb-grid">
+      <div class="mb-field">
+        <label class="lbl">Rendement brut minimum souhaité (%)</label>
+        <input type="number" id="rendement_min" placeholder="5" min="1" max="20" step="0.5">
+        <span class="hint">Ex : 5% = loyer annuel / prix d'achat × 100</span>
+      </div>
+      <div class="mb-field">
+        <label class="lbl">Prix maximum (€)</label>
+        <input type="number" id="prix_max" placeholder="200000" min="0" oninput="calculerCapacite()">
+      </div>
+      <div class="mb-field">
+        <label class="lbl">Surface minimum (m²)</label>
+        <input type="number" id="surface_min" placeholder="30" min="0">
+      </div>
+      <div class="mb-field">
+        <label class="lbl">Type de bien recherché</label>
+        <select id="type_bien_recherche">
+          <option value="">Tous types</option>
+          <option>Appartement</option><option>Maison</option><option>Studio</option>
+          <option>Immeuble de rapport</option><option>Local commercial</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ S1 : INFORMATIONS PERSONNELLES ══ -->
+  <div class="section">
+    <div class="section-head" onclick="toggle('s1')">
+      <div class="sec-num">1</div>
+      <div class="sec-ttl">Informations personnelles</div>
+      <span class="sec-badge b-base">Tous forfaits</span>
+      <span class="sec-arrow open" id="arr-s1">▼</span>
+    </div>
+    <div class="sec-body open" id="s1">
+      <div class="form-grid col1">
+        <div class="field"><label class="lbl">Nom / Prénom *</label>
+          <input type="text" id="nom_acheteur" placeholder="Jean Dupont"></div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label class="lbl">Téléphone *</label>
+          <input type="tel" id="telephone" placeholder="06 12 34 56 78"></div>
+        <div class="field"><label class="lbl">Email *</label>
+          <input type="email" id="email" placeholder="votre@email.fr"></div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label class="lbl">Situation familiale</label>
+          <select id="situation_familiale">
+            <option value="">Sélectionner</option>
+            <option>Célibataire</option><option>En couple</option>
+            <option>Marié(e)</option><option>Pacsé(e)</option><option>Divorcé(e)</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Personnes à charge</label>
+          <input type="number" id="personnes_charge" placeholder="0" min="0" max="10"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ S2 : PROJET D'ACHAT ══ -->
+  <div class="section">
+    <div class="section-head" onclick="toggle('s2')">
+      <div class="sec-num">2</div>
+      <div class="sec-ttl">Projet d'achat</div>
+      <span class="sec-badge b-base">Tous forfaits</span>
+      <span class="sec-arrow" id="arr-s2">▼</span>
+    </div>
+    <div class="sec-body" id="s2">
+      <div class="form-grid">
+        <div class="field"><label class="lbl">Type de bien recherché</label>
+          <select id="type_bien">
+            <option value="">Tous types</option>
+            <option>Appartement</option><option>Maison</option><option>Villa</option>
+            <option>Studio</option><option>Terrain</option><option>Local commercial</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Finalité *</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'finalite')"><input type="radio" name="finalite" value="Résidence principale">Résidence principale</label>
+            <label class="radio-opt" onclick="setRadio(this,'finalite')"><input type="radio" name="finalite" value="Investissement locatif">Investissement locatif</label>
+            <label class="radio-opt" onclick="setRadio(this,'finalite')"><input type="radio" name="finalite" value="Résidence secondaire">Résidence secondaire</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label class="lbl">Localisation souhaitée</label>
+          <input type="text" id="localisation" placeholder="Toulouse, Pau, Bordeaux…"></div>
+        <div class="field"><label class="lbl">Rayon de recherche (km)</label>
+          <select id="rayon">
+            <option>5 km</option><option>10 km</option><option>20 km</option>
+            <option>30 km</option><option>50 km</option><option>Toute la région</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid col3">
+        <div class="field"><label class="lbl">Surface min (m²)</label>
+          <input type="number" id="surface_souhaitee" placeholder="45" min="0"></div>
+        <div class="field"><label class="lbl">Nb pièces min</label>
+          <input type="number" id="nb_pieces_min" placeholder="2" min="1"></div>
+        <div class="field"><label class="lbl">Budget max envisagé (€)</label>
+          <input type="number" id="budget_envisage" placeholder="200000" min="0"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ S3 : REVENUS (investisseur uniquement) ══ -->
+  <div class="section" id="section-revenus" style="display:none">
+    <div class="section-head" onclick="toggle('s3')">
+      <div class="sec-num inv">3</div>
+      <div class="sec-ttl">Revenus mensuels nets</div>
+      <span class="sec-badge b-inv">Investisseur</span>
+      <span class="sec-arrow" id="arr-s3">▼</span>
+    </div>
+    <div class="sec-body" id="s3">
+      <div class="inv-info">
+        <div class="inv-icon">📈</div>
+        <div class="inv-txt">
+          <strong>Calcul capacité d'emprunt en temps réel</strong>
+          Remplissez vos revenus et charges pour voir instantanément votre capacité d'emprunt. Les loyers perçus sont pris en compte à 90%.
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label class="lbl">Salaire net mensuel (vous) *</label>
+          <input type="number" id="salaire_net" placeholder="2500" min="0" oninput="calculerCapacite()">
+          <span class="hint">Après impôts, avant abattement</span>
+        </div>
+        <div class="field"><label class="lbl">Salaire net mensuel (co-emprunteur)</label>
+          <input type="number" id="salaire_co" placeholder="0" min="0" oninput="calculerCapacite()">
+          <span class="hint">Laisser vide si pas de co-emprunteur</span>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label class="lbl">Type de contrat</label>
+          <select id="type_contrat">
+            <option>CDI</option><option>CDD</option><option>Fonctionnaire</option>
+            <option>Indépendant / Auto-entrepreneur</option><option>Retraité</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Ancienneté dans le poste</label>
+          <select id="anciennete">
+            <option>Moins de 1 an</option><option>1 à 3 ans</option>
+            <option>3 à 5 ans</option><option>Plus de 5 ans</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label class="lbl">Primes annuelles régulières (€/an)</label>
+          <input type="number" id="primes_annuelles" placeholder="0" min="0" oninput="calculerCapacite()">
+          <span class="hint">Divisées par 12 pour le calcul mensuel</span>
+        </div>
+        <div class="field"><label class="lbl">Revenus locatifs bruts (€/mois)</label>
+          <input type="number" id="revenus_locatifs" placeholder="0" min="0" oninput="calculerCapacite()">
+          <span class="hint" style="color:var(--coral);font-weight:500">90% pris en compte par les banques</span>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label class="lbl">Autres revenus (pensions, dividendes…)</label>
+          <input type="number" id="autres_revenus" placeholder="0" min="0" oninput="calculerCapacite()"></div>
+        <div class="field"><label class="lbl">Type de co-emprunteur</label>
+          <select id="type_co_emprunteur">
+            <option value="">Aucun</option>
+            <option>Conjoint / Partenaire</option>
+            <option>Associé</option><option>Autre</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ S4 : CHARGES & CRÉDITS (investisseur uniquement) ══ -->
+  <div class="section" id="section-charges" style="display:none">
+    <div class="section-head" onclick="toggle('s4')">
+      <div class="sec-num inv">4</div>
+      <div class="sec-ttl">Charges & Crédits en cours</div>
+      <span class="sec-badge b-inv">Investisseur</span>
+      <span class="sec-arrow" id="arr-s4">▼</span>
+    </div>
+    <div class="sec-body" id="s4">
+      <div class="form-grid">
+        <div class="field"><label class="lbl">Crédit immobilier (mensualité €)</label>
+          <input type="number" id="credit_immo" placeholder="0" min="0" oninput="calculerCapacite()"></div>
+        <div class="field"><label class="lbl">Crédit auto (mensualité €)</label>
+          <input type="number" id="credit_auto" placeholder="0" min="0" oninput="calculerCapacite()"></div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label class="lbl">Crédit conso / revolving (mensualité €)</label>
+          <input type="number" id="credit_conso" placeholder="0" min="0" oninput="calculerCapacite()"></div>
+        <div class="field"><label class="lbl">Pension alimentaire versée (€/mois)</label>
+          <input type="number" id="pension_versee" placeholder="0" min="0" oninput="calculerCapacite()"></div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label class="lbl">Loyer actuel payé (€/mois)</label>
+          <input type="number" id="loyer_actuel" placeholder="0" min="0">
+          <span class="hint">Non comptabilisé dans le taux d'endettement si remplacé par le crédit</span>
+        </div>
+        <div class="field"><label class="lbl">Autres charges mensuelles fixes</label>
+          <input type="number" id="autres_charges" placeholder="0" min="0" oninput="calculerCapacite()"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ S5 : APPORT & FINANCEMENT (investisseur uniquement) ══ -->
+  <div class="section" id="section-apport" style="display:none">
+    <div class="section-head" onclick="toggle('s5')">
+      <div class="sec-num inv">5</div>
+      <div class="sec-ttl">Apport & Financement</div>
+      <span class="sec-badge b-inv">Investisseur</span>
+      <span class="sec-arrow" id="arr-s5">▼</span>
+    </div>
+    <div class="sec-body" id="s5">
+      <div class="form-grid">
+        <div class="field"><label class="lbl">Montant de l'apport (€) *</label>
+          <input type="number" id="apport" placeholder="20000" min="0" oninput="calculerCapacite()">
+          <span class="hint">Minimum recommandé : 10% du prix d'achat</span>
+        </div>
+        <div class="field"><label class="lbl">Origine de l'apport</label>
+          <select id="origine_apport">
+            <option>Épargne personnelle</option><option>Donation familiale</option>
+            <option>Héritage</option><option>Revente d'un bien</option>
+            <option>Épargne salariale (PEE/PERCO)</option><option>Mixte</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label class="lbl">Épargne conservée après achat (€)</label>
+          <input type="number" id="epargne_residuelle" placeholder="5000" min="0">
+          <span class="hint">Recommandé : au moins 3 mois de charges</span>
+        </div>
+        <div class="field"><label class="lbl">Durée d'emprunt souhaitée</label>
+          <div class="radio-group">
+            <label class="radio-opt" onclick="setRadio(this,'duree_emprunt');calculerCapacite()"><input type="radio" name="duree_emprunt" value="10">10 ans</label>
+            <label class="radio-opt" onclick="setRadio(this,'duree_emprunt');calculerCapacite()"><input type="radio" name="duree_emprunt" value="15">15 ans</label>
+            <label class="radio-opt" onclick="setRadio(this,'duree_emprunt');calculerCapacite()"><input type="radio" name="duree_emprunt" value="20">20 ans</label>
+            <label class="radio-opt selected" onclick="setRadio(this,'duree_emprunt');calculerCapacite()"><input type="radio" name="duree_emprunt" value="25">25 ans</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label class="lbl">Taux envisagé (%)</label>
+          <input type="number" id="taux_envisage" placeholder="3.2" min="0" max="15" step="0.1" oninput="calculerCapacite()" value="3.2">
+          <span class="hint">Taux actuel marché : ~3.1 à 3.5%</span>
+        </div>
+        <div class="field"><label class="lbl">Type de taux préféré</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'type_taux')"><input type="radio" name="type_taux" value="Fixe">Fixe</label>
+            <label class="radio-opt" onclick="setRadio(this,'type_taux')"><input type="radio" name="type_taux" value="Variable">Variable</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ S6 : CRITÈRES INVESTISSEMENT (investisseur uniquement) ══ -->
+  <div class="section" id="section-invest" style="display:none">
+    <div class="section-head" onclick="toggle('s6')">
+      <div class="sec-num inv">6</div>
+      <div class="sec-ttl">Critères d'investissement</div>
+      <span class="sec-badge b-inv">Investisseur</span>
+      <span class="sec-arrow" id="arr-s6">▼</span>
+    </div>
+    <div class="sec-body" id="s6">
+      <div class="form-grid">
+        <div class="field"><label class="lbl">Rendement brut minimum souhaité (%)</label>
+          <input type="number" id="rendement_min_inv" placeholder="5" min="1" max="20" step="0.5">
+          <span class="hint">Rendement brut = loyer annuel / prix × 100</span>
+        </div>
+        <div class="field"><label class="lbl">Stratégie d'investissement</label>
+          <select id="strategie">
+            <option>Location nue longue durée</option>
+            <option>Location meublée (LMNP)</option>
+            <option>Location courte durée (Airbnb)</option>
+            <option>Colocation</option>
+            <option>Immeuble de rapport</option>
+            <option>Déficit foncier / travaux</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label class="lbl">Horizon de détention</label>
+          <select id="horizon_detention">
+            <option>Moins de 5 ans</option><option>5 à 10 ans</option>
+            <option>10 à 20 ans</option><option>Plus de 20 ans</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Tolérance aux travaux</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'tolerance_travaux')"><input type="radio" name="tolerance_travaux" value="Aucun">Aucun</label>
+            <label class="radio-opt" onclick="setRadio(this,'tolerance_travaux')"><input type="radio" name="tolerance_travaux" value="Légers">Légers</label>
+            <label class="radio-opt" onclick="setRadio(this,'tolerance_travaux')"><input type="radio" name="tolerance_travaux" value="Lourds">Lourds</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid col1">
+        <div class="field"><label class="lbl">Commentaires / critères spécifiques</label>
+          <textarea id="commentaires" placeholder="Ex : je cherche un T2 proche des transports, DPE C minimum, pas de RDC…" style="min-height:70px"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="submit-zone">
+    <div id="submit-recap" style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6"></div>
+    <button class="btn-submit" id="btn-submit" onclick="soumettre()">Déposer mon projet</button>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL  = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGh5ZWZhamZ3cWN4Y2Z4cG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjYwNDAsImV4cCI6MjA5MTUwMjA0MH0.jB8Z_9eT9lYkqxUUD0G001Y87iSAv94fSu_gVOdqa-A';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+var forfait = 'gratuit';
+
+/* ══ FORFAIT ══ */
+function setForfait(f) {
+  forfait = f;
+  ['gratuit','acheteur','investisseur'].forEach(function(k) {
+    document.getElementById('fc-' + k).className = 'forfait-card' + (k === f ? ' selected-' + k : '');
+  });
+  var isInv = f === 'investisseur';
+  var prog = document.getElementById('prog');
+  prog.className = 'prog-bar pb-' + f;
+  prog.style.width = f === 'gratuit' ? '20%' : f === 'acheteur' ? '50%' : '90%';
+  ['section-revenus','section-charges','section-apport','section-invest'].forEach(function(id) {
+    document.getElementById(id).style.display = isInv ? 'block' : 'none';
+  });
+  document.getElementById('capacite-box').className = 'capacite-box' + (isInv ? ' visible' : '');
+  document.getElementById('matching-box').className = 'matching-box' + (isInv ? ' visible' : '');
+  updateRecap();
+  if (isInv) calculerCapacite();
+}
+
+/* ══ SECTIONS ══ */
+function toggle(id) {
+  var b = document.getElementById(id);
+  var a = document.getElementById('arr-' + id);
+  var o = b.classList.contains('open');
+  b.classList.toggle('open', !o);
+  if (a) a.classList.toggle('open', !o);
+}
+
+/* ══ RADIOS ══ */
+function setRadio(el, name) {
+  document.querySelectorAll('[name="' + name + '"]').forEach(function(r) {
+    r.closest('.radio-opt').classList.remove('selected');
+  });
+  el.classList.add('selected');
+}
+function getRadio(name) {
+  var s = document.querySelector('.radio-opt.selected input[name="' + name + '"]');
+  return s ? s.value : '';
+}
+
+/* ══ CALCUL CAPACITÉ D'EMPRUNT ══ */
+function calculerCapacite() {
+  var salaire      = +document.getElementById('salaire_net').value || 0;
+  var salaireCo    = +document.getElementById('salaire_co').value || 0;
+  var primes       = (+document.getElementById('primes_annuelles').value || 0) / 12;
+  var locsLocatifs = (+document.getElementById('revenus_locatifs').value || 0) * 0.9; // 90%
+  var autresRev    = +document.getElementById('autres_revenus').value || 0;
+
+  var creditImmo   = +document.getElementById('credit_immo').value || 0;
+  var creditAuto   = +document.getElementById('credit_auto').value || 0;
+  var creditConso  = +document.getElementById('credit_conso').value || 0;
+  var pension      = +document.getElementById('pension_versee').value || 0;
+  var autresCharg  = +document.getElementById('autres_charges').value || 0;
+
+  var apport       = +document.getElementById('apport').value || 0;
+  var duree        = +(getRadio('duree_emprunt') || 25);
+  var taux         = (+document.getElementById('taux_envisage').value || 3.2) / 100 / 12;
+
+  var revenuTotal  = salaire + salaireCo + primes + locsLocatifs + autresRev;
+  var chargesTotal = creditImmo + creditAuto + creditConso + pension + autresCharg;
+
+  var mensualiteMax = revenuTotal * 0.35 - chargesTotal;
+  if (mensualiteMax < 0) mensualiteMax = 0;
+
+  // Calcul capacité emprunt (formule prêt amortissable)
+  var n = duree * 12;
+  var capaciteEmprunt = 0;
+  if (taux > 0 && mensualiteMax > 0) {
+    capaciteEmprunt = mensualiteMax * (1 - Math.pow(1 + taux, -n)) / taux;
+  } else if (mensualiteMax > 0) {
+    capaciteEmprunt = mensualiteMax * n;
+  }
+
+  var budgetTotal = capaciteEmprunt + apport;
+  var tauxEndettement = revenuTotal > 0 ? ((chargesTotal + mensualiteMax) / revenuTotal * 100) : 0;
+
+  var fmt = function(n) { return Math.round(n).toLocaleString('fr-FR') + ' €'; };
+
+  document.getElementById('cap-mensualite').textContent = fmt(mensualiteMax);
+  document.getElementById('cap-montant').textContent    = fmt(capaciteEmprunt);
+  document.getElementById('cap-budget').textContent     = fmt(budgetTotal);
+  document.getElementById('cap-ratio-txt').textContent  = Math.round(tauxEndettement) + ' %';
+
+  var barColor = tauxEndettement <= 25 ? '#1E7A62' : tauxEndettement <= 35 ? '#D4732A' : '#C0392B';
+  var barWidth = Math.min(tauxEndettement, 50) * 2;
+  document.getElementById('cap-bar').style.width = barWidth + '%';
+  document.getElementById('cap-bar').style.background = barColor;
+  document.getElementById('cap-ratio-txt').style.color = barColor;
+
+  document.getElementById('cap-warning').style.display = tauxEndettement > 35 ? 'block' : 'none';
+  document.getElementById('cap-ok').style.display      = tauxEndettement > 0 && tauxEndettement <= 35 ? 'block' : 'none';
+
+  // Mettre à jour prix max dans matching
+  if (!document.getElementById('prix_max').value) {
+    document.getElementById('prix_max').placeholder = Math.round(budgetTotal);
+  }
+}
+
+/* ══ RECAP SUBMIT ══ */
+function updateRecap() {
+  var txt = '';
+  if (forfait === 'gratuit')      txt = 'Forfait Gratuit — accès annonces de base.';
+  if (forfait === 'acheteur')     txt = 'Forfait Acheteur 19,99€/mois — infos complètes, rapport Hanaé, 1 contact vendeur/semaine.';
+  if (forfait === 'investisseur') txt = 'Forfait Investisseur 39€/mois — matching automatique, 5 contacts/semaine, vendeurs Platinium.';
+  document.getElementById('submit-recap').textContent = txt;
+}
+
+/* ══ SOUMISSION ══ */
+async function soumettre() {
+  var btn = document.getElementById('btn-submit');
+
+  var required = { nom_acheteur:'Nom / Prénom', telephone:'Téléphone', email:'Email' };
+  var missing = [];
+  Object.keys(required).forEach(function(id) {
+    var v = document.getElementById(id).value;
+    if (!v || !v.trim()) { document.getElementById(id).style.borderColor='#C0392B'; missing.push(required[id]); }
+    else document.getElementById(id).style.borderColor = '';
+  });
+  if (missing.length) { showToast('Champs manquants : ' + missing.join(', '), 'err'); return; }
+
+  btn.disabled = true; btn.textContent = 'Envoi en cours…';
+
+  // Calculs finaux
+  var salaire     = +document.getElementById('salaire_net').value || 0;
+  var salaireCo   = +document.getElementById('salaire_co').value || 0;
+  var primes      = (+document.getElementById('primes_annuelles').value || 0) / 12;
+  var locsLoc     = (+document.getElementById('revenus_locatifs').value || 0) * 0.9;
+  var autresRev   = +document.getElementById('autres_revenus').value || 0;
+  var revenuTotal = salaire + salaireCo + primes + locsLoc + autresRev;
+
+  var creditImmo  = +document.getElementById('credit_immo').value || 0;
+  var creditAuto  = +document.getElementById('credit_auto').value || 0;
+  var creditConso = +document.getElementById('credit_conso').value || 0;
+  var pension     = +document.getElementById('pension_versee').value || 0;
+  var autresCharg = +document.getElementById('autres_charges').value || 0;
+  var chargesTotal = creditImmo + creditAuto + creditConso + pension + autresCharg;
+
+  var apport      = +document.getElementById('apport').value || 0;
+  var duree       = +(getRadio('duree_emprunt') || 25);
+  var taux        = (+document.getElementById('taux_envisage').value || 3.2) / 100 / 12;
+  var n           = duree * 12;
+  var mensMax     = revenuTotal * 0.35 - chargesTotal;
+  var capacite    = mensMax > 0 && taux > 0 ? mensMax * (1 - Math.pow(1+taux,-n)) / taux : 0;
+  var tauxEndt    = revenuTotal > 0 ? (chargesTotal + Math.max(mensMax,0)) / revenuTotal * 100 : 0;
+
+  var payload = {
+    forfait:               forfait,
+    nom_acheteur:          document.getElementById('nom_acheteur').value,
+    telephone:             document.getElementById('telephone').value,
+    email:                 document.getElementById('email').value,
+    situation_familiale:   document.getElementById('situation_familiale').value,
+    personnes_charge:      +document.getElementById('personnes_charge').value || 0,
+    type_bien:             document.getElementById('type_bien').value,
+    finalite:              getRadio('finalite'),
+    localisation:          document.getElementById('localisation').value,
+    rayon:                 document.getElementById('rayon').value,
+    surface_souhaitee:     +document.getElementById('surface_souhaitee').value || null,
+    nb_pieces_min:         +document.getElementById('nb_pieces_min').value || null,
+    budget_envisage:       +document.getElementById('budget_envisage').value || null,
+    salaire_net:           salaire || null,
+    salaire_co:            salaireCo || null,
+    type_contrat:          document.getElementById('type_contrat').value,
+    anciennete:            document.getElementById('anciennete').value,
+    primes_annuelles:      +document.getElementById('primes_annuelles').value || null,
+    revenus_locatifs:      +document.getElementById('revenus_locatifs').value || null,
+    revenus_locatifs_90pc: Math.round(locsLoc) || null,
+    autres_revenus:        autresRev || null,
+    revenu_total_calcul:   Math.round(revenuTotal) || null,
+    credit_immo:           creditImmo || null,
+    credit_auto:           creditAuto || null,
+    credit_conso:          creditConso || null,
+    pension_versee:        pension || null,
+    loyer_actuel:          +document.getElementById('loyer_actuel').value || null,
+    autres_charges:        autresCharg || null,
+    charges_total_calcul:  Math.round(chargesTotal) || null,
+    apport:                apport || null,
+    origine_apport:        document.getElementById('origine_apport').value,
+    epargne_residuelle:    +document.getElementById('epargne_residuelle').value || null,
+    duree_emprunt:         duree,
+    taux_envisage:         +document.getElementById('taux_envisage').value || null,
+    type_taux:             getRadio('type_taux'),
+    mensualite_max:        Math.round(Math.max(mensMax,0)) || null,
+    capacite_emprunt:      Math.round(capacite) || null,
+    budget_total:          Math.round(capacite + apport) || null,
+    taux_endettement:      Math.round(tauxEndt * 10) / 10 || null,
+    rendement_min:         +document.getElementById('rendement_min_inv').value || null,
+    strategie:             document.getElementById('strategie').value,
+    horizon_detention:     document.getElementById('horizon_detention').value,
+    tolerance_travaux:     getRadio('tolerance_travaux'),
+    type_bien_recherche:   document.getElementById('type_bien_recherche').value,
+    surface_min:           +document.getElementById('surface_min').value || null,
+    prix_max:              +document.getElementById('prix_max').value || null,
+    commentaires:          document.getElementById('commentaires').value,
+    statut:                'en_attente',
+    created_at:            new Date().toISOString()
+  };
+
+  var { error } = await db.from('projets_acheteurs').insert([payload]);
+  if (error) {
+    showToast('Erreur : ' + error.message, 'err');
+    btn.disabled = false; btn.textContent = 'Déposer mon projet';
+    return;
+  }
+  showToast('✅ Projet déposé avec succès !', 'ok');
+  btn.textContent = '✓ Projet déposé';
+}
+
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast t-' + type + ' show';
+  setTimeout(function(){ t.classList.remove('show'); }, 3500);
+}
+
+/* INIT */
+updateRecap();
+</script>
+</body>
+</html>
