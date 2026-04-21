@@ -264,11 +264,11 @@ tr:hover td{background:#F9F7F2}
 
   <!-- ═══════════ ACHETEURS ═══════════ -->
   <div id="acheteurs" class="panel">
-    <div class="sec-eye">3 plans · Freemium</div>
+    <div class="sec-eye">2 plans · Freemium</div>
     <div class="sec-title">Plans acheteurs</div>
-    <div class="sec-sub">Gratuit pour explorer. Acheteur à 19,99€ avec infos complètes et rapport Hanaé. Investisseur à 39€ avec matching automatique et 5 contacts/semaine.</div>
+    <div class="sec-sub">Gratuit pour explorer les annonces. Acheteur à 19,99€ avec infos complètes, rapport Hanaé et 1 contact vendeur/semaine. Pour investir, voir l'onglet Investisseur.</div>
 
-    <div class="grid4" style="grid-template-columns:repeat(3,1fr)" id="ac-cards"></div>
+    <div class="grid4" style="grid-template-columns:repeat(2,1fr)" id="ac-cards"></div>
 
     <div class="table-wrap">
       <table>
@@ -276,53 +276,39 @@ tr:hover td{background:#F9F7F2}
           <th>Critère</th>
           <th>Gratuit</th>
           <th style="background:rgba(24,95,165,.05)">Acheteur</th>
-          <th style="background:rgba(192,155,90,.06)">Investisseur</th>
         </tr></thead>
         <tbody>
           <tr><td>Accès annonces</td>
             <td style="font-size:11px">Ville · surface · 3 photos</td>
             <td><span class="td-yes">✓ Infos complètes</span></td>
-            <td class="td-gold"><span class="td-yes">✓ Infos complètes</span></td>
           </tr>
           <tr><td>Adresse exacte</td>
             <td><span class="td-no">—</span></td>
             <td><span class="td-yes">✓</span></td>
-            <td class="td-gold"><span class="td-yes">✓</span></td>
           </tr>
           <tr><td>Rapport Hanaé IA</td>
             <td><span class="td-no">—</span></td>
             <td><span class="td-yes">✓ Inclus</span></td>
-            <td class="td-gold"><span class="td-yes">✓ Inclus</span></td>
           </tr>
           <tr><td>Contact vendeur inclus</td>
             <td style="color:#854F0B;font-size:11px">19,99 €/contact</td>
             <td style="color:#185FA5;font-size:11px;font-weight:600">1/semaine illimité</td>
-            <td class="td-gold" style="color:#854F0B;font-size:11px;font-weight:600">5/semaine illimités</td>
           </tr>
           <tr><td>Contact supplémentaire</td>
             <td><span class="td-no">—</span></td>
             <td style="font-size:11px;color:var(--muted)">9,99 €/contact</td>
-            <td class="td-gold" style="font-size:11px;color:#854F0B;font-weight:600">1,99 €/contact</td>
           </tr>
           <tr><td>Matching automatique</td>
             <td><span class="td-no">—</span></td>
             <td><span class="td-no">—</span></td>
-            <td class="td-gold"><span class="td-yes">✓ Rendement · prix/m²</span></td>
-          </tr>
-          <tr><td>Contacté par vendeurs Platinium</td>
-            <td><span class="td-no">—</span></td>
-            <td><span class="td-no">—</span></td>
-            <td class="td-gold"><span class="td-yes">✓</span></td>
           </tr>
           <tr><td>Alertes annonces</td>
             <td>Quotidien</td>
             <td>Temps réel</td>
-            <td class="td-gold"><span class="td-yes">Temps réel</span></td>
           </tr>
           <tr class="td-price"><td>Tarif</td>
             <td>0 €</td>
             <td style="color:#185FA5;font-weight:600">19,99 €/mois</td>
-            <td class="td-gold">39 €/mois</td>
           </tr>
         </tbody>
       </table>
@@ -331,36 +317,36 @@ tr:hover td{background:#F9F7F2}
 
   <!-- ═══════════ INVESTISSEUR ═══════════ -->
   <div id="investisseur" class="panel">
-    <div class="sec-eye">Inclus dans le forfait Acheteur</div>
-    <div class="sec-title">Forfait Investisseur</div>
-    <div class="sec-sub">39€/mois — 5 contacts vendeurs/semaine illimités · matching automatique sur rendement · contacté directement par les vendeurs Platinium · contact supplémentaire à 1,99€.</div>
+    <div class="sec-eye">Forfait acheteur investisseur</div>
+    <div class="sec-title">Investisseur</div>
+    <div class="sec-sub">39€/mois — 5 contacts vendeurs/semaine · matching automatique rendement · contacté par les vendeurs Platinium · contact supplémentaire à 1,99€.</div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
       <div class="card featured">
         <div class="card-bar bar-coral"></div>
         <div class="card-head bg-coral">
           <div class="badge badge-right badge-amber">39 €/mois</div>
-          <div class="badge badge-left badge-green">3 leads offerts</div>
         </div>
         <div class="card-body">
-          <div class="plan-name">Investisseur Pro</div>
+          <div class="plan-name">Investisseur</div>
           <div class="price-main">39 €</div>
-          <div class="price-sub">/mois · annuel 32 €</div>
-          <div class="plan-tag">Matching · comparaison prix/m² · dossier vendeur</div>
+          <div class="price-sub">/mois</div>
+          <div class="plan-tag">5 contacts/semaine · matching rendement · vendeurs Platinium</div>
+          <div class="pay-box" style="margin-bottom:8px"><span class="pay-lbl">Contact supp. : 1,99 €/contact</span></div>
           <hr class="divider">
           <div class="feats">
-            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span class="feat-ok-txt">Matching biens à fort rendement</span></div>
-            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span class="feat-ok-txt">3 leads vendeurs offerts</span></div>
-            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span class="feat-ok-txt">Accès dossier complet vendeur</span></div>
-            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span class="feat-ok-txt">Comparaison prix/m² vs marché</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Simulateur rendement net</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Alertes dès que le seuil est atteint</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt">Historique loyers DVF</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt">Cash-flow + retour sur invest.</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt">Analyse multi-biens · export Excel/PDF</span></div>
+            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span class="feat-ok-txt">Infos complètes — adresse exacte + toutes données</span></div>
+            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span class="feat-ok-txt">Rapport Hanaé IA inclus</span></div>
+            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span class="feat-ok-txt">5 contacts vendeurs/semaine — illimités</span></div>
+            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span class="feat-ok-txt">Matching auto sur filtres (rendement, prix/m²)</span></div>
+            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span class="feat-ok-txt">Contacté directement par vendeurs Platinium</span></div>
+            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Alertes temps réel sur vos critères</span></div>
+            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt">Simulateur rendement net</span></div>
+            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt">Comparaison prix/m² vs marché DVF</span></div>
+            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt">Calcul capacité d'emprunt intégré</span></div>
             <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt">Support 7j/7</span></div>
           </div>
-          <button class="btn btn-amber">Choisir Investisseur Pro</button>
+          <a href="questionnaire-acheteur.html" class="btn btn-amber" style="display:block;text-align:center;text-decoration:none">Choisir Investisseur</a>
         </div>
       </div>
 
@@ -543,11 +529,10 @@ var AC = [
       {y:1,t:'Alertes quotidiennes'},
       {y:0,t:'Adresse et infos complètes'},
       {y:0,t:'Rapport Hanaé IA'},
-      {y:0,t:'Matching automatique'},
       {y:0,t:'Contact vendeur inclus'}
     ],
-    contact:'Contact vendeur : 19,99 €/contact',
-    price:'0 €', priceGreen:true, priceSub:'pour toujours', btn:'btn-out', ct:'Commencer gratuitement' },
+    contact:'Contact vendeur : 19,99 euros/contact',
+    price:'0 euros', priceGreen:true, priceSub:'pour toujours', btn:'btn-out', ct:'Commencer gratuitement' },
 
   { n:'Acheteur', bar:'bar-blue', bg:'bg-blue',
     tag:'Infos complètes · rapport Hanaé · 1 contact/semaine',
@@ -560,131 +545,9 @@ var AC = [
       {y:0,t:'Matching automatique sur filtres'},
       {y:0,t:'Contacté par vendeurs Platinium'}
     ],
-    contact:'Contact supp. : 9,99 €/contact',
-    price:'19,99 €', priceSub:'/mois', btn:'btn-dark', ct:'Choisir Acheteur' },
-
-  { n:'Investisseur', bar:'bar-coral', bg:'bg-coral',
-    tag:'5 contacts/semaine · matching rendement · vendeurs Platinium',
-    badge:{t:'Investisseur',c:'badge-amber'},
-    feats:[
-      {y:1,b:1,t:'Adresse exacte + toutes infos vendeur'},
-      {y:1,b:1,t:'Rapport Hanaé IA inclus'},
-      {y:1,b:1,t:'5 contacts vendeurs/semaine illimités'},
-      {y:1,b:1,t:'Matching auto sur filtres (rendement, prix/m²)'},
-      {y:1,b:1,t:'Contacté directement par vendeurs Platinium'},
-      {y:1,t:'Alertes temps réel'}
-    ],
-    contact:'Contact supp. : 1,99 €/contact',
-    price:'39 €', priceSub:'/mois', btn:'btn-amber', ct:'Choisir Investisseur' }
-]
-
-/* ══════════════════════════════════════════
-   RENDU CARTES
-══════════════════════════════════════════ */
-function renderAgents() {
-  var html = '';
-  AG.forEach(function(p) {
-    var price = annuel ? p.pa : p.p;
-    var sub = annuel ? '/mois · annuel' : '/mois';
-    html += '<div class="card' + (p.feat ? ' featured' : '') + '">';
-    html += '<div class="card-bar ' + p.bar + '"></div>';
-    html += '<div class="card-head ' + p.bg + '">';
-    if (p.badge) html += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
-    html += '</div>';
-    html += '<div class="card-body">';
-    html += '<div class="plan-name">' + p.n + '</div>';
-    html += '<div class="price-main">' + price + ' €</div>';
-    html += '<div class="price-sub">' + sub + '</div>';
-    html += '<div class="plan-tag">' + p.tag + '</div>';
-    html += '<hr class="divider">';
-    html += '<div class="feats">';
-    p.feats.forEach(function(f) {
-      html += '<div class="feat' + (!f.y ? ' dim' : '') + '">';
-      html += '<div class="feat-dot ' + (f.y ? 'y' : 'n') + '">' + (f.y ? '✓' : '✗') + '</div>';
-      html += '<span class="feat-txt' + (f.b ? ' bold' : '') + '">' + f.t + '</span>';
-      html += '</div>';
-    });
-    html += '</div>';
-    html += '<button class="btn ' + p.btn + '">' + p.ct + '</button>';
-    html += '</div></div>';
-  });
-  document.getElementById('ag-cards').innerHTML = html;
-}
-
-function renderVendeurs() {
-  var html = '';
-  VE.forEach(function(p) {
-    html += '<div class="card' + (p.feat ? ' featured' : '') + '">';
-    html += '<div class="card-bar ' + p.bar + '"></div>';
-    html += '<div class="card-head ' + p.bg + '">';
-    if (p.badge) html += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
-    html += '</div>';
-    html += '<div class="card-body">';
-    html += '<div class="plan-name">' + p.n + '</div>';
-    html += '<div class="price-main price-green">0 €</div>';
-    html += '<div class="price-sub">gratuit — toujours</div>';
-    html += '<div class="plan-tag">' + p.tag + '</div>';
-    if (p.docs) {
-      html += '<div class="gold-box"><div class="gold-box-title">Documents requis</div>';
-      html += '<div class="gold-box-docs">' + p.docs + '</div></div>';
-    }
-    if (p.contact) {
-      html += '<div class="pay-box"><span class="pay-lbl">' + p.contact + '</span></div>';
-    }
-    html += '<hr class="divider">';
-    html += '<div class="feats">';
-    p.feats.forEach(function(f) {
-      html += '<div class="feat' + (!f.y ? ' dim' : '') + '">';
-      html += '<div class="feat-dot ' + (f.y ? 'y' : 'n') + '">' + (f.y ? '✓' : '✗') + '</div>';
-      html += '<span class="feat-txt' + (f.b ? ' bold' : '') + '">' + f.t + '</span>';
-      html += '</div>';
-    });
-    html += '</div>';
-    html += '<a href="questionnaire-vendeur.html" class="btn ' + p.btn + '" style="display:block;text-align:center;text-decoration:none">' + p.ct + '</a>';
-    html += '</div></div>';
-  });
-  document.getElementById('ve-cards').innerHTML = html;
-}
-
-function renderAcheteurs() {
-  var html = '';
-  AC.forEach(function(p) {
-    html += '<div class="card' + (p.feat ? ' featured' : '') + '">';
-    html += '<div class="card-bar ' + p.bar + '"></div>';
-    html += '<div class="card-head ' + p.bg + '">';
-    if (p.badge) html += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
-    html += '</div>';
-    html += '<div class="card-body">';
-    html += '<div class="plan-name">' + p.n + '</div>';
-    html += '<div class="price-main' + (p.priceGreen ? ' price-green' : '') + '">' + p.price + '</div>';
-    html += '<div class="price-sub">' + (p.priceSub || '') + '</div>';
-    html += '<div class="plan-tag">' + p.tag + '</div>';
-    if (p.contact) {
-      html += '<div class="pay-box"><span class="pay-lbl">' + p.contact + '</span></div>';
-    }
-    html += '<hr class="divider">';
-    html += '<div class="feats">';
-    p.feats.forEach(function(f) {
-      html += '<div class="feat' + (!f.y ? ' dim' : '') + '">';
-      html += '<div class="feat-dot ' + (f.y ? 'y' : 'n') + '">' + (f.y ? '✓' : '✗') + '</div>';
-      html += '<span class="feat-txt' + (f.b ? ' bold' : '') + '">' + f.t + '</span>';
-      html += '</div>';
-    });
-    html += '</div>';
-    html += '<button class="btn ' + p.btn + '">' + p.ct + '</button>';
-    html += '</div></div>';
-  });
-  document.getElementById('ac-cards').innerHTML = html;
-}
-
-/* TOGGLE ANNUEL */
-document.getElementById('ag-toggle').addEventListener('click', function() {
-  annuel = !annuel;
-  this.classList.toggle('on', annuel);
-  document.getElementById('lbl-m').classList.toggle('active', !annuel);
-  document.getElementById('lbl-a').classList.toggle('active', annuel);
-  // Mettre à jour les prix dans le tableau
-  var prices = [{id:'p-starter',m:49,a:41},{id:'p-pro',m:99,a:82},{id:'p-expert',m:149,a:124},{id:'p-plat',m:199,a:166}];
+    contact:'Contact supp. : 9,99 euros/contact',
+    price:'19,99 euros', priceSub:'/mois', btn:'btn-dark', ct:'Choisir Acheteur' }
+];
   prices.forEach(function(p) {
     var el = document.getElementById(p.id);
     if (el) el.textContent = (annuel ? p.a : p.m) + ' €';
