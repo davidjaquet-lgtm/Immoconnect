@@ -546,6 +546,113 @@ var AC = [
     contact:'Contact supp. : 9,99 euros/contact',
     price:'19,99 euros', priceSub:'/mois', btn:'btn-dark', ct:'Choisir Acheteur' }
 ];
+
+/* ══════════════════════════════════════════
+   RENDU CARTES
+══════════════════════════════════════════ */
+function renderAgents() {
+  var html = '';
+  AG.forEach(function(p) {
+    var price = annuel ? p.pa : p.p;
+    var sub = annuel ? '/mois · annuel' : '/mois';
+    html += '<div class="card' + (p.feat ? ' featured' : '') + '">';
+    html += '<div class="card-bar ' + p.bar + '"></div>';
+    html += '<div class="card-head ' + p.bg + '">';
+    if (p.badge) html += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
+    html += '</div>';
+    html += '<div class="card-body">';
+    html += '<div class="plan-name">' + p.n + '</div>';
+    html += '<div class="price-main">' + price + ' €</div>';
+    html += '<div class="price-sub">' + sub + '</div>';
+    html += '<div class="plan-tag">' + p.tag + '</div>';
+    html += '<hr class="divider">';
+    html += '<div class="feats">';
+    p.feats.forEach(function(f) {
+      html += '<div class="feat' + (!f.y ? ' dim' : '') + '">';
+      html += '<div class="feat-dot ' + (f.y ? 'y' : 'n') + '">' + (f.y ? '✓' : '✗') + '</div>';
+      html += '<span class="feat-txt' + (f.b ? ' bold' : '') + '">' + f.t + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '<button class="btn ' + p.btn + '">' + p.ct + '</button>';
+    html += '</div></div>';
+  });
+  document.getElementById('ag-cards').innerHTML = html;
+}
+
+function renderVendeurs() {
+  var html = '';
+  VE.forEach(function(p) {
+    html += '<div class="card' + (p.feat ? ' featured' : '') + '">';
+    html += '<div class="card-bar ' + p.bar + '"></div>';
+    html += '<div class="card-head ' + p.bg + '">';
+    if (p.badge) html += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
+    html += '</div>';
+    html += '<div class="card-body">';
+    html += '<div class="plan-name">' + p.n + '</div>';
+    html += '<div class="price-main price-green">0 €</div>';
+    html += '<div class="price-sub">gratuit — toujours</div>';
+    html += '<div class="plan-tag">' + p.tag + '</div>';
+    if (p.docs) {
+      html += '<div class="gold-box"><div class="gold-box-title">Documents requis</div>';
+      html += '<div class="gold-box-docs">' + p.docs + '</div></div>';
+    }
+    if (p.contact) {
+      html += '<div class="pay-box"><span class="pay-lbl">' + p.contact + '</span></div>';
+    }
+    html += '<hr class="divider">';
+    html += '<div class="feats">';
+    p.feats.forEach(function(f) {
+      html += '<div class="feat' + (!f.y ? ' dim' : '') + '">';
+      html += '<div class="feat-dot ' + (f.y ? 'y' : 'n') + '">' + (f.y ? '✓' : '✗') + '</div>';
+      html += '<span class="feat-txt' + (f.b ? ' bold' : '') + '">' + f.t + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '<a href="questionnaire-vendeur.html" class="btn ' + p.btn + '" style="display:block;text-align:center;text-decoration:none">' + p.ct + '</a>';
+    html += '</div></div>';
+  });
+  document.getElementById('ve-cards').innerHTML = html;
+}
+
+function renderAcheteurs() {
+  var html = '';
+  AC.forEach(function(p) {
+    html += '<div class="card' + (p.feat ? ' featured' : '') + '">';
+    html += '<div class="card-bar ' + p.bar + '"></div>';
+    html += '<div class="card-head ' + p.bg + '">';
+    if (p.badge) html += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
+    html += '</div>';
+    html += '<div class="card-body">';
+    html += '<div class="plan-name">' + p.n + '</div>';
+    html += '<div class="price-main' + (p.priceGreen ? ' price-green' : '') + '">' + p.price + '</div>';
+    html += '<div class="price-sub">' + (p.priceSub || '') + '</div>';
+    html += '<div class="plan-tag">' + p.tag + '</div>';
+    if (p.contact) {
+      html += '<div class="pay-box"><span class="pay-lbl">' + p.contact + '</span></div>';
+    }
+    html += '<hr class="divider">';
+    html += '<div class="feats">';
+    p.feats.forEach(function(f) {
+      html += '<div class="feat' + (!f.y ? ' dim' : '') + '">';
+      html += '<div class="feat-dot ' + (f.y ? 'y' : 'n') + '">' + (f.y ? '✓' : '✗') + '</div>';
+      html += '<span class="feat-txt' + (f.b ? ' bold' : '') + '">' + f.t + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '<a href="questionnaire-acheteur.html" class="btn ' + p.btn + '" style="display:block;text-align:center;text-decoration:none">' + p.ct + '</a>';
+    html += '</div></div>';
+  });
+  document.getElementById('ac-cards').innerHTML = html;
+}
+
+/* TOGGLE ANNUEL */
+document.getElementById('ag-toggle').addEventListener('click', function() {
+  annuel = !annuel;
+  this.classList.toggle('on', annuel);
+  document.getElementById('lbl-m').classList.toggle('active', !annuel);
+  document.getElementById('lbl-a').classList.toggle('active', annuel);
+  var prices = [{id:'p-starter',m:49,a:41},{id:'p-pro',m:99,a:82},{id:'p-expert',m:149,a:124},{id:'p-plat',m:199,a:166}];
   prices.forEach(function(p) {
     var el = document.getElementById(p.id);
     if (el) el.textContent = (annuel ? p.a : p.m) + ' €';
