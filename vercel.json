@@ -1,16 +1,18 @@
 {
+  "version": 2,
+  "name": "immoconnect-agence",
   "routes": [
     { "src": "/", "dest": "/index.html" },
-    { "src": "/dashboard", "dest": "/dashboard.html" },
+    { "src": "/forfaits", "dest": "/forfaits.html" },
     { "src": "/carte", "dest": "/carte-dvf.html" },
+    { "src": "/dashboard", "dest": "/dashboard.html" },
     { "src": "/regions", "dest": "/regions.html" },
     { "src": "/agent-ia", "dest": "/agent-ia.html" },
     { "src": "/exclusivite", "dest": "/exclusivite.html" },
     { "src": "/revenus", "dest": "/revenus.html" },
-    { "src": "/forfaits", "dest": "/forfaits.html" },
+    { "src": "/stripe", "dest": "/stripe-paiements.html" },
     { "src": "/guide", "dest": "/guide.html" },
     { "src": "/todo", "dest": "/todo.html" },
-    { "src": "/stripe", "dest": "/stripe-paiements.html" },
-    { "src": "/questionnaire-vendeur", "dest": "/questionnaire-vendeur.html" }
+    { "src": "/(.*)", "dest": "/$1" }
   ]
 }

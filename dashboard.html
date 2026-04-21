@@ -548,50 +548,16 @@ tbody tr:hover{background:rgba(192,155,90,.04);}
     <div class="sb-tagline">Espace Demandes</div>
   </div>
 
-  <nav class="sb-nav">
-    <div class="sb-section-label">Vue d'ensemble</div>
-    <div class="sb-item active" onclick="goTo('dashboard',this)">
-      <span class="sb-icon">⊞</span> Tableau de bord
-    </div>
-    <div class="sb-item" onclick="goTo('toutes',this)">
-      <span class="sb-icon">📋</span> Toutes les demandes
-      <span class="sb-badge" id="totalBadge">0</span>
-    </div>
-
-    <div class="sb-section-label">Par profil</div>
-    <div class="sb-item" onclick="goTo('acheteurs',this)">
-      <span class="sb-icon">🏠</span> Acheteurs
-      <span class="sb-badge teal" id="achBadge">0</span>
-    </div>
-    <div class="sb-item" onclick="goTo('vendeurs',this)">
-      <span class="sb-icon">💶</span> Vendeurs
-      <span class="sb-badge rose" id="venBadge">0</span>
-    </div>
-    <div class="sb-item" onclick="goTo('locataires',this)">
-      <span class="sb-icon">🔑</span> Locataires
-      <span class="sb-badge" id="locBadge">0</span>
-    </div>
-
-    <div class="sb-section-label">Traitement</div>
-    <div class="sb-item" onclick="goTo('pipeline',this)">
-      <span class="sb-icon">⟳</span> Pipeline Kanban
-    </div>
-    <div class="sb-item" onclick="goTo('matching',this)">
-      <span class="sb-icon">⇌</span> Matching
-      <span class="sb-badge" id="matchBadge">0</span>
-    </div>
-    <div class="sb-item" onclick="goTo('nouvelle',this)">
-      <span class="sb-icon">＋</span> Nouvelle demande
-    </div>
-
-    <div class="sb-section-label">Outils</div>
-    <div class="sb-item" onclick="window.open('immo-carte-dvf.html')">
-      <span class="sb-icon">🗺</span> Carte DVF
-    </div>
-    <div class="sb-item" onclick="window.open('immo-connect.html')">
-      <span class="sb-icon">↗</span> Site vitrine
-    </div>
-  </nav>
+  <nav style="background:#0F0F0E;height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100;gap:0">
+  <a href="index.html" style="font-size:18px;font-weight:600;color:#fff;text-decoration:none;margin-right:32px;font-family:'Outfit',sans-serif">Immo<span style="color:#C09B5A">Connect</span></a>
+  <div style="display:flex;gap:24px;align-items:center;flex:1">
+    <a href="forfaits.html" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Forfaits</a>
+    <a href="questionnaire-vendeur.html" style="text-decoration:none;padding:7px 16px;background:#C09B5A;color:#0F0F0E;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif">Vendre</a>
+    <a href="questionnaire-acheteur.html" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Acheter</a>
+    <a href="index.html#agents" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Agents immo</a>
+  </div>
+  <a href="index.html" style="text-decoration:none;padding:8px 20px;border:1px solid #444;color:#fff;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif;transition:all .2s" onmouseover="this.style.borderColor='#C09B5A';this.style.color='#C09B5A'" onmouseout="this.style.borderColor='#444';this.style.color='#fff'">Accueil</a>
+</nav>
 
   <div class="sb-footer">
     <div class="sb-user">
