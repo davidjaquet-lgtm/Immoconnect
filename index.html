@@ -595,7 +595,7 @@
   <div class="hero-left">
     <div class="hero-eyebrow">La plateforme immobilière qui démultiplie vos chances</div>
     <h1 class="hero-title">
-      Vendez plus vite,<br>investissez <em>mieux</em>,<br>sans intermédiaire
+      Vendez plus vite.<br>Publiez une fois,<br><em>touchez tout le marché.</em>
     </h1>
     <p class="hero-sub">
       Publiez gratuitement. Votre bien est visible par les acheteurs <strong>et</strong> par tous les agents inscrits qui peuvent le proposer à leur clientèle — dossier déjà prêt, action immédiate. Investisseurs : filtrez directement sur le rendement.
@@ -1094,14 +1094,17 @@ renderListings();
 renderAgents();
 
 // ── PROFIL TABS ──
-document.querySelectorAll('#profil-tabs .profil-tab').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    var profil = this.getAttribute('data-profil');
-    document.querySelectorAll('.profil-panel').forEach(function(p){ p.classList.remove('active'); });
-    document.querySelectorAll('#profil-tabs .profil-tab').forEach(function(t){ t.classList.remove('active'); });
-    var target = document.getElementById('panel-' + profil);
-    if (target) target.classList.add('active');
-    this.classList.add('active');
+document.addEventListener('DOMContentLoaded', function() {
+  var ptabs = document.querySelectorAll('#profil-tabs .profil-tab');
+  ptabs.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var profil = this.getAttribute('data-profil');
+      document.querySelectorAll('.profil-panel').forEach(function(p){ p.classList.remove('active'); });
+      ptabs.forEach(function(t){ t.classList.remove('active'); });
+      var target = document.getElementById('panel-' + profil);
+      if (target) target.classList.add('active');
+      this.classList.add('active');
+    });
   });
 });
 </script>
