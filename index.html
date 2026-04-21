@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Acheteurs & Vendeurs</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0E8;
+    --warm-white: #FAFAF7;
+    --charcoal: #1C1C1A;
+    --stone: #8A8478;
+    --gold: #B89A5E;
+    --gold-light: #D4B87A;
+    --terracotta: #C4785A;
+    --sage: #7A9B8A;
+    --border: rgba(28,28,26,0.1);
+    --shadow: 0 4px 40px rgba(28,28,26,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--warm-white);
+    color: var(--charcoal);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(250,250,247,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px; font-weight: 600;
+    letter-spacing: -0.5px; color: var(--charcoal);
+  }
+  .logo span { color: var(--gold); }
+  .nav-links { display: flex; gap: 32px; align-items: center; }
+  .nav-links a {
+    text-decoration: none; color: var(--stone);
+    font-size: 14px; font-weight: 400;
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--charcoal); }
+  .btn-nav {
+    padding: 10px 24px; background: var(--charcoal);
+    color: var(--cream) !important; border-radius: 2px;
+    font-size: 13px !important; font-weight: 500 !important;
+    transition: background .2s !important;
+  }
+  .btn-nav:hover { background: var(--gold) !important; color: var(--charcoal) !important; }
+  .btn-nav-gold {
+    padding: 10px 24px; background: var(--gold);
+    color: var(--charcoal) !important; border-radius: 2px;
+    font-size: 13px !important; font-weight: 500 !important;
+    transition: background .2s !important; text-decoration: none;
+  }
+  .btn-nav-gold:hover { background: var(--charcoal) !important; color: var(--cream) !important; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: grid; grid-template-columns: 1fr 1fr;
+    padding-top: 80px;
+  }
+  .hero-left {
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 80px 48px 80px 80px;
+    background: var(--cream);
+    position: relative; overflow: hidden;
+  }
+  .hero-left::before {
+    content: '';
+    position: absolute; top: -80px; right: -80px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(184,154,94,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-eyebrow {
+    font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 20px; font-weight: 500;
+  }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(44px, 5vw, 68px);
+    font-weight: 300; line-height: 1.1;
+    color: var(--charcoal); margin-bottom: 24px;
+  }
+  .hero-title em { font-style: italic; color: var(--gold); }
+  .hero-sub {
+    font-size: 16px; color: var(--stone);
+    line-height: 1.7; max-width: 420px; margin-bottom: 48px;
+    font-weight: 300;
+  }
+  .hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; }
+  .btn-primary {
+    padding: 16px 36px; background: var(--charcoal);
+    color: var(--cream); border: none; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all .25s; letter-spacing: 0.3px;
+  }
+  .btn-primary:hover { background: var(--gold); color: var(--charcoal); transform: translateY(-1px); }
+  .btn-outline {
+    padding: 16px 36px; background: transparent;
+    color: var(--charcoal); border: 1.5px solid var(--charcoal);
+    border-radius: 2px; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500; cursor: pointer; transition: all .25s;
+  }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-1px); }
+
+  .hero-right {
+    position: relative; overflow: hidden;
+    background: var(--charcoal);
+  }
+  .hero-image-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    height: 100%; gap: 3px;
+  }
+  .hero-img-cell {
+    overflow: hidden; position: relative;
+    background: var(--stone);
+  }
+  .hero-img-cell img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform .5s ease; opacity: 0.85;
+  }
+  .hero-img-cell:hover img { transform: scale(1.04); opacity: 1; }
+  .hero-img-cell:first-child { grid-row: span 2; }
+  .img-label {
+    position: absolute; bottom: 12px; left: 12px;
+    background: rgba(250,250,247,0.92); backdrop-filter: blur(4px);
+    padding: 4px 10px; border-radius: 1px;
+    font-size: 11px; color: var(--charcoal); letter-spacing: 0.5px;
+  }
+  .hero-stat-badge {
+    position: absolute; top: 24px; right: 24px; z-index: 2;
+    background: var(--gold); padding: 16px 20px;
+    border-radius: 2px; text-align: center;
+  }
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px; font-weight: 300; color: var(--charcoal);
+    line-height: 1;
+  }
+  .stat-label { font-size: 10px; color: var(--charcoal); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px; }
+
+  /* ── SEARCH BAR ── */
+  .search-section {
+    padding: 0 80px;
+    margin-top: -1px;
+    background: var(--charcoal);
+  }
+  .search-bar {
+    display: flex; align-items: center;
+    background: var(--warm-white); border-radius: 2px;
+    padding: 6px 6px 6px 24px;
+    gap: 12px;
+    box-shadow: var(--shadow);
+  }
+  .search-tabs {
+    display: flex; gap: 0; margin-bottom: 0;
+    background: var(--charcoal); padding: 0 80px;
+    padding-top: 32px;
+  }
+  .search-tab {
+    padding: 12px 28px; font-size: 13px; font-weight: 500;
+    cursor: pointer; color: var(--stone); border-radius: 2px 2px 0 0;
+    border: none; background: rgba(255,255,255,0.06); margin-right: 4px;
+    font-family: 'DM Sans', sans-serif; transition: all .2s;
+    letter-spacing: 0.3px;
+  }
+  .search-tab.active { background: var(--warm-white); color: var(--charcoal); }
+  .search-tab:hover:not(.active) { background: rgba(255,255,255,0.12); color: var(--cream); }
+
+  .search-field {
+    flex: 1; display: flex; align-items: center; gap: 8px;
+    border-right: 1px solid var(--border); padding-right: 16px;
+  }
+  .search-field:last-of-type { border-right: none; }
+  .search-field svg { color: var(--stone); flex-shrink: 0; }
+  .search-field select, .search-field input {
+    border: none; background: transparent; outline: none;
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: var(--charcoal); width: 100%; cursor: pointer;
+  }
+  .search-field label {
+    display: block; font-size: 10px; color: var(--stone);
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px;
+  }
+  .btn-search {
+    padding: 14px 28px; background: var(--gold); color: var(--charcoal);
+    border: none; border-radius: 1px; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500; cursor: pointer; transition: all .2s;
+    white-space: nowrap; letter-spacing: 0.3px;
+  }
+  .btn-search:hover { background: var(--gold-light); }
+
+  /* ── LISTINGS ── */
+  .listings-section { padding: 80px; }
+  .section-header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 48px;
+  }
+  .section-eyebrow {
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 12px; font-weight: 500;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 4vw, 48px); font-weight: 300;
+    line-height: 1.15;
+  }
+  .section-title em { font-style: italic; }
+  .view-all {
+    font-size: 13px; color: var(--stone); text-decoration: none;
+    border-bottom: 1px solid var(--border); padding-bottom: 2px;
+    transition: color .2s, border-color .2s;
+  }
+  .view-all:hover { color: var(--gold); border-color: var(--gold); }
+
+  .listings-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  .listing-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 2px; overflow: hidden;
+    transition: transform .3s, box-shadow .3s;
+    cursor: pointer;
+  }
+  .listing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(28,28,26,0.12);
+  }
+  .card-image {
+    position: relative; height: 220px; overflow: hidden;
+    background: var(--cream);
+  }
+  .card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
+  .listing-card:hover .card-image img { transform: scale(1.04); }
+  .card-badge {
+    position: absolute; top: 16px; left: 16px;
+    padding: 4px 12px; border-radius: 1px;
+    font-size: 10px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  .badge-vente { background: var(--charcoal); color: var(--cream); }
+  .badge-vente { background: var(--sage); color: white; }
+  .badge-neuf { background: var(--terracotta); color: white; }
+  .card-fav {
+    position: absolute; top: 16px; right: 16px;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(250,250,247,0.9); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s; font-size: 16px;
+  }
+  .card-fav:hover { background: white; }
+  .card-body { padding: 20px 24px 24px; }
+  .card-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px; font-weight: 300;
+    color: var(--charcoal); margin-bottom: 6px;
+  }
+  .card-price span { font-size: 16px; }
+  .card-title {
+    font-size: 15px; font-weight: 500; margin-bottom: 6px;
+    color: var(--charcoal);
+  }
+  .card-location {
+    font-size: 13px; color: var(--stone);
+    display: flex; align-items: center; gap: 4px; margin-bottom: 16px;
+  }
+  .card-features {
+    display: flex; gap: 16px;
+    padding-top: 16px; border-top: 1px solid var(--border);
+  }
+  .feature {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--stone);
+  }
+  .feature-icon { font-size: 14px; }
+  .card-agent {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 24px; background: var(--cream);
+    border-top: 1px solid var(--border);
+  }
+  .agent-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--gold); display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: var(--charcoal); flex-shrink: 0;
+  }
+  .agent-info { flex: 1; }
+  .agent-name { font-size: 12px; font-weight: 500; color: var(--charcoal); }
+  .agent-role { font-size: 11px; color: var(--stone); }
+  .btn-contact-sm {
+    padding: 6px 14px; background: transparent;
+    border: 1px solid var(--border); border-radius: 1px;
+    font-size: 11px; cursor: pointer; color: var(--charcoal);
+    font-family: 'DM Sans', sans-serif; transition: all .2s;
+    letter-spacing: 0.3px;
+  }
+  .btn-contact-sm:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── HOW IT WORKS ── */
+  .how-section {
+    padding: 80px;
+    background: var(--charcoal);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+    align-items: center;
+  }
+  .how-text .section-eyebrow { color: var(--gold); }
+  .how-text .section-title { color: var(--cream); }
+  .how-text .section-title em { color: var(--gold-light); }
+  .how-steps { display: flex; flex-direction: column; gap: 0; }
+  .how-step {
+    display: flex; gap: 24px; padding: 28px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    align-items: flex-start;
+  }
+  .step-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px; font-weight: 300; color: rgba(184,154,94,0.3);
+    line-height: 1; flex-shrink: 0; width: 48px;
+  }
+  .step-content {}
+  .step-title { font-size: 16px; font-weight: 500; color: var(--cream); margin-bottom: 6px; }
+  .step-desc { font-size: 14px; color: rgba(250,250,247,0.55); line-height: 1.6; }
+
+  /* ── STATS ── */
+  .stats-section {
+    padding: 60px 80px;
+    background: var(--gold);
+    display: flex; justify-content: space-around; align-items: center;
+  }
+  .stat-item { text-align: center; }
+  .stat-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px; font-weight: 300; color: var(--charcoal);
+    line-height: 1; margin-bottom: 8px;
+  }
+  .stat-desc { font-size: 13px; color: rgba(28,28,26,0.6); letter-spacing: 0.5px; }
+  .stat-divider { width: 1px; height: 60px; background: rgba(28,28,26,0.2); }
+
+  /* ── AGENTS ── */
+  .agents-section { padding: 80px; background: var(--cream); }
+  .agents-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+    margin-top: 48px;
+  }
+  .agent-card {
+    background: var(--warm-white); border: 1px solid var(--border);
+    border-radius: 2px; padding: 28px 24px; text-align: center;
+    transition: transform .3s, box-shadow .3s; cursor: pointer;
+  }
+  .agent-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .agent-photo {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--terracotta) 100%);
+    margin: 0 auto 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px; font-weight: 400; color: white;
+  }
+  .agent-card-name { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
+  .agent-card-spec { font-size: 12px; color: var(--stone); margin-bottom: 16px; letter-spacing: 0.5px; }
+  .agent-rating { display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 6px; }
+  .stars { color: var(--gold); font-size: 12px; }
+  .rating-num { font-size: 12px; color: var(--stone); }
+  .agent-deals { font-size: 11px; color: var(--stone); letter-spacing: 0.5px; }
+  .btn-agent {
+    margin-top: 16px; width: 100%; padding: 10px;
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 1px; font-family: 'DM Sans', sans-serif;
+    font-size: 12px; cursor: pointer; color: var(--charcoal);
+    transition: all .2s; letter-spacing: 0.3px;
+  }
+  .btn-agent:hover { border-color: var(--gold); background: var(--gold); color: var(--charcoal); }
+
+  /* ── CTA ── */
+  .cta-section {
+    padding: 100px 80px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+    align-items: center; background: var(--warm-white);
+    border-top: 1px solid var(--border);
+  }
+  .cta-block {
+    padding: 48px; border: 1px solid var(--border); border-radius: 2px;
+    position: relative; overflow: hidden;
+  }
+  .cta-block.dark {
+    background: var(--charcoal); border-color: var(--charcoal);
+  }
+  .cta-block::before {
+    content: ''; position: absolute;
+    bottom: -40px; right: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(184,154,94,0.2) 0%, transparent 70%);
+  }
+  .cta-icon { font-size: 36px; margin-bottom: 20px; }
+  .cta-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px; font-weight: 300; margin-bottom: 12px;
+  }
+  .cta-block.dark .cta-title { color: var(--cream); }
+  .cta-desc { font-size: 14px; color: var(--stone); line-height: 1.7; margin-bottom: 28px; }
+  .cta-block.dark .cta-desc { color: rgba(250,250,247,0.55); }
+  .btn-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 28px; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all .25s; letter-spacing: 0.3px; border: none;
+  }
+  .btn-cta.light { background: var(--charcoal); color: var(--cream); }
+  .btn-cta.light:hover { background: var(--gold); color: var(--charcoal); }
+  .btn-cta.gold { background: var(--gold); color: var(--charcoal); }
+  .btn-cta.gold:hover { background: var(--gold-light); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--charcoal); color: rgba(250,250,247,0.5);
+    padding: 48px 80px 32px;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px;
+  }
+  .footer-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px; color: var(--cream); margin-bottom: 12px;
+  }
+  .footer-logo span { color: var(--gold); }
+  .footer-desc { font-size: 13px; line-height: 1.7; max-width: 280px; }
+  .footer-col h4 { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+  .footer-col a { display: block; font-size: 13px; color: rgba(250,250,247,0.5); text-decoration: none; margin-bottom: 10px; transition: color .2s; }
+  .footer-col a:hover { color: var(--cream); }
+  .footer-bottom {
+    background: var(--charcoal); padding: 20px 80px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-bottom p { font-size: 12px; color: rgba(250,250,247,0.3); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(28,28,26,0.7); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--warm-white); border-radius: 4px;
+    width: 90%; max-width: 520px; max-height: 90vh; overflow-y: auto;
+    animation: modalIn .3s ease;
+  }
+  @keyframes modalIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+  .modal-header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; }
+  .modal-close {
+    width: 36px; height: 36px; border: 1px solid var(--border);
+    background: none; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; transition: all .2s;
+  }
+  .modal-close:hover { border-color: var(--charcoal); }
+  .modal-body { padding: 28px 32px 32px; }
+  .modal-tabs { display: flex; gap: 0; margin-bottom: 28px; border-bottom: 1px solid var(--border); }
+  .modal-tab {
+    padding: 10px 20px; font-size: 13px; cursor: pointer;
+    border: none; background: none; font-family: 'DM Sans', sans-serif;
+    color: var(--stone); border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: all .2s;
+  }
+  .modal-tab.active { color: var(--charcoal); border-bottom-color: var(--gold); }
+  .form-group { margin-bottom: 20px; }
+  .form-group label { display: block; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--stone); margin-bottom: 8px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 12px 16px;
+    border: 1px solid var(--border); border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--charcoal);
+    background: var(--warm-white); outline: none; transition: border-color .2s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--gold); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group textarea { resize: vertical; min-height: 90px; }
+  .btn-submit {
+    width: 100%; padding: 14px; background: var(--charcoal);
+    color: var(--cream); border: none; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: background .2s; letter-spacing: 0.3px;
+    margin-top: 8px;
+  }
+  .btn-submit:hover { background: var(--gold); color: var(--charcoal); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero-eyebrow { animation: fadeUp .6s ease both; }
+  .hero-title { animation: fadeUp .7s ease .1s both; }
+  .hero-sub { animation: fadeUp .7s ease .2s both; }
+  .hero-ctas { animation: fadeUp .7s ease .3s both; }
+
+  @media (max-width: 1100px) {
+    .hero { grid-template-columns: 1fr; min-height: auto; }
+    .hero-right { height: 400px; }
+    .listings-grid { grid-template-columns: repeat(2, 1fr); }
+    .agents-grid { grid-template-columns: repeat(2, 1fr); }
+    .how-section { grid-template-columns: 1fr; }
+    .cta-section { grid-template-columns: 1fr; }
+    footer { grid-template-columns: 1fr 1fr; }
+    nav, .listings-section, .agents-section, .search-section, .search-tabs,
+    .how-section, .stats-section, .cta-section, .footer-bottom { padding-left: 32px; padding-right: 32px; }
+    .hero-left { padding: 60px 32px; }
+  }
+  @media (max-width: 700px) {
+    .listings-grid, .agents-grid { grid-template-columns: 1fr; }
+    .stats-section { flex-direction: column; gap: 32px; }
+    .stat-divider { display: none; }
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    footer { grid-template-columns: 1fr; gap: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Immo<span>Connect</span></div>
+  <div class="nav-links">
+    <a href="forfaits.html">Forfaits</a>
+    <a href="questionnaire-vendeur.html" class="btn-nav-gold">Vendre</a>
+    <a href="#" onclick="openModal('acheter')">Acheter</a>
+    <a href="#agents">Agents immo</a>
+    <a href="#" class="btn-nav" onclick="openModal()">Se connecter</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow">La référence immobilière française</div>
+    <h1 class="hero-title">
+      Trouvez<br>le bien <em>idéal</em>,<br>au bon prix
+    </h1>
+    <p class="hero-sub">
+      ImmoConnect met en relation acheteurs et vendeurs avec les meilleurs agents immobiliers de France. Plus de des biens disponibles dans votre région.
+    </p>
+    <div class="hero-ctas">
+      <button class="btn-primary" onclick="showListings()">Explorer les biens</button>
+      <button class="btn-outline" onclick="window.location.href='questionnaire-vendeur.html'">Vendre mon bien</button>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="stat-label">En ce moment</div>
+    </div>
+    <div class="hero-image-grid">
+      <div class="hero-img-cell">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80" alt="Villa luxueuse">
+        <div class="img-label">Villa · Côte d'Azur</div>
+      </div>
+      <div class="hero-img-cell">
+        <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&q=80" alt="Appartement Paris">
+        <div class="img-label">Appartement · Paris</div>
+      </div>
+      <div class="hero-img-cell">
+        <img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80" alt="Maison campagne">
+        <div class="img-label">Maison · Provence</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<div class="search-tabs">
+  <button class="search-tab active" onclick="setTab(this,'Acheter')">Acheter</button>
+  
+  <button class="search-tab" onclick="setTab(this,'Neuf')">Programme neuf</button>
+  <button class="search-tab" onclick="setTab(this,'Estimer')">Estimer</button>
+</div>
+<div class="search-section">
+  <div class="search-bar">
+    <div class="search-field">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      <div style="flex:1">
+        <label>Localisation</label>
+        <input type="text" placeholder="Ville, quartier, code postal…">
+      </div>
+    </div>
+    <div class="search-field" style="max-width:160px">
+      <div style="flex:1">
+        <label>Type de bien</label>
+        <select>
+          <option>Tous</option>
+          <option>Appartement</option>
+          <option>Maison</option>
+          <option>Villa</option>
+          <option>Terrain</option>
+          <option>Local commercial</option>
+        </select>
+      </div>
+    </div>
+    <div class="search-field" style="max-width:180px">
+      <div style="flex:1">
+        <label>Budget max</label>
+        <select>
+          <option>Sans limite</option>
+          <option>200 000 €</option>
+          <option>350 000 €</option>
+          <option>500 000 €</option>
+          <option>750 000 €</option>
+          <option>1 000 000 €</option>
+          <option>2 000 000 €</option>
+        </select>
+      </div>
+    </div>
+    <div class="search-field" style="max-width:140px; border-right:none">
+      <div style="flex:1">
+        <label>Pièces min.</label>
+        <select>
+          <option>Indifférent</option>
+          <option>1 pièce</option>
+          <option>2 pièces</option>
+          <option>3 pièces</option>
+          <option>4 pièces</option>
+          <option>5+ pièces</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-search" onclick="showListings()">Rechercher →</button>
+  </div>
+</div>
+
+<!-- LISTINGS -->
+<section class="listings-section" id="listings">
+  <div class="section-header">
+    <div>
+      <div class="section-eyebrow">Sélection du moment</div>
+      <h2 class="section-title">Biens <em>à la une</em></h2>
+    </div>
+    <a href="#" class="view-all">Voir tous les biens →</a>
+  </div>
+  <div class="listings-grid" id="listingsGrid">
+    <!-- Cards injected by JS -->
+  </div>
+</section>
+
+<!-- STATS -->
+
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <div class="stat-number">—</div>
+    <div class="stat-desc">Transactions réalisées</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <div class="stat-number">480</div>
+    <div class="stat-desc">Agents certifiés</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <div class="stat-number">48h</div>
+    <div class="stat-desc">Délai moyen de mise en relation</div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="how-section">
+  <div class="how-text">
+    <div class="section-eyebrow">Simple & efficace</div>
+    <h2 class="section-title" style="color:var(--cream)">Comment ça <em style="color:var(--gold-light)">fonctionne</em></h2>
+    <p style="color:rgba(250,250,247,0.55); font-size:15px; margin-top:16px; line-height:1.7; max-width:380px">
+      De la recherche à la signature, nous vous accompagnons à chaque étape de votre projet immobilier.
+    </p>
+  </div>
+  <div class="how-steps">
+    <div class="how-step">
+      <div class="step-num">01</div>
+      <div class="step-content">
+        <div class="step-title">Définissez votre projet</div>
+        <div class="step-desc">Renseignez vos critères : localisation, budget, type de bien, superficie souhaitée.</div>
+      </div>
+    </div>
+    <div class="how-step">
+      <div class="step-num">02</div>
+      <div class="step-content">
+        <div class="step-title">Recevez des correspondances</div>
+        <div class="step-desc">Notre algorithme vous envoie des biens correspondant à vos critères en temps réel.</div>
+      </div>
+    </div>
+    <div class="how-step">
+      <div class="step-num">03</div>
+      <div class="step-content">
+        <div class="step-title">Rencontrez votre agent</div>
+        <div class="step-desc">Un agent dédié vous accompagne pour les visites, la négociation et les démarches.</div>
+      </div>
+    </div>
+    <div class="how-step">
+      <div class="step-num">04</div>
+      <div class="step-content">
+        <div class="step-title">Signez en toute sérénité</div>
+        <div class="step-desc">Compromis, notaire, financement — nous coordonnons tout jusqu'à la remise des clés.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AGENTS -->
+<section class="agents-section" id="agents">
+  <div class="section-header">
+    <div>
+      <div class="section-eyebrow">Expertise humaine</div>
+      <h2 class="section-title">Nos <em>meilleurs</em> agents</h2>
+    </div>
+    <a href="#" class="view-all">Voir tous les agents →</a>
+  </div>
+  <div class="agents-grid" id="agentsGrid"></div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-block">
+    <div class="cta-icon">🏠</div>
+    <h3 class="cta-title">Vous souhaitez acheter ?</h3>
+    <p class="cta-desc">Déposez votre projet en 2 minutes. Nos agents vous rappellent sous 24h avec une sélection personnalisée.</p>
+    <button class="btn-cta light" onclick="openModal('acheter')">Déposer mon projet →</button>
+  </div>
+  <div class="cta-block dark">
+    <div class="cta-icon">💶</div>
+    <h3 class="cta-title" style="color:var(--cream)">Vous souhaitez vendre ?</h3>
+    <p class="cta-desc">Estimez gratuitement la valeur de votre bien et mettez-le en vente avec nos experts.</p>
+    <button class="btn-cta gold" onclick="window.location.href='questionnaire-vendeur.html'">Estimer mon bien →</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-logo">Immo<span>Connect</span></div>
+    <p class="footer-desc">La plateforme locale qui met en relation acheteurs, vendeurs et agents immobiliers.</p>
+  </div>
+  <div class="footer-col">
+    <h4>Acheter</h4>
+    <a href="#">Appartements</a>
+    <a href="#">Maisons</a>
+    <a href="#">Villas</a>
+    <a href="#">Terrains</a>
+    <a href="#">Immobilier neuf</a>
+  </div>
+  <div class="footer-col">
+    <h4>Vendre</h4>
+    <a href="questionnaire-vendeur.html">Estimer mon bien</a>
+    <a href="questionnaire-vendeur.html">Mettre en vente</a>
+    <a href="#">Trouver un agent</a>
+    <a href="#">Nos honoraires</a>
+  </div>
+  <div class="footer-col">
+    <h4>ImmoConnect</h4>
+    <a href="#">À propos</a>
+    <a href="#">Nos agents</a>
+    <a href="#">Blog</a>
+    <a href="#">Contact</a>
+    <a href="#">Mentions légales</a>
+  </div>
+</footer>
+<div class="footer-bottom">
+  <p>© 2026 ImmoConnect. Tous droits réservés.</p>
+  <p>Carte professionnelle N° CPI 7501 2025 000 000 123</p>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Mon projet</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tabs">
+        <button class="modal-tab active" onclick="switchModalTab(this,'acheter')">🏠 Acheter</button>
+        <button class="modal-tab" onclick="switchModalTab(this,'vendre')">💶 Vendre</button>
+        <button class="modal-tab" onclick="switchModalTab(this,'contact')">📞 Contact agent</button>
+      </div>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+const listings = [
+  { type:'vente', badge:'badge-vente', label:'À vendre', price:'1 250 000', unit:'€', title:'Villa d'exception avec piscine', city:'Cannes, 06400', rooms:6, beds:4, area:280, agent:'Sophie M.', agentRole:'Agent Senior', img:'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600&q=80' },
+  { type:'vente', badge:'badge-neuf', label:'Programme neuf', price:'385 000', unit:'€', title:'Appartement T3 — résidence privée', city:'Lyon 6e, 69006', rooms:3, beds:2, area:72, agent:'Marc D.', agentRole:'Agent Conseil', img:'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&q=80' },
+  { type:'location', badge:'badge-vente', label:'À louer', price:'2 800', unit:'€/mois', title:'Loft industriel au cœur du Marais', city:'Paris 4e, 75004', rooms:2, beds:1, area:95, agent:'Claire B.', agentRole:'Spécialiste Paris', img:'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=600&q=80' },
+  { type:'vente', badge:'badge-vente', label:'À vendre', price:'620 000', unit:'€', title:'Maison bourgeoise avec jardin', city:'Bordeaux, 33000', rooms:7, beds:4, area:210, agent:'Antoine R.', agentRole:'Agent Immobilier', img:'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&q=80' },
+  { type:'vente', badge:'badge-vente', label:'À vendre', price:'190 000', unit:'€', title:'Studio rénové proche métro', city:'Toulouse, 31000', rooms:1, beds:1, area:38, agent:'Léa F.', agentRole:'Agent Junior', img:'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80' },
+  { type:'location', badge:'badge-vente', label:'À louer', price:'4 500', unit:'€/mois', title:'Penthouse vue mer panoramique', city:'Nice, 06000', rooms:4, beds:3, area:145, agent:'Pierre L.', agentRole:'Agent Luxe', img:'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&q=80' },
+];
+
+const agents = [
+  { init:'SM', name:'Sophie Martin', spec:'Côte d'Azur · Luxe', rating:4.9, deals:87 },
+  { init:'MD', name:'Marc Dubois', spec:'Lyon · Neuf', rating:4.8, deals:143 },
+  { init:'CB', name:'Claire Bernard', spec:'Paris · Investissement', rating:5.0, deals:62 },
+  { init:'AR', name:'Antoine Roux', spec:'Bordeaux · Maisons', rating:4.7, deals:201 },
+];
+
+// ── RENDER LISTINGS ──
+function renderListings() {
+  const grid = document.getElementById('listingsGrid');
+  grid.innerHTML = listings.map(l => `
+    <div class="listing-card">
+      <div class="card-image">
+        <img src="${l.img}" alt="${l.title}">
+        <div class="card-badge ${l.badge}">${l.label}</div>
+        <button class="card-fav" title="Favoris">♡</button>
+      </div>
+      <div class="card-body">
+        <div class="card-price">${l.price} <span>${l.unit}</span></div>
+        <div class="card-title">${l.title}</div>
+        <div class="card-location">📍 ${l.city}</div>
+        <div class="card-features">
+          <div class="feature"><span class="feature-icon">🛏</span>${l.beds} ch.</div>
+          <div class="feature"><span class="feature-icon">📐</span>${l.area} m²</div>
+          <div class="feature"><span class="feature-icon">🏠</span>${l.rooms} pièces</div>
+        </div>
+      </div>
+      <div class="card-agent">
+        <div class="agent-avatar">${l.agent.split(' ').map(w=>w[0]).join('')}</div>
+        <div class="agent-info">
+          <div class="agent-name">${l.agent}</div>
+          <div class="agent-role">${l.agentRole}</div>
+        </div>
+        <button class="btn-contact-sm" onclick="openModal('contact')">Contacter</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── RENDER AGENTS ──
+function renderAgents() {
+  const grid = document.getElementById('agentsGrid');
+  grid.innerHTML = agents.map(a => `
+    <div class="agent-card">
+      <div class="agent-photo">${a.init}</div>
+      <div class="agent-card-name">${a.name}</div>
+      <div class="agent-card-spec">${a.spec}</div>
+      <div class="agent-rating">
+        <span class="stars">★★★★★</span>
+        <span class="rating-num">${a.rating}</span>
+      </div>
+      <div class="agent-deals">${a.deals} transactions</div>
+      <button class="btn-agent" onclick="openModal('contact')">Prendre RDV</button>
+    </div>
+  `).join('');
+}
+
+// ── TABS ──
+function setTab(el, label) {
+  document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function showListings() {
+  document.getElementById('listings').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── MODAL ──
+const modalForms = {
+  acheter: `
+    <div class="form-row">
+      <div class="form-group"><label>Prénom</label><input type="text" placeholder="Marie"></div>
+      <div class="form-group"><label>Nom</label><input type="text" placeholder="Dupont"></div>
+    </div>
+    <div class="form-group"><label>Email</label><input type="email" placeholder="marie@email.com"></div>
+    <div class="form-group"><label>Téléphone</label><input type="tel" placeholder="06 12 34 56 78"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Localisation souhaitée</label><input type="text" placeholder="Paris, Lyon…"></div>
+      <div class="form-group"><label>Budget max</label><select><option>500 000 €</option><option>350 000 €</option><option>750 000 €</option><option>1 000 000 €</option><option>Sans limite</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Type de bien</label><select><option>Appartement</option><option>Maison</option><option>Villa</option><option>Tous</option></select></div>
+      <div class="form-group"><label>Pièces min.</label><select><option>2</option><option>3</option><option>4</option><option>5+</option></select></div>
+    </div>
+    <div class="form-group"><label>Informations complémentaires</label><textarea placeholder="Étage, jardin, parking, délai d'achat…"></textarea></div>
+    <button class="btn-submit" onclick="submitForm()">Envoyer mon projet →</button>
+  `,
+  vendre: `
+    <div class="form-row">
+      <div class="form-group"><label>Prénom</label><input type="text" placeholder="Jean"></div>
+      <div class="form-group"><label>Nom</label><input type="text" placeholder="Martin"></div>
+    </div>
+    <div class="form-group"><label>Email</label><input type="email" placeholder="jean@email.com"></div>
+    <div class="form-group"><label>Téléphone</label><input type="tel" placeholder="06 98 76 54 32"></div>
+    <div class="form-group"><label>Adresse du bien</label><input type="text" placeholder="12 rue de la Paix, 75001 Paris"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Type de bien</label><select><option>Appartement</option><option>Maison</option><option>Villa</option><option>Terrain</option></select></div>
+      <div class="form-group"><label>Superficie (m²)</label><input type="number" placeholder="85"></div>
+    </div>
+    <div class="form-group"><label>Votre estimation (optionnel)</label><input type="text" placeholder="Ex: 400 000 €"></div>
+    <div class="form-group"><label>Commentaires</label><textarea placeholder="État du bien, travaux réalisés, charges…"></textarea></div>
+    <button class="btn-submit" onclick="submitForm()">Demander une estimation →</button>
+  `,
+  contact: `
+    <div class="form-row">
+      <div class="form-group"><label>Prénom</label><input type="text" placeholder="Votre prénom"></div>
+      <div class="form-group"><label>Nom</label><input type="text" placeholder="Votre nom"></div>
+    </div>
+    <div class="form-group"><label>Email</label><input type="email" placeholder="votre@email.com"></div>
+    <div class="form-group"><label>Téléphone</label><input type="tel" placeholder="06 XX XX XX XX"></div>
+    <div class="form-group"><label>Disponibilités</label><select><option>Matin (8h–12h)</option><option>Après-midi (12h–18h)</option><option>Soir (18h–20h)</option><option>Week-end</option></select></div>
+    <div class="form-group"><label>Message</label><textarea placeholder="Décrivez votre projet ou votre question…"></textarea></div>
+    <button class="btn-submit" onclick="submitForm()">Envoyer le message →</button>
+  `
+};
+
+let currentTab = 'acheter';
+
+function openModal(type = 'acheter') {
+  currentTab = type;
+  document.getElementById('modalTitle').textContent = type === 'acheter' ? 'Mon projet achat' : type === 'vendre' ? 'Estimer & vendre' : 'Contacter un agent';
+  document.getElementById('modalContent').innerHTML = modalForms[type];
+  document.querySelectorAll('.modal-tab').forEach(t => {
+    t.classList.toggle('active', t.getAttribute('onclick').includes(`'${type}'`));
+  });
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function switchModalTab(el, type) {
+  document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentTab = type;
+  document.getElementById('modalContent').innerHTML = modalForms[type];
+}
+
+function submitForm() {
+  const btn = document.querySelector('.btn-submit');
+  btn.textContent = '✓ Envoyé ! Nous vous contactons sous 24h';
+  btn.style.background = 'var(--sage)';
+  btn.style.color = 'white';
+  btn.disabled = true;
+  setTimeout(closeModal, 2200);
+}
+
+// ── HEART TOGGLE ──
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('card-fav')) {
+    e.target.textContent = e.target.textContent === '♡' ? '♥' : '♡';
+    e.target.style.color = e.target.textContent === '♥' ? 'var(--terracotta)' : '';
+  }
+});
+
+// ── INIT ──
+renderListings();
+renderAgents();
+</script>
+</body>
+</html>
