@@ -317,26 +317,64 @@
   .how-section {
     padding: 80px;
     background: var(--charcoal);
-    display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
-    align-items: center;
+  }
+  .how-intro {
+    text-align: center; margin-bottom: 56px;
   }
   .how-text .section-eyebrow { color: var(--gold); }
   .how-text .section-title { color: var(--cream); }
   .how-text .section-title em { color: var(--gold-light); }
-  .how-steps { display: flex; flex-direction: column; gap: 0; }
-  .how-step {
-    display: flex; gap: 24px; padding: 28px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    align-items: flex-start;
+
+  /* PROFIL TABS */
+  .profil-tabs {
+    display: flex; justify-content: center; gap: 8px;
+    margin-bottom: 48px; flex-wrap: wrap;
   }
-  .step-num {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 48px; font-weight: 300; color: rgba(184,154,94,0.3);
-    line-height: 1; flex-shrink: 0; width: 48px;
+  .profil-tab {
+    padding: 10px 24px; border-radius: 40px;
+    border: 1px solid rgba(255,255,255,.15);
+    background: transparent; color: rgba(250,250,247,.55);
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    cursor: pointer; transition: all .2s; font-weight: 500;
   }
-  .step-content {}
-  .step-title { font-size: 16px; font-weight: 500; color: var(--cream); margin-bottom: 6px; }
-  .step-desc { font-size: 14px; color: rgba(250,250,247,0.55); line-height: 1.6; }
+  .profil-tab:hover { border-color: rgba(255,255,255,.4); color: var(--cream); }
+  .profil-tab.active { background: var(--gold); border-color: var(--gold); color: var(--charcoal); }
+
+  /* PROFIL PANELS */
+  .profil-panel { display: none; }
+  .profil-panel.active { display: block; }
+
+  /* CARDS ARGUMENTS */
+  .args-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+  }
+  .arg-card {
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 12px; padding: 24px;
+    transition: background .2s;
+  }
+  .arg-card:hover { background: rgba(255,255,255,.08); }
+  .arg-num {
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .arg-icon { font-size: 28px; margin-bottom: 10px; }
+  .arg-title {
+    font-size: 15px; font-weight: 600; color: var(--cream);
+    margin-bottom: 8px; line-height: 1.3;
+  }
+  .arg-desc {
+    font-size: 13px; color: rgba(250,250,247,.55);
+    line-height: 1.65;
+  }
+  .arg-tag {
+    display: inline-block; margin-top: 12px;
+    font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: 20px;
+    background: rgba(184,154,94,.15); color: var(--gold);
+  }
 
   /* ── STATS ── */
   .stats-section {
@@ -681,49 +719,119 @@
 
 <!-- HOW IT WORKS -->
 <section class="how-section">
-  <div class="how-text">
+  <div class="how-intro how-text">
     <div class="section-eyebrow">Pourquoi ImmoConnect</div>
-    <h2 class="section-title" style="color:var(--cream)">Ce que les autres <em style="color:var(--gold-light)">ne font pas</em></h2>
-    <p style="color:rgba(250,250,247,0.55); font-size:15px; margin-top:16px; line-height:1.7; max-width:380px">
-      Vendeurs, agents et investisseurs — voici pourquoi ImmoConnect change la donne par rapport aux plateformes classiques.
-    </p>
+    <h2 class="section-title" style="color:var(--cream);font-size:clamp(28px,4vw,44px)">Ce que les autres <em style="color:var(--gold-light)">ne font pas</em></h2>
   </div>
-  <div class="how-steps">
 
-    <div class="how-step">
-      <div class="step-num">🏠</div>
-      <div class="step-content">
-        <div class="step-title">Vendeurs — deux marchés en un seul dossier</div>
-        <div class="step-desc"><strong>01 · Publiez gratuitement en 10 minutes.</strong> Remplissez votre dossier une seule fois : photos, description, informations financières. Pas de mandat, pas d'engagement.<br><br>
-        <strong>02 · Exposé sur deux marchés simultanément.</strong> Les acheteurs voient votre annonce et vous contactent directement. Les agents reçoivent une alerte et peuvent proposer votre bien à leurs clients sans vous déranger — vous touchez la clientèle des agences sans payer de mandat.<br><br>
-        <strong>03 · Plus votre dossier est complet, plus vous vendez vite.</strong> Standard = ville + 3 photos. Platinium = adresse, DPE, rapport Hanaé IA, mise en avant prioritaire. La différence ? La vitesse de vente.<br><br>
-        <strong>04 · Rapport Hanaé IA gratuit dès Silver.</strong> Une estimation basée sur les vraies ventes notariales (DVF), l'indice Notaires-INSEE et la carte des loyers — pas une estimation marketing gonflée pour vous faire signer un mandat.</div>
-      </div>
-    </div>
-
-    <div class="how-step">
-      <div class="step-num">🤝</div>
-      <div class="step-content">
-        <div class="step-title">Agents — une base prête à l'emploi, sans prospection</div>
-        <div class="step-desc"><strong>01 · Fini les mandats à arracher.</strong> Sur ImmoConnect, les vendeurs ont déjà constitué leur dossier complet — photos, documents légaux, DPE, rapport d'estimation. Vous arrivez avec un dossier vendeur prêt, pas une feuille blanche.<br><br>
-        <strong>02 · Alertes en priorité selon votre forfait.</strong> Les biens Gold et Platinium vous sont signalés à H+0 (Platinium), J+1 (Expert), J+2 (Pro) ou J+4 (Starter) — vous agissez avant vos concurrents.<br><br>
-        <strong>03 · Exclusivité possible.</strong> Bloquez un dossier pour votre clientèle pendant 48h ou 96h — le temps de présenter le bien sans concurrence.<br><br>
-        <strong>04 · Jusqu'à 50% de réduction jusqu'au 01/09/2026.</strong> Starter à 24,50€/mois au lieu de 49€ — le temps de constituer votre base clients sur la plateforme.</div>
-      </div>
-    </div>
-
-    <div class="how-step">
-      <div class="step-num">📈</div>
-      <div class="step-content">
-        <div class="step-title">Investisseurs — filtrez sur la rentabilité, pas sur les photos</div>
-        <div class="step-desc"><strong>01 · Paramétrez votre rendement cible.</strong> Indiquez votre rendement minimum, votre budget, votre stratégie (LMNP, location nue, colocation…) — ImmoConnect filtre automatiquement les biens qui correspondent. Vous ne voyez que les opportunités rentables.<br><br>
-        <strong>02 · Rapport Hanaé IA sur chaque bien.</strong> Prix de marché basé sur les vraies ventes DVF notariales corrigées de l'indice Notaires-INSEE, loyer estimé par la carte des loyers officielle, rendement brut et net calculés, frais de notaire détaillés. Des données factuelles, pas du marketing.<br><br>
-        <strong>03 · Capacité d'emprunt calculée en temps réel.</strong> Renseignez vos revenus, charges et apport — ImmoConnect calcule votre mensualité max à 35% d'endettement (loyers perçus pris à 90% comme les banques) et votre budget total.<br><br>
-        <strong>04 · Contacté directement par les vendeurs Platinium.</strong> Les vendeurs avec le dossier le plus complet peuvent vous contacter directement — vous recevez les meilleures opportunités sans les chercher.</div>
-      </div>
-    </div>
-
+  <div class="profil-tabs">
+    <button class="profil-tab active" onclick="showProfil('vendeur',this)">🏠 Vendeurs</button>
+    <button class="profil-tab" onclick="showProfil('agent',this)">🤝 Agents immo</button>
+    <button class="profil-tab" onclick="showProfil('investisseur',this)">📈 Investisseurs</button>
   </div>
+
+  <!-- VENDEURS -->
+  <div class="profil-panel active" id="panel-vendeur">
+    <div class="args-grid">
+      <div class="arg-card">
+        <div class="arg-num">01</div>
+        <div class="arg-icon">⚡</div>
+        <div class="arg-title">Publiez gratuitement en 10 minutes</div>
+        <div class="arg-desc">Un dossier, une fois. Photos, description, infos financières. Pas de mandat, pas d'engagement, pas de commission d'avance.</div>
+        <span class="arg-tag">100% gratuit</span>
+      </div>
+      <div class="arg-card">
+        <div class="arg-num">02</div>
+        <div class="arg-icon">🎯</div>
+        <div class="arg-title">Deux marchés en même temps</div>
+        <div class="arg-desc">Les acheteurs vous contactent directement. Les agents reçoivent une alerte et proposent votre bien à leur clientèle — sans vous déranger. Vous touchez les agences sans payer de mandat.</div>
+        <span class="arg-tag">Acheteurs + Agents</span>
+      </div>
+      <div class="arg-card">
+        <div class="arg-num">03</div>
+        <div class="arg-icon">📊</div>
+        <div class="arg-title">Rapport Hanaé IA — vraies données</div>
+        <div class="arg-desc">Estimation basée sur les ventes notariales DVF, l'indice Notaires-INSEE et la carte des loyers. Pas une valeur gonflée pour vous faire signer un mandat.</div>
+        <span class="arg-tag">Dès le niveau Silver</span>
+      </div>
+      <div class="arg-card">
+        <div class="arg-num">04</div>
+        <div class="arg-icon">🚀</div>
+        <div class="arg-title">Plus complet = plus visible = plus rapide</div>
+        <div class="arg-desc">Standard : ville + 3 photos. Platinium : adresse exacte, DPE, rapport IA, mise en avant prioritaire, contacté par les agents dès H+0. La différence ? La vitesse de vente.</div>
+        <span class="arg-tag">4 niveaux gratuits</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGENTS -->
+  <div class="profil-panel" id="panel-agent">
+    <div class="args-grid">
+      <div class="arg-card">
+        <div class="arg-num">01</div>
+        <div class="arg-icon">📁</div>
+        <div class="arg-title">Dossiers vendeurs déjà prêts</div>
+        <div class="arg-desc">Photos, documents légaux, DPE, rapport d'estimation — tout est constitué. Vous arrivez avec un dossier complet, pas une feuille blanche. Zéro temps perdu en aller-retour.</div>
+        <span class="arg-tag">Fini la prospection à froid</span>
+      </div>
+      <div class="arg-card">
+        <div class="arg-num">02</div>
+        <div class="arg-icon">🔔</div>
+        <div class="arg-title">Alertes prioritaires selon votre forfait</div>
+        <div class="arg-desc">Gold et Platinium signalés à H+0 (Platinium) · J+1 (Expert) · J+2 (Pro) · J+4 (Starter). Vous agissez avant vos concurrents sur les meilleures opportunités.</div>
+        <span class="arg-tag">Alerte temps réel</span>
+      </div>
+      <div class="arg-card">
+        <div class="arg-num">03</div>
+        <div class="arg-icon">🔒</div>
+        <div class="arg-title">Exclusivité 48h ou 96h</div>
+        <div class="arg-desc">Bloquez un dossier pour votre clientèle — le temps de présenter le bien sans concurrence. 49€ pour 48h, 99€ pour 96h. Réservé aux forfaits Expert et Platinium.</div>
+        <span class="arg-tag">Expert & Platinium</span>
+      </div>
+      <div class="arg-card">
+        <div class="arg-num">04</div>
+        <div class="arg-icon">🎁</div>
+        <div class="arg-title">-50% jusqu'au 01/09/2026</div>
+        <div class="arg-desc">Offre de lancement : Starter à 24,50€/mois, Pro à 49,50€, Expert à 74,50€, Platinium à 99,50€. Le temps de constituer votre base clients sur la plateforme.</div>
+        <span class="arg-tag">Offre de lancement</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVESTISSEURS -->
+  <div class="profil-panel" id="panel-investisseur">
+    <div class="args-grid">
+      <div class="arg-card">
+        <div class="arg-num">01</div>
+        <div class="arg-icon">🎯</div>
+        <div class="arg-title">Filtrez sur la rentabilité, pas les photos</div>
+        <div class="arg-desc">Rendement minimum, budget, stratégie (LMNP, location nue, colocation…) — ImmoConnect filtre automatiquement. Vous ne voyez que les biens qui matchent vos critères de rendement.</div>
+        <span class="arg-tag">Matching automatique</span>
+      </div>
+      <div class="arg-card">
+        <div class="arg-num">02</div>
+        <div class="arg-icon">📊</div>
+        <div class="arg-title">Rapport Hanaé IA — données officielles</div>
+        <div class="arg-desc">Prix marché DVF corrigé Notaires-INSEE · loyer estimé carte des loyers · rendement brut et net · frais de notaire détaillés. Des chiffres, pas du marketing.</div>
+        <span class="arg-tag">DVF + INSEE + Loyers</span>
+      </div>
+      <div class="arg-card">
+        <div class="arg-num">03</div>
+        <div class="arg-icon">🧮</div>
+        <div class="arg-title">Capacité d'emprunt en temps réel</div>
+        <div class="arg-desc">Revenus, charges, apport → mensualité max à 35% d'endettement calculée instantanément. Loyers perçus pris à 90% comme les banques. Budget total affiché en direct.</div>
+        <span class="arg-tag">Calcul bancaire réel</span>
+      </div>
+      <div class="arg-card">
+        <div class="arg-num">04</div>
+        <div class="arg-icon">📩</div>
+        <div class="arg-title">Les vendeurs Platinium vous contactent</div>
+        <div class="arg-desc">Les vendeurs avec le dossier le plus complet peuvent vous écrire directement — vous recevez les meilleures opportunités sans les chercher. Réservé au forfait Investisseur.</div>
+        <span class="arg-tag">Opportunités entrantes</span>
+      </div>
+    </div>
+  </div>
+
 </section>
 
 <!-- AGENTS -->
@@ -983,6 +1091,14 @@ document.addEventListener('click', e => {
 // ── INIT ──
 renderListings();
 renderAgents();
+
+// ── PROFIL TABS ──
+function showProfil(profil, el) {
+  document.querySelectorAll('.profil-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.profil-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('panel-' + profil).classList.add('active');
+  el.classList.add('active');
+}
 </script>
 </body>
 </html>
