@@ -584,8 +584,8 @@
     <a href="forfaits.html">Forfaits</a>
     <a href="questionnaire-vendeur.html" class="btn-nav-gold">Vendre</a>
     <a href="questionnaire-acheteur.html">Acheter</a>
-    <a href="#agents">Agents immo</a>
-    <a href="#" class="btn-nav" onclick="window.location.href='connexion.html'">Se connecter</a>
+    <a href="forfaits.html#agents">Agents immo</a>
+    <a href="connexion.html" class="btn-nav">Se connecter</a>
   </div>
 </nav>
 
@@ -1094,10 +1094,13 @@ renderAgents();
 
 // ── PROFIL TABS ──
 function showProfil(profil, el) {
-  document.querySelectorAll('.profil-panel').forEach(function(p){ p.classList.remove('active'); });
-  document.querySelectorAll('.profil-tab').forEach(function(t){ t.classList.remove('active'); });
-  document.getElementById('panel-' + profil).classList.add('active');
-  el.classList.add('active');
+  var panels = document.querySelectorAll('.profil-panel');
+  var tabs = document.querySelectorAll('.profil-tab');
+  for (var i = 0; i < panels.length; i++) panels[i].classList.remove('active');
+  for (var j = 0; j < tabs.length; j++) tabs[j].classList.remove('active');
+  var target = document.getElementById('panel-' + profil);
+  if (target) target.classList.add('active');
+  if (el) el.classList.add('active');
 }
 </script>
 </body>
