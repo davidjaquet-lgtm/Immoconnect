@@ -9,61 +9,68 @@
 :root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--amber:#D4732A;--blue:#185FA5;--coral:#993C1D;--r:10px}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
-nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100;gap:0}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
 .nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none;margin-right:32px}
 .nav-logo span{color:var(--gold)}
 .nav-links{display:flex;gap:24px;align-items:center;flex:1}
 .nav-links a{text-decoration:none;color:#888780;font-size:13px;transition:color .2s}
 .nav-links a:hover{color:#fff}
-.nav-btn-gold{padding:7px 16px;background:var(--gold);color:var(--ink)!important;border-radius:4px;font-weight:500}
-.nav-btn-out{padding:8px 20px;border:1px solid #444;color:#fff!important;border-radius:4px;font-size:13px;font-weight:500}
+.nav-gold{padding:7px 16px;background:var(--gold);color:var(--ink)!important;border-radius:4px;font-weight:500}
+.nav-out{padding:8px 20px;border:1px solid #444;color:#fff!important;border-radius:4px;font-size:13px;font-weight:500;text-decoration:none}
 .page{max-width:1080px;margin:0 auto;padding:36px 24px 60px}
+
+/* ONGLETS */
 .tabs{display:flex;gap:4px;background:rgba(15,15,14,.06);border-radius:var(--r);padding:4px;margin-bottom:28px}
 .tab{flex:1;padding:9px 8px;border-radius:8px;border:none;background:transparent;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);font-family:'Outfit',sans-serif;transition:all .15s;text-align:center}
 .tab.active{background:var(--warm);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
 .panel{display:none}.panel.active{display:block}
+
 .sec-eye{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:500}
 .sec-title{font-size:22px;font-weight:500;margin-bottom:6px}
-.sec-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px;max-width:600px}
+.sec-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px;max-width:620px}
+
+/* PROMO BANNER */
+.promo-banner{background:#EAF3DE;border:1px solid #9FD9C0;border-radius:8px;padding:10px 16px;margin-bottom:20px;font-size:12px;color:#27500A;display:flex;align-items:center;gap:8px}
+
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+
+/* CARDS */
 .card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
 .card.featured{border:2px solid var(--gold)}
 .card-bar{height:4px}
 .bar-gray{background:#888780}.bar-blue{background:#185FA5}.bar-amber{background:#BA7517}.bar-teal{background:#1E7A62}.bar-coral{background:#993C1D}
-.card-head{height:88px;display:flex;align-items:center;justify-content:center;position:relative}
+.card-head{height:80px;display:flex;align-items:center;justify-content:center;position:relative}
 .bg-gray{background:#F1EFE8}.bg-blue{background:#E6F1FB}.bg-amber{background:#FAEEDA}.bg-teal{background:#E1F5EE}.bg-coral{background:#FAECE7}
 .badge{position:absolute;font-size:9px;font-weight:600;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
-.badge-right{top:10px;right:10px}
-.badge-left{top:10px;left:10px}
-.badge-blue{background:#E6F1FB;color:#185FA5}
-.badge-amber{background:#FAEEDA;color:#854F0B}
-.badge-dark{background:var(--ink);color:#fff}
-.badge-green{background:#EAF3DE;color:#27500A}
-.card-body{padding:16px 16px 20px;display:flex;flex-direction:column;flex:1;gap:6px}
+.badge-right{top:10px;right:10px}.badge-left{top:10px;left:10px}
+.badge-blue{background:#E6F1FB;color:#185FA5}.badge-amber{background:#FAEEDA;color:#854F0B}
+.badge-dark{background:var(--ink);color:#fff}.badge-green{background:#EAF3DE;color:#27500A}
+.card-body{padding:14px 16px 18px;display:flex;flex-direction:column;flex:1;gap:5px}
 .plan-name{font-size:15px;font-weight:600}
-.price-main{font-size:24px;font-weight:300;line-height:1.1}
+.price-wrap{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.price-main{font-size:22px;font-weight:300}
+.price-normal{font-size:13px;color:var(--muted);text-decoration:line-through}
 .price-green{color:var(--teal)}
-.price-sub{font-size:11px;color:var(--muted)}
-.plan-tag{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:4px}
+.price-sub{font-size:11px;color:var(--teal);font-weight:500}
+.plan-tag{font-size:11px;color:var(--muted);line-height:1.5}
 .divider{border:none;border-top:1px solid var(--line);margin:8px 0}
 .feats{display:flex;flex-direction:column;gap:5px;flex:1}
 .feat{display:flex;align-items:flex-start;gap:7px;font-size:12px}
-.feat.dim{opacity:.45}
+.feat.dim{opacity:.4}
 .feat-dot{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;margin-top:1px}
-.feat-dot.y{background:#EAF3DE;color:#27500A}
-.feat-dot.n{background:#F1EFE8;color:#888780}
-.feat-ok{display:flex;align-items:flex-start;gap:7px;font-size:12px;font-weight:500;color:var(--teal)}
-.feat-ok-dot{width:16px;height:16px;border-radius:50%;background:#EAF3DE;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;margin-top:1px;color:#27500A}
+.feat-dot.y{background:#EAF3DE;color:#27500A}.feat-dot.n{background:#F1EFE8;color:#888780}
 .feat-txt.bold{font-weight:600;color:var(--ink)}
 .gold-box{background:#FAEEDA;border-radius:8px;padding:10px 12px;font-size:11px;margin-bottom:4px}
 .gold-box-title{font-weight:600;color:#854F0B;margin-bottom:4px;font-size:10px;text-transform:uppercase;letter-spacing:.5px}
 .gold-box-docs{color:#633806;line-height:1.6}
-.pay-box{background:#F1EFE8;border-radius:8px;padding:8px 12px;font-size:11px;font-weight:500;color:var(--muted)}
+.pay-box{background:#F1EFE8;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:500;color:var(--muted)}
 .btn{width:100%;padding:10px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:opacity .15s;display:block;text-align:center;text-decoration:none;margin-top:auto}
+.btn:hover{opacity:.85}
 .btn-dark{background:var(--ink);color:#fff}.btn-out{background:transparent;border:1px solid var(--line);color:var(--muted)}
 .btn-amber{background:#FAEEDA;color:#633806;border:1px solid #FAC775}
+
+/* TOGGLE */
 .toggle-wrap{display:flex;align-items:center;gap:12px;margin-bottom:20px}
 .toggle-lbl{font-size:13px;color:var(--muted)}.toggle-lbl.active{color:var(--ink);font-weight:500}
 .toggle-sw{width:44px;height:23px;border-radius:12px;background:#D3D1C7;border:none;cursor:pointer;position:relative;flex-shrink:0;transition:background .2s}
@@ -71,6 +78,8 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 .toggle-thumb{position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:#fff;transition:transform .2s}
 .toggle-sw.on .toggle-thumb{transform:translateX(21px)}
 .ann-pill{font-size:10px;background:#EAF3DE;color:#27500A;padding:2px 8px;border-radius:20px;font-weight:500}
+
+/* TIMING */
 .timing{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:20px}
 .timing-head{padding:12px 18px;border-bottom:1px solid var(--line);font-size:13px;font-weight:500}
 .timing-grid{display:grid;grid-template-columns:repeat(4,1fr)}
@@ -79,6 +88,8 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 .timing-plan{font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:600}
 .timing-val{font-size:18px;font-weight:500;margin-bottom:2px}
 .timing-desc{font-size:10px;color:var(--muted)}
+
+/* TABLE */
 .table-wrap{overflow:hidden;border-radius:var(--r);border:1px solid var(--line);margin-bottom:20px}
 table{width:100%;border-collapse:collapse;background:var(--warm);font-size:12px}
 th{padding:10px 14px;text-align:center;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line);font-weight:600}
@@ -89,6 +100,9 @@ tr:last-child td{border-bottom:none}
 tr:hover td{background:#F9F7F2}
 .td-yes{color:#1E7A62;font-weight:600}.td-no{color:rgba(136,135,128,.35);font-size:16px}
 .td-gold{background:rgba(192,155,90,.05)}.td-price{background:var(--bg);font-weight:600}
+.td-promo{background:#EAF3DE}
+
+/* CASTORUS */
 .castorus{background:var(--bg);border-radius:var(--r);padding:16px 20px}
 .castorus-title{font-size:12px;font-weight:500;margin-bottom:6px;display:flex;align-items:center;gap:8px}
 .castorus-pill{font-size:10px;background:#E6F1FB;color:#0C447C;padding:2px 8px;border-radius:20px;font-weight:500}
@@ -103,8 +117,9 @@ tr:hover td{background:#F9F7F2}
 .bien-pm2{font-size:13px;font-weight:600}.bien-pm2.ok{color:#1E7A62}.bien-pm2.warn{color:#D4732A}.bien-pm2.bad{color:#C0392B}
 .bien-lbl{font-size:10px;color:var(--muted);margin-top:1px}
 .castorus-note{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.65}
-@media(max-width:860px){.grid4,.grid3{grid-template-columns:1fr 1fr}.timing-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:580px){.grid2,.grid4,.grid3{grid-template-columns:1fr}.tabs{flex-wrap:wrap}}
+
+@media(max-width:860px){.grid4{grid-template-columns:1fr 1fr}.timing-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:580px){.grid2,.grid4{grid-template-columns:1fr}.tabs{flex-wrap:wrap}}
 </style>
 </head>
 <body>
@@ -113,27 +128,27 @@ tr:hover td{background:#F9F7F2}
   <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
   <div class="nav-links">
     <a href="forfaits.html">Forfaits</a>
-    <a href="questionnaire-vendeur.html" class="nav-btn-gold">Vendre</a>
+    <a href="questionnaire-vendeur.html" class="nav-gold">Vendre</a>
     <a href="questionnaire-acheteur.html">Acheter</a>
     <a href="index.html#agents">Agents immo</a>
   </div>
-  <a href="index.html" class="nav-btn-out">Accueil</a>
+  <a href="index.html" class="nav-out">Accueil</a>
 </nav>
 
 <div class="page">
 
   <div class="tabs">
-    <button class="tab active" data-target="vendeurs">Vendeurs</button>
-    <button class="tab" data-target="acheteurs">Acheteurs</button>
-    <button class="tab" data-target="investisseur">Investisseur</button>
-    <button class="tab" data-target="agents">Agents</button>
+    <button class="tab active" id="tab-vendeurs">Vendeurs</button>
+    <button class="tab" id="tab-acheteurs">Acheteurs</button>
+    <button class="tab" id="tab-investisseur">Investisseur</button>
+    <button class="tab" id="tab-agents">Agents immo</button>
   </div>
 
-  <!-- VENDEURS -->
-  <div id="vendeurs" class="panel active">
+  <!-- ══ VENDEURS ══ -->
+  <div id="panel-vendeurs" class="panel active">
     <div class="sec-eye">Stratégie marketplace</div>
     <div class="sec-title">Plans vendeurs — 100% gratuits</div>
-    <div class="sec-sub">Tous les niveaux sont gratuits. Plus vous fournissez de justificatifs, plus votre annonce gagne en visibilité.</div>
+    <div class="sec-sub">Tous les niveaux sont gratuits. Plus vous fournissez de justificatifs, plus votre annonce gagne en visibilité et en fonctionnalités.</div>
     <div class="grid4" id="ve-cards"></div>
     <div class="table-wrap"><table>
       <thead><tr><th>Critère</th><th>Standard</th><th>Silver</th><th>Gold</th><th>Platinium</th></tr></thead>
@@ -141,7 +156,7 @@ tr:hover td{background:#F9F7F2}
         <tr><td>Tarif</td><td style="color:#1E7A62;font-weight:600">Gratuit</td><td style="color:#1E7A62;font-weight:600">Gratuit</td><td style="color:#1E7A62;font-weight:600">Gratuit</td><td style="color:#1E7A62;font-weight:600">Gratuit</td></tr>
         <tr><td>Photos</td><td>3 max</td><td style="color:#185FA5;font-weight:600">Illimitées</td><td style="color:#854F0B;font-weight:600">Illimitées</td><td style="color:#1E7A62;font-weight:600">Illimitées</td></tr>
         <tr><td>Adresse visible</td><td><span class="td-no">—</span> Ville seule</td><td style="color:#185FA5;font-size:11px;font-weight:600">Acheteurs éligibles</td><td style="color:#854F0B;font-size:11px;font-weight:600">Acheteurs éligibles</td><td><span class="td-yes">Acheteurs éligibles</span></td></tr>
-        <tr><td>Contact acheteurs</td><td style="color:#854F0B;font-size:11px">19,99 €/contact</td><td><span class="td-yes">Gratuit & direct</span></td><td><span class="td-yes">Gratuit & direct</span></td><td><span class="td-yes">Gratuit & direct</span></td></tr>
+        <tr><td>Contact acheteurs</td><td style="color:#854F0B;font-size:11px">19,99 €/contact</td><td><span class="td-yes">Gratuit &amp; direct</span></td><td><span class="td-yes">Gratuit &amp; direct</span></td><td><span class="td-yes">Gratuit &amp; direct</span></td></tr>
         <tr><td>Matching investisseurs</td><td><span class="td-no">—</span></td><td style="color:#185FA5;font-weight:600">Oui</td><td><span class="td-yes">Oui</span></td><td><span class="td-yes">Oui</span></td></tr>
         <tr><td>Contact agents immo</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td><span class="td-yes">Oui</span></td></tr>
         <tr><td>Mise en avant</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td><span class="td-yes">Prioritaire</span></td></tr>
@@ -150,8 +165,8 @@ tr:hover td{background:#F9F7F2}
     </table></div>
   </div>
 
-  <!-- ACHETEURS -->
-  <div id="acheteurs" class="panel">
+  <!-- ══ ACHETEURS ══ -->
+  <div id="panel-acheteurs" class="panel">
     <div class="sec-eye">2 plans · Freemium</div>
     <div class="sec-title">Plans acheteurs</div>
     <div class="sec-sub">Gratuit pour explorer. Acheteur à 19,99€ avec infos complètes et rapport Hanaé. Pour investir, voir l'onglet Investisseur.</div>
@@ -162,17 +177,17 @@ tr:hover td{background:#F9F7F2}
         <tr><td>Accès annonces</td><td style="font-size:11px">Ville · surface · 3 photos</td><td><span class="td-yes">Infos complètes</span></td></tr>
         <tr><td>Adresse exacte</td><td><span class="td-no">—</span></td><td><span class="td-yes">Oui</span></td></tr>
         <tr><td>Rapport Hanaé IA</td><td><span class="td-no">—</span></td><td><span class="td-yes">Inclus</span></td></tr>
-        <tr><td>Contact vendeur inclus</td><td style="color:#854F0B;font-size:11px">19,99 €/contact</td><td style="color:#185FA5;font-size:11px;font-weight:600">1/semaine illimité</td></tr>
-        <tr><td>Contact supplémentaire</td><td><span class="td-no">—</span></td><td style="font-size:11px;color:var(--muted)">9,99 €/contact</td></tr>
+        <tr><td>Contact vendeur/semaine</td><td style="color:#854F0B;font-size:11px">19,99 €/contact</td><td style="color:#185FA5;font-size:11px;font-weight:600">1 illimité</td></tr>
+        <tr><td>Contact supplémentaire</td><td><span class="td-no">—</span></td><td style="font-size:11px">9,99 €/contact</td></tr>
         <tr><td>Matching automatique</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td></tr>
-        <tr><td>Alertes annonces</td><td>Quotidien</td><td>Temps réel</td></tr>
+        <tr><td>Alertes</td><td>Quotidien</td><td>Temps réel</td></tr>
         <tr class="td-price"><td>Tarif</td><td>0 €</td><td style="color:#185FA5;font-weight:600">19,99 €/mois</td></tr>
       </tbody>
     </table></div>
   </div>
 
-  <!-- INVESTISSEUR -->
-  <div id="investisseur" class="panel">
+  <!-- ══ INVESTISSEUR ══ -->
+  <div id="panel-investisseur" class="panel">
     <div class="sec-eye">Forfait investisseur</div>
     <div class="sec-title">Investisseur</div>
     <div class="sec-sub">39€/mois — 5 contacts vendeurs/semaine · matching automatique sur rendement · contacté par les vendeurs Platinium · contact supp. à 1,99€.</div>
@@ -182,20 +197,19 @@ tr:hover td{background:#F9F7F2}
         <div class="card-head bg-coral"><div class="badge badge-right badge-amber">39 €/mois</div></div>
         <div class="card-body">
           <div class="plan-name">Investisseur</div>
-          <div class="price-main">39 €</div>
+          <div class="price-wrap"><div class="price-main price-green">39 €</div></div>
           <div class="price-sub">/mois</div>
           <div class="plan-tag">5 contacts/semaine · matching rendement · vendeurs Platinium</div>
           <div class="pay-box">Contact supp. : 1,99 €/contact</div>
           <hr class="divider">
           <div class="feats">
-            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span>Infos complètes — adresse exacte + toutes données</span></div>
-            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span>Rapport Hanaé IA inclus</span></div>
-            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span>5 contacts vendeurs/semaine — illimités</span></div>
-            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span>Matching auto sur filtres (rendement, prix/m²)</span></div>
-            <div class="feat-ok"><div class="feat-ok-dot">✓</div><span>Contacté directement par vendeurs Platinium</span></div>
+            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Infos complètes — adresse exacte + toutes données</span></div>
+            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Rapport Hanaé IA inclus</span></div>
+            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">5 contacts vendeurs/semaine illimités</span></div>
+            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Matching auto sur filtres (rendement, prix/m²)</span></div>
+            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Contacté directement par vendeurs Platinium</span></div>
             <div class="feat"><div class="feat-dot y">✓</div><span>Alertes temps réel sur vos critères</span></div>
             <div class="feat"><div class="feat-dot y">✓</div><span>Simulateur rendement net</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span>Comparaison prix/m² vs marché DVF</span></div>
             <div class="feat"><div class="feat-dot y">✓</div><span>Calcul capacité d'emprunt intégré</span></div>
           </div>
           <a href="questionnaire-acheteur.html" class="btn btn-amber">Choisir Investisseur</a>
@@ -206,17 +220,18 @@ tr:hover td{background:#F9F7F2}
         <div class="castorus-median">Médiane DVF 2024 — Lons (64) : <strong>2 750 €/m²</strong></div>
         <div class="bien"><div class="bien-info"><div class="bien-addr">T2 · 45 m² — Allée du Pic d'Anie</div><div class="bien-meta">Lons · 12 jours · 89 000 €</div></div><div class="bien-bar-wrap"><div class="bien-bar-bg"><div class="bien-bar-fill fill-ok" style="width:72%"></div></div></div><div class="bien-price"><div class="bien-pm2 ok">1 978 €/m²</div><div class="bien-lbl">−28 % vs marché</div></div></div>
         <div class="bien"><div class="bien-info"><div class="bien-addr">T3 · 62 m² — Av. de Santona</div><div class="bien-meta">Lons · 45 jours · 167 000 €</div></div><div class="bien-bar-wrap"><div class="bien-bar-bg"><div class="bien-bar-fill fill-warn" style="width:90%"></div></div></div><div class="bien-price"><div class="bien-pm2 warn">2 694 €/m²</div><div class="bien-lbl">−2 % vs marché</div></div></div>
-        <div class="bien"><div class="bien-info"><div class="bien-addr">T2 · 45 m² — Chemin Mirassou</div><div class="bien-meta">Lons · 6 mois · 124 800 €</div></div><div class="bien-bar-wrap"><div class="bien-bar-bg"><div class="bien-bar-fill fill-warn" style="width:93%"></div></div></div><div class="bien-price"><div class="bien-pm2 warn">2 773 €/m²</div><div class="bien-lbl">+1 % vs marché</div></div></div>
-        <div class="castorus-note">Vert = sous-évalué · Orange = prix marché · Rouge = surévalué. Données DVF actualisées.</div>
+        <div class="bien"><div class="bien-info"><div class="bien-addr">T2 · 41 m² — Rue des Chênes</div><div class="bien-meta">Lons · 91 jours · 175 000 €</div></div><div class="bien-bar-wrap"><div class="bien-bar-bg"><div class="bien-bar-fill fill-bad" style="width:100%"></div></div></div><div class="bien-price"><div class="bien-pm2 bad">4 268 €/m²</div><div class="bien-lbl">+55 % vs marché</div></div></div>
+        <div class="castorus-note">Vert = sous-évalué · Orange = prix marché · Rouge = surévalué. Données DVF.</div>
       </div>
     </div>
   </div>
 
-  <!-- AGENTS -->
-  <div id="agents" class="panel">
+  <!-- ══ AGENTS ══ -->
+  <div id="panel-agents" class="panel">
     <div class="sec-eye">4 forfaits · Agents immobiliers</div>
     <div class="sec-title">Plans agents immobiliers</div>
     <div class="sec-sub">Accédez aux dossiers vendeurs Gold &amp; Platinium en priorité. Contacts vendeurs et acheteurs, exclusivité, rapport Hanaé inclus.</div>
+    <div class="promo-banner">🎁 <strong>Offre de lancement — 50% de réduction jusqu'au 01/09/2026</strong> &nbsp;· Les tarifs affichés sont les tarifs promotionnels.</div>
     <div class="toggle-wrap">
       <span class="toggle-lbl active" id="lbl-m">Mensuel</span>
       <button class="toggle-sw" id="ag-toggle"><div class="toggle-thumb"></div></button>
@@ -233,19 +248,18 @@ tr:hover td{background:#F9F7F2}
       </div>
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Critère</th><th>Starter</th><th style="background:rgba(24,95,165,.05)">Pro</th><th>Expert</th><th style="background:rgba(192,155,90,.06)">Platinium</th></tr></thead>
+      <thead><tr><th>Critère</th><th>Starter</th><th>Pro</th><th>Expert</th><th style="background:rgba(192,155,90,.06)">Platinium</th></tr></thead>
       <tbody>
         <tr><td>Annonces publiables</td><td>5 max</td><td>20 max</td><td>50 max</td><td><span class="td-yes">Illimitées</span></td></tr>
         <tr><td>Contacts vendeurs/semaine</td><td style="font-weight:600;color:#185FA5">10</td><td style="font-weight:600;color:#185FA5">15</td><td style="font-weight:600;color:#1E7A62">30</td><td><span class="td-yes">Illimités</span></td></tr>
         <tr><td>Contacts acheteurs/semaine</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td style="font-weight:600;color:#1E7A62">15</td><td><span class="td-yes">Illimités</span></td></tr>
         <tr><td>Contact supp. vendeur</td><td style="font-size:11px">1,99 €</td><td style="font-size:11px">1,99 €</td><td style="font-size:11px">1,99 €</td><td><span class="td-yes">Inclus</span></td></tr>
-        <tr><td>Alerte dossiers Gold & Platinium</td><td>J+4</td><td>J+2</td><td>J+1</td><td><span class="td-yes">H+0</span></td></tr>
+        <tr><td>Alerte Gold &amp; Platinium</td><td>J+4</td><td>J+2</td><td>J+1</td><td><span class="td-yes">H+0</span></td></tr>
         <tr><td>Rapport Hanaé IA</td><td><span class="td-yes">✓</span></td><td><span class="td-yes">✓</span></td><td><span class="td-yes">✓</span></td><td><span class="td-yes">✓</span></td></tr>
-        <tr><td>Matching auto rendement</td><td><span class="td-yes">✓</span></td><td><span class="td-yes">✓</span></td><td><span class="td-yes">✓</span></td><td><span class="td-yes">✓</span></td></tr>
         <tr><td>Exclusivité vendeur 48h</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td style="font-size:11px;font-weight:600;color:#854F0B">99 €</td><td style="font-size:11px;font-weight:600;color:#1E7A62">49 €</td></tr>
         <tr><td>Exclusivité vendeur 96h</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td style="font-size:11px;font-weight:600;color:#1E7A62">99 €</td></tr>
-        <tr><td>Prix normal</td><td style="text-decoration:line-through;color:var(--muted)">49 €</td><td style="text-decoration:line-through;color:var(--muted)">99 €</td><td style="text-decoration:line-through;color:var(--muted)">149 €</td><td class="td-gold" style="text-decoration:line-through;color:var(--muted)">199 €</td></tr>
-        <tr class="td-price" style="background:#EAF3DE"><td style="color:#1E7A62">🎁 Promo -50% jusqu'au 01/09/2026</td><td style="color:#1E7A62;font-weight:700">24,50 €</td><td style="color:#1E7A62;font-weight:700">49,50 €</td><td style="color:#1E7A62;font-weight:700">74,50 €</td><td class="td-gold" style="color:#1E7A62;font-weight:700">99,50 €</td></tr>
+        <tr><td style="color:var(--muted);font-size:11px">Tarif normal</td><td style="text-decoration:line-through;color:var(--muted);font-size:11px">49 €</td><td style="text-decoration:line-through;color:var(--muted);font-size:11px">99 €</td><td style="text-decoration:line-through;color:var(--muted);font-size:11px">149 €</td><td class="td-gold" style="text-decoration:line-through;color:var(--muted);font-size:11px">199 €</td></tr>
+        <tr class="td-promo"><td style="color:#1E7A62;font-weight:600">🎁 Promo -50% jusqu'au 01/09/2026</td><td style="color:#1E7A62;font-weight:700">24,50 €/mois</td><td style="color:#1E7A62;font-weight:700">49,50 €/mois</td><td style="color:#1E7A62;font-weight:700">74,50 €/mois</td><td class="td-gold" style="color:#1E7A62;font-weight:700">99,50 €/mois</td></tr>
       </tbody>
     </table></div>
   </div>
@@ -253,181 +267,154 @@ tr:hover td{background:#F9F7F2}
 </div>
 
 <script>
-// ONGLETS
-document.querySelectorAll('.tab').forEach(function(tab) {
-  tab.addEventListener('click', function() {
-    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
-    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+// ONGLETS — simple et direct
+var tabs = {
+  'tab-vendeurs':    'panel-vendeurs',
+  'tab-acheteurs':   'panel-acheteurs',
+  'tab-investisseur':'panel-investisseur',
+  'tab-agents':      'panel-agents'
+};
+
+Object.keys(tabs).forEach(function(tabId) {
+  document.getElementById(tabId).addEventListener('click', function() {
+    // Désactiver tout
+    Object.keys(tabs).forEach(function(t) {
+      document.getElementById(t).classList.remove('active');
+      document.getElementById(tabs[t]).classList.remove('active');
+    });
+    // Activer le bon
     this.classList.add('active');
-    document.getElementById(this.getAttribute('data-target')).classList.add('active');
+    document.getElementById(tabs[tabId]).classList.add('active');
   });
 });
 
 var annuel = false;
 
-// DONNÉES AGENTS
-var AG = [
-  { n:'Starter', bar:'bar-gray', bg:'bg-gray', p:49, promo:24.50, tag:'10 contacts vendeurs/semaine · 5 annonces max · alerte J+4',
-    feats:[
-      {y:1,b:1,t:'5 annonces maximum'},
-      {y:1,b:1,t:'Infos completes vendeurs — adresse + toutes donnees'},
-      {y:1,b:1,t:'Rapport Hanae IA inclus'},
-      {y:1,b:1,t:'10 contacts vendeurs/semaine illimites'},
-      {y:1,b:1,t:'Alerte J+4 — dossiers Gold & Platinium vendeurs'},
-      {y:1,t:'Matching auto sur filtres (rendement, prix/m2)'},
-      {y:0,t:'Contacts acheteurs offerts'},
-      {y:0,t:'Exclusivite vendeur'}
-    ],
-    contact:'Contact supp. vendeur : 1,99 euros/contact',
-    btn:'btn-out', ct:'Choisir Starter' },
-
-  { n:'Pro', bar:'bar-blue', bg:'bg-blue', p:99, promo:49.50, tag:'15 contacts vendeurs/semaine · 20 annonces max · alerte J+2', feat:true, badge:{t:'Populaire',c:'badge-blue'},
-    feats:[
-      {y:1,b:1,t:'20 annonces maximum'},
-      {y:1,b:1,t:'Infos completes vendeurs — adresse + toutes donnees'},
-      {y:1,b:1,t:'Rapport Hanae IA inclus'},
-      {y:1,b:1,t:'15 contacts vendeurs/semaine illimites'},
-      {y:1,b:1,t:'Alerte J+2 — dossiers Gold & Platinium vendeurs'},
-      {y:1,t:'Matching auto sur filtres (rendement, prix/m2)'},
-      {y:0,t:'Contacts acheteurs offerts'},
-      {y:0,t:'Exclusivite vendeur'}
-    ],
-    contact:'Contact supp. vendeur : 1,99 euros/contact',
-    btn:'btn-dark', ct:'Choisir Pro' },
-
-  { n:'Expert', bar:'bar-teal', bg:'bg-teal', p:149, promo:74.50, tag:'30 contacts vendeurs + 15 acheteurs · 50 annonces · exclusivite 48h · alerte J+1',
-    feats:[
-      {y:1,b:1,t:'50 annonces maximum'},
-      {y:1,b:1,t:'30 contacts vendeurs/semaine illimites'},
-      {y:1,b:1,t:'15 contacts acheteurs/semaine illimites'},
-      {y:1,b:1,t:'Alerte J+1 — biens Silver, Gold & Platinium vendeurs'},
-      {y:1,b:1,t:'Exclusivite vendeur 48h — 99 euros'},
-      {y:1,t:'Rapport Hanae IA inclus'},
-      {y:1,t:'Matching auto sur filtres (rendement, prix/m2)'}
-    ],
-    contact:'Contact supp. vendeur : 1,99 euros/contact',
-    btn:'btn-dark', ct:'Choisir Expert' },
-
-  { n:'Platinium', bar:'bar-amber', bg:'bg-amber', p:199, promo:99.50, tag:'Annonces illimitees · contacts illimites · alerte H+0 · exclusivite 48h ou 96h', badge:{t:'Premium',c:'badge-dark'},
-    feats:[
-      {y:1,b:1,t:'Annonces illimitees'},
-      {y:1,b:1,t:'Contacts vendeurs illimites'},
-      {y:1,b:1,t:'Contacts acheteurs illimites'},
-      {y:1,b:1,t:'Alerte H+0 — biens Silver, Gold & Platinium vendeurs'},
-      {y:1,b:1,t:'Exclusivite vendeur 48h — 49 euros'},
-      {y:1,b:1,t:'Exclusivite vendeur 96h — 99 euros'},
-      {y:1,t:'Rapport Hanae IA inclus'}
-    ],
-    contact:'Contact supp. vendeur : inclus illimite',
-    btn:'btn-amber', ct:'Choisir Platinium' }
-];
-
-// DONNÉES VENDEURS
+// VENDEURS
 var VE = [
-  { n:'Standard', bar:'bar-gray', bg:'bg-gray', tag:'Publiez gratuitement · ville uniquement · contact payant', badge:null, docs:null,
-    feats:[{y:1,t:'1 annonce active'},{y:1,t:'3 photos maximum'},{y:1,t:'Ville uniquement (adresse masquée)'},{y:0,t:'Photos illimitées'},{y:0,t:'Matching investisseurs'},{y:0,t:'Mise en avant prioritaire'}],
-    contact:'Acheteur paie 19,99 euros pour vous contacter', btn:'btn-out', ct:'Publier gratuitement' },
-  { n:'Silver', bar:'bar-blue', bg:'bg-blue', tag:'Valeur locative ou bail · photos illimitées · adresse visible', badge:{t:'Silver',c:'badge-blue'},
+  { n:'Standard', bar:'bar-gray', bg:'bg-gray', tag:'Ville uniquement · 3 photos · contact payant', badge:null, docs:null,
+    feats:[{y:1,t:'1 annonce active'},{y:1,t:'3 photos maximum'},{y:1,t:'Ville uniquement (adresse masquee)'},{y:0,t:'Photos illimitees'},{y:0,t:'Matching investisseurs'},{y:0,t:'Mise en avant prioritaire'}],
+    contact:'Acheteur paie 19,99 euros pour contacter', btn:'btn-out', ct:'Publier gratuitement' },
+  { n:'Silver', bar:'bar-blue', bg:'bg-blue', tag:'Photos illimitees · adresse visible acheteurs eligibles', badge:{t:'Silver',c:'badge-blue'},
     docs:'Valeur locative (justificatif papier) OU bail en cours',
-    feats:[{y:1,b:1,t:'Photos illimitées'},{y:1,b:1,t:'Adresse exacte visible (acheteurs éligibles)'},{y:1,b:1,t:'Contact gratuit — acheteurs éligibles'},{y:1,b:1,t:'Matching automatique avec les investisseurs'},{y:1,t:'Badge Silver affiché'},{y:0,t:'Mise en avant prioritaire'}],
+    feats:[{y:1,b:1,t:'Photos illimitees'},{y:1,b:1,t:'Adresse visible (acheteurs eligibles)'},{y:1,b:1,t:'Contact gratuit acheteurs eligibles'},{y:1,b:1,t:'Matching investisseurs'},{y:1,t:'Badge Silver'},{y:0,t:'Mise en avant prioritaire'}],
     contact:null, btn:'btn-out', ct:'Passer Silver' },
-  { n:'Gold', bar:'bar-amber', bg:'bg-amber', tag:'Copro + Taxe foncière · adresse visible · contact gratuit', badge:{t:'Gold',c:'badge-amber'}, feat:true,
-    docs:'Documents Silver + Compte rendu copro (si applicable) + Taxe foncière',
-    feats:[{y:1,b:1,t:'Photos illimitées'},{y:1,b:1,t:'Adresse exacte visible (acheteurs éligibles)'},{y:1,b:1,t:'Contact direct — gratuit'},{y:1,b:1,t:'Matching automatique investisseurs'},{y:1,t:'Badge Gold affiché'},{y:0,t:'Mise en avant prioritaire'}],
+  { n:'Gold', bar:'bar-amber', bg:'bg-amber', tag:'Adresse visible · contact direct gratuit', badge:{t:'Gold',c:'badge-amber'}, feat:true,
+    docs:'Silver + Compte rendu copro (si applicable) + Taxe fonciere',
+    feats:[{y:1,b:1,t:'Photos illimitees'},{y:1,b:1,t:'Adresse exacte visible'},{y:1,b:1,t:'Contact direct gratuit'},{y:1,b:1,t:'Matching investisseurs'},{y:1,t:'Badge Gold'},{y:0,t:'Mise en avant prioritaire'}],
     contact:null, btn:'btn-amber', ct:'Passer Gold' },
-  { n:'Platinium', bar:'bar-teal', bg:'bg-teal', tag:'DPE requis · visibilité maximale · contact libre · agents', badge:{t:'Platinium',c:'badge-dark'},
-    docs:'Documents Gold + DPE (Diagnostic de Performance Energetique)',
-    feats:[{y:1,b:1,t:'Photos illimitées'},{y:1,b:1,t:'Adresse exacte visible (tous acheteurs)'},{y:1,b:1,t:'Contact direct — tous les acheteurs'},{y:1,b:1,t:'Contact direct — agents immobiliers'},{y:1,b:1,t:'Matching investisseurs + acheteurs'},{y:1,b:1,t:'Mise en avant prioritaire'}],
+  { n:'Platinium', bar:'bar-teal', bg:'bg-teal', tag:'Visibilite maximale · contact libre · agents immo', badge:{t:'Platinium',c:'badge-dark'},
+    docs:'Gold + DPE (Diagnostic de Performance Energetique)',
+    feats:[{y:1,b:1,t:'Photos illimitees'},{y:1,b:1,t:'Adresse visible tous acheteurs'},{y:1,b:1,t:'Contact direct tous acheteurs'},{y:1,b:1,t:'Contact direct agents immobiliers'},{y:1,b:1,t:'Matching investisseurs + acheteurs'},{y:1,b:1,t:'Mise en avant prioritaire'}],
     contact:null, btn:'btn-dark', ct:'Passer Platinium' }
 ];
 
-// DONNÉES ACHETEURS
+// ACHETEURS
 var AC = [
   { n:'Gratuit', bar:'bar-gray', bg:'bg-gray', tag:'Ville · surface · 3 photos · contact payant', badge:null,
     feats:[{y:1,t:'Annonces : ville, surface, 3 photos'},{y:1,t:'Alertes quotidiennes'},{y:0,t:'Adresse et infos completes'},{y:0,t:'Rapport Hanae IA'},{y:0,t:'Contact vendeur inclus'}],
-    contact:'Contact vendeur : 19,99 euros/contact', price:'0 euros', priceGreen:true, priceSub:'pour toujours', btn:'btn-out', ct:'Commencer gratuitement' },
+    contact:'Contact vendeur : 19,99 euros/contact', price:'0', priceGreen:true, priceSub:'pour toujours', btn:'btn-out', ct:'Commencer gratuitement' },
   { n:'Acheteur', bar:'bar-blue', bg:'bg-blue', tag:'Infos completes · rapport Hanae · 1 contact/semaine', badge:{t:'Populaire',c:'badge-blue'}, feat:true,
-    feats:[{y:1,b:1,t:'Adresse exacte + toutes infos vendeur'},{y:1,b:1,t:'Rapport Hanae IA inclus'},{y:1,b:1,t:'1 contact vendeur/semaine illimite'},{y:1,t:'Alertes temps reel'},{y:0,t:'Matching automatique sur filtres'},{y:0,t:'Contacte par vendeurs Platinium'}],
-    contact:'Contact supp. : 9,99 euros/contact', price:'19,99 euros', priceSub:'/mois', btn:'btn-dark', ct:'Choisir Acheteur' }
+    feats:[{y:1,b:1,t:'Adresse exacte + toutes infos vendeur'},{y:1,b:1,t:'Rapport Hanae IA inclus'},{y:1,b:1,t:'1 contact vendeur/semaine illimite'},{y:1,t:'Alertes temps reel'},{y:0,t:'Matching automatique'},{y:0,t:'Contacte par vendeurs Platinium'}],
+    contact:'Contact supp. : 9,99 euros/contact', price:'19,99', priceSub:'/mois', btn:'btn-dark', ct:'Choisir Acheteur' }
 ];
 
-// RENDU
-function renderAgents() {
-  var html = '';
-  AG.forEach(function(p) {
-    var price = annuel ? p.pa : p.p;
-    var sub = annuel ? '/mois · annuel' : '/mois';
-    html += '<div class="card' + (p.feat ? ' featured' : '') + '">';
-    html += '<div class="card-bar ' + p.bar + '"></div>';
-    html += '<div class="card-head ' + p.bg + '">';
-    if (p.badge) html += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
-    html += '</div><div class="card-body">';
-    html += '<div class="plan-name">' + p.n + '</div>';
-    html += '<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">';
-    html += '<div class="price-main" style="color:#1E7A62">' + p.promo + ' €</div>';
-    html += '<div style="font-size:14px;color:#888780;text-decoration:line-through">' + p.p + ' €</div>';
-    html += '</div>';
-    html += '<div class="price-sub" style="color:#1E7A62;font-weight:500">/mois · -50% jusqu'au 1/09/2026</div>';
-    html += '<div class="plan-tag">' + p.tag + '</div>';
-    if (p.contact) html += '<div class="pay-box">' + p.contact + '</div>';
-    html += '<hr class="divider"><div class="feats">';
-    p.feats.forEach(function(f) {
-      html += '<div class="feat' + (!f.y ? ' dim' : '') + '">';
-      html += '<div class="feat-dot ' + (f.y ? 'y' : 'n') + '">' + (f.y ? '✓' : '✗') + '</div>';
-      html += '<span class="feat-txt' + (f.b ? ' bold' : '') + '">' + f.t + '</span></div>';
-    });
-    html += '</div><button class="btn ' + p.btn + '">' + p.ct + '</button></div></div>';
-  });
-  document.getElementById('ag-cards').innerHTML = html;
-}
+// AGENTS
+var AG = [
+  { n:'Starter', bar:'bar-gray', bg:'bg-gray', p:49, promo:24.50, pa:41,
+    tag:'10 contacts vendeurs/semaine · 5 annonces · alerte J+4',
+    feats:[{y:1,b:1,t:'5 annonces maximum'},{y:1,b:1,t:'10 contacts vendeurs/semaine'},{y:1,b:1,t:'Rapport Hanae IA inclus'},{y:1,b:1,t:'Alerte J+4 dossiers Gold & Platinium'},{y:1,t:'Matching auto rendement'},{y:0,t:'Contacts acheteurs'},{y:0,t:'Exclusivite vendeur'}],
+    contact:'Contact supp. : 1,99 euros/contact', btn:'btn-out', ct:'Choisir Starter' },
+  { n:'Pro', bar:'bar-blue', bg:'bg-blue', p:99, promo:49.50, pa:82,
+    tag:'15 contacts vendeurs/semaine · 20 annonces · alerte J+2', feat:true, badge:{t:'Populaire',c:'badge-blue'},
+    feats:[{y:1,b:1,t:'20 annonces maximum'},{y:1,b:1,t:'15 contacts vendeurs/semaine'},{y:1,b:1,t:'Rapport Hanae IA inclus'},{y:1,b:1,t:'Alerte J+2 dossiers Gold & Platinium'},{y:1,t:'Matching auto rendement'},{y:0,t:'Contacts acheteurs'},{y:0,t:'Exclusivite vendeur'}],
+    contact:'Contact supp. : 1,99 euros/contact', btn:'btn-dark', ct:'Choisir Pro' },
+  { n:'Expert', bar:'bar-teal', bg:'bg-teal', p:149, promo:74.50, pa:124,
+    tag:'30 vendeurs + 15 acheteurs · 50 annonces · exclusivite 48h · alerte J+1',
+    feats:[{y:1,b:1,t:'50 annonces maximum'},{y:1,b:1,t:'30 contacts vendeurs/semaine'},{y:1,b:1,t:'15 contacts acheteurs/semaine'},{y:1,b:1,t:'Alerte J+1 biens Silver, Gold & Platinium'},{y:1,b:1,t:'Exclusivite vendeur 48h — 99 euros'},{y:1,t:'Rapport Hanae IA inclus'},{y:1,t:'Matching auto rendement'}],
+    contact:'Contact supp. : 1,99 euros/contact', btn:'btn-dark', ct:'Choisir Expert' },
+  { n:'Platinium', bar:'bar-amber', bg:'bg-amber', p:199, promo:99.50, pa:166,
+    tag:'Annonces & contacts illimites · alerte H+0 · exclusivite 48h ou 96h', badge:{t:'Premium',c:'badge-dark'},
+    feats:[{y:1,b:1,t:'Annonces illimitees'},{y:1,b:1,t:'Contacts vendeurs illimites'},{y:1,b:1,t:'Contacts acheteurs illimites'},{y:1,b:1,t:'Alerte H+0 biens Silver, Gold & Platinium'},{y:1,b:1,t:'Exclusivite vendeur 48h — 49 euros'},{y:1,b:1,t:'Exclusivite vendeur 96h — 99 euros'},{y:1,t:'Rapport Hanae IA inclus'}],
+    contact:'Contact supp. : inclus illimite', btn:'btn-amber', ct:'Choisir Platinium' }
+];
 
+// RENDU VENDEURS
 function renderVendeurs() {
-  var html = '';
+  var h = '';
   VE.forEach(function(p) {
-    html += '<div class="card' + (p.feat ? ' featured' : '') + '">';
-    html += '<div class="card-bar ' + p.bar + '"></div>';
-    html += '<div class="card-head ' + p.bg + '">';
-    if (p.badge) html += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
-    html += '</div><div class="card-body">';
-    html += '<div class="plan-name">' + p.n + '</div>';
-    html += '<div class="price-main price-green">0 €</div>';
-    html += '<div class="price-sub">gratuit — toujours</div>';
-    html += '<div class="plan-tag">' + p.tag + '</div>';
-    if (p.docs) html += '<div class="gold-box"><div class="gold-box-title">Documents requis</div><div class="gold-box-docs">' + p.docs + '</div></div>';
-    if (p.contact) html += '<div class="pay-box">' + p.contact + '</div>';
-    html += '<hr class="divider"><div class="feats">';
+    h += '<div class="card' + (p.feat ? ' featured' : '') + '">';
+    h += '<div class="card-bar ' + p.bar + '"></div>';
+    h += '<div class="card-head ' + p.bg + '">';
+    if (p.badge) h += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
+    h += '</div><div class="card-body">';
+    h += '<div class="plan-name">' + p.n + '</div>';
+    h += '<div class="price-wrap"><div class="price-main price-green">0 &euro;</div></div>';
+    h += '<div class="price-sub">gratuit &mdash; toujours</div>';
+    h += '<div class="plan-tag">' + p.tag + '</div>';
+    if (p.docs) h += '<div class="gold-box"><div class="gold-box-title">Documents requis</div><div class="gold-box-docs">' + p.docs + '</div></div>';
+    if (p.contact) h += '<div class="pay-box">' + p.contact + '</div>';
+    h += '<hr class="divider"><div class="feats">';
     p.feats.forEach(function(f) {
-      html += '<div class="feat' + (!f.y ? ' dim' : '') + '">';
-      html += '<div class="feat-dot ' + (f.y ? 'y' : 'n') + '">' + (f.y ? '✓' : '✗') + '</div>';
-      html += '<span class="feat-txt' + (f.b ? ' bold' : '') + '">' + f.t + '</span></div>';
+      h += '<div class="feat' + (!f.y ? ' dim' : '') + '"><div class="feat-dot ' + (f.y?'y':'n') + '">' + (f.y?'✓':'✗') + '</div>';
+      h += '<span class="feat-txt' + (f.b?' bold':'') + '">' + f.t + '</span></div>';
     });
-    html += '</div><a href="questionnaire-vendeur.html" class="btn ' + p.btn + '">' + p.ct + '</a></div></div>';
+    h += '</div><a href="questionnaire-vendeur.html" class="btn ' + p.btn + '">' + p.ct + '</a></div></div>';
   });
-  document.getElementById('ve-cards').innerHTML = html;
+  document.getElementById('ve-cards').innerHTML = h;
 }
 
+// RENDU ACHETEURS
 function renderAcheteurs() {
-  var html = '';
+  var h = '';
   AC.forEach(function(p) {
-    html += '<div class="card' + (p.feat ? ' featured' : '') + '">';
-    html += '<div class="card-bar ' + p.bar + '"></div>';
-    html += '<div class="card-head ' + p.bg + '">';
-    if (p.badge) html += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
-    html += '</div><div class="card-body">';
-    html += '<div class="plan-name">' + p.n + '</div>';
-    html += '<div class="price-main' + (p.priceGreen ? ' price-green' : '') + '">' + p.price + '</div>';
-    html += '<div class="price-sub">' + (p.priceSub || '') + '</div>';
-    html += '<div class="plan-tag">' + p.tag + '</div>';
-    if (p.contact) html += '<div class="pay-box">' + p.contact + '</div>';
-    html += '<hr class="divider"><div class="feats">';
+    h += '<div class="card' + (p.feat ? ' featured' : '') + '">';
+    h += '<div class="card-bar ' + p.bar + '"></div>';
+    h += '<div class="card-head ' + p.bg + '">';
+    if (p.badge) h += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
+    h += '</div><div class="card-body">';
+    h += '<div class="plan-name">' + p.n + '</div>';
+    h += '<div class="price-wrap"><div class="price-main' + (p.priceGreen?' price-green':'') + '">' + p.price + ' &euro;</div></div>';
+    h += '<div class="price-sub">' + (p.priceSub||'') + '</div>';
+    h += '<div class="plan-tag">' + p.tag + '</div>';
+    if (p.contact) h += '<div class="pay-box">' + p.contact + '</div>';
+    h += '<hr class="divider"><div class="feats">';
     p.feats.forEach(function(f) {
-      html += '<div class="feat' + (!f.y ? ' dim' : '') + '">';
-      html += '<div class="feat-dot ' + (f.y ? 'y' : 'n') + '">' + (f.y ? '✓' : '✗') + '</div>';
-      html += '<span class="feat-txt' + (f.b ? ' bold' : '') + '">' + f.t + '</span></div>';
+      h += '<div class="feat' + (!f.y ? ' dim' : '') + '"><div class="feat-dot ' + (f.y?'y':'n') + '">' + (f.y?'✓':'✗') + '</div>';
+      h += '<span class="feat-txt' + (f.b?' bold':'') + '">' + f.t + '</span></div>';
     });
-    html += '</div><a href="questionnaire-acheteur.html" class="btn ' + p.btn + '">' + p.ct + '</a></div></div>';
+    h += '</div><a href="questionnaire-acheteur.html" class="btn ' + p.btn + '">' + p.ct + '</a></div></div>';
   });
-  document.getElementById('ac-cards').innerHTML = html;
+  document.getElementById('ac-cards').innerHTML = h;
+}
+
+// RENDU AGENTS
+function renderAgents() {
+  var h = '';
+  AG.forEach(function(p) {
+    var prix = annuel ? p.pa : p.promo;
+    var sub = annuel ? '/mois · annuel' : '/mois · promo -50%';
+    h += '<div class="card' + (p.feat ? ' featured' : '') + '">';
+    h += '<div class="card-bar ' + p.bar + '"></div>';
+    h += '<div class="card-head ' + p.bg + '">';
+    if (p.badge) h += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
+    h += '</div><div class="card-body">';
+    h += '<div class="plan-name">' + p.n + '</div>';
+    h += '<div class="price-wrap">';
+    h += '<div class="price-main price-green">' + prix + ' &euro;</div>';
+    h += '<div class="price-normal">' + p.p + ' &euro;</div>';
+    h += '</div>';
+    h += '<div class="price-sub">' + sub + '</div>';
+    h += '<div class="plan-tag">' + p.tag + '</div>';
+    if (p.contact) h += '<div class="pay-box">' + p.contact + '</div>';
+    h += '<hr class="divider"><div class="feats">';
+    p.feats.forEach(function(f) {
+      h += '<div class="feat' + (!f.y ? ' dim' : '') + '"><div class="feat-dot ' + (f.y?'y':'n') + '">' + (f.y?'✓':'✗') + '</div>';
+      h += '<span class="feat-txt' + (f.b?' bold':'') + '">' + f.t + '</span></div>';
+    });
+    h += '</div><button class="btn ' + p.btn + '">' + p.ct + '</button></div></div>';
+  });
+  document.getElementById('ag-cards').innerHTML = h;
 }
 
 // TOGGLE ANNUEL
@@ -436,16 +423,13 @@ document.getElementById('ag-toggle').addEventListener('click', function() {
   this.classList.toggle('on', annuel);
   document.getElementById('lbl-m').classList.toggle('active', !annuel);
   document.getElementById('lbl-a').classList.toggle('active', annuel);
-  [{id:'p-starter',m:49,a:41},{id:'p-pro',m:99,a:82},{id:'p-expert',m:149,a:124},{id:'p-plat',m:199,a:166}].forEach(function(p) {
-    var el = document.getElementById(p.id);
-    if (el) el.textContent = (annuel ? p.a : p.m) + ' €';
-  });
   renderAgents();
 });
 
-renderAgents();
+// INIT
 renderVendeurs();
 renderAcheteurs();
+renderAgents();
 </script>
 </body>
 </html>
