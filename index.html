@@ -566,6 +566,10 @@
     .how-section, .stats-section, .cta-section, .footer-bottom { padding-left: 32px; padding-right: 32px; }
     .hero-left { padding: 60px 32px; }
   }
+  .hw-tab { display:none; }
+  .hw-tab.visible { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media(max-width:600px){ .hw-tab.visible { grid-template-columns:1fr; } }
+
   @media (max-width: 700px) {
     .listings-grid, .agents-grid { grid-template-columns: 1fr; }
     .stats-section { flex-direction: column; gap: 32px; }
@@ -720,12 +724,6 @@
 
 <!-- HOW IT WORKS -->
 <section style="padding:80px;background:#1C1C1A">
-  <style>
-    .hw-tab { display:none; grid-template-columns:1fr 1fr; gap:16px; }
-    .hw-tab.visible { display:grid; }
-    @media(max-width:600px){ .hw-tab.visible { grid-template-columns:1fr; } }
-  </style>
-
   <div style="text-align:center;margin-bottom:40px">
     <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#B89A5E;margin-bottom:12px;font-weight:500">Pourquoi ImmoConnect</div>
     <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4vw,44px);font-weight:300;color:#FAFAF7">La plateforme qui <em style="color:#D4B87A">change la donne</em></h2>
@@ -923,75 +921,6 @@
 
 </section>
 
-<!-- AGENTS -->
-  <div class="profil-panel" id="panel-agent">
-    <div class="args-grid">
-      <div class="arg-card">
-        <div class="arg-num">01</div>
-        <div class="arg-icon">📁</div>
-        <div class="arg-title">Dossiers vendeurs déjà prêts</div>
-        <div class="arg-desc">Photos, documents légaux, DPE, rapport d'estimation — tout est constitué. Vous arrivez avec un dossier complet, pas une feuille blanche. Zéro temps perdu en aller-retour.</div>
-        <span class="arg-tag">Fini la prospection à froid</span>
-      </div>
-      <div class="arg-card">
-        <div class="arg-num">02</div>
-        <div class="arg-icon">🔔</div>
-        <div class="arg-title">Alertes prioritaires selon votre forfait</div>
-        <div class="arg-desc">Gold et Platinium signalés à H+0 (Platinium) · J+1 (Expert) · J+2 (Pro) · J+4 (Starter). Vous agissez avant vos concurrents sur les meilleures opportunités.</div>
-        <span class="arg-tag">Alerte temps réel</span>
-      </div>
-      <div class="arg-card">
-        <div class="arg-num">03</div>
-        <div class="arg-icon">🔒</div>
-        <div class="arg-title">Exclusivité 48h ou 96h</div>
-        <div class="arg-desc">Bloquez un dossier pour votre clientèle — le temps de présenter le bien sans concurrence. 49€ pour 48h, 99€ pour 96h. Réservé aux forfaits Expert et Platinium.</div>
-        <span class="arg-tag">Expert & Platinium</span>
-      </div>
-      <div class="arg-card">
-        <div class="arg-num">04</div>
-        <div class="arg-icon">🎁</div>
-        <div class="arg-title">-50% jusqu'au 01/09/2026</div>
-        <div class="arg-desc">Offre de lancement : Starter à 24,50€/mois, Pro à 49,50€, Expert à 74,50€, Platinium à 99,50€. Le temps de constituer votre base clients sur la plateforme.</div>
-        <span class="arg-tag">Offre de lancement</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- INVESTISSEURS -->
-  <div class="profil-panel" id="panel-investisseur">
-    <div class="args-grid">
-      <div class="arg-card">
-        <div class="arg-num">01</div>
-        <div class="arg-icon">🎯</div>
-        <div class="arg-title">Filtrez sur la rentabilité, pas les photos</div>
-        <div class="arg-desc">Rendement minimum, budget, stratégie (LMNP, location nue, colocation…) — ImmoConnect filtre automatiquement. Vous ne voyez que les biens qui matchent vos critères de rendement.</div>
-        <span class="arg-tag">Matching automatique</span>
-      </div>
-      <div class="arg-card">
-        <div class="arg-num">02</div>
-        <div class="arg-icon">📊</div>
-        <div class="arg-title">Rapport Hanaé IA — données officielles</div>
-        <div class="arg-desc">Prix marché DVF corrigé Notaires-INSEE · loyer estimé carte des loyers · rendement brut et net · frais de notaire détaillés. Des chiffres, pas du marketing.</div>
-        <span class="arg-tag">DVF + INSEE + Loyers</span>
-      </div>
-      <div class="arg-card">
-        <div class="arg-num">03</div>
-        <div class="arg-icon">🧮</div>
-        <div class="arg-title">Capacité d'emprunt en temps réel</div>
-        <div class="arg-desc">Revenus, charges, apport → mensualité max à 35% d'endettement calculée instantanément. Loyers perçus pris à 90% comme les banques. Budget total affiché en direct.</div>
-        <span class="arg-tag">Calcul bancaire réel</span>
-      </div>
-      <div class="arg-card">
-        <div class="arg-num">04</div>
-        <div class="arg-icon">📩</div>
-        <div class="arg-title">Les vendeurs Platinium vous contactent</div>
-        <div class="arg-desc">Les vendeurs avec le dossier le plus complet peuvent vous écrire directement — vous recevez les meilleures opportunités sans les chercher. Réservé au forfait Investisseur.</div>
-        <span class="arg-tag">Opportunités entrantes</span>
-      </div>
-    </div>
-  </div>
-
-</section>
 
 <!-- AGENTS -->
 <section class="agents-section" id="agents">
