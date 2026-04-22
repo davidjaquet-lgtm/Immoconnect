@@ -725,46 +725,138 @@
     <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4vw,44px);font-weight:300;color:#FAFAF7">La plateforme qui <em style="color:#D4B87A">change la donne</em></h2>
   </div>
 
-  <!-- TABS CSS PUR -->
   <div style="display:flex;justify-content:center;gap:8px;margin-bottom:40px;flex-wrap:wrap">
-    <a href="#tab-vendeurs" style="padding:10px 24px;border-radius:40px;background:#B89A5E;color:#1C1C1A;font-size:14px;font-weight:500;text-decoration:none;font-family:'DM Sans',sans-serif">🏠 Vendeurs</a>
-    <a href="#tab-agents" style="padding:10px 24px;border-radius:40px;border:1px solid rgba(255,255,255,.2);color:rgba(250,250,247,.6);font-size:14px;font-weight:500;text-decoration:none;font-family:'DM Sans',sans-serif">🤝 Agents immo</a>
-    <a href="#tab-investisseurs" style="padding:10px 24px;border-radius:40px;border:1px solid rgba(255,255,255,.2);color:rgba(250,250,247,.6);font-size:14px;font-weight:500;text-decoration:none;font-family:'DM Sans',sans-serif">📈 Investisseurs</a>
+    <button id="btn-vendeurs" onclick="switchTab('vendeurs')" style="padding:10px 24px;border-radius:40px;background:#B89A5E;border:none;color:#1C1C1A;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">🏠 Vendeurs</button>
+    <button id="btn-agents" onclick="switchTab('agents')" style="padding:10px 24px;border-radius:40px;background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(250,250,247,.6);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">🤝 Agents immo</button>
+    <button id="btn-investisseurs" onclick="switchTab('investisseurs')" style="padding:10px 24px;border-radius:40px;background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(250,250,247,.6);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">📈 Investisseurs</button>
   </div>
 
-  <!-- VENDEURS -->
-  <div id="tab-vendeurs" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:900px;margin:0 auto 60px">
-    <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
-      <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">01</div>
-      <div style="font-size:28px;margin-bottom:10px">⚡</div>
-      <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Publiez gratuitement en 10 minutes</div>
-      <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Un dossier, une fois. Photos, description, infos financières. Pas de mandat, pas d'engagement, pas de commission d'avance.</div>
-      <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">100% gratuit</span>
+  <div style="max-width:900px;margin:0 auto">
+
+    <div id="tab-vendeurs" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">01</div>
+        <div style="font-size:28px;margin-bottom:10px">⚡</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Publiez gratuitement en 10 minutes</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Un dossier, une fois. Photos, description, infos financières. Pas de mandat, pas d'engagement, pas de commission d'avance.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">100% gratuit</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">02</div>
+        <div style="font-size:28px;margin-bottom:10px">🎯</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Deux marchés en même temps</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Les acheteurs vous contactent directement. Les agents proposent votre bien à leur clientèle sans vous déranger. Vous touchez les agences sans payer de mandat.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Acheteurs + Agents</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">03</div>
+        <div style="font-size:28px;margin-bottom:10px">📊</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Rapport Hanaé IA — vraies données</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Estimation basée sur les ventes notariales DVF, l'indice Notaires-INSEE et la carte des loyers. Pas une valeur gonflée pour vous faire signer un mandat.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Dès le niveau Silver</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">04</div>
+        <div style="font-size:28px;margin-bottom:10px">🚀</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Plus complet = plus visible = plus rapide</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Standard : ville + 3 photos. Platinium : adresse exacte, DPE, rapport IA, mise en avant prioritaire, alerté à H+0 par les agents.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">4 niveaux gratuits</span>
+      </div>
     </div>
-    <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
-      <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">02</div>
-      <div style="font-size:28px;margin-bottom:10px">🎯</div>
-      <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Deux marchés en même temps</div>
-      <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Les acheteurs vous contactent directement. Les agents reçoivent une alerte et proposent votre bien à leur clientèle — sans vous déranger.</div>
-      <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Acheteurs + Agents</span>
+
+    <div id="tab-agents" style="display:none;grid-template-columns:1fr 1fr;gap:16px">
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">01</div>
+        <div style="font-size:28px;margin-bottom:10px">📁</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Dossiers vendeurs déjà prêts</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Photos, documents légaux, DPE, rapport d'estimation — tout est constitué. Zéro aller-retour, zéro prospection à froid.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Fini la prospection</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">02</div>
+        <div style="font-size:28px;margin-bottom:10px">🔔</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Alertes prioritaires selon votre forfait</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Gold et Platinium signalés à H+0 (Platinium) · J+1 (Expert) · J+2 (Pro) · J+4 (Starter). Agissez avant vos concurrents.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Alerte temps réel</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">03</div>
+        <div style="font-size:28px;margin-bottom:10px">🔒</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Exclusivité 48h ou 96h</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Bloquez un dossier pour votre clientèle sans concurrence. 49€ pour 48h, 99€ pour 96h. Réservé Expert et Platinium.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Expert &amp; Platinium</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">04</div>
+        <div style="font-size:28px;margin-bottom:10px">🎁</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">-50% jusqu'au 01/09/2026</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Starter à 24,50€/mois · Pro à 49,50€ · Expert à 74,50€ · Platinium à 99,50€. Offre de lancement.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Offre de lancement</span>
+      </div>
     </div>
-    <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
-      <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">03</div>
-      <div style="font-size:28px;margin-bottom:10px">📊</div>
-      <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Rapport Hanaé IA — vraies données</div>
-      <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Estimation basée sur les ventes notariales DVF, l'indice Notaires-INSEE et la carte des loyers. Pas une valeur gonflée pour vous faire signer un mandat.</div>
-      <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Dès le niveau Silver</span>
+
+    <div id="tab-investisseurs" style="display:none;grid-template-columns:1fr 1fr;gap:16px">
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">01</div>
+        <div style="font-size:28px;margin-bottom:10px">🎯</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Filtrez sur la rentabilité</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Rendement minimum, budget, stratégie (LMNP, location nue, colocation…) — matching automatique. Vous ne voyez que les biens rentables.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Matching automatique</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">02</div>
+        <div style="font-size:28px;margin-bottom:10px">📊</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Rapport Hanaé IA — données officielles</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Prix marché DVF · indice Notaires-INSEE · carte des loyers · rendement brut et net · frais de notaire. Des chiffres, pas du marketing.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">DVF + INSEE + Loyers</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">03</div>
+        <div style="font-size:28px;margin-bottom:10px">🧮</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Capacité d'emprunt en temps réel</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Revenus, charges, apport → mensualité max à 35%. Loyers perçus pris à 90% comme les banques. Budget total affiché instantanément.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Calcul bancaire réel</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">04</div>
+        <div style="font-size:28px;margin-bottom:10px">📩</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Les vendeurs Platinium vous contactent</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Les vendeurs avec le dossier le plus complet peuvent vous écrire directement — les meilleures opportunités viennent à vous.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Opportunités entrantes</span>
+      </div>
     </div>
-    <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
-      <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">04</div>
-      <div style="font-size:28px;margin-bottom:10px">🚀</div>
-      <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Plus complet = plus visible = plus rapide</div>
-      <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Standard : ville + 3 photos. Platinium : adresse exacte, DPE, rapport IA, mise en avant prioritaire, contacté par les agents dès H+0.</div>
-      <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">4 niveaux gratuits</span>
-    </div>
+
   </div>
 
-  <!-- AGENTS -->
+  <script>
+  function switchTab(t) {
+    var tabs = ['vendeurs','agents','investisseurs'];
+    var btns = {
+      vendeurs: document.getElementById('btn-vendeurs'),
+      agents: document.getElementById('btn-agents'),
+      investisseurs: document.getElementById('btn-investisseurs')
+    };
+    tabs.forEach(function(id) {
+      var el = document.getElementById('tab-' + id);
+      var btn = btns[id];
+      if (id === t) {
+        el.style.display = 'grid';
+        btn.style.background = '#B89A5E';
+        btn.style.color = '#1C1C1A';
+        btn.style.border = 'none';
+      } else {
+        el.style.display = 'none';
+        btn.style.background = 'transparent';
+        btn.style.color = 'rgba(250,250,247,.6)';
+        btn.style.border = '1px solid rgba(255,255,255,.2)';
+      }
+    });
+  }
+  </script>
+
+</section>
+
+<!-- AGENTS -->
   <div id="tab-agents" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:900px;margin:0 auto 60px">
     <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
       <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">01</div>
