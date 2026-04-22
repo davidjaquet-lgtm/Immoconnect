@@ -720,6 +720,12 @@
 
 <!-- HOW IT WORKS -->
 <section style="padding:80px;background:#1C1C1A">
+  <style>
+    .hw-tab { display:none; grid-template-columns:1fr 1fr; gap:16px; }
+    .hw-tab.visible { display:grid; }
+    @media(max-width:600px){ .hw-tab.visible { grid-template-columns:1fr; } }
+  </style>
+
   <div style="text-align:center;margin-bottom:40px">
     <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#B89A5E;margin-bottom:12px;font-weight:500">Pourquoi ImmoConnect</div>
     <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4vw,44px);font-weight:300;color:#FAFAF7">La plateforme qui <em style="color:#D4B87A">change la donne</em></h2>
@@ -733,7 +739,7 @@
 
   <div style="max-width:900px;margin:0 auto">
 
-    <div id="tab-vendeurs" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div id="tab-vendeurs" class="hw-tab visible">
       <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">01</div>
         <div style="font-size:28px;margin-bottom:10px">⚡</div>
@@ -764,7 +770,7 @@
       </div>
     </div>
 
-    <div id="tab-agents" style="display:none;grid-template-columns:1fr 1fr;gap:16px">
+    <div id="tab-agents" class="hw-tab">
       <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">01</div>
         <div style="font-size:28px;margin-bottom:10px">📁</div>
@@ -795,7 +801,7 @@
       </div>
     </div>
 
-    <div id="tab-investisseurs" style="display:none;grid-template-columns:1fr 1fr;gap:16px">
+    <div id="tab-investisseurs" class="hw-tab">
       <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">01</div>
         <div style="font-size:28px;margin-bottom:10px">🎯</div>
@@ -830,22 +836,17 @@
 
   <script>
   function switchTab(t) {
-    var tabs = ['vendeurs','agents','investisseurs'];
-    var btns = {
-      vendeurs: document.getElementById('btn-vendeurs'),
-      agents: document.getElementById('btn-agents'),
-      investisseurs: document.getElementById('btn-investisseurs')
-    };
-    tabs.forEach(function(id) {
-      var el = document.getElementById('tab-' + id);
-      var btn = btns[id];
+    var ids = ['vendeurs','agents','investisseurs'];
+    ids.forEach(function(id) {
+      var tab = document.getElementById('tab-' + id);
+      var btn = document.getElementById('btn-' + id);
       if (id === t) {
-        el.style.display = 'grid';
+        tab.classList.add('visible');
         btn.style.background = '#B89A5E';
         btn.style.color = '#1C1C1A';
         btn.style.border = 'none';
       } else {
-        el.style.display = 'none';
+        tab.classList.remove('visible');
         btn.style.background = 'transparent';
         btn.style.color = 'rgba(250,250,247,.6)';
         btn.style.border = '1px solid rgba(255,255,255,.2)';
