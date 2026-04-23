@@ -565,12 +565,13 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
           <span style="font-size:10px;font-weight:500;background:#E1F5EE;color:#1E7A62;padding:2px 8px;border-radius:20px;margin-left:6px">🔒 Document confidentiel — non transmis</span>
         </label>
         <div class="upload-zone uz-gold">
-          <input type="file" id="file-taxe" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc('taxe_fonciere_doc','file-taxe','fs-taxe')">
+          <input type="file" id="file-taxe" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadTaxe()">
           <div class="upload-icon">🧾</div>
           <div class="upload-title">Avis de taxe foncière</div>
           <div class="upload-sub">Dernier avis d'imposition foncier — PDF ou image</div>
         </div>
         <div class="file-status fs-none" id="fs-taxe">📎 Aucun fichier sélectionné</div>
+        <div id="ocr-taxe-result" style="display:none;margin-top:10px;border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.7"></div>
       </div>
       <div id="bloc-copro" style="display:none">
         <hr class="div">
@@ -657,6 +658,16 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
       <div style="background:rgba(30,122,98,.08);border-radius:6px;padding:10px 12px;font-size:11px;color:#0F0F0E;line-height:1.65">
         🛡️ <strong>Vos documents restent confidentiels.</strong> Les justificatifs que vous uploadez (taxe foncière, DPE, copropriété) ne sont jamais transmis directement aux acheteurs ou agents. Seul leur statut <em>"vérifié et attesté"</em> est visible. ImmoConnect agit en tant que tiers de confiance.
       </div>
+    </div>
+    <!-- DÉCLARATION SUR L'HONNEUR -->
+    <div style="background:#FAEEDA;border:1px solid rgba(192,155,90,.3);border-radius:8px;padding:14px 16px;margin-bottom:10px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#854F0B;margin-bottom:10px">⚖️ Déclaration sur l'honneur</div>
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;line-height:1.6;color:#0F0F0E">
+        <input type="checkbox" id="declaration-honneur" style="width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:#C09B5A;cursor:pointer" required>
+        <span>
+          Je soussigné(e) <strong id="nom-vendeur-dsh">[votre nom]</strong> déclare sur l'honneur que toutes les informations renseignées dans ce formulaire sont exactes, sincères et complètes. Je certifie être propriétaire du bien ou mandaté pour le vendre. Toute fausse déclaration engage ma responsabilité civile et pénale.
+        </span>
+      </label>
     </div>
     <button class="btn-submit" id="btn-submit" onclick="soumettre()">Publier mon annonce</button>
   </div>
@@ -752,6 +763,115 @@ function addPhotos(inp){
 }
 function delPhoto(i){photos.splice(i,1);renderPhotos();}
 
+// ── MAJ NOM DÉCLARATION SUR L'HONNEUR ──
+function majNomDsh() {
+  var nom = document.getElementById('nom_vendeur').value.trim();
+  var el = document.getElementById('nom-vendeur-dsh');
+  if (el) el.textContent = nom || '[votre nom]';
+}
+
+// ── UPLOAD TAXE FONCIÈRE + OCR CLAUDE API ──
+async function uploadTaxe() {
+  var file = document.getElementById('file-taxe').files[0];
+  var st = document.getElementById('fs-taxe');
+  var ocrResult = document.getElementById('ocr-taxe-result');
+  if (!file) return;
+
+  // Upload du fichier
+  st.className = 'file-status fs-loading'; st.textContent = '⏳ Upload en cours…';
+  var ext = file.name.split('.').pop();
+  var path = 'vendeurs/taxe_fonciere_' + Date.now() + '.' + ext;
+  var { error } = await db.storage.from(BUCKET).upload(path, file, { upsert: true });
+  if (error) { st.className = 'file-status fs-none'; st.textContent = '❌ Erreur — ' + error.message; return; }
+  var { data: pub } = db.storage.from(BUCKET).getPublicUrl(path);
+  docs['taxe_fonciere_doc'] = { path: path, url: pub.publicUrl };
+  st.className = 'file-status fs-ok'; st.textContent = '✅ ' + file.name;
+
+  // OCR via Claude API
+  ocrResult.style.display = 'block';
+  ocrResult.style.background = '#F5F2EC';
+  ocrResult.style.border = '1px solid #E8E6E0';
+  ocrResult.innerHTML = '🔍 <strong>Vérification automatique du document en cours…</strong>';
+
+  try {
+    // Lire le fichier en base64
+    var base64 = await new Promise(function(resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function(e) { resolve(e.target.result.split(',')[1]); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    var montantDeclare = document.getElementById('taxe_fonciere_montant').value;
+    var villeDec = document.getElementById('ville').value;
+    var nomDec = document.getElementById('nom_vendeur').value;
+
+    var mediaType = file.type === 'application/pdf' ? 'application/pdf' : 'image/jpeg';
+
+    var response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 500,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: mediaType === 'application/pdf' ? 'document' : 'image',
+              source: { type: 'base64', media_type: mediaType, data: base64 }
+            },
+            {
+              type: 'text',
+              text: 'Tu es un assistant de vérification de documents immobiliers. Analyse cet avis de taxe foncière et réponds UNIQUEMENT en JSON avec ces champs : {"montant_trouve": number|null, "adresse_trouvee": string|null, "proprietaire_trouve": string|null, "annee": string|null, "est_taxe_fonciere": boolean, "concordance_montant": boolean|null, "concordance_adresse": boolean|null, "alerte": string|null}. Montant déclaré par le vendeur: ' + (montantDeclare||'non renseigné') + '€. Ville déclarée: ' + (villeDec||'non renseignée') + '. Nom déclaré: ' + (nomDec||'non renseigné') + '. Ne mets rien d'autre que le JSON.'
+            }
+          ]
+        }]
+      })
+    });
+
+    var data = await response.json();
+    var text = data.content && data.content[0] && data.content[0].text || '{}';
+    var ocr = JSON.parse(text.replace(/```json|```/g, '').trim());
+
+    if (!ocr.est_taxe_fonciere) {
+      ocrResult.style.background = '#FAECE7';
+      ocrResult.style.border = '1px solid #F5C4B3';
+      ocrResult.innerHTML = '❌ <strong>Document non reconnu</strong> — Ce document ne semble pas être un avis de taxe foncière. Veuillez uploader le bon document.';
+      docs['taxe_fonciere_doc'] = null;
+      docs['taxe_verifie'] = false;
+      return;
+    }
+
+    var alertes = [];
+    if (ocr.concordance_montant === false) alertes.push('Le montant trouvé (' + ocr.montant_trouve + '€) diffère du montant déclaré (' + montantDeclare + '€)');
+    if (ocr.concordance_adresse === false) alertes.push('L'adresse du document ne correspond pas à la ville déclarée');
+    if (ocr.alerte) alertes.push(ocr.alerte);
+
+    if (alertes.length > 0) {
+      ocrResult.style.background = '#FAEEDA';
+      ocrResult.style.border = '1px solid #FAC775';
+      ocrResult.innerHTML = '⚠️ <strong>Vérification manuelle requise</strong><br>' + alertes.join('<br>') +
+        '<br><br>📋 Données extraites : Montant ' + (ocr.montant_trouve||'?') + '€ · ' + (ocr.adresse_trouvee||'adresse non lue') + ' · ' + (ocr.annee||'');
+      docs['taxe_verifie'] = 'partiel';
+    } else {
+      ocrResult.style.background = '#E1F5EE';
+      ocrResult.style.border = '1px solid #9FE1CB';
+      ocrResult.innerHTML = '✅ <strong>Document vérifié automatiquement</strong>' +
+        '<br>Montant : <strong>' + (ocr.montant_trouve||'?') + ' €</strong> · ' +
+        'Adresse : ' + (ocr.adresse_trouvee||'—') + ' · Année : ' + (ocr.annee||'—') +
+        '<br><span style="font-size:11px;color:#1E7A62">🔒 Ce document reste confidentiel — seul le statut "Vérifié" sera affiché aux acheteurs et agents.</span>';
+      docs['taxe_verifie'] = 'ok';
+    }
+    calcNiveau();
+  } catch(e) {
+    ocrResult.style.background = '#F5F2EC';
+    ocrResult.style.border = '1px solid #E8E6E0';
+    ocrResult.innerHTML = '⚠️ Vérification automatique indisponible — votre document a bien été enregistré. Il sera vérifié manuellement par notre équipe.';
+    docs['taxe_verifie'] = 'manuel';
+  }
+}
+
 async function uploadDoc(champ,inputId,statusId){
   var file=document.getElementById(inputId).files[0];
   var st=document.getElementById(statusId);
@@ -788,6 +908,11 @@ async function soumettre(){
   }
   if (!consent2 || !consent2.checked) {
     showToast('Vous devez accepter la politique de confidentialité pour continuer.','err');
+    return;
+  }
+  var dsh = document.getElementById('declaration-honneur');
+  if (!dsh || !dsh.checked) {
+    showToast('Vous devez signer la déclaration sur l'honneur pour publier.','err');
     return;
   }
   var btn=document.getElementById('btn-submit');
@@ -853,8 +978,8 @@ async function soumettre(){
     charges_syndic:+document.getElementById('charges_syndic').value||null,
     nb_lots_copro:+document.getElementById('nb_lots_copro').value||null,
     taxe_fonciere_montant:+document.getElementById('taxe_fonciere_montant').value||null,
-    taxe_fonciere_verifie: docs['taxe_fonciere_doc'] ? true : false,
-    // URL du document taxe foncière stockée côté serveur uniquement — non transmise
+    taxe_fonciere_verifie: docs['taxe_verifie'] || false,
+    // URL du document taxe foncière stockée côté serveur uniquement — non transmise aux acheteurs/agents
     is_copropriete:getRadio('is_copro')==='Oui',
     copro_doc_url:docs['copro_doc']?docs['copro_doc'].url:null,
     classe_dpe:document.getElementById('classe_dpe').value,
