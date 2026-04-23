@@ -477,6 +477,15 @@ async function supprimerCreneau(id) {
 
 async function confirmerVisite(id) {
   await db.from('reservations_visites').update({ statut: 'confirme' }).eq('id', id);
+
+  // Incrémenter nb_visites sur l'annonce concernée
+  var resa = reservations.find(function(r){ return r.id === id; });
+  if (resa && resa.disponibilites_visites && resa.disponibilites_visites.annonce_id) {
+    await db.rpc('incrementer_visites', {
+      annonce_uuid: resa.disponibilites_visites.annonce_id
+    }).catch(function(){});
+  }
+
   await chargerReservations();
   afficherContenu();
 }

@@ -154,6 +154,31 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
 var rapportData = null;
 
+/* ══ INCRÉMENTATION VUES ══ */
+async function incrementerVues(annonceId, emailVendeur) {
+  try {
+    // Vérifier si c'est le propriétaire qui consulte
+    var { data: { session } } = await db.auth.getSession();
+    if (session && session.user && session.user.email === emailVendeur) return;
+
+    // Incrémenter nb_vues avec une fonction RPC Supabase
+    var { error } = await db.rpc('incrementer_vues', { annonce_uuid: annonceId });
+    if (error) {
+      // Fallback si RPC pas encore créée : lecture puis écriture
+      var { data: ann } = await db.from('annonces_vendeurs')
+        .select('nb_vues').eq('id', annonceId).single();
+      if (ann) {
+        await db.from('annonces_vendeurs')
+          .update({ nb_vues: (ann.nb_vues || 0) + 1 })
+          .eq('id', annonceId);
+      }
+    }
+  } catch(e) {
+    // Silencieux — ne pas bloquer l'affichage du rapport
+    console.warn('Vues increment:', e.message);
+  }
+}
+
 /* ══ CHARGEMENT RAPPORT ══ */
 async function chargerRapport() {
   var id = document.getElementById('annonce-id').value.trim();
@@ -171,6 +196,9 @@ async function chargerRapport() {
       annonce = annonces && annonces[0];
     }
     if (!annonce) { document.getElementById('rapport-content').innerHTML = '<div class="empty">Annonce introuvable</div>'; return; }
+
+    // ── INCRÉMENTER LES VUES (ne pas compter le propriétaire) ──
+    await incrementerVues(annonce.id, annonce.email_contact);
 
     document.getElementById('rapport-content').innerHTML = '<div class="loading"><div class="loading-spin"></div>Récupération données DVF…</div>';
 

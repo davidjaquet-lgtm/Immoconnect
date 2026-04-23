@@ -273,6 +273,11 @@ function afficherBiens(biens) {
     var prixFmt = b.prix ? Math.round(b.prix).toLocaleString('fr-FR') + ' €' : '—';
     var pm2 = b.prix && b.surface ? Math.round(b.prix/b.surface).toLocaleString('fr-FR') + ' €/m²' : '';
 
+    // Incrémenter vue au clic
+    marker.on('popupopen', function() {
+      db.rpc('incrementer_vues', { annonce_uuid: b.id }).then(function(){}).catch(function(){});
+    });
+
     marker.bindPopup(
       '<div class="popup-bien">' +
       '<span class="popup-badge ' + badgeClass + '">' + niv.charAt(0).toUpperCase()+niv.slice(1) + '</span>' +

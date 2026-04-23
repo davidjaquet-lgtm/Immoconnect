@@ -358,6 +358,16 @@ async function envoyerMessage() {
       .update({ contact_consomme: true, date_contact: new Date().toISOString() })
       .eq('id', currentConvId);
     conv.contact_consomme = true;
+
+    // Incrémenter le compteur contacts sur l'annonce
+    if (conv.annonce_id) {
+      db.rpc('incrementer_contacts', { annonce_uuid: conv.annonce_id }).then(function(){}).catch(function(){});
+    }
+
+    // Incrémenter nb_contacts sur l'annonce
+    if (conv.annonce_id) {
+      await db.rpc('incrementer_contacts', { annonce_uuid: conv.annonce_id }).catch(function(){});
+    }
   }
 
   // Insérer le message
