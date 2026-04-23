@@ -763,6 +763,27 @@ function addPhotos(inp){
 }
 function delPhoto(i){photos.splice(i,1);renderPhotos();}
 
+// ── GÉOCODAGE AUTOMATIQUE (Nominatim OpenStreetMap) ──
+async function geocoderAdresse(adresse, ville, codePostal) {
+  try {
+    var q = [adresse, ville, codePostal, 'France'].filter(Boolean).join(' ');
+    var url = 'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(q) + '&format=json&limit=1&countrycodes=fr';
+    var res = await fetch(url, { headers: { 'Accept-Language': 'fr' } });
+    var data = await res.json();
+    if (data && data[0]) {
+      return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+    }
+    // 2e tentative sans l'adresse (juste ville + CP)
+    var q2 = [ville, codePostal, 'France'].filter(Boolean).join(' ');
+    var res2 = await fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(q2) + '&format=json&limit=1&countrycodes=fr');
+    var data2 = await res2.json();
+    if (data2 && data2[0]) {
+      return { lat: parseFloat(data2[0].lat), lon: parseFloat(data2[0].lon) };
+    }
+  } catch(e) {}
+  return null;
+}
+
 // ── MAJ NOM DÉCLARATION SUR L'HONNEUR ──
 function majNomDsh() {
   var nom = document.getElementById('nom_vendeur').value.trim();
@@ -989,9 +1010,23 @@ async function soumettre(){
     dpe_doc_url:docs['dpe_doc']?docs['dpe_doc'].url:null,
     niveau_vendeur:niveau,
     statut_annonce:'en_attente',
+    latitude: null,
+    longitude: null,
     created_at:new Date().toISOString()
   };
 
+  // Géocodage automatique — transparent pour le vendeur
+  btn.textContent = '📍 Géolocalisation…';
+  var adresse = document.getElementById('adresse').value;
+  var ville   = document.getElementById('ville').value;
+  var cp      = document.getElementById('code_postal').value;
+  var coords  = await geocoderAdresse(adresse, ville, cp);
+  if (coords) {
+    payload.latitude  = coords.lat;
+    payload.longitude = coords.lon;
+  }
+
+  btn.textContent = '⏳ Publication…';
   var {error}=await db.from('annonces_vendeurs').insert([payload]);
   if(error){showToast('Erreur : '+error.message,'err');btn.disabled=false;btn.textContent='Publier mon annonce';return;}
   showToast('✅ Annonce publiée — '+NIV[niveau].label,'ok');
