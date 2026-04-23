@@ -71,7 +71,7 @@ input[type=number]:focus,select:focus{border-color:var(--ink)}
 .pb-silver{background:#E6F1FB;color:var(--blue)}
 .pb-gold{background:#FAEEDA;color:#854F0B}
 .pb-platinium{background:#E1F5EE;color:var(--teal)}
-.pb-dvf{background:#F3E8FF;color:#6B21A8}
+
 .popup-titre{font-size:13px;font-weight:600;margin-bottom:4px;color:var(--ink)}
 .popup-meta{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:8px}
 .popup-prix{font-size:16px;font-weight:500;color:var(--ink);margin-bottom:4px}
@@ -119,7 +119,7 @@ input[type=number]:focus,select:focus{border-color:var(--ink)}
 
       <!-- COUCHES -->
       <div class="filter-group">
-        <label class="filter-label">Couches affichées</label>
+        <label class="filter-label">Biens affichés</label>
         <div class="couche-toggle">
           <div class="couche-info">
             <div class="couche-dot" style="background:#1E7A62"></div>
@@ -130,16 +130,7 @@ input[type=number]:focus,select:focus{border-color:var(--ink)}
           </div>
           <button class="toggle-sw on" id="toggle-immo" onclick="toggleCouche('immo')"><div class="toggle-thumb"></div></button>
         </div>
-        <div class="couche-toggle">
-          <div class="couche-info">
-            <div class="couche-dot" style="background:#7C3AED"></div>
-            <div>
-              <div class="couche-name">Ventes DVF passées</div>
-              <div class="couche-count" id="count-dvf">— transactions</div>
-            </div>
-          </div>
-          <button class="toggle-sw blue" id="toggle-dvf" onclick="toggleCouche('dvf')"><div class="toggle-thumb"></div></button>
-        </div>
+
       </div>
 
       <!-- TYPE DE BIEN -->
@@ -211,7 +202,7 @@ input[type=number]:focus,select:focus{border-color:var(--ink)}
     <div id="map"></div>
     <div class="legende">
       <div class="legende-item"><div class="leg-dot" style="background:#1E7A62"></div>Bien ImmoConnect</div>
-      <div class="legende-item"><div class="leg-dot" style="background:#7C3AED"></div>Vente DVF passée</div>
+
     </div>
   </div>
 
@@ -223,9 +214,9 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const { createClient } = supabase;
 const db = createClient(SB_URL, SB_KEY);
 
-var map, layerImmo, layerDVF;
-var allBiens = [], allDVF = [];
-var coucheImmo = true, coucheDVF = true;
+var map, layerImmo;
+var allBiens = [];
+var coucheImmo = true;
 var filtres = { type:'tous', prixMin:0, prixMax:0, surfMin:0, surfMax:0, pieces:0, niveau:'tous' };
 
 // ── INIT CARTE ──
@@ -236,7 +227,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 layerImmo = L.layerGroup().addTo(map);
-layerDVF  = L.layerGroup().addTo(map);
+
 
 // ── ICÔNES ──
 function makeIcon(color, size) {
@@ -255,7 +246,6 @@ var iconImmo = {
   gold:      makeIcon('#C09B5A', 16),
   platinium: makeIcon('#1E7A62', 18)
 };
-var iconDVF = makeIcon('#7C3AED', 10);
 
 // ── CHARGER BIENS IMMOCONNECT ──
 async function chargerBiens() {
@@ -268,91 +258,6 @@ async function chargerBiens() {
   allBiens = data || [];
   document.getElementById('count-immo').textContent = allBiens.length + ' annonces';
   afficherBiens(allBiens);
-}
-
-// ── CHARGER DVF ──
-async function chargerDVF() {
-  document.getElementById('count-dvf').textContent = 'Chargement…';
-  layerDVF.clearLayers();
-
-  var center = map.getCenter();
-  var zoom   = map.getZoom();
-  var dist   = zoom < 9 ? 30000 : zoom < 11 ? 15000 : zoom < 13 ? 8000 : 3000;
-
-  // Essayer plusieurs endpoints DVF en cascade
-  var result = await tryDVFBbox(center, dist)
-            || await tryDVFCodePostal(center)
-            || await tryDVFDept(center);
-
-  allDVF = result || [];
-  document.getElementById('count-dvf').textContent = allDVF.length + ' transactions';
-  afficherDVF(allDVF);
-}
-
-// Méthode 1 : lon/lat/dist
-async function tryDVFBbox(center, dist) {
-  try {
-    var url = 'https://api.dvf.etalab.gouv.fr/geoapi/dvf/?lon=' +
-              center.lng.toFixed(5) + '&lat=' + center.lat.toFixed(5) +
-              '&dist=' + dist + '&nb_resultats=300';
-    var r = await fetch(url, {signal: AbortSignal.timeout(8000)});
-    if (!r.ok) return null;
-    var d = await r.json();
-    var f = (d.features||[]).filter(function(f){
-      return f.geometry && f.geometry.coordinates && f.properties.valeur_fonciere > 0;
-    });
-    console.log('DVF bbox:', f.length, 'résultats');
-    return f.length > 0 ? f : null;
-  } catch(e) { console.warn('DVF bbox échec:', e.message); return null; }
-}
-
-// Méthode 2 : code postal le plus proche
-async function tryDVFCodePostal(center) {
-  try {
-    // Trouver le code postal via l'API geo.api.gouv.fr
-    var geoUrl = 'https://geo.api.gouv.fr/communes?lat=' + center.lat + '&lon=' + center.lng + '&fields=codesPostaux&limit=3';
-    var geoRes = await fetch(geoUrl, {signal: AbortSignal.timeout(5000)});
-    var geoData = await geoRes.json();
-    var cps = [];
-    (geoData||[]).forEach(function(c){ cps = cps.concat(c.codesPostaux||[]); });
-    cps = cps.slice(0,4);
-
-    if (!cps.length) return null;
-    var all = [];
-    for (var i=0; i<cps.length; i++) {
-      try {
-        var url = 'https://api.dvf.etalab.gouv.fr/geoapi/dvf/?code_postal=' + cps[i] + '&nb_resultats=80';
-        var r = await fetch(url, {signal: AbortSignal.timeout(6000)});
-        var d = await r.json();
-        var f = (d.features||[]).filter(function(f){
-          return f.geometry && f.geometry.coordinates && f.properties.valeur_fonciere > 0;
-        });
-        all = all.concat(f);
-      } catch(e2) {}
-    }
-    console.log('DVF code postal:', all.length, 'résultats, CPs:', cps);
-    return all.length > 0 ? all : null;
-  } catch(e) { console.warn('DVF CP échec:', e.message); return null; }
-}
-
-// Méthode 3 : département
-async function tryDVFDept(center) {
-  try {
-    var geoUrl = 'https://geo.api.gouv.fr/communes?lat=' + center.lat + '&lon=' + center.lng + '&fields=codeDepartement&limit=1';
-    var geoRes = await fetch(geoUrl, {signal: AbortSignal.timeout(5000)});
-    var geoData = await geoRes.json();
-    var dept = geoData && geoData[0] && geoData[0].codeDepartement;
-    if (!dept) return null;
-
-    var url = 'https://api.dvf.etalab.gouv.fr/geoapi/dvf/?code_departement=' + dept + '&nb_resultats=150';
-    var r = await fetch(url, {signal: AbortSignal.timeout(8000)});
-    var d = await r.json();
-    var f = (d.features||[]).filter(function(f){
-      return f.geometry && f.geometry.coordinates && f.properties.valeur_fonciere > 0;
-    });
-    console.log('DVF département', dept, ':', f.length, 'résultats');
-    return f.length > 0 ? f : null;
-  } catch(e) { console.warn('DVF dept échec:', e.message); return null; }
 }
 
 // ── AFFICHER BIENS ──
@@ -386,32 +291,6 @@ function afficherBiens(biens) {
     layerImmo.addLayer(marker);
   });
   majResultats();
-}
-
-// ── AFFICHER DVF ──
-function afficherDVF(features) {
-  layerDVF.clearLayers();
-  features.forEach(function(f) {
-    var coords = f.geometry.coordinates;
-    var p = f.properties;
-    var marker = L.marker([coords[1], coords[0]], { icon: iconDVF });
-
-    var prixFmt = p.valeur_fonciere ? Math.round(p.valeur_fonciere).toLocaleString('fr-FR') + ' €' : '—';
-    var pm2 = p.valeur_fonciere && p.surface_reelle_bati ? Math.round(p.valeur_fonciere/p.surface_reelle_bati).toLocaleString('fr-FR') + ' €/m²' : '';
-    var date = p.date_mutation ? p.date_mutation.substring(0,10) : '';
-
-    marker.bindPopup(
-      '<div class="popup-bien">' +
-      '<span class="popup-badge pb-dvf">DVF — Vendu</span>' +
-      '<div class="popup-titre">' + (p.type_local||'Bien') + (p.surface_reelle_bati ? ' · ' + p.surface_reelle_bati + ' m²' : '') + '</div>' +
-      '<div class="popup-meta">📍 ' + (p.adresse_numero||'') + ' ' + (p.adresse_nom_voie||'') + ', ' + (p.code_postal||'') + '<br>📅 Vendu le ' + date + '</div>' +
-      '<div class="popup-prix">' + prixFmt + '</div>' +
-      (pm2 ? '<div class="popup-pm2">' + pm2 + '</div>' : '') +
-      '</div>',
-      { maxWidth: 220 }
-    );
-    layerDVF.addLayer(marker);
-  });
 }
 
 // ── FILTRES ──
@@ -452,19 +331,12 @@ function resetFiltres() {
   afficherBiens(allBiens);
 }
 
-// ── TOGGLE COUCHES ──
+// ── TOGGLE COUCHE IMMO ──
 function toggleCouche(couche) {
-  var btn = document.getElementById('toggle-' + couche);
-  if (couche === 'immo') {
-    coucheImmo = !coucheImmo;
-    btn.classList.toggle('on', coucheImmo);
-    if (coucheImmo) map.addLayer(layerImmo); else map.removeLayer(layerImmo);
-  } else {
-    coucheDVF = !coucheDVF;
-    btn.classList.toggle('on', coucheDVF);
-    btn.classList.toggle('blue', coucheDVF);
-    if (coucheDVF) map.addLayer(layerDVF); else map.removeLayer(layerDVF);
-  }
+  var btn = document.getElementById('toggle-immo');
+  coucheImmo = !coucheImmo;
+  btn.classList.toggle('on', coucheImmo);
+  if (coucheImmo) map.addLayer(layerImmo); else map.removeLayer(layerImmo);
 }
 
 function majResultats() {
@@ -506,14 +378,9 @@ async function geocoderBien(bien) {
     map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
   }
 
-  await chargerDVF();
   document.getElementById('map-loading').style.display = 'none';
 
-  // Recharger DVF quand l'utilisateur navigue sur la carte
-  map.on('moveend', function() {
-    if (coucheDVF) chargerDVF();
-  });
-})();
+  })();
 </script>
 </body>
 </html>
