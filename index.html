@@ -589,6 +589,7 @@
     <a href="forfaits.html">Forfaits</a>
     <a href="questionnaire-vendeur.html" class="btn-nav-gold">Vendre</a>
     <a href="questionnaire-acheteur.html">Acheter</a>
+    <a href="carte.html">Carte</a>
     <a href="forfaits.html#agents">Agents immo</a>
     <a href="connexion.html" class="btn-nav">Se connecter</a>
   </div>
@@ -884,6 +885,35 @@
 </section>
 
 <!-- FOOTER -->
+<!-- SECTION CARTE -->
+<section style="padding:80px;background:var(--warm-white);border-top:1px solid var(--border)">
+  <div class="section-header">
+    <div>
+      <div class="section-eyebrow">Carte interactive</div>
+      <h2 class="section-title">Biens à vendre + <em>ventes DVF</em> superposées</h2>
+    </div>
+    <a href="carte.html" class="view-all">Ouvrir la carte complète →</a>
+  </div>
+  <p style="font-size:14px;color:var(--stone);margin-bottom:24px;line-height:1.7;max-width:600px">
+    Visualisez tous les biens ImmoConnect sur la carte et superposez les ventes DVF officielles pour situer les prix du marché. Filtrez par type, budget, surface ou niveau de dossier.
+  </p>
+  <div style="border-radius:12px;overflow:hidden;border:1px solid var(--border);position:relative;height:420px">
+    <iframe src="carte.html" style="width:100%;height:100%;border:none" title="Carte des biens ImmoConnect"></iframe>
+    <div style="position:absolute;inset:0;pointer-events:none;border-radius:12px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)"></div>
+  </div>
+  <div style="display:flex;gap:24px;margin-top:16px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--stone)">
+      <div style="width:12px;height:12px;border-radius:50%;background:#1E7A62;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 3px rgba(0,0,0,.2)"></div>
+      Biens ImmoConnect à vendre
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--stone)">
+      <div style="width:12px;height:12px;border-radius:50%;background:#7C3AED;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 3px rgba(0,0,0,.2)"></div>
+      Ventes DVF officielles (données notariales)
+    </div>
+    <a href="carte.html" style="margin-left:auto;font-size:12px;color:var(--stone);text-decoration:none;display:flex;align-items:center;gap:4px">Plein écran →</a>
+  </div>
+</section>
+
 <footer>
   <div>
     <div class="footer-logo">Immo<span>Connect</span></div>
