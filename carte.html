@@ -272,23 +272,87 @@ async function chargerBiens() {
 
 // ── CHARGER DVF ──
 async function chargerDVF() {
-  try {
-    // Récupérer quelques ventes DVF récentes via l'API Etalab
-    // On prend les ventes les plus récentes sur toute la France
-    var url = 'https://api.dvf.etalab.gouv.fr/geoapi/dvf/?nb_resultats=200&type_local=Appartement,Maison';
-    var res = await fetch(url);
-    var data = await res.json();
-    var features = data.features || [];
+  document.getElementById('count-dvf').textContent = 'Chargement…';
+  layerDVF.clearLayers();
 
-    allDVF = features.filter(function(f) {
+  var center = map.getCenter();
+  var zoom   = map.getZoom();
+  var dist   = zoom < 9 ? 30000 : zoom < 11 ? 15000 : zoom < 13 ? 8000 : 3000;
+
+  // Essayer plusieurs endpoints DVF en cascade
+  var result = await tryDVFBbox(center, dist)
+            || await tryDVFCodePostal(center)
+            || await tryDVFDept(center);
+
+  allDVF = result || [];
+  document.getElementById('count-dvf').textContent = allDVF.length + ' transactions';
+  afficherDVF(allDVF);
+}
+
+// Méthode 1 : lon/lat/dist
+async function tryDVFBbox(center, dist) {
+  try {
+    var url = 'https://api.dvf.etalab.gouv.fr/geoapi/dvf/?lon=' +
+              center.lng.toFixed(5) + '&lat=' + center.lat.toFixed(5) +
+              '&dist=' + dist + '&nb_resultats=300';
+    var r = await fetch(url, {signal: AbortSignal.timeout(8000)});
+    if (!r.ok) return null;
+    var d = await r.json();
+    var f = (d.features||[]).filter(function(f){
       return f.geometry && f.geometry.coordinates && f.properties.valeur_fonciere > 0;
     });
+    console.log('DVF bbox:', f.length, 'résultats');
+    return f.length > 0 ? f : null;
+  } catch(e) { console.warn('DVF bbox échec:', e.message); return null; }
+}
 
-    document.getElementById('count-dvf').textContent = allDVF.length + ' transactions';
-    afficherDVF(allDVF);
-  } catch(e) {
-    document.getElementById('count-dvf').textContent = 'Indisponible';
-  }
+// Méthode 2 : code postal le plus proche
+async function tryDVFCodePostal(center) {
+  try {
+    // Trouver le code postal via l'API geo.api.gouv.fr
+    var geoUrl = 'https://geo.api.gouv.fr/communes?lat=' + center.lat + '&lon=' + center.lng + '&fields=codesPostaux&limit=3';
+    var geoRes = await fetch(geoUrl, {signal: AbortSignal.timeout(5000)});
+    var geoData = await geoRes.json();
+    var cps = [];
+    (geoData||[]).forEach(function(c){ cps = cps.concat(c.codesPostaux||[]); });
+    cps = cps.slice(0,4);
+
+    if (!cps.length) return null;
+    var all = [];
+    for (var i=0; i<cps.length; i++) {
+      try {
+        var url = 'https://api.dvf.etalab.gouv.fr/geoapi/dvf/?code_postal=' + cps[i] + '&nb_resultats=80';
+        var r = await fetch(url, {signal: AbortSignal.timeout(6000)});
+        var d = await r.json();
+        var f = (d.features||[]).filter(function(f){
+          return f.geometry && f.geometry.coordinates && f.properties.valeur_fonciere > 0;
+        });
+        all = all.concat(f);
+      } catch(e2) {}
+    }
+    console.log('DVF code postal:', all.length, 'résultats, CPs:', cps);
+    return all.length > 0 ? all : null;
+  } catch(e) { console.warn('DVF CP échec:', e.message); return null; }
+}
+
+// Méthode 3 : département
+async function tryDVFDept(center) {
+  try {
+    var geoUrl = 'https://geo.api.gouv.fr/communes?lat=' + center.lat + '&lon=' + center.lng + '&fields=codeDepartement&limit=1';
+    var geoRes = await fetch(geoUrl, {signal: AbortSignal.timeout(5000)});
+    var geoData = await geoRes.json();
+    var dept = geoData && geoData[0] && geoData[0].codeDepartement;
+    if (!dept) return null;
+
+    var url = 'https://api.dvf.etalab.gouv.fr/geoapi/dvf/?code_departement=' + dept + '&nb_resultats=150';
+    var r = await fetch(url, {signal: AbortSignal.timeout(8000)});
+    var d = await r.json();
+    var f = (d.features||[]).filter(function(f){
+      return f.geometry && f.geometry.coordinates && f.properties.valeur_fonciere > 0;
+    });
+    console.log('DVF département', dept, ':', f.length, 'résultats');
+    return f.length > 0 ? f : null;
+  } catch(e) { console.warn('DVF dept échec:', e.message); return null; }
 }
 
 // ── AFFICHER BIENS ──
@@ -444,6 +508,11 @@ async function geocoderBien(bien) {
 
   await chargerDVF();
   document.getElementById('map-loading').style.display = 'none';
+
+  // Recharger DVF quand l'utilisateur navigue sur la carte
+  map.on('moveend', function() {
+    if (coucheDVF) chargerDVF();
+  });
 })();
 </script>
 </body>
