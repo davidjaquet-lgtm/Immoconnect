@@ -484,6 +484,25 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
   <!-- SUBMIT -->
   <div class="submit-zone">
     <div id="submit-recap" style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6"></div>
+
+    <!-- CONSENTEMENT RGPD OBLIGATOIRE -->
+    <div style="background:#E6F1FB;border:1px solid rgba(24,95,165,.2);border-radius:8px;padding:16px;margin-bottom:10px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#185FA5;margin-bottom:10px">🔒 Consentement obligatoire — RGPD</div>
+
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;line-height:1.6;color:#0F0F0E;margin-bottom:10px">
+        <input type="checkbox" id="consentement-acheteur" style="width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:#185FA5;cursor:pointer" required>
+        <span><strong>J'autorise ImmoConnect à transmettre mes informations aux vendeurs et agents immo</strong> afin d'être mis en relation avec les biens et professionnels correspondant à mon projet immobilier.</span>
+      </label>
+
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;line-height:1.6;color:#0F0F0E;margin-bottom:10px">
+        <input type="checkbox" id="consentement-rgpd-acheteur" style="width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:#185FA5;cursor:pointer" required>
+        <span>J'ai lu et j'accepte la <a href="#" style="color:#185FA5;text-decoration:underline">Politique de confidentialité</a> d'ImmoConnect. Mes données sont traitées conformément au RGPD. Je peux exercer mes droits d'accès, rectification et suppression à tout moment.</span>
+      </label>
+
+      <div style="background:rgba(24,95,165,.06);border-radius:6px;padding:10px 12px;font-size:11px;color:#0F0F0E;line-height:1.65">
+        🛡️ <strong>Vos données sont protégées.</strong> ImmoConnect ne revend jamais vos données à des tiers. Vos coordonnées ne sont transmises qu'aux vendeurs et agents dont les biens correspondent à vos critères, uniquement dans le cadre de votre recherche immobilière.
+      </div>
+    </div>
     <button class="btn-submit" id="btn-submit" onclick="soumettre()">Déposer mon projet</button>
   </div>
 
@@ -607,6 +626,20 @@ function updateRecap() {
 
 /* ══ SOUMISSION ══ */
 async function soumettre() {
+  var consent1 = document.getElementById('consentement-acheteur');
+  var consent2 = document.getElementById('consentement-rgpd-acheteur');
+  if (!consent1 || !consent1.checked) {
+    showToast && showToast('Vous devez autoriser la transmission de vos informations pour continuer.','err');
+    if (!showToast) alert('Veuillez cocher la case de consentement.');
+    consent1 && consent1.focus();
+    return;
+  }
+  if (!consent2 || !consent2.checked) {
+    showToast && showToast('Vous devez accepter la politique de confidentialité pour continuer.','err');
+    if (!showToast) alert('Veuillez accepter la politique de confidentialité.');
+    consent2 && consent2.focus();
+    return;
+  }
   var btn = document.getElementById('btn-submit');
 
   var required = { nom_acheteur:'Nom / Prénom', telephone:'Téléphone', email:'Email' };

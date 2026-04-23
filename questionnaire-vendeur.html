@@ -561,7 +561,9 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
         </div>
       </div>
       <div class="field" style="margin-bottom:12px">
-        <label class="lbl">Avis de taxe foncière (justificatif papier) *</label>
+        <label class="lbl">Avis de taxe foncière *
+          <span style="font-size:10px;font-weight:500;background:#E1F5EE;color:#1E7A62;padding:2px 8px;border-radius:20px;margin-left:6px">🔒 Document confidentiel — non transmis</span>
+        </label>
         <div class="upload-zone uz-gold">
           <input type="file" id="file-taxe" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc('taxe_fonciere_doc','file-taxe','fs-taxe')">
           <div class="upload-icon">🧾</div>
@@ -636,6 +638,24 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
       <div class="sn-info">
         <div class="sn-label" id="sn-label">Niveau Standard</div>
         <div class="sn-desc" id="sn-desc">3 photos · Ville uniquement · Contact acheteur payant (19,99 €)</div>
+      </div>
+    </div>
+    <!-- CONSENTEMENT RGPD OBLIGATOIRE -->
+    <div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:16px;margin-bottom:10px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#1E7A62;margin-bottom:10px">🔒 Consentement obligatoire — RGPD</div>
+
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;line-height:1.6;color:#0F0F0E;margin-bottom:10px">
+        <input type="checkbox" id="consentement-vendeur" style="width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:#1E7A62;cursor:pointer" required>
+        <span><strong>J'autorise ImmoConnect à transmettre mes informations aux acheteurs et agents immo</strong> selon le niveau de visibilité de mon annonce (Standard, Silver, Gold ou Platinium). Ces informations incluent les caractéristiques de mon bien et mes coordonnées de contact.</span>
+      </label>
+
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;line-height:1.6;color:#0F0F0E;margin-bottom:10px">
+        <input type="checkbox" id="consentement-rgpd" style="width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:#1E7A62;cursor:pointer" required>
+        <span>J'ai lu et j'accepte la <a href="#" style="color:#1E7A62;text-decoration:underline">Politique de confidentialité</a> d'ImmoConnect. Mes données sont traitées conformément au RGPD. Je peux exercer mes droits d'accès, rectification et suppression à tout moment.</span>
+      </label>
+
+      <div style="background:rgba(30,122,98,.08);border-radius:6px;padding:10px 12px;font-size:11px;color:#0F0F0E;line-height:1.65">
+        🛡️ <strong>Vos documents restent confidentiels.</strong> Les justificatifs que vous uploadez (taxe foncière, DPE, copropriété) ne sont jamais transmis directement aux acheteurs ou agents. Seul leur statut <em>"vérifié et attesté"</em> est visible. ImmoConnect agit en tant que tiers de confiance.
       </div>
     </div>
     <button class="btn-submit" id="btn-submit" onclick="soumettre()">Publier mon annonce</button>
@@ -759,6 +779,17 @@ async function uploadPhotos(){
 }
 
 async function soumettre(){
+  // Vérifier consentements RGPD
+  var consent1 = document.getElementById('consentement-vendeur');
+  var consent2 = document.getElementById('consentement-rgpd');
+  if (!consent1 || !consent1.checked) {
+    showToast('Vous devez autoriser la transmission de vos informations pour publier.','err');
+    return;
+  }
+  if (!consent2 || !consent2.checked) {
+    showToast('Vous devez accepter la politique de confidentialité pour continuer.','err');
+    return;
+  }
   var btn=document.getElementById('btn-submit');
   var required={type_bien:'Type de bien',titre:'Titre',description:'Description',surface:'Surface',nb_pieces:'Nb de pièces',prix:'Prix',ville:'Ville',code_postal:'Code postal',nom_vendeur:'Nom / Prénom',telephone:'Téléphone',email_contact:'Email'};
   var missing=[];
@@ -822,7 +853,8 @@ async function soumettre(){
     charges_syndic:+document.getElementById('charges_syndic').value||null,
     nb_lots_copro:+document.getElementById('nb_lots_copro').value||null,
     taxe_fonciere_montant:+document.getElementById('taxe_fonciere_montant').value||null,
-    taxe_fonciere_doc_url:docs['taxe_fonciere_doc']?docs['taxe_fonciere_doc'].url:null,
+    taxe_fonciere_verifie: docs['taxe_fonciere_doc'] ? true : false,
+    // URL du document taxe foncière stockée côté serveur uniquement — non transmise
     is_copropriete:getRadio('is_copro')==='Oui',
     copro_doc_url:docs['copro_doc']?docs['copro_doc'].url:null,
     classe_dpe:document.getElementById('classe_dpe').value,
