@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — À propos</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:24px;align-items:center;flex:1;margin-left:32px}
+.nav-links a{text-decoration:none;color:#888780;font-size:13px}
+.nav-links a:hover{color:#fff}
+.nav-gold{padding:7px 16px;background:var(--gold);color:var(--ink)!important;border-radius:4px;font-weight:500}
+
+/* HERO */
+.hero-ap{background:var(--ink);padding:80px;text-align:center}
+.hero-eyebrow{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,5vw,60px);font-weight:300;color:#FAFAF7;margin-bottom:20px;line-height:1.2}
+.hero-title em{color:#D4B87A}
+.hero-sub{font-size:15px;color:rgba(250,250,247,.6);max-width:600px;margin:0 auto;line-height:1.8}
+
+/* CONTENT */
+.page{max-width:900px;margin:0 auto;padding:60px 24px 80px}
+.section{margin-bottom:48px}
+.sec-eyebrow{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-weight:500}
+.sec-title{font-size:22px;font-weight:500;margin-bottom:16px}
+.sec-body{font-size:14px;color:var(--muted);line-height:1.9;max-width:680px}
+.sec-body strong{color:var(--ink)}
+
+/* VALEURS */
+.valeurs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
+.valeur-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:24px}
+.valeur-icon{font-size:28px;margin-bottom:12px}
+.valeur-title{font-size:14px;font-weight:600;margin-bottom:8px}
+.valeur-desc{font-size:12px;color:var(--muted);line-height:1.7}
+
+/* STATS */
+.stats-ap{display:grid;grid-template-columns:repeat(3,1fr);gap:0;background:var(--warm);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-top:24px}
+.stat-ap{padding:28px;text-align:center;border-right:1px solid var(--line)}
+.stat-ap:last-child{border-right:none}
+.stat-ap-val{font-family:'Cormorant Garamond',serif;font-size:44px;font-weight:300;color:var(--teal);margin-bottom:6px}
+.stat-ap-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+
+/* DIFFÉRENCE */
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
+.diff-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.diff-card.good{border-left:3px solid var(--teal)}
+.diff-card.bad{border-left:3px solid #E8E6E0;opacity:.7}
+.diff-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.diff-label.g{color:var(--teal)}
+.diff-label.b{color:var(--muted)}
+.diff-items{font-size:12px;color:var(--muted);line-height:1.9}
+.diff-items li{list-style:none;padding-left:16px;position:relative}
+.diff-items li::before{position:absolute;left:0}
+.diff-items.g li::before{content:'✓';color:var(--teal);font-weight:700}
+.diff-items.b li::before{content:'✗';color:#C0392B}
+
+/* CTA */
+.cta-ap{background:var(--ink);border-radius:var(--r);padding:48px;text-align:center;margin-top:48px}
+.cta-ap h2{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:#FAFAF7;margin-bottom:12px}
+.cta-ap p{font-size:14px;color:rgba(250,250,247,.6);margin-bottom:28px;line-height:1.7}
+.btn-cta-ap{padding:14px 36px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:none;text-decoration:none;display:inline-block;margin:0 6px}
+.btn-gold{background:var(--gold);color:var(--ink)}
+.btn-out{background:transparent;border:1px solid rgba(255,255,255,.3);color:#FAFAF7}
+
+@media(max-width:700px){.valeurs-grid,.diff-grid,.stats-ap{grid-template-columns:1fr}.stat-ap{border-right:none;border-bottom:1px solid var(--line)}.hero-ap{padding:48px 24px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-links">
+    <a href="forfaits.html">Forfaits</a>
+    <a href="questionnaire-vendeur.html" class="nav-gold">Vendre</a>
+    <a href="questionnaire-acheteur.html">Acheter</a>
+    <a href="connexion.html">Se connecter</a>
+  </div>
+</nav>
+
+<div class="hero-ap">
+  <div class="hero-eyebrow">Notre mission</div>
+  <h1 class="hero-title">L'immobilier <em>autrement</em></h1>
+  <p class="hero-sub">ImmoConnect est née d'un constat simple : vendre un bien immobilier ne devrait pas vous obliger à choisir entre vous débrouiller seul ou payer une commission d'avance à une agence.</p>
+</div>
+
+<div class="page">
+
+  <div class="section">
+    <div class="sec-eyebrow">Notre histoire</div>
+    <div class="sec-title">Pourquoi ImmoConnect ?</div>
+    <div class="sec-body">
+      Trop de vendeurs se retrouvaient face à un choix binaire : publier une annonce sur LeBonCoin et espérer, ou signer un mandat avec une agence et payer des milliers d'euros de commission.<br><br>
+      ImmoConnect casse cette logique. <strong>Vous publiez gratuitement, une seule fois.</strong> Votre bien est immédiatement visible par les acheteurs directs ET par tous les agents inscrits sur la plateforme — qui peuvent le proposer à leur propre clientèle sans que vous ayez à les démarcher. Si un agent vend votre bien, il prend sa commission. Si vous vendez directement, vous ne payez rien.<br><br>
+      Pour les agents immobiliers, ImmoConnect résout un autre problème : la prospection à froid. Chaque dossier vendeur est déjà constitué — photos, documents, rapport d'estimation. Ils arrivent avec un dossier prêt, pas une feuille blanche.
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-eyebrow">Nos chiffres</div>
+    <div class="sec-title">ImmoConnect en quelques mots</div>
+    <div class="stats-ap">
+      <div class="stat-ap">
+        <div class="stat-ap-val">100%</div>
+        <div class="stat-ap-lbl">Gratuit pour les vendeurs</div>
+      </div>
+      <div class="stat-ap">
+        <div class="stat-ap-val">3</div>
+        <div class="stat-ap-lbl">Sources de données officielles</div>
+      </div>
+      <div class="stat-ap">
+        <div class="stat-ap-val">H+0</div>
+        <div class="stat-ap-lbl">Alerte agents Platinium</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-eyebrow">Ce qui nous différencie</div>
+    <div class="sec-title">ImmoConnect vs les autres plateformes</div>
+    <div class="diff-grid">
+      <div class="diff-card good">
+        <div class="diff-label g">✦ ImmoConnect</div>
+        <ul class="diff-items g">
+          <li>Gratuit pour les vendeurs</li>
+          <li>Visible par acheteurs ET agents</li>
+          <li>Dossier constitué une seule fois</li>
+          <li>Rapport Hanaé IA — données DVF officielles</li>
+          <li>Documents vérifiés par IA — confidentiels</li>
+          <li>Matching investisseurs automatique</li>
+          <li>Capacité d'emprunt calculée en temps réel</li>
+        </ul>
+      </div>
+      <div class="diff-card bad">
+        <div class="diff-label b">LeBonCoin / SeLoger / BienIci</div>
+        <ul class="diff-items b">
+          <li>Payant pour être visible</li>
+          <li>Acheteurs uniquement</li>
+          <li>Dossier à refaire pour chaque agence</li>
+          <li>Estimations marketing non sourcées</li>
+          <li>Aucune vérification des documents</li>
+          <li>Pas de matching investisseurs</li>
+          <li>Pas de calcul de financement</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-eyebrow">Nos valeurs</div>
+    <div class="sec-title">Ce en quoi nous croyons</div>
+    <div class="valeurs-grid">
+      <div class="valeur-card">
+        <div class="valeur-icon">🔒</div>
+        <div class="valeur-title">Transparence</div>
+        <div class="valeur-desc">Les données d'estimation viennent de sources officielles (DVF, Notaires-INSEE, carte des loyers). Pas d'estimation gonflée pour vous faire signer un mandat.</div>
+      </div>
+      <div class="valeur-card">
+        <div class="valeur-icon">🤝</div>
+        <div class="valeur-title">Équité</div>
+        <div class="valeur-desc">Les vendeurs accèdent au réseau des agents sans payer de mandat d'avance. Les agents accèdent aux dossiers sans prospecter à froid. Tout le monde y gagne.</div>
+      </div>
+      <div class="valeur-card">
+        <div class="valeur-icon">🛡️</div>
+        <div class="valeur-title">Confiance</div>
+        <div class="valeur-desc">Vos documents restent confidentiels. Seul leur statut "vérifié" est visible. ImmoConnect agit comme tiers de confiance, conforme au RGPD.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-ap">
+    <h2>Prêt à démarrer ?</h2>
+    <p>Publiez votre bien gratuitement en 10 minutes.<br>Ou déposez votre projet acheteur / investisseur.</p>
+    <a href="questionnaire-vendeur.html" class="btn-cta-ap btn-gold">Vendre mon bien →</a>
+    <a href="questionnaire-acheteur.html" class="btn-cta-ap btn-out">Déposer mon projet</a>
+  </div>
+
+</div>
+</body>
+</html>
