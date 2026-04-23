@@ -413,7 +413,8 @@ function renderAgents() {
       h += '<div class="feat' + (!f.y ? ' dim' : '') + '"><div class="feat-dot ' + (f.y?'y':'n') + '">' + (f.y?'✓':'✗') + '</div>';
       h += '<span class="feat-txt' + (f.b?' bold':'') + '">' + f.t + '</span></div>';
     });
-    h += '</div><button class="btn ' + p.btn + '">' + p.ct + '</button></div></div>';
+    var lienForfait = 'questionnaire-agent.html?forfait=' + p.n.toLowerCase();
+    h += '</div><a href="' + lienForfait + '" class="btn ' + p.btn + '" style="text-align:center;text-decoration:none">' + p.ct + '</a></div></div>';
   });
   document.getElementById('ag-cards').innerHTML = h;
 }
