@@ -371,13 +371,20 @@ async function envoyerMessage() {
   }
 
   // Insérer le message
-  await db.from('messages_conversation').insert({
+  var { data: newMsg } = await db.from('messages_conversation').insert({
     conversation_id: currentConvId,
     expediteur_email: currentUser.email,
     expediteur_role: currentRole,
     contenu: contenu,
     lu: false
-  });
+  }).select().single();
+
+  // Envoyer email de notification à l'interlocuteur
+  var destinataire = currentRole === 'agent' ? conv.email_vendeur : conv.email_agent;
+  var expediteurNom = currentUser.email.split('@')[0];
+  var bien = conv.annonces_vendeurs;
+  var bienTitre = bien ? (bien.type_bien||'Bien') + ' · ' + (bien.ville||'') : 'votre bien';
+  await envoyerEmailNotification(destinataire, expediteurNom, contenu, bienTitre, currentConvId);
 
   if (input) input.value = '';
   await afficherChat(conv);
@@ -417,6 +424,25 @@ function filtrerConvs() {
     return txt.includes(q);
   });
   afficherListeConvs(filtered);
+}
+
+// ── EMAIL NOTIFICATION NOUVEAU MESSAGE ──
+async function envoyerEmailNotification(destinataire, expediteur, message, bienTitre, convId) {
+  try {
+    await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'nouveau_message',
+        to: destinataire,
+        subject: '💬 Nouveau message ImmoConnect — ' + bienTitre,
+        expediteur: expediteur,
+        message: message.substring(0, 200) + (message.length > 200 ? '…' : ''),
+        bien: bienTitre,
+        lien: 'https://immoconnect-agence.fr/messagerie.html'
+      }
+    });
+  } catch(e) {
+    console.warn('Email notification:', e.message);
+  }
 }
 
 // ── UTILS ──

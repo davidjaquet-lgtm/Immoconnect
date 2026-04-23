@@ -234,9 +234,176 @@ async function chargerRapport() {
     afficherRapport(rapportData);
     document.getElementById('btn-pdf').disabled = false;
 
+    // Afficher bouton visite si niveau Silver, Gold ou Platinium
+    var niv = rapportData.annonce.niveau_vendeur || 'standard';
+    if (['silver','gold','platinium'].includes(niv)) {
+      document.getElementById('btn-visite').style.display = 'inline-block';
+    }
+
   } catch(e) {
     document.getElementById('rapport-content').innerHTML = '<div class="empty">Erreur : ' + e.message + '</div>';
   }
+}
+
+/* ══ MODAL CALENDRIER VISITES ══ */
+function ouvrirCalendrier() {
+  var annonce = rapportData && rapportData.annonce;
+  if (!annonce) return;
+
+  // Créer modal calendrier
+  var modal = document.getElementById('modal-calendrier');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'modal-calendrier';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,15,14,.6);backdrop-filter:blur(4px);z-index:999;display:flex;align-items:center;justify-content:center;padding:24px';
+    document.body.appendChild(modal);
+  }
+
+  modal.innerHTML = '<div style="background:#FEFDFB;border-radius:10px;padding:0;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)">' +
+    '<div style="padding:20px 24px;border-bottom:1px solid #E8E6E0;display:flex;align-items:center;justify-content:space-between">' +
+    '<div>' +
+    '<div style="font-size:16px;font-weight:500;color:#0F0F0E">📅 Réserver une visite</div>' +
+    '<div style="font-size:12px;color:#888780;margin-top:2px">' + (annonce.type_bien||'Bien') + ' · ' + (annonce.surface||'—') + ' m² · ' + (annonce.ville||'') + '</div>' +
+    '</div>' +
+    '<button onclick="fermerCalendrier()" style="border:none;background:none;font-size:20px;cursor:pointer;color:#888780;padding:4px">×</button>' +
+    '</div>' +
+    '<div id="cal-modal-content" style="padding:20px 24px">' +
+    '<div style="text-align:center;padding:20px;color:#888780;font-size:13px">' +
+    '<div style="width:24px;height:24px;border:3px solid #E8E6E0;border-top-color:#1E7A62;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px"></div>' +
+    'Chargement des disponibilités…</div></div>' +
+    '</div>';
+
+  modal.style.display = 'flex';
+  chargerDisposVendeur(annonce.email_contact, annonce.id);
+}
+
+async function chargerDisposVendeur(emailVendeur, annonceId) {
+  try {
+    var today = new Date().toISOString().split('T')[0];
+    var { data: dispos } = await db.from('disponibilites_visites')
+      .select('*')
+      .eq('email_vendeur', emailVendeur)
+      .eq('annonce_id', annonceId)
+      .eq('statut', 'libre')
+      .gte('date', today)
+      .order('date', {ascending: true})
+      .limit(20);
+
+    var container = document.getElementById('cal-modal-content');
+    if (!dispos || !dispos.length) {
+      container.innerHTML = '<div style="text-align:center;padding:32px;color:#888780;font-size:13px">' +
+        '<div style="font-size:32px;margin-bottom:12px">📅</div>' +
+        'Aucun créneau disponible pour le moment.<br>Contactez le vendeur via la messagerie.' +
+        '</div>';
+      return;
+    }
+
+    var html = '<div style="font-size:13px;color:#888780;margin-bottom:16px">Choisissez un créneau disponible :</div>';
+
+    // Grouper par date
+    var parDate = {};
+    dispos.forEach(function(d) {
+      if (!parDate[d.date]) parDate[d.date] = [];
+      parDate[d.date].push(d);
+    });
+
+    Object.keys(parDate).forEach(function(date) {
+      var dateObj = new Date(date + 'T12:00:00');
+      var opts = {weekday:'long', day:'numeric', month:'long'};
+      html += '<div style="margin-bottom:16px">';
+      html += '<div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#888780;margin-bottom:8px">' +
+        dateObj.toLocaleDateString('fr-FR', opts) + '</div>';
+      html += '<div style="display:flex;flex-wrap:wrap;gap:8px">';
+      parDate[date].forEach(function(d) {
+        html += '<button onclick="selectionnerCreneau('' + d.id + '','' + date + '','' + d.heure_debut + '','' + d.heure_fin + '','' + emailVendeur + '')" ' +
+          'style="padding:8px 16px;border-radius:8px;border:1px solid #9FE1CB;background:#E1F5EE;color:#1E7A62;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer">' +
+          d.heure_debut + ' – ' + d.heure_fin + '</button>';
+      });
+      html += '</div></div>';
+    });
+
+    container.innerHTML = html;
+  } catch(e) {
+    document.getElementById('cal-modal-content').innerHTML =
+      '<div style="text-align:center;padding:24px;color:#888780;font-size:13px">Erreur de chargement. Réessayez.</div>';
+  }
+}
+
+function selectionnerCreneau(dispoId, date, debut, fin, emailVendeur) {
+  var dateObj = new Date(date + 'T12:00:00');
+  var dateStr = dateObj.toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long'});
+  var container = document.getElementById('cal-modal-content');
+
+  container.innerHTML =
+    '<div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:16px;margin-bottom:16px;font-size:13px;line-height:1.7">' +
+    '✅ <strong>' + dateStr + ' de ' + debut + ' à ' + fin + '</strong><br>' +
+    '<span style="color:#888780">Confirmez votre demande de visite</span></div>' +
+    '<div style="margin-bottom:14px">' +
+    '<label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#888780;display:block;margin-bottom:6px">Votre message au vendeur (optionnel)</label>' +
+    '<textarea id="msg-visite" placeholder="Bonjour, je souhaite visiter votre bien…" style="width:100%;background:#F5F2EC;border:1px solid #E8E6E0;border-radius:8px;padding:10px;font-family:Outfit,sans-serif;font-size:13px;resize:none;min-height:80px;outline:none"></textarea></div>' +
+    '<button onclick="confirmerReservation('' + dispoId + '','' + emailVendeur + '')" ' +
+    'style="width:100%;padding:12px;border-radius:8px;border:none;background:#0F0F0E;color:#fff;font-family:Outfit,sans-serif;font-size:14px;font-weight:500;cursor:pointer">' +
+    'Envoyer ma demande de visite →</button>' +
+    '<button onclick="chargerDisposVendeur('' + emailVendeur + '','' + (rapportData.annonce.id) + '')" ' +
+    'style="width:100%;padding:10px;border-radius:8px;border:1px solid #E8E6E0;background:transparent;color:#888780;font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;margin-top:8px">' +
+    '← Choisir un autre créneau</button>';
+}
+
+async function confirmerReservation(dispoId, emailVendeur) {
+  try {
+    var { data: { session } } = await db.auth.getSession();
+    if (!session) {
+      alert('Connectez-vous pour réserver une visite.');
+      window.location.href = 'connexion.html';
+      return;
+    }
+
+    var msg = document.getElementById('msg-visite') ? document.getElementById('msg-visite').value : '';
+    var btn = document.querySelector('#cal-modal-content button');
+    if (btn) btn.disabled = true;
+
+    await db.from('reservations_visites').insert({
+      dispo_id: dispoId,
+      email_vendeur: emailVendeur,
+      email_acheteur: session.user.email,
+      message: msg || null,
+      statut: 'en_attente'
+    });
+
+    // Marquer le créneau comme réservé
+    await db.from('disponibilites_visites')
+      .update({ statut: 'reserve' })
+      .eq('id', dispoId);
+
+    // Notifier le vendeur par email
+    await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'demande_visite',
+        to: emailVendeur,
+        subject: '📅 Nouvelle demande de visite — ImmoConnect',
+        acheteur: session.user.email,
+        message: msg,
+        bien: (rapportData.annonce.type_bien||'Bien') + ' · ' + (rapportData.annonce.ville||''),
+        lien: 'https://immoconnect-agence.fr/calendrier.html'
+      }
+    }).catch(function(){});
+
+    document.getElementById('cal-modal-content').innerHTML =
+      '<div style="text-align:center;padding:32px">' +
+      '<div style="font-size:48px;margin-bottom:16px">✅</div>' +
+      '<div style="font-size:16px;font-weight:500;margin-bottom:8px">Demande envoyée !</div>' +
+      '<div style="font-size:13px;color:#888780;line-height:1.7">Le vendeur a été notifié. Il confirmera ou refusera votre demande.<br>Vous recevrez un email de confirmation.</div>' +
+      '<button onclick="fermerCalendrier()" style="margin-top:20px;padding:10px 24px;border-radius:8px;border:none;background:#0F0F0E;color:#fff;font-family:Outfit,sans-serif;font-size:13px;cursor:pointer">Fermer</button>' +
+      '</div>';
+
+  } catch(e) {
+    alert('Erreur : ' + e.message);
+  }
+}
+
+function fermerCalendrier() {
+  var modal = document.getElementById('modal-calendrier');
+  if (modal) modal.style.display = 'none';
 }
 
 /* ══ API DVF OFFICIELLE ══ */

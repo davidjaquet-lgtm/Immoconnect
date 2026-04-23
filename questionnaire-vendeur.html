@@ -908,6 +908,52 @@ async function uploadDoc(champ,inputId,statusId){
   calcNiveau();
 }
 
+// ── ALERTES AGENTS NOUVEAU BIEN ──
+async function envoyerAlertesAgents(bien, niveau) {
+  try {
+    // Définir quels forfaits reçoivent l'alerte selon le niveau
+    // Silver  → tous les forfaits (starter, pro, expert, platinium)
+    // Gold    → pro, expert, platinium
+    // Platinium → expert, platinium (en premier), puis pro avec délai
+    var forfaitsEligibles = {
+      silver:    ['starter','pro','expert','platinium'],
+      gold:      ['pro','expert','platinium'],
+      platinium: ['expert','platinium']
+    };
+
+    var forfaits = forfaitsEligibles[niveau] || [];
+    var delais = {
+      platinium: 0,    // H+0
+      expert:    1,    // J+1
+      pro:       2,    // J+2
+      starter:   4     // J+4
+    };
+
+    // Appeler la Edge Function Supabase
+    await db.functions.invoke('alerter-agents', {
+      body: {
+        type: 'nouveau_bien',
+        niveau: niveau,
+        forfaits_eligibles: forfaits,
+        delais: delais,
+        bien: {
+          titre: bien.titre || bien.type_bien + ' · ' + bien.ville,
+          type: bien.type_bien,
+          ville: bien.ville,
+          code_postal: bien.code_postal,
+          surface: bien.surface,
+          prix: bien.prix,
+          nb_pieces: bien.nb_pieces,
+          niveau_vendeur: niveau
+        }
+      }
+    });
+    console.log('Alertes agents envoyées pour niveau:', niveau);
+  } catch(e) {
+    console.warn('Alertes agents:', e.message);
+  }
+}
+
 async function uploadPhotos(){
   var urls=[];
   for(var i=0;i<photos.length;i++){
@@ -1031,6 +1077,11 @@ async function soumettre(){
   if(error){showToast('Erreur : '+error.message,'err');btn.disabled=false;btn.textContent='Publier mon annonce';return;}
   showToast('✅ Annonce publiée — '+NIV[niveau].label,'ok');
   btn.textContent='✓ Annonce publiée';
+
+  // Envoyer alertes agents si Silver, Gold ou Platinium
+  if (['silver','gold','platinium'].includes(niveau)) {
+    await envoyerAlertesAgents(payload, niveau);
+  }
 }
 
 function showToast(msg,type){

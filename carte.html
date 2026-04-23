@@ -290,6 +290,8 @@ function afficherBiens(biens) {
       '<div class="popup-prix">' + prixFmt + '</div>' +
       (pm2 ? '<div class="popup-pm2">' + pm2 + '</div>' : '') +
       '<a href="rapport-hanae.html?annonce=' + b.id + '" class="popup-btn">Voir le dossier →</a>' +
+      ((['silver','gold','platinium'].includes(b.niveau_vendeur)) ?
+        '<a href="calendrier.html" class="popup-btn" style="background:#1E7A62;margin-top:6px">📅 Réserver une visite</a>' : '') +
       '</div>',
       { maxWidth: 240 }
     );
