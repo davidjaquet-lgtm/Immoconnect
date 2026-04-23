@@ -406,7 +406,7 @@ async function afficherDashboard(user) {
   html += '<div class="dash-avatar">' + nom.charAt(0).toUpperCase() + '</div>';
   html += '<div class="dash-info"><div class="dash-name">Bonjour, ' + nom + ' ' + badgesHtml + '</div>';
   html += '<div class="dash-sub">' + user.email + (meta.agence ? ' · ' + meta.agence : '') + '</div></div>';
-  html += '<a href="messagerie.html" style="padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;color:var(--ink);text-decoration:none;margin-right:8px">💬 Messagerie</a>
+  html += '<a href="calendrier.html" style="padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;color:var(--ink);text-decoration:none;margin-right:8px">📅 Visites</a><a href="messagerie.html" style="padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;color:var(--ink);text-decoration:none;margin-right:8px">💬 Messagerie</a>
 <button class="btn-logout" onclick="logout()">Déconnexion</button></div>';
 
   // Onglets selon profils
