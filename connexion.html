@@ -262,6 +262,38 @@ input:focus,select:focus{border-color:var(--ink)}
         <label class="lbl">Agence immobilière</label>
         <input type="text" id="signup-agence" placeholder="Nom de votre agence">
       </div>
+
+      <!-- CHAMPS CARTE T — AGENTS UNIQUEMENT -->
+      <div id="field-carte-t" style="display:none">
+        <div style="background:#FEF3E7;border:1px solid rgba(212,115,42,.3);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#633806;line-height:1.65">
+          🪪 <strong>Carte professionnelle obligatoire</strong><br>
+          Seuls les agents titulaires d'une carte T valide peuvent s'inscrire. Votre compte sera activé sous <strong>48h maximum</strong> après vérification par notre équipe.
+        </div>
+        <div class="field">
+          <label class="lbl">Numéro de carte T * <span style="font-size:10px;font-weight:400;color:var(--muted)">(format : CPI XXXX 20XX XXX XXXXXX)</span></label>
+          <input type="text" id="signup-carte-t" placeholder="CPI 7501 2024 000 012345" oninput="validerFormatCarteT()">
+          <div id="carte-t-feedback" style="font-size:11px;margin-top:4px;display:none"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="field">
+            <label class="lbl">CCI émettrice *</label>
+            <input type="text" id="signup-cci" placeholder="ex: Paris, Lyon, Bordeaux">
+          </div>
+          <div class="field">
+            <label class="lbl">Date d'expiration *</label>
+            <input type="date" id="signup-expiration">
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">Photo de la carte T * <span style="font-size:10px;font-weight:400;color:var(--muted)">(recto, jpg/png/pdf)</span></label>
+          <input type="file" id="signup-carte-photo" accept=".jpg,.jpeg,.png,.pdf" onchange="analyserCarteT()">
+          <div id="carte-t-ocr" style="display:none;margin-top:8px;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.6"></div>
+        </div>
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;line-height:1.6;margin-bottom:14px">
+          <input type="checkbox" id="certif-carte-t" style="width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:var(--amber)">
+          <span>Je certifie être titulaire de cette carte professionnelle valide et en cours de validité, conformément à la loi Hoguet du 2 janvier 1970.</span>
+        </label>
+      </div>
     </div>
 
     <div class="field"><label class="lbl">Email *</label><input type="email" id="auth-email" placeholder="votre@email.fr"></div>
@@ -308,6 +340,7 @@ function toggleProfil(p) {
     el.classList.toggle('checked', selectedProfils.indexOf(k) !== -1);
   });
   document.getElementById('field-agence').style.display = selectedProfils.indexOf('agent') !== -1 ? 'block' : 'none';
+  document.getElementById('field-carte-t').style.display = selectedProfils.indexOf('agent') !== -1 ? 'block' : 'none';
 }
 
 function showErr(m) { var b=document.getElementById('err-box'); b.textContent=m; b.style.display='block'; document.getElementById('ok-box').style.display='none'; }
@@ -333,12 +366,42 @@ async function handleAuth() {
     var agence = document.getElementById('signup-agence').value.trim();
     if (!nom) { showErr('Renseignez votre nom.'); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
     if (!selectedProfils.length) { showErr('Choisissez au moins un profil.'); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
+
+    // Validation carte T si profil agent
+    if (selectedProfils.indexOf('agent') !== -1) {
+      var carteT = document.getElementById('signup-carte-t').value.trim();
+      var expiration = document.getElementById('signup-expiration').value;
+      var certif = document.getElementById('certif-carte-t').checked;
+
+      if (!carteT) { showErr('Renseignez votre numéro de carte T.'); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
+      if (!validerFormatCarteT()) { showErr('Format de carte T invalide. Ex: CPI 7501 2024 000 012345'); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
+      if (!expiration) { showErr('Renseignez la date d'expiration de votre carte T.'); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
+      if (new Date(expiration) < new Date()) { showErr('Votre carte T est expirée. Renouvelez-la avant de vous inscrire.'); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
+      if (!certif) { showErr('Certifiez être titulaire d'une carte T valide.'); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
+    }
+    var carteT = selectedProfils.indexOf('agent') !== -1 ? document.getElementById('signup-carte-t').value.trim() : null;
+    var cci = selectedProfils.indexOf('agent') !== -1 ? document.getElementById('signup-cci').value.trim() : null;
+    var expiration = selectedProfils.indexOf('agent') !== -1 ? document.getElementById('signup-expiration').value : null;
+
     var { data, error } = await db.auth.signUp({
       email, password: pwd,
-      options: { data: { nom, profils: selectedProfils, agence: agence||null } }
+      options: { data: {
+        nom,
+        profils: selectedProfils,
+        agence: agence||null,
+        carte_t: carteT||null,
+        cci: cci||null,
+        carte_t_expiration: expiration||null,
+        compte_agent_valide: false,
+        forfait_agent: 'starter'
+      }}
     });
     if (error) { showErr('Erreur : ' + error.message); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
-    showOk('Compte créé ! Confirmez votre email puis connectez-vous.');
+    if (selectedProfils.indexOf('agent') !== -1) {
+      showOk('Compte créé ! Confirmez votre email. Votre carte T sera vérifiée sous 48h maximum — vous recevrez un email de confirmation d'activation de votre espace agent.');
+    } else {
+      showOk('Compte créé ! Confirmez votre email puis connectez-vous.');
+    }
     btn.disabled=false; btn.textContent='Créer mon compte';
   }
 }
@@ -613,6 +676,120 @@ async function supprimerAnnonce(id) {
   afficherDashboard(currentUser);
 }
 function demanderExclusivite(d) { alert('Exclusivité '+d+'h — paiement Stripe à venir.'); }
+
+// ── VALIDATION CARTE T ──
+function validerFormatCarteT() {
+  var input = document.getElementById('signup-carte-t');
+  if (!input) return true;
+  var val = input.value.trim().toUpperCase();
+  var feedback = document.getElementById('carte-t-feedback');
+
+  // Format : CPI XXXX 20XX XXX XXXXXX (avec espaces ou tirets)
+  var regex = /^CPI\s?\d{4}\s?\d{4}\s?\d{3}\s?\d{6}$/;
+  var ok = regex.test(val.replace(/[-]/g, ' '));
+
+  if (val.length === 0) { feedback.style.display='none'; return false; }
+
+  feedback.style.display = 'block';
+  if (ok) {
+    feedback.style.color = '#1E7A62';
+    feedback.textContent = '✅ Format valide';
+    input.style.borderColor = '#1E7A62';
+    return true;
+  } else {
+    feedback.style.color = '#C0392B';
+    feedback.textContent = '❌ Format invalide — attendu : CPI XXXX 20XX XXX XXXXXX';
+    input.style.borderColor = '#C0392B';
+    return false;
+  }
+}
+
+// ── OCR CARTE T VIA CLAUDE API ──
+async function analyserCarteT() {
+  var file = document.getElementById('signup-carte-photo').files[0];
+  var ocrDiv = document.getElementById('carte-t-ocr');
+  if (!file) return;
+
+  ocrDiv.style.display = 'block';
+  ocrDiv.style.background = '#F5F2EC';
+  ocrDiv.style.border = '1px solid #E8E6E0';
+  ocrDiv.innerHTML = '🔍 Analyse de votre carte T en cours…';
+
+  try {
+    var base64 = await new Promise(function(res, rej) {
+      var reader = new FileReader();
+      reader.onload = function(e) { res(e.target.result.split(',')[1]); };
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+    });
+
+    var mediaType = file.type === 'application/pdf' ? 'application/pdf' : 'image/jpeg';
+    var nomDeclare = document.getElementById('signup-nom').value.trim();
+    var numDeclare = document.getElementById('signup-carte-t').value.trim();
+
+    var response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 400,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: mediaType === 'application/pdf' ? 'document' : 'image',
+              source: { type: 'base64', media_type: mediaType, data: base64 }
+            },
+            {
+              type: 'text',
+              text: 'Analyse cette carte professionnelle immobilière française (carte T). Réponds UNIQUEMENT en JSON: {"est_carte_t": boolean, "numero_trouve": string|null, "nom_trouve": string|null, "expiration_trouvee": string|null, "concordance_numero": boolean|null, "concordance_nom": boolean|null, "valide": boolean, "alerte": string|null}. Numéro déclaré: "' + numDeclare + '". Nom déclaré: "' + nomDeclare + '". JSON uniquement, rien d'autre.'
+            }
+          ]
+        }]
+      })
+    });
+
+    var data = await response.json();
+    var text = data.content && data.content[0] && data.content[0].text || '{}';
+    var ocr = JSON.parse(text.replace(/```json|```/g, '').trim());
+
+    if (!ocr.est_carte_t) {
+      ocrDiv.style.background = '#FAECE7';
+      ocrDiv.style.border = '1px solid #F5C4B3';
+      ocrDiv.innerHTML = '❌ <strong>Document non reconnu</strong> — Ce document ne semble pas être une carte professionnelle immobilière. Uploadez la carte T recto.';
+      return;
+    }
+
+    var alertes = [];
+    if (ocr.concordance_numero === false) alertes.push('Numéro trouvé (' + ocr.numero_trouve + ') différent du numéro déclaré');
+    if (ocr.concordance_nom === false) alertes.push('Nom trouvé (' + ocr.nom_trouve + ') différent du nom déclaré');
+    if (ocr.alerte) alertes.push(ocr.alerte);
+
+    if (alertes.length > 0) {
+      ocrDiv.style.background = '#FAEEDA';
+      ocrDiv.style.border = '1px solid #FAC775';
+      ocrDiv.innerHTML = '⚠️ <strong>Vérification manuelle requise</strong> — ' + alertes.join(' · ') +
+        '<br><span style="color:#888780;font-size:11px">Votre dossier sera examiné par notre équipe sous 48h.</span>';
+    } else {
+      ocrDiv.style.background = '#E1F5EE';
+      ocrDiv.style.border = '1px solid #9FE1CB';
+      ocrDiv.innerHTML = '✅ <strong>Carte T reconnue</strong> — ' +
+        (ocr.nom_trouve ? ocr.nom_trouve + ' · ' : '') +
+        (ocr.numero_trouve ? ocr.numero_trouve + ' · ' : '') +
+        (ocr.expiration_trouvee ? 'Exp. ' + ocr.expiration_trouvee : '') +
+        '<br><span style="color:#1E7A62;font-size:11px">Votre compte agent sera activé sous 48h après confirmation finale de notre équipe.</span>';
+      // Pré-remplir le numéro si cohérent
+      if (ocr.numero_trouve && !document.getElementById('signup-carte-t').value.trim()) {
+        document.getElementById('signup-carte-t').value = ocr.numero_trouve;
+        validerFormatCarteT();
+      }
+    }
+  } catch(e) {
+    ocrDiv.style.background = '#F5F2EC';
+    ocrDiv.style.border = '1px solid #E8E6E0';
+    ocrDiv.innerHTML = '⚠️ Analyse automatique indisponible — votre carte sera vérifiée manuellement sous 48h.';
+  }
+}
 
 function getSemaine() {
   var d = new Date();

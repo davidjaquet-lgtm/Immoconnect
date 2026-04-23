@@ -62,3 +62,25 @@ CREATE INDEX IF NOT EXISTS idx_resa_acheteur ON reservations_visites(email_achet
 
 ALTER TABLE reservations_visites ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Acces reservations" ON reservations_visites FOR ALL USING (true);
+
+-- ══ TABLE VALIDATION AGENTS ══
+CREATE TABLE IF NOT EXISTS agents_validation (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  nom TEXT,
+  agence TEXT,
+  carte_t TEXT NOT NULL,
+  cci TEXT,
+  carte_t_expiration DATE,
+  ocr_statut TEXT DEFAULT 'non_analyse',
+  statut TEXT DEFAULT 'en_attente' CHECK (statut IN ('en_attente','valide','refuse')),
+  raison_refus TEXT,
+  valide_le TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_agents_val_statut ON agents_validation(statut);
+
+ALTER TABLE agents_validation ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Acces agents validation" ON agents_validation FOR ALL USING (true);
