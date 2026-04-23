@@ -406,7 +406,8 @@ async function afficherDashboard(user) {
   html += '<div class="dash-avatar">' + nom.charAt(0).toUpperCase() + '</div>';
   html += '<div class="dash-info"><div class="dash-name">Bonjour, ' + nom + ' ' + badgesHtml + '</div>';
   html += '<div class="dash-sub">' + user.email + (meta.agence ? ' · ' + meta.agence : '') + '</div></div>';
-  html += '<button class="btn-logout" onclick="logout()">Déconnexion</button></div>';
+  html += '<a href="messagerie.html" style="padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;color:var(--ink);text-decoration:none;margin-right:8px">💬 Messagerie</a>
+<button class="btn-logout" onclick="logout()">Déconnexion</button></div>';
 
   // Onglets selon profils
   html += '<div class="dash-tabs">';
@@ -546,10 +547,18 @@ function buildAgentPanel(leads, meta) {
   var goldPlat = leads.filter(function(l){ return l.niveau_vendeur==='gold'||l.niveau_vendeur==='platinium'; });
   var silver   = leads.filter(function(l){ return l.niveau_vendeur==='silver'; });
 
+  // Compteur contacts semaine
+  var semaine = getSemaine();
+  var { data: quota } = await db.from('contacts_semaine')
+    .select('nb_contacts').eq('agent_id', user.id).eq('semaine', semaine).single().catch(function(){return{data:null};});
+  var nbContacts = quota ? quota.nb_contacts : 0;
+  var forfaitLabel = meta.forfait_agent || 'starter';
+  var maxContacts = {starter:10, pro:15, expert:30, platinium:999}[forfaitLabel] || 10;
+
   var h = '<div class="stats-row s4">';
   h += '<div class="stat-box st-amber"><div class="stat-val">' + leads.length + '</div><div class="stat-lbl">Dossiers disponibles</div></div>';
   h += '<div class="stat-box"><div class="stat-val">' + goldPlat.length + '</div><div class="stat-lbl">Gold & Platinium</div></div>';
-  h += '<div class="stat-box"><div class="stat-val">' + silver.length + '</div><div class="stat-lbl">Silver</div></div>';
+  h += '<div class="stat-box"><div class="stat-val">' + nbContacts + ' / ' + (maxContacts === 999 ? '∞' : maxContacts) + '</div><div class="stat-lbl">Contacts cette semaine</div></div>';
   h += '<div class="stat-box"><div class="stat-val">H+0</div><div class="stat-lbl">Alerte Platinium</div></div>';
   h += '</div>';
 
@@ -604,6 +613,13 @@ async function supprimerAnnonce(id) {
   afficherDashboard(currentUser);
 }
 function demanderExclusivite(d) { alert('Exclusivité '+d+'h — paiement Stripe à venir.'); }
+
+function getSemaine() {
+  var d = new Date();
+  var jan1 = new Date(d.getFullYear(), 0, 1);
+  var week = Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+  return d.getFullYear() + '-W' + String(week).padStart(2, '0');
+}
 
 async function logout() {
   await db.auth.signOut();

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>ImmoConnect — Templates Emails Supabase</title>
+<style>
+body{font-family:Arial,sans-serif;max-width:900px;margin:0 auto;padding:40px 24px;color:#333;font-size:14px}
+h1{font-size:22px;margin-bottom:8px}
+.subtitle{color:#888;margin-bottom:40px}
+.template-block{background:#f8f8f8;border:1px solid #e0e0e0;border-radius:8px;padding:24px;margin-bottom:32px}
+.template-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.template-where{font-size:12px;color:#888;margin-bottom:16px;padding:4px 10px;background:#fff;border-radius:4px;display:inline-block;border:1px solid #e0e0e0}
+.template-subject{background:#fff;border:1px solid #e0e0e0;border-radius:4px;padding:10px;font-size:13px;margin-bottom:8px}
+.template-subject label{font-size:11px;font-weight:700;text-transform:uppercase;color:#888;display:block;margin-bottom:4px}
+.template-body{background:#fff;border:1px solid #e0e0e0;border-radius:4px;padding:10px;font-size:12px;white-space:pre-wrap;line-height:1.7}
+.template-body label{font-size:11px;font-weight:700;text-transform:uppercase;color:#888;display:block;margin-bottom:8px}
+.note{background:#E1F5EE;border:1px solid #9FD9C0;border-radius:8px;padding:14px 16px;font-size:13px;margin-bottom:32px;line-height:1.7}
+.step{background:#E6F1FB;border-radius:4px;padding:6px 12px;font-size:12px;margin-bottom:6px}
+</style>
+</head>
+<body>
+
+<h1>📧 Templates Emails ImmoConnect</h1>
+<div class="subtitle">À configurer dans Supabase → Authentication → Email Templates</div>
+
+<div class="note">
+  <strong>Configuration Supabase :</strong><br>
+  1. Allez sur <strong>supabase.com</strong> → votre projet<br>
+  2. Menu gauche → <strong>Authentication</strong> → <strong>Email Templates</strong><br>
+  3. Copiez-collez chaque template ci-dessous dans la bonne section<br>
+  4. Dans <strong>SMTP Settings</strong> → activez un service SMTP (recommandé : <a href="https://resend.com">Resend.com</a> gratuit jusqu'à 3000 emails/mois)<br>
+  5. Adresse expéditeur : <strong>contact@immoconnect-agence.fr</strong> (à remplacer quand vous aurez votre email)
+</div>
+
+<!-- EMAIL CONFIRMATION -->
+<div class="template-block">
+  <div class="template-title">1. Confirmation d'email (après inscription)</div>
+  <div class="template-where">Supabase → Authentication → Email Templates → Confirm signup</div>
+
+  <div class="template-subject">
+    <label>Objet</label>
+    ✅ Confirmez votre compte ImmoConnect
+  </div>
+
+  <div class="template-body"><label>Corps du message (HTML)</label>&lt;div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:560px;margin:0 auto;background:#FEFDFB;border:1px solid #E8E6E0;border-radius:10px;overflow:hidden"&gt;
+  &lt;div style="background:#0F0F0E;padding:24px 32px;text-align:center"&gt;
+    &lt;div style="font-size:22px;font-weight:600;color:#fff"&gt;Immo&lt;span style="color:#C09B5A"&gt;Connect&lt;/span&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div style="padding:32px"&gt;
+    &lt;h2 style="font-size:20px;font-weight:500;margin-bottom:12px;color:#0F0F0E"&gt;Confirmez votre adresse email&lt;/h2&gt;
+    &lt;p style="font-size:14px;color:#888780;line-height:1.7;margin-bottom:24px"&gt;
+      Bienvenue sur ImmoConnect ! Cliquez sur le bouton ci-dessous pour confirmer votre adresse email et accéder à votre espace personnel.
+    &lt;/p&gt;
+    &lt;div style="text-align:center;margin-bottom:28px"&gt;
+      &lt;a href="{{ .ConfirmationURL }}" style="background:#0F0F0E;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:500;display:inline-block"&gt;
+        Confirmer mon compte →
+      &lt;/a&gt;
+    &lt;/div&gt;
+    &lt;p style="font-size:12px;color:#888780;line-height:1.6"&gt;
+      Ce lien expire dans 24 heures. Si vous n'avez pas créé de compte ImmoConnect, ignorez cet email.
+    &lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div style="background:#F5F2EC;padding:16px 32px;font-size:11px;color:#888780;text-align:center;border-top:1px solid #E8E6E0"&gt;
+    ImmoConnect — La plateforme qui démultiplie vos chances &bull; &lt;a href="https://immoconnect-agence.fr/mentions-legales.html" style="color:#888780"&gt;Mentions légales&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</div>
+</div>
+
+<!-- EMAIL BIENVENUE -->
+<div class="template-block">
+  <div class="template-title">2. Email de bienvenue (après confirmation)</div>
+  <div class="template-where">À envoyer via Supabase Edge Functions ou manuellement après confirmation</div>
+
+  <div class="template-subject">
+    <label>Objet</label>
+    🏠 Bienvenue sur ImmoConnect — votre espace est prêt
+  </div>
+
+  <div class="template-body"><label>Corps du message (HTML)</label>&lt;div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:560px;margin:0 auto;background:#FEFDFB;border:1px solid #E8E6E0;border-radius:10px;overflow:hidden"&gt;
+  &lt;div style="background:#0F0F0E;padding:24px 32px"&gt;
+    &lt;div style="font-size:22px;font-weight:600;color:#fff"&gt;Immo&lt;span style="color:#C09B5A"&gt;Connect&lt;/span&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div style="padding:32px"&gt;
+    &lt;h2 style="font-size:20px;font-weight:500;margin-bottom:8px;color:#0F0F0E"&gt;Bienvenue sur ImmoConnect 👋&lt;/h2&gt;
+    &lt;p style="font-size:14px;color:#888780;line-height:1.7;margin-bottom:24px"&gt;
+      Votre compte est actif. Plus besoin de démarcher les agences — elles viennent à vous.
+    &lt;/p&gt;
+
+    &lt;div style="background:#F5F2EC;border-radius:8px;padding:20px;margin-bottom:20px"&gt;
+      &lt;div style="font-size:13px;font-weight:600;margin-bottom:12px;color:#0F0F0E"&gt;🏠 Pour les vendeurs&lt;/div&gt;
+      &lt;div style="font-size:13px;color:#888780;line-height:1.7"&gt;
+        ✅ Publiez votre bien gratuitement&lt;br&gt;
+        ✅ Visible par les acheteurs ET tous les agents&lt;br&gt;
+        ✅ Rapport Hanaé IA dès le niveau Silver&lt;br&gt;
+        ✅ Dossier vérifié automatiquement par IA
+      &lt;/div&gt;
+      &lt;div style="margin-top:14px"&gt;
+        &lt;a href="https://immoconnect-agence.fr/questionnaire-vendeur.html" style="background:#1E7A62;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:500"&gt;Publier mon bien →&lt;/a&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div style="background:#E6F1FB;border-radius:8px;padding:20px;margin-bottom:20px"&gt;
+      &lt;div style="font-size:13px;font-weight:600;margin-bottom:12px;color:#0F0F0E"&gt;🤝 Pour les agents immo&lt;/div&gt;
+      &lt;div style="font-size:13px;color:#888780;line-height:1.7"&gt;
+        ✅ Accès aux dossiers vendeurs complets&lt;br&gt;
+        ✅ Alertes Gold &amp; Platinium en priorité&lt;br&gt;
+        ✅ -50% jusqu'au 01/09/2026&lt;br&gt;
+        ✅ Exclusivité 48h ou 96h disponible
+      &lt;/div&gt;
+      &lt;div style="margin-top:14px"&gt;
+        &lt;a href="https://immoconnect-agence.fr/forfaits.html" style="background:#185FA5;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:500"&gt;Voir les forfaits →&lt;/a&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;p style="font-size:12px;color:#888780;line-height:1.6;border-top:1px solid #E8E6E0;padding-top:16px"&gt;
+      Une question ? Répondez à cet email — nous vous répondrons sous 24h.&lt;br&gt;
+      &lt;strong&gt;L'équipe ImmoConnect&lt;/strong&gt;
+    &lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div style="background:#F5F2EC;padding:16px 32px;font-size:11px;color:#888780;text-align:center;border-top:1px solid #E8E6E0"&gt;
+    ImmoConnect &bull; &lt;a href="https://immoconnect-agence.fr/mentions-legales.html" style="color:#888780"&gt;Mentions légales&lt;/a&gt; &bull; &lt;a href="https://immoconnect-agence.fr/a-propos.html" style="color:#888780"&gt;À propos&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</div>
+</div>
+
+<!-- EMAIL RESET PASSWORD -->
+<div class="template-block">
+  <div class="template-title">3. Réinitialisation mot de passe</div>
+  <div class="template-where">Supabase → Authentication → Email Templates → Reset password</div>
+
+  <div class="template-subject">
+    <label>Objet</label>
+    🔐 Réinitialisation de votre mot de passe ImmoConnect
+  </div>
+
+  <div class="template-body"><label>Corps du message (HTML)</label>&lt;div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:560px;margin:0 auto;background:#FEFDFB;border:1px solid #E8E6E0;border-radius:10px;overflow:hidden"&gt;
+  &lt;div style="background:#0F0F0E;padding:24px 32px"&gt;
+    &lt;div style="font-size:22px;font-weight:600;color:#fff"&gt;Immo&lt;span style="color:#C09B5A"&gt;Connect&lt;/span&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div style="padding:32px"&gt;
+    &lt;h2 style="font-size:20px;font-weight:500;margin-bottom:12px"&gt;Réinitialisation du mot de passe&lt;/h2&gt;
+    &lt;p style="font-size:14px;color:#888780;line-height:1.7;margin-bottom:24px"&gt;
+      Vous avez demandé à réinitialiser votre mot de passe. Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe.
+    &lt;/p&gt;
+    &lt;div style="text-align:center;margin-bottom:28px"&gt;
+      &lt;a href="{{ .ConfirmationURL }}" style="background:#0F0F0E;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:500;display:inline-block"&gt;
+        Choisir un nouveau mot de passe →
+      &lt;/a&gt;
+    &lt;/div&gt;
+    &lt;p style="font-size:12px;color:#888780"&gt;Ce lien expire dans 1 heure. Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div style="background:#F5F2EC;padding:16px 32px;font-size:11px;color:#888780;text-align:center;border-top:1px solid #E8E6E0"&gt;
+    ImmoConnect &bull; &lt;a href="https://immoconnect-agence.fr/mentions-legales.html" style="color:#888780"&gt;Mentions légales&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</div>
+</div>
+
+<div class="note">
+  <strong>Pour activer l'envoi d'emails :</strong><br>
+  1. Créez un compte gratuit sur <a href="https://resend.com">resend.com</a><br>
+  2. Ajoutez votre domaine immoconnect-agence.fr<br>
+  3. Copiez la clé API Resend<br>
+  4. Dans Supabase → Project Settings → Authentication → SMTP Settings<br>
+  &nbsp;&nbsp;&nbsp;Host: smtp.resend.com | Port: 465 | User: resend | Password: [votre clé API]<br>
+  5. Adresse From: <strong>contact@immoconnect-agence.fr</strong> (à remplacer par votre vrai email)
+</div>
+
+</body>
+</html>
