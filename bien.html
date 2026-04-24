@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Fiche bien</title>
+<meta name="description" content="Consultez cette annonce immobilière sur ImmoConnect">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:20px;align-items:center;flex:1;margin-left:24px}
+.nav-links a{text-decoration:none;color:#888780;font-size:13px}
+.nav-links a:hover{color:#fff}
+.nav-gold{padding:7px 14px;background:var(--gold);color:var(--ink)!important;border-radius:4px;font-weight:500}
+.nav-out{padding:7px 14px;border:1px solid #444;color:#fff!important;border-radius:4px;font-size:13px;text-decoration:none}
+
+.page{max-width:1040px;margin:0 auto;padding:32px 24px 80px}
+.breadcrumb{font-size:12px;color:var(--muted);margin-bottom:20px}
+.breadcrumb a{color:var(--muted);text-decoration:none}
+.breadcrumb a:hover{color:var(--ink)}
+.breadcrumb span{margin:0 6px}
+
+/* LAYOUT */
+.bien-layout{display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start}
+
+/* GALERIE */
+.galerie{border-radius:var(--r);overflow:hidden;margin-bottom:20px;position:relative}
+.photo-main{width:100%;height:400px;object-fit:cover;background:var(--line);display:block}
+.photo-main-placeholder{width:100%;height:400px;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:48px}
+.photos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:4px}
+.photo-thumb{width:100%;height:80px;object-fit:cover;cursor:pointer;transition:opacity .2s}
+.photo-thumb:hover{opacity:.8}
+.niveau-badge{position:absolute;top:16px;left:16px;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.8px}
+.nb-standard{background:#F1EFE8;color:#555}
+.nb-silver{background:#E6F1FB;color:var(--blue)}
+.nb-gold{background:#FAEEDA;color:#854F0B}
+.nb-platinium{background:#E1F5EE;color:var(--teal)}
+.mandat-badge{position:absolute;top:16px;right:16px;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;background:#FAEEDA;color:#854F0B}
+
+/* INFOS BIEN */
+.bien-titre{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;margin-bottom:8px;line-height:1.2}
+.bien-localisation{font-size:14px;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:6px}
+.bien-prix{font-size:36px;font-weight:300;color:var(--ink);margin-bottom:4px}
+.bien-pm2{font-size:13px;color:var(--muted);margin-bottom:20px}
+
+/* STATS RAPIDES */
+.stats-rapides{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+.stat-r{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:12px;text-align:center}
+.stat-r-val{font-size:18px;font-weight:500;margin-bottom:2px}
+.stat-r-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+
+/* DPE */
+.dpe-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:20px}
+.dpe-A{background:#00A550;color:#fff}
+.dpe-B{background:#51B848;color:#fff}
+.dpe-C{background:#8DC63F;color:#fff}
+.dpe-D{background:#F7C125;color:#0F0F0E}
+.dpe-E{background:#F3891D;color:#fff}
+.dpe-F{background:#ED1C24;color:#fff}
+.dpe-G{background:#9B1915;color:#fff}
+.dpe-NC{background:#888780;color:#fff}
+
+/* DESCRIPTION */
+.section{margin-bottom:28px}
+.section-title{font-size:15px;font-weight:500;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.description{font-size:14px;color:var(--muted);line-height:1.9}
+.details-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.detail-item{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.detail-lbl{font-size:12px;color:var(--muted)}
+.detail-val{font-size:13px;font-weight:500}
+
+/* SIDEBAR */
+.sidebar{position:sticky;top:70px}
+.contact-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:14px}
+.contact-title{font-size:14px;font-weight:500;margin-bottom:14px}
+.btn-contact{width:100%;padding:12px;border-radius:8px;border:none;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-bottom:8px;transition:opacity .15s;display:block;text-align:center;text-decoration:none}
+.btn-contact:hover{opacity:.85}
+.bc-teal{background:var(--teal);color:#fff}
+.bc-blue{background:var(--blue);color:#fff}
+.bc-out{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.lock-info{background:var(--bg);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:8px;text-align:center}
+.lock-info strong{color:var(--ink)}
+
+/* RAPPORT */
+.rapport-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.rapport-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px}
+.rapport-val{font-size:22px;font-weight:500;color:var(--teal);margin-bottom:2px}
+.rapport-sub{font-size:11px;color:var(--muted)}
+.rapport-badge{font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;display:inline-block;margin-top:6px}
+.rb-ok{background:#E1F5EE;color:var(--teal)}
+.rb-warn{background:#FAEEDA;color:#854F0B}
+.rb-bad{background:#FAECE7;color:#993C1D}
+
+/* MODAL CONTACT */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,15,14,.6);backdrop-filter:blur(4px);z-index:999;display:none;align-items:center;justify-content:center;padding:24px}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--warm);border-radius:var(--r);padding:28px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:18px;font-weight:500;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+label.lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+input,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink);outline:none;width:100%}
+input:focus,textarea:focus{border-color:var(--ink)}
+.err-box{background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:10px;font-size:12px;color:#712B13;margin-bottom:12px;display:none}
+.ok-box{background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:10px;font-size:12px;color:#1E7A62;margin-bottom:12px;display:none}
+
+/* SIMILAIRES */
+.similaires-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.sim-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;text-decoration:none;color:var(--ink);transition:border-color .2s}
+.sim-card:hover{border-color:var(--muted)}
+.sim-img{width:100%;height:120px;object-fit:cover;background:var(--line)}
+.sim-body{padding:12px}
+.sim-titre{font-size:13px;font-weight:500;margin-bottom:4px}
+.sim-meta{font-size:11px;color:var(--muted)}
+.sim-prix{font-size:14px;font-weight:500;margin-top:6px;color:var(--teal)}
+
+.spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin:60px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.not-found{text-align:center;padding:60px;color:var(--muted);font-size:14px}
+.not-found-icon{font-size:48px;margin-bottom:16px}
+
+@media(max-width:760px){
+  .bien-layout{grid-template-columns:1fr}
+  .sidebar{position:static}
+  .stats-rapides{grid-template-columns:1fr 1fr}
+  .similaires-grid{grid-template-columns:1fr 1fr}
+  .details-grid{grid-template-columns:1fr}
+  .bien-titre{font-size:24px}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-links">
+    <a href="index.html">Annonces</a>
+    <a href="carte.html">Carte</a>
+    <a href="questionnaire-vendeur.html" class="nav-gold">Vendre</a>
+  </div>
+  <a href="connexion.html" class="nav-out">Se connecter</a>
+</nav>
+
+<div class="page">
+  <div id="loading"><div class="spin"></div></div>
+  <div id="content" style="display:none"></div>
+</div>
+
+<!-- MODAL CONTACT -->
+<div class="modal-overlay" id="modal-contact">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">Contacter le vendeur</div>
+    <div class="modal-sub" id="modal-sub">Envoyez un message pour en savoir plus sur ce bien.</div>
+    <div id="modal-err" class="err-box"></div>
+    <div id="modal-ok" class="ok-box"></div>
+    <div id="modal-form">
+      <div class="field"><label class="lbl">Votre nom *</label><input type="text" id="c-nom" placeholder="Jean Dupont"></div>
+      <div class="field"><label class="lbl">Votre email *</label><input type="email" id="c-email" placeholder="jean@exemple.fr"></div>
+      <div class="field"><label class="lbl">Votre téléphone</label><input type="tel" id="c-tel" placeholder="06 12 34 56 78"></div>
+      <div class="field"><label class="lbl">Message *</label><textarea id="c-message" rows="4" placeholder="Bonjour, je suis intéressé(e) par votre bien..."></textarea></div>
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:14px">
+        <input type="checkbox" id="c-consent" style="width:16px;height:16px;margin-top:2px;flex-shrink:0;accent-color:var(--teal)">
+        <label for="c-consent" style="font-size:12px;color:var(--muted);line-height:1.5;cursor:pointer">J'autorise ImmoConnect à transmettre mes coordonnées au vendeur dans le cadre de ce projet immobilier.</label>
+      </div>
+      <button class="btn-contact bc-teal" onclick="envoyerContact()">Envoyer mon message →</button>
+      <button class="btn-contact bc-out" style="margin-top:6px" onclick="fermerModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VISITE -->
+<div class="modal-overlay" id="modal-visite">
+  <div class="modal-box">
+    <div class="modal-title">📅 Réserver une visite</div>
+    <div class="modal-sub" id="visite-sub">Choisissez un créneau disponible</div>
+    <div id="visite-content"><div class="spin"></div></div>
+    <button class="btn-contact bc-out" style="margin-top:14px" onclick="document.getElementById('modal-visite').classList.remove('open')">Fermer</button>
+  </div>
+</div>
+
+<script>
+const SB_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGh5ZWZhamZ3cWN4Y2Z4cG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjYwNDAsImV4cCI6MjA5MTUwMjA0MH0.jB8Z_9eT9lYkqxUUD0G001Y87iSAv94fSu_gVOdqa-A';
+const { createClient } = supabase;
+const db = createClient(SB_URL, SB_KEY);
+
+var bien = null;
+var currentUser = null;
+
+// ── INIT ──
+(async function() {
+  var params = new URLSearchParams(window.location.search);
+  var id = params.get('id');
+  if (!id) { afficherErreur('Annonce introuvable'); return; }
+
+  // Mettre à jour le title de la page
+  document.title = 'ImmoConnect — Chargement…';
+
+  // Charger le bien
+  var { data, error } = await db.from('annonces_vendeurs')
+    .select('*').eq('id', id).eq('statut_annonce', 'publiee').single();
+
+  if (error || !data) { afficherErreur('Cette annonce n\'existe pas ou a été supprimée.'); return; }
+  bien = data;
+
+  // Mettre à jour meta
+  document.title = 'ImmoConnect — ' + (bien.titre || bien.type_bien + ' · ' + bien.ville);
+  var metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) metaDesc.content = (bien.type_bien||'Bien') + ' ' + (bien.surface||'') + 'm² à ' + (bien.ville||'') + ' — ' + (bien.prix ? Math.round(bien.prix).toLocaleString('fr-FR') + '€' : '');
+
+  // Vérifier si connecté
+  var { data: { session } } = await db.auth.getSession();
+  currentUser = session ? session.user : null;
+
+  // Incrémenter vues (si pas le propriétaire)
+  if (!currentUser || currentUser.email !== bien.email_contact) {
+    await db.rpc('incrementer_vues', { annonce_uuid: bien.id }).catch(function(){});
+  }
+
+  // Charger biens similaires
+  var { data: similaires } = await db.from('annonces_vendeurs')
+    .select('id,titre,type_bien,surface,prix,ville,niveau_vendeur')
+    .eq('statut_annonce', 'publiee')
+    .eq('type_bien', bien.type_bien)
+    .neq('id', bien.id)
+    .limit(3);
+
+  afficherBien(bien, similaires || []);
+})();
+
+// ── AFFICHER ──
+function afficherBien(b, similaires) {
+  var niv = b.niveau_vendeur || 'standard';
+  var nivLabel = niv.charAt(0).toUpperCase() + niv.slice(1);
+  var pm2 = b.prix && b.surface ? Math.round(b.prix / b.surface).toLocaleString('fr-FR') + ' €/m²' : '';
+  var prixFmt = b.prix ? Math.round(b.prix).toLocaleString('fr-FR') + ' €' : 'Prix sur demande';
+  var titre = b.titre || (b.type_bien || 'Bien') + ' · ' + (b.surface || '—') + ' m²';
+
+  // Photos
+  var photosHtml = '';
+  var photos = [];
+  if (b.photo_principale) photos.push(b.photo_principale);
+  if (b.photos_supplementaires) {
+    try { var sup = JSON.parse(b.photos_supplementaires); photos = photos.concat(sup); } catch(e) {}
+  }
+
+  var mainPhoto = photos.length > 0
+    ? '<img class="photo-main" src="' + photos[0] + '" alt="' + titre + '" id="main-photo">'
+    : '<div class="photo-main-placeholder">🏠</div>';
+
+  var thumbsHtml = '';
+  if (photos.length > 1) {
+    thumbsHtml = '<div class="photos-grid">';
+    photos.slice(1, 5).forEach(function(p, i) {
+      thumbsHtml += '<img class="photo-thumb" src="' + p + '" onclick="changePhoto(\'' + p + '\')" alt="Photo ' + (i+2) + '">';
+    });
+    thumbsHtml += '</div>';
+  }
+
+  // Niveau et mandat
+  var mandatHtml = b.sous_mandat_exclusif ? '<div class="mandat-badge">🤝 Sous mandat exclusif</div>' : '';
+
+  // DPE
+  var dpe = b.classe_dpe || 'NC';
+  var dpeHtml = '<span class="dpe-badge dpe-' + dpe + '">DPE ' + dpe + '</span>';
+
+  // Stats rapides
+  var statsHtml = '<div class="stats-rapides">';
+  statsHtml += '<div class="stat-r"><div class="stat-r-val">' + (b.surface || '—') + '</div><div class="stat-r-lbl">m²</div></div>';
+  statsHtml += '<div class="stat-r"><div class="stat-r-val">' + (b.nb_pieces || '—') + '</div><div class="stat-r-lbl">Pièces</div></div>';
+  statsHtml += '<div class="stat-r"><div class="stat-r-val">' + (b.annee_construction || '—') + '</div><div class="stat-r-lbl">Année</div></div>';
+  statsHtml += '<div class="stat-r"><div class="stat-r-val">' + dpe + '</div><div class="stat-r-lbl">DPE</div></div>';
+  statsHtml += '</div>';
+
+  // Détails
+  var details = [
+    ['Type', b.type_bien || '—'],
+    ['Surface', b.surface ? b.surface + ' m²' : '—'],
+    ['Pièces', b.nb_pieces || '—'],
+    ['Étage', b.etage || '—'],
+    ['Année', b.annee_construction || '—'],
+    ['État', b.statut_occupation || '—'],
+    ['Charges', b.charges_syndic ? b.charges_syndic + ' €/mois' : '—'],
+    ['Taxe foncière', b.taxe_fonciere_montant ? b.taxe_fonciere_montant + ' €/an' : '—'],
+    ['DPE', dpe],
+    ['Ville', b.ville || '—'],
+  ];
+
+  var detailsHtml = '<div class="details-grid">';
+  details.forEach(function(d) {
+    detailsHtml += '<div class="detail-item"><span class="detail-lbl">' + d[0] + '</span><span class="detail-val">' + d[1] + '</span></div>';
+  });
+  detailsHtml += '</div>';
+
+  // Adresse (selon niveau)
+  var adresseHtml = '';
+  if (['silver','gold','platinium'].includes(niv) && b.adresse) {
+    adresseHtml = '📍 ' + b.adresse + ', ' + b.ville + ' (' + (b.code_postal||'') + ')';
+  } else {
+    adresseHtml = '📍 ' + (b.ville || '') + ' (' + (b.code_postal||'') + ')';
+  }
+
+  // Documents vérifiés
+  var docsHtml = '';
+  if (b.taxe_fonciere_verifie) docsHtml += '<div style="font-size:12px;color:var(--teal);margin-bottom:4px">✅ Taxe foncière vérifiée</div>';
+  if (b.classe_dpe && b.classe_dpe !== 'NC') docsHtml += '<div style="font-size:12px;color:var(--teal);margin-bottom:4px">✅ DPE disponible</div>';
+
+  // Boutons contact selon niveau et connexion
+  var contactHtml = buildContactButtons(b, niv);
+
+  // Sidebar rapport
+  var rapportHtml = '';
+  if (['silver','gold','platinium'].includes(niv)) {
+    rapportHtml = '<div class="rapport-card">' +
+      '<div class="rapport-title">Rapport Hanaé IA</div>' +
+      '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px">Estimation basée sur DVF + Notaires-INSEE + carte des loyers</div>' +
+      '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;padding:10px">📊 Voir le rapport complet</a>' +
+      '</div>';
+  }
+
+  // Biens similaires
+  var similairesHtml = '';
+  if (similaires.length > 0) {
+    similairesHtml = '<div class="section" style="margin-top:32px"><div class="section-title">Biens similaires</div><div class="similaires-grid">';
+    similaires.forEach(function(s) {
+      var sPrix = s.prix ? Math.round(s.prix).toLocaleString('fr-FR') + ' €' : '—';
+      similairesHtml += '<a href="bien.html?id=' + s.id + '" class="sim-card">' +
+        '<div class="sim-img" style="display:flex;align-items:center;justify-content:center;font-size:32px">🏠</div>' +
+        '<div class="sim-body">' +
+        '<div class="sim-titre">' + (s.type_bien||'Bien') + ' · ' + (s.surface||'—') + ' m²</div>' +
+        '<div class="sim-meta">' + (s.ville||'') + '</div>' +
+        '<div class="sim-prix">' + sPrix + '</div>' +
+        '</div></a>';
+    });
+    similairesHtml += '</div></div>';
+  }
+
+  var html = '<div class="breadcrumb"><a href="index.html">Accueil</a><span>›</span><a href="index.html">Annonces</a><span>›</span>' + titre + '</div>';
+  html += '<div class="bien-layout">';
+
+  // COLONNE GAUCHE
+  html += '<div>';
+  html += '<div class="galerie">' + mainPhoto + thumbsHtml + '<div class="niveau-badge nb-' + niv + '">' + nivLabel + '</div>' + mandatHtml + '</div>';
+  html += '<h1 class="bien-titre">' + titre + '</h1>';
+  html += '<div class="bien-localisation">' + adresseHtml + '</div>';
+  html += '<div class="bien-prix">' + prixFmt + '</div>';
+  if (pm2) html += '<div class="bien-pm2">' + pm2 + '</div>';
+  html += statsHtml;
+  if (docsHtml) html += '<div style="margin-bottom:16px">' + docsHtml + '</div>';
+
+  if (b.description) {
+    html += '<div class="section"><div class="section-title">Description</div><div class="description">' + b.description.replace(/\n/g, '<br>') + '</div></div>';
+  }
+
+  html += '<div class="section"><div class="section-title">Caractéristiques</div>' + detailsHtml + '</div>';
+  html += similairesHtml;
+  html += '</div>';
+
+  // COLONNE DROITE — SIDEBAR
+  html += '<div class="sidebar">';
+  html += '<div class="contact-card"><div class="contact-title">Intéressé(e) par ce bien ?</div>' + contactHtml + '</div>';
+  html += rapportHtml;
+  html += '<div class="contact-card" style="font-size:12px;color:var(--muted);line-height:1.7">';
+  html += '<div style="font-weight:500;color:var(--ink);margin-bottom:6px">🛡️ Vos données sont protégées</div>';
+  html += 'Vos coordonnées ne sont transmises qu\'au vendeur. ImmoConnect ne revend jamais vos données. <a href="cgu.html" style="color:var(--teal)">CGU</a>';
+  html += '</div>';
+  html += '</div>';
+
+  html += '</div>';
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('content').innerHTML = html;
+  document.getElementById('content').style.display = 'block';
+}
+
+function buildContactButtons(b, niv) {
+  var html = '';
+
+  if (niv === 'standard') {
+    html += '<div class="lock-info">📍 <strong>Ville : ' + (b.ville||'—') + '</strong><br>Connectez-vous pour voir l\'adresse complète</div>';
+    html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">Contacter le vendeur</button>';
+    html += '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px">19,99 € — accès direct au vendeur</div>';
+  } else if (niv === 'silver') {
+    html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">💬 Contacter le vendeur</button>';
+    html += '<button class="btn-contact bc-out" onclick="ouvrirVisite()">📅 Réserver une visite</button>';
+  } else {
+    html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">💬 Contacter le vendeur</button>';
+    html += '<button class="btn-contact bc-blue" onclick="ouvrirVisite()">📅 Réserver une visite</button>';
+    html += '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-out" style="margin-top:4px">📊 Rapport Hanaé</a>';
+  }
+
+  return html;
+}
+
+// ── CONTACT ──
+function ouvrirContact() {
+  document.getElementById('modal-contact').classList.add('open');
+}
+function fermerModal() {
+  document.getElementById('modal-contact').classList.remove('open');
+}
+
+async function envoyerContact() {
+  var nom = document.getElementById('c-nom').value.trim();
+  var email = document.getElementById('c-email').value.trim();
+  var tel = document.getElementById('c-tel').value.trim();
+  var msg = document.getElementById('c-message').value.trim();
+  var consent = document.getElementById('c-consent').checked;
+  var err = document.getElementById('modal-err');
+  var ok = document.getElementById('modal-ok');
+
+  err.style.display = 'none'; ok.style.display = 'none';
+
+  if (!nom || !email || !msg) { err.textContent = 'Remplissez tous les champs obligatoires.'; err.style.display = 'block'; return; }
+  if (!consent) { err.textContent = 'Cochez la case de consentement.'; err.style.display = 'block'; return; }
+  if (!bien) return;
+
+  try {
+    // Enregistrer dans messages_annonces
+    await db.from('messages_annonces').insert({
+      annonce_id: bien.id,
+      email_vendeur: bien.email_contact,
+      nom_acheteur: nom,
+      email_acheteur: email,
+      telephone_acheteur: tel || null,
+      message: msg,
+      lu: false
+    });
+
+    // Incrémenter contacts
+    await db.rpc('incrementer_contacts', { annonce_uuid: bien.id }).catch(function(){});
+
+    // Notifier le vendeur
+    await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'nouveau_message',
+        to: bien.email_contact,
+        subject: '💬 Nouveau contact pour votre bien — ImmoConnect',
+        expediteur: nom,
+        message: msg,
+        bien: (bien.type_bien||'Bien') + ' · ' + (bien.ville||''),
+        lien: 'https://immoconnect-agence.fr/connexion.html'
+      }
+    }).catch(function(){});
+
+    ok.textContent = '✅ Message envoyé ! Le vendeur vous répondra rapidement.';
+    ok.style.display = 'block';
+    document.getElementById('modal-form').style.display = 'none';
+
+  } catch(e) {
+    err.textContent = 'Erreur : ' + e.message;
+    err.style.display = 'block';
+  }
+}
+
+// ── VISITE ──
+async function ouvrirVisite() {
+  document.getElementById('modal-visite').classList.add('open');
+  document.getElementById('visite-sub').textContent = (bien.type_bien||'Bien') + ' · ' + (bien.ville||'');
+
+  var today = new Date().toISOString().split('T')[0];
+  var { data: dispos } = await db.from('disponibilites_visites')
+    .select('*').eq('email_vendeur', bien.email_contact)
+    .eq('annonce_id', bien.id).eq('statut', 'libre')
+    .gte('date', today).order('date', {ascending: true}).limit(20);
+
+  var container = document.getElementById('visite-content');
+  if (!dispos || !dispos.length) {
+    container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Aucun créneau disponible pour le moment.<br>Contactez le vendeur via la messagerie.</div>';
+    return;
+  }
+
+  var parDate = {};
+  dispos.forEach(function(d) { if (!parDate[d.date]) parDate[d.date] = []; parDate[d.date].push(d); });
+
+  var html = '<div style="font-size:13px;color:var(--muted);margin-bottom:14px">Choisissez un créneau :</div>';
+  Object.keys(parDate).forEach(function(date) {
+    var dateObj = new Date(date + 'T12:00:00');
+    var dateStr = dateObj.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+    html += '<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">' + dateStr + '</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:8px">';
+    parDate[date].forEach(function(d) {
+      html += '<button onclick="selectionnerCreneau(\'' + d.id + '\',\'' + date + '\',\'' + d.heure_debut + '\',\'' + d.heure_fin + '\')" style="padding:8px 14px;border-radius:8px;border:1px solid #9FE1CB;background:#E1F5EE;color:#1E7A62;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer">' + d.heure_debut + ' – ' + d.heure_fin + '</button>';
+    });
+    html += '</div></div>';
+  });
+  container.innerHTML = html;
+}
+
+function selectionnerCreneau(dispoId, date, debut, fin) {
+  var dateObj = new Date(date + 'T12:00:00');
+  var dateStr = dateObj.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+  document.getElementById('visite-content').innerHTML =
+    '<div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:14px;margin-bottom:14px;font-size:13px;line-height:1.7">✅ <strong>' + dateStr + ' · ' + debut + ' – ' + fin + '</strong></div>' +
+    '<div class="field"><label class="lbl">Votre nom *</label><input type="text" id="v-nom" placeholder="Jean Dupont"></div>' +
+    '<div class="field"><label class="lbl">Votre email *</label><input type="email" id="v-email" placeholder="jean@exemple.fr"></div>' +
+    '<div class="field"><label class="lbl">Message (optionnel)</label><textarea id="v-msg" rows="3" placeholder="Précisions sur votre projet..."></textarea></div>' +
+    '<button onclick="confirmerVisite(\'' + dispoId + '\')" style="width:100%;padding:12px;border-radius:8px;border:none;background:#0F0F0E;color:#fff;font-family:Outfit,sans-serif;font-size:14px;font-weight:500;cursor:pointer">Envoyer ma demande →</button>';
+}
+
+async function confirmerVisite(dispoId) {
+  var nom = document.getElementById('v-nom').value.trim();
+  var email = document.getElementById('v-email').value.trim();
+  var msg = document.getElementById('v-msg') ? document.getElementById('v-msg').value : '';
+  if (!nom || !email) { alert('Renseignez votre nom et email.'); return; }
+
+  await db.from('reservations_visites').insert({
+    dispo_id: dispoId, email_vendeur: bien.email_contact,
+    email_acheteur: email, message: msg || null, statut: 'en_attente'
+  });
+  await db.from('disponibilites_visites').update({ statut: 'reserve' }).eq('id', dispoId);
+  await db.functions.invoke('envoyer-email', {
+    body: {
+      type: 'demande_visite', to: bien.email_contact,
+      subject: '📅 Nouvelle demande de visite — ImmoConnect',
+      acheteur: nom + ' (' + email + ')', message: msg,
+      bien: (bien.type_bien||'Bien') + ' · ' + (bien.ville||''),
+      lien: 'https://immoconnect-agence.fr/calendrier.html'
+    }
+  }).catch(function(){});
+
+  document.getElementById('visite-content').innerHTML =
+    '<div style="text-align:center;padding:24px"><div style="font-size:48px;margin-bottom:14px">✅</div>' +
+    '<div style="font-size:15px;font-weight:500;margin-bottom:8px">Demande envoyée !</div>' +
+    '<div style="font-size:13px;color:var(--muted)">Le vendeur a été notifié et confirmera votre visite sous 24h.</div></div>';
+}
+
+// ── GALERIE ──
+function changePhoto(src) {
+  var el = document.getElementById('main-photo');
+  if (el) el.src = src;
+}
+
+// ── ERREUR ──
+function afficherErreur(msg) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('content').innerHTML = '<div class="not-found"><div class="not-found-icon">🏠</div>' + msg + '<br><br><a href="index.html" style="color:var(--teal)">Retour aux annonces →</a></div>';
+  document.getElementById('content').style.display = 'block';
+}
+
+// Fermer modals en cliquant dehors
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('modal-overlay')) {
+    e.target.classList.remove('open');
+  }
+});
+</script>
+<script>
+(function() {
+  var consent = localStorage.getItem('ic_cookie_consent');
+  if (!consent) {
+    var b = document.createElement('div');
+    b.id = 'cookie-banner';
+    b.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1C1C1A;border-top:1px solid rgba(255,255,255,.1);padding:16px 32px;font-family:Outfit,sans-serif';
+    b.innerHTML = '<div style="max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;font-weight:500;color:#FAFAF7;margin-bottom:4px">🍪 Cookies & confidentialité</div><div style="font-size:12px;color:rgba(250,250,247,.6);line-height:1.6">ImmoConnect utilise des cookies strictement nécessaires. <a href=\"mentions-legales.html\" style=\"color:#C09B5A\">En savoir plus</a></div></div><div style="display:flex;gap:10px;flex-shrink:0"><button onclick=\"icRefuser()\" style=\"padding:9px 20px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(250,250,247,.7);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer\">Refuser</button><button onclick=\"icAccepter()\" style=\"padding:9px 20px;border-radius:8px;border:none;background:#C09B5A;color:#1C1C1A;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer\">Accepter</button></div></div>';
+    document.body.appendChild(b);
+  }
+})();
+function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
+function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
+</script>
+</body>
+</html>
