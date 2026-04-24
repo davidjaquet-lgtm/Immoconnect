@@ -440,22 +440,15 @@ async function analyserCarte() {
     var nomDeclare = document.getElementById('prenom').value + ' ' + document.getElementById('nom').value;
     var numDeclare = document.getElementById('carte-t').value.trim();
     var mediaType = file.type === 'application/pdf' ? 'application/pdf' : 'image/jpeg';
-    var response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 400,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: mediaType === 'application/pdf' ? 'document' : 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-            { type: 'text', text: 'Analyse cette carte professionnelle immobilière française. Réponds UNIQUEMENT en JSON: {"est_carte_t":boolean,"numero_trouve":string|null,"nom_trouve":string|null,"expiration_trouvee":string|null,"concordance_numero":boolean|null,"concordance_nom":boolean|null,"valide":boolean,"alerte":string|null}. Numéro déclaré: "' + numDeclare + '". Nom déclaré: "' + nomDeclare + '". JSON uniquement.' }
-          ]
-        }]
-      })
+    // OCR via Edge Function Supabase (clé protégée)
+    var { data, error: ocrError } = await db.functions.invoke('ocr-documents', {
+      body: {
+        base64: base64,
+        mediaType: mediaType,
+        prompt: 'Analyse cette carte professionnelle immobilière française. Réponds UNIQUEMENT en JSON: {"est_carte_t":boolean,"numero_trouve":string|null,"nom_trouve":string|null,"expiration_trouvee":string|null,"concordance_numero":boolean|null,"concordance_nom":boolean|null,"valide":boolean,"alerte":string|null}. Numéro déclaré: "' + numDeclare + '". Nom déclaré: "' + nomDeclare + '". JSON uniquement.'
+      }
     });
-    var data = await response.json();
+    if (ocrError) throw ocrError;
     var text = data.content && data.content[0] && data.content[0].text || '{}';
     var ocr = JSON.parse(text.replace(/```json|```/g, '').trim());
     if (!ocr.est_carte_t) {
