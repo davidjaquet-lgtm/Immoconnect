@@ -205,7 +205,8 @@ tr:hover td{background:#F9F7F2}
           <div class="feats">
             <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Infos complètes — adresse exacte + toutes données</span></div>
             <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Rapport Hanaé IA inclus</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">5 contacts vendeurs/semaine illimités</span></div>
+            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">5 contacts vendeurs offerts par semaine</span></div>
+            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Contact supplementaire : 1,99 euros/contact</span></div>
             <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Matching auto sur filtres (rendement, prix/m²)</span></div>
             <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Contacté directement par vendeurs Platinium</span></div>
             <div class="feat"><div class="feat-dot y">✓</div><span>Alertes temps réel sur vos critères</span></div>
@@ -293,9 +294,9 @@ var annuel = false;
 
 // VENDEURS
 var VE = [
-  { n:'Standard', bar:'bar-gray', bg:'bg-gray', tag:'Ville uniquement · 3 photos · contact payant', badge:null, docs:null,
+  { n:'Standard', bar:'bar-gray', bg:'bg-gray', tag:'Ville uniquement · 3 photos · contactable via forfait acheteur', badge:null, docs:null,
     feats:[{y:1,t:'1 annonce active'},{y:1,t:'3 photos maximum'},{y:1,t:'Ville uniquement (adresse masquee)'},{y:0,t:'Photos illimitees'},{y:0,t:'Matching investisseurs'},{y:0,t:'Mise en avant prioritaire'}],
-    contact:'Acheteur paie 19,99 euros pour contacter', btn:'btn-out', ct:'Publier gratuitement' },
+    contact:'Contact inclus dans le forfait acheteur · 19,99€ pour acheteurs gratuits', btn:'btn-out', ct:'Publier gratuitement' },
   { n:'Silver', bar:'bar-blue', bg:'bg-blue', tag:'Photos illimitees · adresse visible acheteurs eligibles', badge:{t:'Silver',c:'badge-blue'},
     docs:'Valeur locative (justificatif papier) OU bail en cours',
     feats:[{y:1,b:1,t:'Photos illimitees'},{y:1,b:1,t:'Adresse visible (acheteurs eligibles)'},{y:1,b:1,t:'Contact gratuit acheteurs eligibles'},{y:1,b:1,t:'Matching investisseurs'},{y:1,t:'Badge Silver'},{y:0,t:'Mise en avant prioritaire'}],
@@ -312,12 +313,12 @@ var VE = [
 
 // ACHETEURS
 var AC = [
-  { n:'Gratuit', bar:'bar-gray', bg:'bg-gray', tag:'Ville · surface · 3 photos · contact payant', badge:null,
+  { n:'Gratuit', bar:'bar-gray', bg:'bg-gray', tag:'Ville · surface · 3 photos · 19,99€/contact', badge:null,
     feats:[{y:1,t:'Annonces : ville, surface, 3 photos'},{y:1,t:'Alertes quotidiennes'},{y:0,t:'Adresse et infos completes'},{y:0,t:'Rapport Hanae IA'},{y:0,t:'Contact vendeur inclus'}],
-    contact:'Contact vendeur : 19,99 euros/contact', price:'0', priceGreen:true, priceSub:'pour toujours', btn:'btn-out', ct:'Commencer gratuitement' },
-  { n:'Acheteur', bar:'bar-blue', bg:'bg-blue', tag:'Infos completes · rapport Hanae · 1 contact/semaine', badge:{t:'Populaire',c:'badge-blue'}, feat:true,
-    feats:[{y:1,b:1,t:'Adresse exacte + toutes infos vendeur'},{y:1,b:1,t:'Rapport Hanae IA inclus'},{y:1,b:1,t:'1 contact vendeur/semaine illimite'},{y:1,t:'Alertes temps reel'},{y:0,t:'Matching automatique'},{y:0,t:'Contacte par vendeurs Platinium'}],
-    contact:'Contact supp. : 9,99 euros/contact', price:'19,99', priceSub:'/mois', btn:'btn-dark', ct:'Choisir Acheteur' }
+    contact:'Chaque contact vendeur : 19,99 euros', price:'0', priceGreen:true, priceSub:'pour toujours', btn:'btn-out', ct:'Commencer gratuitement' },
+  { n:'Acheteur', bar:'bar-blue', bg:'bg-blue', tag:'Infos completes · rapport Hanae · 1 contact offert/semaine', badge:{t:'Populaire',c:'badge-blue'}, feat:true,
+    feats:[{y:1,b:1,t:'Adresse exacte + toutes infos vendeur'},{y:1,b:1,t:'Rapport Hanae IA inclus'},{y:1,b:1,t:'1 contact vendeur offert par semaine'},{y:1,t:'Alertes temps reel'},{y:0,t:'Matching automatique'},{y:0,t:'Contacte par vendeurs Platinium'}],
+    contact:'Contact supplementaire : 9,99 euros/contact', price:'19,99', priceSub:'/mois', btn:'btn-dark', ct:'Choisir Acheteur' }
 ];
 
 // AGENTS

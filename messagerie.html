@@ -125,12 +125,17 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const { createClient } = supabase;
 const db = createClient(SB_URL, SB_KEY);
 
-// Limites par forfait agent
+// Limites par forfait
 const FORFAITS = {
-  starter:    { contacts_semaine: 10, label: 'Starter' },
-  pro:        { contacts_semaine: 15, label: 'Pro' },
-  expert:     { contacts_semaine: 30, label: 'Expert' },
-  platinium:  { contacts_semaine: 999, label: 'Platinium' }
+  // Agents
+  starter:           { contacts_semaine: 10,  label: 'Starter',    prix_supp: 1.99,  type: 'agent' },
+  pro:               { contacts_semaine: 15,  label: 'Pro',         prix_supp: 1.99,  type: 'agent' },
+  expert:            { contacts_semaine: 30,  label: 'Expert',      prix_supp: 1.99,  type: 'agent' },
+  platinium:         { contacts_semaine: 999, label: 'Platinium',   prix_supp: 0,     type: 'agent' },
+  // Acheteurs
+  acheteur_gratuit:  { contacts_semaine: 0,   label: 'Gratuit',     prix_contact: 19.99, type: 'acheteur' },
+  acheteur:          { contacts_semaine: 1,   label: 'Acheteur',    prix_supp: 9.99,  type: 'acheteur' },
+  investisseur:      { contacts_semaine: 5,   label: 'Investisseur',prix_supp: 1.99,  type: 'acheteur' }
 };
 
 var currentUser = null;
