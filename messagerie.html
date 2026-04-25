@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--r:10px}
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--coral:#993C1D;--r:10px}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;height:100vh;display:flex;flex-direction:column}
 nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 24px;flex-shrink:0}
@@ -17,10 +17,10 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 .nav-links a{text-decoration:none;color:#888780;font-size:13px}
 .nav-links a:hover{color:#fff}
 
-/* LAYOUT MESSAGERIE */
+/* LAYOUT */
 .msg-layout{display:flex;flex:1;overflow:hidden}
 
-/* LISTE CONVERSATIONS */
+/* LISTE */
 .conv-list{width:320px;flex-shrink:0;background:var(--warm);border-right:1px solid var(--line);display:flex;flex-direction:column}
 .conv-header{padding:16px;border-bottom:1px solid var(--line)}
 .conv-title{font-size:15px;font-weight:600;margin-bottom:2px}
@@ -30,91 +30,128 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 .conv-items{flex:1;overflow-y:auto}
 .conv-item{padding:14px 16px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:12px}
 .conv-item:hover{background:var(--bg)}
-.conv-item.active{background:#E1F5EE}
+.conv-item.active{background:#E1F5EE;border-left:3px solid var(--teal)}
 .conv-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;flex-shrink:0;color:#fff}
 .av-agent{background:var(--blue)}
 .av-vendeur{background:var(--teal)}
+.av-acheteur{background:var(--coral)}
 .conv-info{flex:1;min-width:0}
 .conv-name{font-size:13px;font-weight:500;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .conv-preview{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .conv-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
 .conv-date{font-size:10px;color:var(--muted)}
 .conv-badge{background:var(--teal);color:#fff;border-radius:20px;font-size:9px;font-weight:700;padding:2px 6px}
-.conv-quota{font-size:9px;color:var(--muted);padding:2px 6px;background:var(--bg);border-radius:20px;border:1px solid var(--line)}
+.realtime-dot{width:8px;height:8px;border-radius:50%;background:#22C55E;display:inline-block;margin-right:6px;animation:pulseDot 2s infinite}
+@keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* ZONE CHAT */
+/* CHAT */
 .chat-zone{flex:1;display:flex;flex-direction:column;background:var(--bg)}
 .chat-header{background:var(--warm);border-bottom:1px solid var(--line);padding:14px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0}
 .chat-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff;flex-shrink:0}
 .chat-info{flex:1}
 .chat-name{font-size:14px;font-weight:500}
 .chat-detail{font-size:11px;color:var(--muted)}
-.chat-badge{font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px}
-.cb-ok{background:#E1F5EE;color:var(--teal)}
-.cb-warn{background:#FAEEDA;color:#854F0B}
-.cb-block{background:#FAECE7;color:#993C1D}
+.chat-actions{display:flex;gap:8px;align-items:center}
+.btn-noter{padding:6px 12px;border-radius:8px;border:1px solid var(--gold);background:transparent;color:var(--gold);font-family:'Outfit',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:all .2s}
+.btn-noter:hover{background:var(--gold);color:#fff}
+.stars-display{color:#F59E0B;font-size:13px;letter-spacing:1px}
 
-.chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px}
-.msg-bubble{max-width:70%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6}
+.chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:10px}
+.msg-bubble{max-width:68%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6;position:relative}
 .msg-out{align-self:flex-end;background:var(--ink);color:#fff;border-bottom-right-radius:4px}
 .msg-in{align-self:flex-start;background:var(--warm);border:1px solid var(--line);border-bottom-left-radius:4px}
-.msg-time{font-size:10px;opacity:.6;margin-top:4px}
-.msg-date-sep{text-align:center;font-size:11px;color:var(--muted);padding:8px;background:rgba(15,15,14,.04);border-radius:20px;align-self:center}
+.msg-time{font-size:10px;opacity:.55;margin-top:3px}
+.msg-date-sep{text-align:center;font-size:11px;color:var(--muted);padding:6px 14px;background:rgba(15,15,14,.05);border-radius:20px;align-self:center}
+.typing-indicator{align-self:flex-start;background:var(--warm);border:1px solid var(--line);border-radius:12px;border-bottom-left-radius:4px;padding:10px 14px;display:flex;gap:4px;align-items:center}
+.typing-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:typingAnim 1.2s infinite}
+.typing-dot:nth-child(2){animation-delay:.2s}
+.typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes typingAnim{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
 
 .chat-input-zone{background:var(--warm);border-top:1px solid var(--line);padding:14px 20px;flex-shrink:0}
 .quota-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:11px;color:var(--muted)}
 .quota-pill{font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px}
 .qp-ok{background:#E1F5EE;color:var(--teal)}
 .qp-warn{background:#FAEEDA;color:#854F0B}
-.qp-block{background:#FAECE7;color:#993C1D}
+.qp-block{background:#FAECE7;color:var(--coral)}
 .input-row{display:flex;gap:10px;align-items:flex-end}
-.msg-textarea{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink);outline:none;resize:none;min-height:42px;max-height:120px;line-height:1.5}
+.msg-textarea{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink);outline:none;resize:none;min-height:42px;max-height:120px;line-height:1.5;transition:border .15s}
 .msg-textarea:focus{border-color:var(--ink)}
-.btn-send{padding:10px 18px;border-radius:8px;border:none;background:var(--ink);color:#fff;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;flex-shrink:0}
+.btn-send{padding:10px 18px;border-radius:8px;border:none;background:var(--ink);color:#fff;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;flex-shrink:0;transition:opacity .15s}
 .btn-send:hover{opacity:.85}
 .btn-send:disabled{opacity:.4;cursor:not-allowed}
+.quota-block{background:#FAECE7;border:1px solid rgba(153,60,29,.2);border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:12px;line-height:1.6;color:#712B13}
 
-/* VIDE */
 .chat-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);font-size:13px;gap:12px}
 .chat-empty-icon{font-size:48px}
-
-/* BLOCAGE QUOTA */
-.quota-block{background:#FAECE7;border:1px solid rgba(153,60,29,.2);border-radius:8px;padding:14px 16px;margin-bottom:10px;font-size:12px;line-height:1.6;color:#712B13}
-
 .spin{width:24px;height:24px;border:3px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin:40px auto}
 @keyframes spin{to{transform:rotate(360deg)}}
-@media(max-width:700px){.conv-list{width:100%;height:40vh;border-right:none;border-bottom:1px solid var(--line)}.msg-layout{flex-direction:column}}
+
+/* MODAL NOTATION */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,15,14,.55);backdrop-filter:blur(4px);z-index:999;display:none;align-items:center;justify-content:center;padding:24px}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--warm);border-radius:var(--r);padding:32px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-title{font-size:18px;font-weight:600;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6}
+.stars-input{display:flex;gap:8px;justify-content:center;margin-bottom:20px}
+.star-btn{font-size:32px;cursor:pointer;opacity:.3;transition:opacity .15s,transform .15s;background:none;border:none;padding:4px}
+.star-btn.active{opacity:1;transform:scale(1.1)}
+.star-btn:hover{opacity:.8}
+.modal-textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink);outline:none;resize:none;height:80px;margin-bottom:16px;line-height:1.5}
+.modal-textarea:focus{border-color:var(--ink)}
+.modal-actions{display:flex;gap:10px}
+.btn-cancel{flex:1;padding:11px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;color:var(--muted)}
+.btn-submit{flex:2;padding:11px;border-radius:8px;border:none;background:var(--ink);color:#fff;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed}
+
+@media(max-width:700px){.conv-list{width:100%;height:38vh;border-right:none;border-bottom:1px solid var(--line)}.msg-layout{flex-direction:column}}
 </style>
 </head>
 <body>
 <nav>
   <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
   <div class="nav-links">
+    <span style="color:#22C55E;font-size:12px"><span class="realtime-dot"></span>Temps réel</span>
     <a href="connexion.html">Mon espace</a>
     <a href="index.html">Accueil</a>
   </div>
 </nav>
 
 <div class="msg-layout">
-  <!-- LISTE CONVERSATIONS -->
   <div class="conv-list">
     <div class="conv-header">
       <div class="conv-title">💬 Messagerie</div>
       <div class="conv-sub" id="user-role-label">Chargement…</div>
     </div>
     <div class="conv-search">
-      <input type="text" id="search-conv" placeholder="Rechercher une conversation…" oninput="filtrerConvs()">
+      <input type="text" id="search-conv" placeholder="Rechercher…" oninput="filtrerConvs()">
     </div>
-    <div class="conv-items" id="conv-list">
-      <div class="spin"></div>
-    </div>
+    <div class="conv-items" id="conv-list"><div class="spin"></div></div>
   </div>
-
-  <!-- CHAT -->
   <div class="chat-zone" id="chat-zone">
     <div class="chat-empty">
       <div class="chat-empty-icon">💬</div>
       <div>Sélectionnez une conversation</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOTATION -->
+<div class="modal-overlay" id="modal-notation">
+  <div class="modal-box">
+    <div class="modal-title">⭐ Noter cet agent</div>
+    <div class="modal-sub" id="modal-agent-nom">Donnez votre avis sur la qualité de l'échange avec cet agent.</div>
+    <div class="stars-input" id="stars-input">
+      <button class="star-btn" data-note="1" onclick="setNote(1)">★</button>
+      <button class="star-btn" data-note="2" onclick="setNote(2)">★</button>
+      <button class="star-btn" data-note="3" onclick="setNote(3)">★</button>
+      <button class="star-btn" data-note="4" onclick="setNote(4)">★</button>
+      <button class="star-btn" data-note="5" onclick="setNote(5)">★</button>
+    </div>
+    <textarea class="modal-textarea" id="notation-commentaire" placeholder="Votre commentaire (optionnel)…"></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="fermerModal()">Annuler</button>
+      <button class="btn-submit" id="btn-submit-note" onclick="soumettreNotation()">Envoyer ma note →</button>
     </div>
   </div>
 </div>
@@ -125,17 +162,14 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const { createClient } = supabase;
 const db = createClient(SB_URL, SB_KEY);
 
-// Limites par forfait
 const FORFAITS = {
-  // Agents
-  starter:           { contacts_semaine: 10,  label: 'Starter',    prix_supp: 1.99,  type: 'agent' },
-  pro:               { contacts_semaine: 15,  label: 'Pro',         prix_supp: 1.99,  type: 'agent' },
-  expert:            { contacts_semaine: 30,  label: 'Expert',      prix_supp: 1.99,  type: 'agent' },
-  platinium:         { contacts_semaine: 999, label: 'Platinium',   prix_supp: 0,     type: 'agent' },
-  // Acheteurs
-  acheteur_gratuit:  { contacts_semaine: 0,   label: 'Gratuit',     prix_contact: 19.99, type: 'acheteur' },
-  acheteur:          { contacts_semaine: 1,   label: 'Acheteur',    prix_supp: 9.99,  type: 'acheteur' },
-  investisseur:      { contacts_semaine: 5,   label: 'Investisseur',prix_supp: 1.99,  type: 'acheteur' }
+  starter:{contacts_semaine:10,label:'Starter',prix_supp:1.99},
+  pro:{contacts_semaine:15,label:'Pro',prix_supp:1.99},
+  expert:{contacts_semaine:30,label:'Expert',prix_supp:1.99},
+  platinium:{contacts_semaine:999,label:'Platinium',prix_supp:0},
+  acheteur_gratuit:{contacts_semaine:0,prix_contact:19.99},
+  acheteur:{contacts_semaine:1,prix_supp:9.99},
+  investisseur:{contacts_semaine:5,prix_supp:1.99}
 };
 
 var currentUser = null;
@@ -143,7 +177,10 @@ var currentRole = 'vendeur';
 var currentForfait = 'starter';
 var allConvs = [];
 var currentConvId = null;
-var msgInterval = null;
+var realtimeChannel = null;
+var typingTimeout = null;
+var noteSelectionnee = 0;
+var convPourNotation = null;
 
 // ── INIT ──
 (async function() {
@@ -152,11 +189,13 @@ var msgInterval = null;
   currentUser = session.user;
   var meta = currentUser.user_metadata || {};
   var profils = meta.profils || ['vendeur'];
-  currentRole = profils.includes('agent') ? 'agent' : 'vendeur';
+  if (profils.includes('agent')) currentRole = 'agent';
+  else if (profils.includes('acheteur') || profils.includes('investisseur')) currentRole = 'acheteur';
+  else currentRole = 'vendeur';
   currentForfait = meta.forfait_agent || 'starter';
 
-  document.getElementById('user-role-label').textContent =
-    currentRole === 'agent' ? '🤝 Agent — Forfait ' + FORFAITS[currentForfait].label : '🏠 Vendeur';
+  var roleLabels = {agent:'🤝 Agent — Forfait '+(FORFAITS[currentForfait]?.label||'Starter'), vendeur:'🏠 Vendeur', acheteur:'🔑 Acheteur'};
+  document.getElementById('user-role-label').textContent = roleLabels[currentRole] || '🏠 Vendeur';
 
   await chargerConversations();
 })();
@@ -164,170 +203,227 @@ var msgInterval = null;
 // ── CHARGER CONVERSATIONS ──
 async function chargerConversations() {
   var field = currentRole === 'agent' ? 'email_agent' : 'email_vendeur';
+  if (currentRole === 'acheteur') field = 'email_vendeur'; // acheteurs dans email_vendeur
+  
   var { data: convs } = await db.from('conversations')
-    .select('*, annonces_vendeurs(titre, type_bien, ville, surface, prix)')
-    .eq(field, currentUser.email)
-    .order('created_at', { ascending: false });
+    .select('*, annonces_vendeurs(titre,type_bien,ville,surface,prix)')
+    .or('email_agent.eq.'+currentUser.email+',email_vendeur.eq.'+currentUser.email)
+    .order('dernier_message_at', { ascending: false, nullsFirst: false });
 
   allConvs = convs || [];
 
-  // Compter messages non lus par conversation
+  // Compter non lus
   for (var i = 0; i < allConvs.length; i++) {
     var { count } = await db.from('messages_conversation')
-      .select('*', { count: 'exact', head: true })
+      .select('*', { count:'exact', head:true })
       .eq('conversation_id', allConvs[i].id)
       .eq('lu', false)
       .neq('expediteur_email', currentUser.email);
     allConvs[i].non_lus = count || 0;
   }
 
+  // Charger notations existantes
+  var emailsAgents = allConvs.filter(function(c){ return c.email_agent; }).map(function(c){ return c.email_agent; });
+  var notationsMap = {};
+  if (emailsAgents.length) {
+    var { data: notations } = await db.from('notations_agents')
+      .select('agent_email, note, conversation_id')
+      .eq('notateur_email', currentUser.email);
+    (notations || []).forEach(function(n){ notationsMap[n.conversation_id] = n.note; });
+  }
+  allConvs.forEach(function(c){ c.ma_notation = notationsMap[c.id] || null; });
+
   afficherListeConvs(allConvs);
 }
 
 // ── AFFICHER LISTE ──
 function afficherListeConvs(convs) {
-  var html = '';
   if (!convs.length) {
-    html = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px">Aucune conversation</div>';
-    document.getElementById('conv-list').innerHTML = html;
+    document.getElementById('conv-list').innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px">Aucune conversation</div>';
     return;
   }
-
+  var html = '';
   convs.forEach(function(c) {
-    var nom = currentRole === 'agent' ? c.email_vendeur.split('@')[0] : c.email_agent ? c.email_agent.split('@')[0] : 'Agent';
+    var isAgent = c.email_agent === currentUser.email;
+    var nomInterlocuteur = isAgent
+      ? (c.email_vendeur || '').split('@')[0]
+      : (c.email_agent || '').split('@')[0];
     var bien = c.annonces_vendeurs;
-    var preview = bien ? (bien.type_bien || 'Bien') + ' · ' + (bien.ville || '') : '—';
-    var avatar = currentRole === 'agent' ? 'av-vendeur' : 'av-agent';
-    var initiale = nom.charAt(0).toUpperCase();
-    var date = new Date(c.created_at).toLocaleDateString('fr-FR', { day:'2-digit', month:'short' });
-
-    html += '<div class="conv-item' + (c.id === currentConvId ? ' active' : '') + '" onclick="ouvrirConv(\'' + c.id + '\')">';
-    html += '<div class="conv-avatar ' + avatar + '">' + initiale + '</div>';
-    html += '<div class="conv-info">';
-    html += '<div class="conv-name">' + nom + '</div>';
-    html += '<div class="conv-preview">' + preview + '</div>';
-    html += '</div>';
-    html += '<div class="conv-meta">';
-    html += '<div class="conv-date">' + date + '</div>';
-    if (c.non_lus > 0) html += '<div class="conv-badge">' + c.non_lus + '</div>';
-    html += '</div></div>';
+    var preview = c.dernier_message || (bien ? (bien.type_bien||'Bien')+' · '+(bien.ville||'') : '—');
+    var avatarClass = isAgent ? 'av-vendeur' : 'av-agent';
+    var initiale = nomInterlocuteur.charAt(0).toUpperCase();
+    var date = c.dernier_message_at
+      ? new Date(c.dernier_message_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'})
+      : '';
+    html += '<div class="conv-item'+(c.id===currentConvId?' active':'')+'" onclick="ouvrirConv(\''+c.id+'\')"><div class="conv-avatar '+avatarClass+'">'+initiale+'</div><div class="conv-info"><div class="conv-name">'+nomInterlocuteur+'</div><div class="conv-preview">'+preview+'</div></div><div class="conv-meta"><div class="conv-date">'+date+'</div>'+(c.non_lus>0?'<div class="conv-badge">'+c.non_lus+'</div>':'')+'</div></div>';
   });
-
   document.getElementById('conv-list').innerHTML = html;
 }
 
 // ── OUVRIR CONVERSATION ──
 async function ouvrirConv(convId) {
   currentConvId = convId;
-  var conv = allConvs.find(function(c){ return c.id === convId; });
+  var conv = allConvs.find(function(c){ return c.id===convId; });
   if (!conv) return;
 
-  // Mettre à jour la liste
+  // Arrêter l'ancien channel realtime
+  if (realtimeChannel) { db.removeChannel(realtimeChannel); realtimeChannel = null; }
+
   afficherListeConvs(allConvs);
 
   // Marquer comme lu
-  await db.from('messages_conversation')
-    .update({ lu: true })
-    .eq('conversation_id', convId)
-    .neq('expediteur_email', currentUser.email);
+  await db.from('messages_conversation').update({lu:true}).eq('conversation_id',convId).neq('expediteur_email',currentUser.email);
+  conv.non_lus = 0;
 
-  // Charger les messages
   await afficherChat(conv);
+  abonnerRealtime(convId);
+}
 
-  // Rafraîchir automatiquement
-  if (msgInterval) clearInterval(msgInterval);
-  msgInterval = setInterval(function() { rafraichirMessages(convId); }, 5000);
+// ── REALTIME ──
+function abonnerRealtime(convId) {
+  realtimeChannel = db.channel('chat-'+convId)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'messages_conversation',
+      filter: 'conversation_id=eq.'+convId
+    }, function(payload) {
+      var conv = allConvs.find(function(c){ return c.id===convId; });
+      if (!conv) return;
+      // Nouveau message reçu — rafraîchir
+      afficherChat(conv);
+      // Marquer comme lu si c'est l'interlocuteur
+      if (payload.new.expediteur_email !== currentUser.email) {
+        db.from('messages_conversation').update({lu:true}).eq('id', payload.new.id);
+      }
+    })
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'conversations',
+      filter: 'id=eq.'+convId
+    }, function(payload) {
+      // Indicateur "en train d'écrire"
+      var typingField = currentRole==='agent' ? 'typing_vendeur' : 'typing_agent';
+      var typingAt = payload.new[typingField];
+      var typingDiv = document.getElementById('typing-indicator');
+      if (typingAt) {
+        var diff = Date.now() - new Date(typingAt).getTime();
+        if (diff < 4000 && typingDiv) typingDiv.style.display = 'flex';
+      } else {
+        if (typingDiv) typingDiv.style.display = 'none';
+      }
+    })
+    .subscribe();
+}
+
+// ── INDICATEUR TYPING ──
+async function onTyping() {
+  if (!currentConvId) return;
+  var field = currentRole==='agent' ? 'typing_agent' : 'typing_vendeur';
+  await db.from('conversations').update({[field]: new Date().toISOString()}).eq('id', currentConvId);
+  if (typingTimeout) clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(async function(){
+    await db.from('conversations').update({[field]: null}).eq('id', currentConvId);
+  }, 3000);
 }
 
 // ── AFFICHER CHAT ──
 async function afficherChat(conv) {
   var bien = conv.annonces_vendeurs;
-  var nomInterlocuteur = currentRole === 'agent'
-    ? conv.email_vendeur.split('@')[0]
-    : (conv.email_agent || 'Agent').split('@')[0];
+  var isAgent = conv.email_agent === currentUser.email;
+  var nomInterlocuteur = isAgent
+    ? (conv.email_vendeur||'').split('@')[0]
+    : (conv.email_agent||'').split('@')[0];
+  var emailInterlocuteur = isAgent ? conv.email_agent : conv.email_vendeur;
 
-  // Quota agent
-  var quotaHtml = '';
+  // Charger messages
+  var { data: msgs } = await db.from('messages_conversation')
+    .select('*')
+    .eq('conversation_id', conv.id)
+    .order('created_at', {ascending:true});
+
+  // Vérifier quota agent
   var peutEnvoyer = true;
+  var quotaHtml = '';
   if (currentRole === 'agent') {
     var semaine = getSemaine();
-    var { data: quota } = await db.from('contacts_semaine')
-      .select('nb_contacts').eq('agent_id', currentUser.id).eq('semaine', semaine).single();
-    var nbUtilises = quota ? quota.nb_contacts : 0;
-    var max = FORFAITS[currentForfait].contacts_semaine;
+    var { data: q } = await db.from('contacts_semaine').select('nb_contacts').eq('agent_id',currentUser.id).eq('semaine',semaine).single().catch(function(){return{data:null};});
+    var nbContacts = q ? q.nb_contacts : 0;
+    var maxContacts = FORFAITS[currentForfait]?.contacts_semaine || 10;
+    if (!conv.contact_consomme && nbContacts >= maxContacts && maxContacts !== 999) {
+      peutEnvoyer = false;
+      quotaHtml = '<div class="quota-block">🚫 Quota semaine atteint ('+maxContacts+' contacts). <a href="forfaits.html" style="color:var(--coral);font-weight:500">Changer de forfait →</a></div>';
+    }
+  }
 
-    if (!conv.contact_consomme) {
-      // Ce contact n'est pas encore consommé
-      if (nbUtilises >= max) {
-        peutEnvoyer = false;
-        quotaHtml = '<div class="quota-block">⚠️ Vous avez atteint votre limite de <strong>' + max + ' contacts/semaine</strong> (forfait ' + FORFAITS[currentForfait].label + '). Votre quota se renouvelle lundi. <a href="forfaits.html" style="color:var(--teal)">Passer au forfait supérieur →</a></div>';
-      }
+  // Notation agent — visible si vendeur ou acheteur dans la conv
+  var peutNoter = !isAgent && conv.email_agent;
+  var notationHtml = '';
+  if (peutNoter) {
+    if (conv.ma_notation) {
+      notationHtml = '<div class="stars-display">'+'★'.repeat(conv.ma_notation)+'<span style="color:var(--muted)">'+'☆'.repeat(5-conv.ma_notation)+'</span></div>';
+    } else {
+      notationHtml = '<button class="btn-noter" onclick="ouvrirModal(\''+conv.id+'\',\''+nomInterlocuteur+'\')">⭐ Noter cet agent</button>';
+    }
+  }
+
+  // Récupérer note moyenne de l'agent si on est vendeur
+  var noteMoyenneHtml = '';
+  if (peutNoter && conv.email_agent) {
+    var { data: stats } = await db.from('stats_agents').select('note_moyenne,nb_avis').eq('agent_email', conv.email_agent).single().catch(function(){return{data:null};});
+    if (stats && stats.nb_avis > 0) {
+      noteMoyenneHtml = '<span style="font-size:11px;color:var(--muted)">★ '+stats.note_moyenne+' ('+stats.nb_avis+' avis)</span>';
     }
   }
 
   var html = '';
+  // Header
   html += '<div class="chat-header">';
-  html += '<div class="chat-avatar ' + (currentRole === 'agent' ? 'av-vendeur' : 'av-agent') + '">' + nomInterlocuteur.charAt(0).toUpperCase() + '</div>';
-  html += '<div class="chat-info"><div class="chat-name">' + nomInterlocuteur + '</div>';
-  html += '<div class="chat-detail">' + (bien ? (bien.type_bien||'Bien') + ' · ' + (bien.surface||'—') + ' m² · ' + (bien.ville||'') + (bien.prix ? ' · ' + Math.round(bien.prix).toLocaleString('fr-FR') + ' €' : '') : '') + '</div></div>';
-  if (currentRole === 'agent') {
-    var semaine2 = getSemaine();
-    var { data: q2 } = await db.from('contacts_semaine')
-      .select('nb_contacts').eq('agent_id', currentUser.id).eq('semaine', semaine2).single();
-    var used = q2 ? q2.nb_contacts : 0;
-    var max2 = FORFAITS[currentForfait].contacts_semaine;
-    var left = max2 - used;
-    var cls = left > 5 ? 'cb-ok' : left > 0 ? 'cb-warn' : 'cb-block';
-    html += '<div class="chat-badge ' + cls + '">' + (max2 === 999 ? '∞ contacts' : left + ' contacts restants cette semaine') + '</div>';
-  }
+  html += '<div class="chat-avatar '+(isAgent?'av-vendeur':'av-agent')+'">'+nomInterlocuteur.charAt(0).toUpperCase()+'</div>';
+  html += '<div class="chat-info"><div class="chat-name">'+nomInterlocuteur+'</div>';
+  html += '<div class="chat-detail">'+(bien?(bien.type_bien||'Bien')+' · '+(bien.ville||''):'Conversation')+' '+noteMoyenneHtml+'</div></div>';
+  html += '<div class="chat-actions">'+notationHtml+'</div>';
   html += '</div>';
 
   // Messages
-  var { data: msgs } = await db.from('messages_conversation')
-    .select('*').eq('conversation_id', conv.id)
-    .order('created_at', { ascending: true });
-
   html += '<div class="chat-messages" id="chat-msgs">';
   if (!msgs || !msgs.length) {
-    html += '<div class="msg-date-sep">Début de la conversation</div>';
+    html += '<div style="text-align:center;color:var(--muted);font-size:12px;margin-top:40px">Démarrez la conversation !</div>';
   } else {
     var lastDate = '';
     msgs.forEach(function(m) {
-      var d = new Date(m.created_at).toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' });
-      if (d !== lastDate) {
-        html += '<div class="msg-date-sep">' + d + '</div>';
-        lastDate = d;
-      }
+      var d = new Date(m.created_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+      if (d !== lastDate) { html += '<div class="msg-date-sep">'+d+'</div>'; lastDate = d; }
       var isOut = m.expediteur_email === currentUser.email;
-      var heure = new Date(m.created_at).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
-      html += '<div class="msg-bubble ' + (isOut ? 'msg-out' : 'msg-in') + '">';
-      html += m.contenu.replace(/\n/g, '<br>');
-      html += '<div class="msg-time">' + heure + '</div></div>';
+      var heure = new Date(m.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+      html += '<div class="msg-bubble '+(isOut?'msg-out':'msg-in')+'">'+m.contenu.replace(/\n/g,'<br>')+'<div class="msg-time">'+heure+(isOut&&m.lu?' · ✓✓':'')+'</div></div>';
     });
   }
+  // Indicateur typing
+  html += '<div id="typing-indicator" class="typing-indicator" style="display:none"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
   html += '</div>';
 
   // Zone saisie
   html += '<div class="chat-input-zone">';
   if (currentRole === 'agent') {
-    html += '<div class="quota-bar"><span>Quota semaine</span>';
-    html += '<span class="quota-pill ' + (peutEnvoyer ? 'qp-ok' : 'qp-block') + '">' +
-      (FORFAITS[currentForfait].contacts_semaine === 999 ? 'Illimité' :
-       (FORFAITS[currentForfait].contacts_semaine - (q2 ? q2.nb_contacts : 0)) + ' / ' + FORFAITS[currentForfait].contacts_semaine + ' restants') + '</span>';
-    html += '</div>';
+    var semaine = getSemaine();
+    var { data: q2 } = await db.from('contacts_semaine').select('nb_contacts').eq('agent_id',currentUser.id).eq('semaine',semaine).single().catch(function(){return{data:null};});
+    var nb = q2 ? q2.nb_contacts : 0;
+    var max = FORFAITS[currentForfait]?.contacts_semaine || 10;
+    var restants = max === 999 ? '∞' : Math.max(0, max - nb);
+    html += '<div class="quota-bar"><span><span class="realtime-dot" style="background:#22C55E"></span>Temps réel activé</span><span class="quota-pill '+(peutEnvoyer?'qp-ok':'qp-block')+'">'+(max===999?'Illimité':restants+' / '+max+' contacts restants')+'</span></div>';
   }
   if (quotaHtml) html += quotaHtml;
   if (peutEnvoyer) {
     html += '<div class="input-row">';
-    html += '<textarea class="msg-textarea" id="msg-input" placeholder="Écrivez votre message…" rows="1" onkeydown="sendOnEnter(event)"></textarea>';
+    html += '<textarea class="msg-textarea" id="msg-input" placeholder="Écrivez votre message… (Entrée pour envoyer)" rows="1" oninput="autoResize(this);onTyping()" onkeydown="sendOnEnter(event)"></textarea>';
     html += '<button class="btn-send" onclick="envoyerMessage()">Envoyer →</button>';
     html += '</div>';
   }
   html += '</div>';
 
   document.getElementById('chat-zone').innerHTML = html;
-
-  // Scroll en bas
   var msgBox = document.getElementById('chat-msgs');
   if (msgBox) msgBox.scrollTop = msgBox.scrollHeight;
 }
@@ -337,144 +433,141 @@ async function envoyerMessage() {
   var input = document.getElementById('msg-input');
   var contenu = input ? input.value.trim() : '';
   if (!contenu) return;
-
-  var conv = allConvs.find(function(c){ return c.id === currentConvId; });
+  var conv = allConvs.find(function(c){ return c.id===currentConvId; });
   if (!conv) return;
-
   var btn = document.querySelector('.btn-send');
-  if (btn) btn.disabled = true;
+  if (btn) { btn.disabled=true; btn.textContent='…'; }
 
-  // Si agent et premier message sur cette conversation → consommer le contact
+  // Quota agent
   if (currentRole === 'agent' && !conv.contact_consomme) {
     var semaine = getSemaine();
-    // Incrémenter le compteur
-    var { data: existing } = await db.from('contacts_semaine')
-      .select('*').eq('agent_id', currentUser.id).eq('semaine', semaine).single();
+    var { data: existing } = await db.from('contacts_semaine').select('*').eq('agent_id',currentUser.id).eq('semaine',semaine).single().catch(function(){return{data:null};});
     if (existing) {
-      await db.from('contacts_semaine')
-        .update({ nb_contacts: existing.nb_contacts + 1 })
-        .eq('id', existing.id);
+      await db.from('contacts_semaine').update({nb_contacts:existing.nb_contacts+1}).eq('id',existing.id);
     } else {
-      await db.from('contacts_semaine')
-        .insert({ agent_id: currentUser.id, semaine: semaine, nb_contacts: 1 });
+      await db.from('contacts_semaine').insert({agent_id:currentUser.id,semaine:semaine,nb_contacts:1});
     }
-    // Marquer le contact comme consommé
-    await db.from('conversations')
-      .update({ contact_consomme: true, date_contact: new Date().toISOString() })
-      .eq('id', currentConvId);
+    await db.from('conversations').update({contact_consomme:true,date_contact:new Date().toISOString()}).eq('id',currentConvId);
     conv.contact_consomme = true;
-
-    // Incrémenter le compteur contacts sur l'annonce
-    if (conv.annonce_id) {
-      db.rpc('incrementer_contacts', { annonce_uuid: conv.annonce_id }).then(function(){}).catch(function(){});
-    }
-
-    // Incrémenter nb_contacts sur l'annonce
-    if (conv.annonce_id) {
-      await db.rpc('incrementer_contacts', { annonce_uuid: conv.annonce_id }).catch(function(){});
-    }
+    if (conv.annonce_id) db.rpc('incrementer_contacts',{annonce_uuid:conv.annonce_id}).catch(function(){});
   }
 
-  // Insérer le message
-  var { data: newMsg } = await db.from('messages_conversation').insert({
+  // Effacer typing
+  var typingField = currentRole==='agent' ? 'typing_agent' : 'typing_vendeur';
+  await db.from('conversations').update({[typingField]:null}).eq('id',currentConvId);
+
+  // Insérer message
+  await db.from('messages_conversation').insert({
     conversation_id: currentConvId,
     expediteur_email: currentUser.email,
     expediteur_role: currentRole,
     contenu: contenu,
     lu: false
-  }).select().single();
+  });
 
-  // Envoyer email de notification à l'interlocuteur
-  var destinataire = currentRole === 'agent' ? conv.email_vendeur : conv.email_agent;
-  var expediteurNom = currentUser.email.split('@')[0];
+  // Email notification
+  var destinataire = conv.email_agent===currentUser.email ? conv.email_vendeur : conv.email_agent;
   var bien = conv.annonces_vendeurs;
-  var bienTitre = bien ? (bien.type_bien||'Bien') + ' · ' + (bien.ville||'') : 'votre bien';
-  await envoyerEmailNotification(destinataire, expediteurNom, contenu, bienTitre, currentConvId);
+  envoyerEmailNotif(destinataire, currentUser.email.split('@')[0], contenu, bien?(bien.type_bien||'Bien')+' · '+(bien.ville||''):'votre bien');
 
-  if (input) input.value = '';
+  if (input) { input.value=''; input.style.height='42px'; }
+  if (btn) { btn.disabled=false; btn.textContent='Envoyer →'; }
+  // Le realtime va rafraîchir automatiquement
   await afficherChat(conv);
 }
 
-// ── NOUVELLE CONVERSATION (depuis espace agent) ──
-async function creerConversation(annonceId, emailVendeur) {
-  // Vérifier si conversation existe déjà
-  var { data: existing } = await db.from('conversations')
-    .select('id').eq('agent_id', currentUser.id).eq('annonce_id', annonceId).single();
-  if (existing) { currentConvId = existing.id; return existing.id; }
-
-  var { data: conv } = await db.from('conversations').insert({
-    agent_id: currentUser.id,
-    annonce_id: annonceId,
-    email_agent: currentUser.email,
-    email_vendeur: emailVendeur,
-    contact_consomme: false
-  }).select().single();
-
-  return conv ? conv.id : null;
+// ── MODAL NOTATION ──
+function ouvrirModal(convId, nomAgent) {
+  convPourNotation = convId;
+  noteSelectionnee = 0;
+  document.getElementById('modal-agent-nom').textContent = 'Donnez votre avis sur '+nomAgent;
+  document.getElementById('notation-commentaire').value = '';
+  document.querySelectorAll('.star-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('modal-notation').classList.add('open');
 }
 
-// ── RAFRAÎCHIR MESSAGES ──
-async function rafraichirMessages(convId) {
-  if (convId !== currentConvId) return;
-  var conv = allConvs.find(function(c){ return c.id === convId; });
-  if (conv) await afficherChat(conv);
+function fermerModal() {
+  document.getElementById('modal-notation').classList.remove('open');
+  convPourNotation = null;
 }
 
-// ── FILTRER CONVERSATIONS ──
-function filtrerConvs() {
-  var q = document.getElementById('search-conv').value.toLowerCase();
-  var filtered = allConvs.filter(function(c) {
-    var bien = c.annonces_vendeurs;
-    var txt = (c.email_vendeur + c.email_agent + (bien ? bien.ville + bien.type_bien : '')).toLowerCase();
-    return txt.includes(q);
+function setNote(n) {
+  noteSelectionnee = n;
+  document.querySelectorAll('.star-btn').forEach(function(b,i){ b.classList.toggle('active', i < n); });
+}
+
+async function soumettreNotation() {
+  if (!noteSelectionnee) { alert('Choisissez une note de 1 à 5.'); return; }
+  var conv = allConvs.find(function(c){ return c.id===convPourNotation; });
+  if (!conv) return;
+  var btn = document.getElementById('btn-submit-note');
+  btn.disabled=true; btn.textContent='Envoi…';
+  var commentaire = document.getElementById('notation-commentaire').value.trim();
+
+  var { error } = await db.from('notations_agents').insert({
+    agent_email: conv.email_agent,
+    notateur_email: currentUser.email,
+    notateur_role: currentRole,
+    conversation_id: convPourNotation,
+    note: noteSelectionnee,
+    commentaire: commentaire || null
   });
-  afficherListeConvs(filtered);
+
+  if (error) {
+    btn.disabled=false; btn.textContent='Envoyer ma note →';
+    alert('Erreur : '+(error.code==='23505'?'Vous avez déjà noté cet agent pour cette conversation.':error.message));
+    return;
+  }
+
+  conv.ma_notation = noteSelectionnee;
+  fermerModal();
+  await afficherChat(conv);
 }
 
-// ── EMAIL NOTIFICATION NOUVEAU MESSAGE ──
-async function envoyerEmailNotification(destinataire, expediteur, message, bienTitre, convId) {
+// ── EMAIL NOTIFICATION ──
+async function envoyerEmailNotif(destinataire, expediteur, message, bienTitre) {
   try {
     await db.functions.invoke('envoyer-email', {
-      body: {
-        type: 'nouveau_message',
-        to: destinataire,
-        subject: '💬 Nouveau message ImmoConnect — ' + bienTitre,
-        expediteur: expediteur,
-        message: message.substring(0, 200) + (message.length > 200 ? '…' : ''),
-        bien: bienTitre,
-        lien: 'https://immoconnect-agence.fr/messagerie.html'
-      }
+      body: { type:'nouveau_message', to:destinataire, subject:'💬 Nouveau message ImmoConnect — '+bienTitre, expediteur:expediteur, message:message.substring(0,200)+(message.length>200?'…':''), bien:bienTitre, lien:'https://immoconnect-agence.fr/messagerie.html' }
     });
-  } catch(e) {
-    console.warn('Email notification:', e.message);
-  }
+  } catch(e) { console.warn('Email:', e.message); }
 }
 
 // ── UTILS ──
 function getSemaine() {
   var d = new Date();
-  var jan1 = new Date(d.getFullYear(), 0, 1);
-  var week = Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
-  return d.getFullYear() + '-W' + String(week).padStart(2, '0');
+  var jan1 = new Date(d.getFullYear(),0,1);
+  var week = Math.ceil(((d-jan1)/86400000+jan1.getDay()+1)/7);
+  return d.getFullYear()+'-W'+String(week).padStart(2,'0');
+}
+
+function filtrerConvs() {
+  var q = document.getElementById('search-conv').value.toLowerCase();
+  var filtered = allConvs.filter(function(c){
+    var b = c.annonces_vendeurs;
+    return (c.email_vendeur+c.email_agent+(b?b.ville+b.type_bien:'')).toLowerCase().includes(q);
+  });
+  afficherListeConvs(filtered);
 }
 
 function sendOnEnter(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); envoyerMessage(); }
+  if (e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); envoyerMessage(); }
 }
+
+function autoResize(el) {
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,120)+'px';
+}
+
+// Fermer modal si clic overlay
+document.getElementById('modal-notation').addEventListener('click', function(e){
+  if (e.target===this) fermerModal();
+});
 </script>
 <script>
-(function() {
-  var consent = localStorage.getItem('ic_cookie_consent');
-  if (!consent) {
-    var b = document.createElement('div');
-    b.id = 'cookie-banner';
-    b.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1C1C1A;border-top:1px solid rgba(255,255,255,.1);padding:16px 32px;font-family:Outfit,sans-serif';
-    b.innerHTML = '<div style="max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;font-weight:500;color:#FAFAF7;margin-bottom:4px">🍪 Cookies & confidentialité</div><div style="font-size:12px;color:rgba(250,250,247,.6);line-height:1.6">ImmoConnect utilise des cookies strictement nécessaires. Aucun cookie publicitaire. <a href=\"mentions-legales.html\" style=\"color:#C09B5A\">En savoir plus</a></div></div><div style="display:flex;gap:10px;flex-shrink:0"><button onclick=\"icRefuser()\" style=\"padding:9px 20px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(250,250,247,.7);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer\">Refuser</button><button onclick=\"icAccepter()\" style=\"padding:9px 20px;border-radius:8px;border:none;background:#C09B5A;color:#1C1C1A;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer\">Accepter</button></div></div>';
-    document.body.appendChild(b);
-  }
-})();
-function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
-function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
+(function(){var c=localStorage.getItem('ic_cookie_consent');if(!c){var b=document.createElement('div');b.id='cookie-banner';b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1C1C1A;border-top:1px solid rgba(255,255,255,.1);padding:16px 32px;font-family:Outfit,sans-serif';b.innerHTML='<div style="max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;font-weight:500;color:#FAFAF7;margin-bottom:4px">🍪 Cookies & confidentialité</div><div style="font-size:12px;color:rgba(250,250,247,.6);line-height:1.6">ImmoConnect utilise des cookies strictement nécessaires. <a href="mentions-legales.html" style="color:#C09B5A">En savoir plus</a></div></div><div style="display:flex;gap:10px;flex-shrink:0"><button onclick="icRefuser()" style="padding:9px 20px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(250,250,247,.7);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer">Refuser</button><button onclick="icAccepter()" style="padding:9px 20px;border-radius:8px;border:none;background:#C09B5A;color:#1C1C1A;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer">Accepter</button></div></div>';document.body.appendChild(b);}})();
+function icAccepter(){localStorage.setItem('ic_cookie_consent','accepted');document.getElementById('cookie-banner').style.display='none';}
+function icRefuser(){localStorage.setItem('ic_cookie_consent','refused');document.getElementById('cookie-banner').style.display='none';}
 </script>
 </body>
 </html>

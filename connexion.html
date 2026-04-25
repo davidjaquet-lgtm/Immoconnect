@@ -300,6 +300,14 @@ input:focus,select:focus{border-color:var(--ink)}
     <div class="field"><label class="lbl">Mot de passe *</label><input type="password" id="auth-password" placeholder="••••••••" minlength="8"></div>
     <span class="forgot" id="forgot-link" onclick="resetPassword()">Mot de passe oublié ?</span>
     <button class="btn-main" id="btn-auth" onclick="handleAuth()">Se connecter</button>
+
+    <!-- RENVOI EMAIL CONFIRMATION -->
+    <div id="resend-confirm" style="display:none;margin-top:14px;background:#FEF3E7;border:1px solid rgba(212,115,42,.3);border-radius:8px;padding:12px 14px;font-size:12px;color:#633806;line-height:1.65">
+      <input type="hidden" id="resend-email-val">
+      📧 <strong>Email non confirmé</strong><br>
+      Vous n'avez pas reçu l'email de confirmation ?<br>
+      <button onclick="renvoyerConfirmation()" style="margin-top:8px;padding:7px 14px;border-radius:8px;border:none;background:#D4732A;color:#fff;font-family:Outfit,sans-serif;font-size:12px;font-weight:500;cursor:pointer">Renvoyer l'email de confirmation</button>
+    </div>
   </div>
 </div>
 
@@ -359,6 +367,15 @@ async function handleAuth() {
     btn.textContent = 'Connexion…';
     var { data, error } = await db.auth.signInWithPassword({ email, password: pwd });
     if (error) { showErr('Email ou mot de passe incorrect.'); btn.disabled=false; btn.textContent='Se connecter'; return; }
+    // Vérification email obligatoire
+    if (!data.user.email_confirmed_at) {
+      await db.auth.signOut();
+      showErr('Veuillez confirmer votre adresse email avant de vous connecter. Vérifiez vos emails (et vos spams).');
+      btn.disabled=false; btn.textContent='Se connecter';
+      document.getElementById('resend-confirm').style.display = 'block';
+      document.getElementById('resend-email-val').value = email;
+      return;
+    }
     afficherDashboard(data.user);
   } else {
     btn.textContent = 'Création…';
@@ -404,6 +421,15 @@ async function handleAuth() {
     }
     btn.disabled=false; btn.textContent='Créer mon compte';
   }
+}
+
+async function renvoyerConfirmation() {
+  var email = document.getElementById('resend-email-val').value;
+  if (!email) return;
+  var { error } = await db.auth.resend({ type: 'signup', email: email });
+  if (error) { showErr('Erreur : ' + error.message); return; }
+  showOk('Email de confirmation renvoyé ! Vérifiez vos emails et vos spams.');
+  document.getElementById('resend-confirm').style.display = 'none';
 }
 
 async function loginGoogle()   { await db.auth.signInWithOAuth({ provider:'google',   options:{ redirectTo: window.location.href } }); }

@@ -353,6 +353,34 @@ function afficherBien(b, similaires) {
   html += statsHtml;
   if (docsHtml) html += '<div style="margin-bottom:16px">' + docsHtml + '</div>';
 
+  // RENDEMENT INVESTISSEUR
+  var loyer = b.loyer_mensuel || 0;
+  var loyerM2 = (b.type_bien||'').toLowerCase().includes('maison') ? 8.5 : 11;
+  var loyerAuto = b.surface > 0 ? Math.round(loyerM2 * b.surface) : 0;
+  var loyerEffectif = loyer > 0 ? loyer : loyerAuto;
+  var prix = b.prix || 0;
+  if (prix > 0 && loyerEffectif > 0) {
+    var loyerAnnuel = loyerEffectif * 12;
+    var charges = (b.charges_syndic||0)*12 + (b.taxe_fonciere_montant||0);
+    var rdtBrut = (loyerAnnuel / prix * 100).toFixed(1);
+    var rdtNet = charges > 0 ? ((loyerAnnuel - charges) / prix * 100).toFixed(1) : null;
+    var rdtBrutNum = parseFloat(rdtBrut);
+    var badgeColor = rdtBrutNum >= 7 ? '#993C1D' : rdtBrutNum >= 5 ? '#185FA5' : '#1E7A62';
+    var badgeBg = rdtBrutNum >= 7 ? '#FAECE7' : rdtBrutNum >= 5 ? '#E6F1FB' : '#E1F5EE';
+    html += '<div style="background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:20px">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">';
+    html += '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">💰 Potentiel locatif</div>';
+    if (rdtBrutNum >= 3) html += '<div style="background:'+badgeBg+';color:'+badgeColor+';font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px">🎯 Compatible investisseur</div>';
+    html += '</div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px">';
+    html += '<div style="text-align:center"><div style="font-size:18px;font-weight:500;color:var(--teal)">'+rdtBrut+' %</div><div style="font-size:10px;color:var(--muted)">Rendement brut</div></div>';
+    if (rdtNet) html += '<div style="text-align:center"><div style="font-size:18px;font-weight:500;color:var(--teal)">'+rdtNet+' %</div><div style="font-size:10px;color:var(--muted)">Rendement net</div></div>';
+    html += '<div style="text-align:center"><div style="font-size:18px;font-weight:500;color:var(--teal)">'+loyerEffectif.toLocaleString('fr-FR')+' €</div><div style="font-size:10px;color:var(--muted)">'+(loyer>0?'Loyer réel':'Loyer estimé')+'/mois</div></div>';
+    html += '</div>';
+    if (loyer === 0) html += '<div style="font-size:10px;color:var(--muted);margin-top:8px">* Loyer estimé sur la base de la carte des loyers. Le vendeur peut renseigner le loyer réel.</div>';
+    html += '</div>';
+  }
+
   if (b.description) {
     html += '<div class="section"><div class="section-title">Description</div><div class="description">' + b.description.replace(/\n/g, '<br>') + '</div></div>';
   }

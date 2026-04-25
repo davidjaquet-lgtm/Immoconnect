@@ -193,6 +193,7 @@ input:focus,select:focus{border-color:var(--ink)}
   <div class="steps-nav">
     <div class="step-tab active" id="tab1"><span class="step-num">1</span>Votre bien</div>
     <div class="step-tab" id="tab2"><span class="step-num">2</span>Score qualité</div>
+    <div class="step-tab" id="tab3"><span class="step-num">3</span>Revenus & rendement</div>
   </div>
   <div class="form-card">
 
@@ -356,9 +357,64 @@ input:focus,select:focus{border-color:var(--ink)}
 
       <div class="form-nav">
         <button class="btn-prev" onclick="allerEtape1()">← Retour</button>
-        <button class="btn-estimer-final" onclick="lancerEstimation()">✨ Estimer mon bien →</button>
+        <button class="btn-next" onclick="allerEtape3()">Étape suivante : revenus →</button>
       </div>
       <div class="form-garantie">Le score qualité affine l'estimation DVF avec un correctif de ±30%</div>
+    </div>
+
+    <!-- ÉTAPE 3 : REVENUS & RENDEMENT -->
+    <div id="step3" style="display:none">
+      <div class="form-section-title">💰 Revenus locatifs & rendement</div>
+      <div class="form-section-sub">Ces données permettent de calculer le rendement et d'alerter les investisseurs compatibles avec votre bien.</div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="lbl">Prix de vente demandé (€) *</label>
+          <input type="number" id="prix-vente" placeholder="ex: 185000" min="0">
+          <span style="font-size:10px;color:var(--muted);margin-top:3px">Libre à vous de fixer votre prix</span>
+        </div>
+        <div class="form-group">
+          <label class="lbl">Loyer mensuel (€)</label>
+          <input type="number" id="loyer-mensuel" placeholder="ex: 750" min="0" oninput="majRendement()">
+          <span style="font-size:10px;color:var(--muted);margin-top:3px">Laissez vide pour une estimation automatique</span>
+        </div>
+        <div class="form-group">
+          <label class="lbl">Charges annuelles (€/an)</label>
+          <input type="number" id="charges-annuelles" placeholder="ex: 1800" min="0" oninput="majRendement()">
+          <span style="font-size:10px;color:var(--muted);margin-top:3px">Syndic + taxe foncière</span>
+        </div>
+        <div class="form-group">
+          <label class="lbl">Travaux à prévoir (€)</label>
+          <input type="number" id="travaux-montant" placeholder="ex: 15000" min="0" oninput="majRendement()">
+          <span style="font-size:10px;color:var(--muted);margin-top:3px">Amortis sur 10 ans dans le calcul net</span>
+        </div>
+      </div>
+
+      <!-- RÉSUMÉ RENDEMENT LIVE -->
+      <div id="rendement-preview" style="background:var(--bg);border-radius:10px;padding:16px;margin-bottom:20px;display:none">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">📊 Rendement calculé en temps réel</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">
+          <div style="background:var(--warm);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--line)">
+            <div style="font-size:20px;font-weight:500;color:var(--teal)" id="rdt-brut">—</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px">Rendement brut</div>
+          </div>
+          <div style="background:#E1F5EE;border-radius:8px;padding:12px;text-align:center;border:1px solid #9FE1CB">
+            <div style="font-size:20px;font-weight:500;color:var(--teal)" id="rdt-net">—</div>
+            <div style="font-size:10px;color:var(--teal);margin-top:2px;font-weight:600">Rendement net</div>
+          </div>
+          <div style="background:var(--warm);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--line)">
+            <div style="font-size:20px;font-weight:500;color:var(--teal)" id="rdt-cashflow">—</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px">Cashflow/mois</div>
+          </div>
+        </div>
+        <div id="matching-preview" style="font-size:12px;color:var(--muted);line-height:1.6"></div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn-prev" onclick="allerEtape2()">← Retour</button>
+        <button class="btn-estimer-final" onclick="lancerEstimation()">✨ Lancer l'estimation complète →</button>
+      </div>
+      <div class="form-garantie">🎯 Les investisseurs compatibles seront alertés automatiquement · Gratuit</div>
     </div>
   </div>
 </div>
@@ -452,6 +508,78 @@ function allerEtape1() {
   document.getElementById('tab2').className = 'step-tab';
 }
 
+// ── NAVIGATION ÉTAPE 3 ──
+function allerEtape3() {
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step3').style.display = 'block';
+  document.getElementById('tab2').className = 'step-tab done';
+  document.getElementById('tab3').className = 'step-tab active';
+  // Pré-remplir le prix de vente avec le prix souhaité si saisi
+  var prixSouhaite = document.getElementById('prix-souhaite').value;
+  if (prixSouhaite) document.getElementById('prix-vente').value = prixSouhaite;
+  majRendement();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function allerEtape2() {
+  document.getElementById('step3').style.display = 'none';
+  document.getElementById('step2').style.display = 'block';
+  document.getElementById('tab3').className = 'step-tab';
+  document.getElementById('tab2').className = 'step-tab active';
+}
+
+// ── CALCUL RENDEMENT LIVE ──
+function majRendement() {
+  var prix = parseFloat(document.getElementById('prix-vente').value) || 0;
+  var loyer = parseFloat(document.getElementById('loyer-mensuel').value) || 0;
+  var charges = parseFloat(document.getElementById('charges-annuelles').value) || 0;
+  var travaux = parseFloat(document.getElementById('travaux-montant').value) || 0;
+  var surface = parseFloat(document.getElementById('surface').value) || 0;
+
+  // Estimation loyer auto si non saisi (8-12€/m² selon type)
+  var type = document.getElementById('type-bien').value || '';
+  var loyerAuto = 0;
+  if (surface > 0) {
+    var loyerM2 = type.toLowerCase().includes('maison') || type.toLowerCase().includes('villa') ? 8.5 : 11;
+    loyerAuto = Math.round(loyerM2 * surface);
+  }
+  var loyerEffectif = loyer > 0 ? loyer : loyerAuto;
+  var loyerSource = loyer > 0 ? 'loyer saisi' : 'estimation auto ('+loyerAuto+' €/mois estimé)';
+
+  if (prix === 0 || loyerEffectif === 0) {
+    document.getElementById('rendement-preview').style.display = 'none';
+    return;
+  }
+
+  var loyerAnnuel = loyerEffectif * 12;
+  var travauxAnnualises = travaux / 10; // amortis sur 10 ans
+  var chargesAnnuellesTotal = charges + travauxAnnualises;
+
+  var rdtBrut = (loyerAnnuel / prix * 100).toFixed(2);
+  var rdtNet = ((loyerAnnuel - chargesAnnuellesTotal) / prix * 100).toFixed(2);
+  var cashflow = Math.round((loyerEffectif - (chargesAnnuellesTotal / 12)));
+
+  document.getElementById('rdt-brut').textContent = rdtBrut + ' %';
+  document.getElementById('rdt-net').textContent = rdtNet + ' %';
+  document.getElementById('rdt-cashflow').textContent = (cashflow >= 0 ? '+' : '') + cashflow.toLocaleString('fr-FR') + ' €';
+  document.getElementById('rdt-cashflow').style.color = cashflow >= 0 ? 'var(--teal)' : 'var(--coral)';
+
+  // Message matching investisseurs
+  var matchMsg = '';
+  var rdtNetNum = parseFloat(rdtNet);
+  if (rdtNetNum >= 7) matchMsg = '🎯 <strong>Excellent rendement</strong> — compatible avec les investisseurs cherchant 5%+ et 7%+. Alerte automatique à la publication.';
+  else if (rdtNetNum >= 5) matchMsg = '✅ <strong>Bon rendement</strong> — compatible investisseurs 5%+. Les profils patrimoniaux seront alertés.';
+  else if (rdtNetNum >= 3) matchMsg = '📊 <strong>Rendement correct</strong> — intéressera les investisseurs patrimoniaux (3-5%). Saisir un loyer réel améliorera le matching.';
+  else matchMsg = '⚠️ Rendement faible (<3%) — peu attractif pour les investisseurs. Vérifiez le loyer ou le prix de vente.';
+
+  if (loyer === 0 && loyerAuto > 0) {
+    matchMsg += '<br><span style="color:var(--muted)">Loyer utilisé : estimation auto '+loyerAuto+' €/mois. Saisissez le loyer réel pour plus de précision.</span>';
+  }
+
+  document.getElementById('matching-preview').innerHTML = matchMsg;
+  document.getElementById('rendement-preview').style.display = 'block';
+}
+
 // ── LANCER ESTIMATION ──
 async function lancerEstimation() {
   var type = document.getElementById('type-bien').value;
@@ -460,6 +588,10 @@ async function lancerEstimation() {
   var annee = document.getElementById('annee-construction').value;
   var nbPieces = document.getElementById('nb-pieces').value;
   var prixSouhaite = parseFloat(document.getElementById('prix-souhaite').value) || 0;
+  var prixVente = parseFloat(document.getElementById('prix-vente').value) || prixSouhaite;
+  var loyerMensuel = parseFloat(document.getElementById('loyer-mensuel').value) || 0;
+  var chargesAnnuelles = parseFloat(document.getElementById('charges-annuelles').value) || 0;
+  var travauxMontant = parseFloat(document.getElementById('travaux-montant').value) || 0;
   var coeffQualite = calculerCoeffTotal();
 
   document.getElementById('form-section').style.display = 'none';
@@ -479,7 +611,9 @@ async function lancerEstimation() {
   document.getElementById('step-hanae').className = 'step-item done';
   await new Promise(function(r){ setTimeout(r,400); });
 
-  afficherResultats({type, cp, surface, annee, nbPieces, prixSouhaite, coeffQualite, dvf, insee, calculs, synthese, scoreData: Object.assign({},scoreData)});
+  // Calcul rendement final
+  var rdtData = calculerRendement(prixVente, loyerMensuel, chargesAnnuelles, travauxMontant, surface, type);
+  afficherResultats({type, cp, surface, annee, nbPieces, prixSouhaite, prixVente, loyerMensuel, chargesAnnuelles, travauxMontant, coeffQualite, dvf, insee, calculs, synthese, scoreData: Object.assign({},scoreData), rdtData});
 }
 
 async function animerEtape(idActif, idSuivant, delai) {
@@ -587,6 +721,32 @@ Explique brièvement la méthode (DVF + Notaires-INSEE + score qualité). Commen
   } catch(e) { return null; }
 }
 
+// ── CALCUL RENDEMENT FINAL ──
+function calculerRendement(prix, loyer, charges, travaux, surface, type) {
+  // Loyer auto si non saisi
+  var loyerM2 = (type||'').toLowerCase().includes('maison')||(type||'').toLowerCase().includes('villa') ? 8.5 : 11;
+  var loyerAuto = surface > 0 ? Math.round(loyerM2 * surface) : 0;
+  var loyerEffectif = loyer > 0 ? loyer : loyerAuto;
+  var loyerSource = loyer > 0 ? 'Loyer saisi par le vendeur' : 'Estimation carte des loyers ('+loyerAuto+' €/mois)';
+
+  if (!prix || !loyerEffectif) return null;
+
+  var loyerAnnuel = loyerEffectif * 12;
+  var travauxAnnualises = travaux / 10;
+  var chargesTotal = charges + travauxAnnualises;
+  var rdtBrut = parseFloat((loyerAnnuel / prix * 100).toFixed(2));
+  var rdtNet = parseFloat(((loyerAnnuel - chargesTotal) / prix * 100).toFixed(2));
+  var cashflow = Math.round(loyerEffectif - chargesTotal / 12);
+
+  // Profils investisseurs compatibles
+  var profilsCompatibles = [];
+  if (rdtNet >= 3) profilsCompatibles.push({label:'Investisseur patrimonial', seuil:'3%+', color:'var(--teal)'});
+  if (rdtNet >= 5) profilsCompatibles.push({label:'Investisseur rendement', seuil:'5%+', color:'var(--blue)'});
+  if (rdtNet >= 7) profilsCompatibles.push({label:'Investisseur haut rendement', seuil:'7%+', color:'var(--coral)'});
+
+  return { prix, loyerEffectif, loyerAnnuel, loyerSource, loyerAuto, charges, travaux, travauxAnnualises, chargesTotal, rdtBrut, rdtNet, cashflow, profilsCompatibles };
+}
+
 // ── AFFICHER RÉSULTATS ──
 function afficherResultats(d) {
   document.getElementById('loading-section').style.display = 'none';
@@ -665,6 +825,56 @@ function afficherResultats(d) {
   // Synthèse Hanaé
   if (d.synthese) {
     html += '<div class="section"><div class="section-head"><div class="section-icon">🤖</div><div class="section-title">Synthèse de Hanaé</div><div class="section-badge">IA ImmoConnect</div></div><div class="section-body"><div class="synthese-box"><div class="synthese-name">🤖 Hanaé — Conseillère IA ImmoConnect</div>'+d.synthese.replace(/\n/g,'<br>')+'</div></div></div>';
+  }
+
+  // RENDEMENT INVESTISSEUR
+  if (d.rdtData) {
+    var r = d.rdtData;
+    var cashCol = r.cashflow >= 0 ? 'var(--teal)' : 'var(--coral)';
+    html += '<div class="section"><div class="section-head"><div class="section-icon">💰</div><div class="section-title">Analyse rendement locatif</div><div class="section-badge">Matching investisseurs</div></div><div class="section-body">';
+
+    // Prix vendeur vs estimation
+    var ecartPrix = d.calculs.prixM2Corrige > 0 ? Math.round((r.prix/d.surface - d.calculs.prixM2Corrige) / d.calculs.prixM2Corrige * 100) : null;
+    html += '<div style="background:var(--bg);border-radius:8px;padding:14px 16px;margin-bottom:16px;display:flex;gap:16px;flex-wrap:wrap">';
+    html += '<div style="flex:1;min-width:140px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Votre prix de vente</div><div style="font-size:20px;font-weight:500">'+r.prix.toLocaleString('fr-FR')+' €</div></div>';
+    if (ecartPrix !== null) {
+      var ecartCol = ecartPrix > 10 ? 'var(--coral)' : ecartPrix < -5 ? 'var(--teal)' : '#D4732A';
+      var ecartLabel = ecartPrix > 10 ? 'Au-dessus du marché' : ecartPrix < -5 ? 'En dessous du marché' : 'Dans la moyenne du marché';
+      html += '<div style="flex:1;min-width:140px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">vs estimation marché</div><div style="font-size:18px;font-weight:500;color:'+ecartCol+'">'+(ecartPrix>0?'+':'')+ecartPrix+'% — '+ecartLabel+'</div></div>';
+    }
+    html += '<div style="flex:1;min-width:140px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Loyer utilisé</div><div style="font-size:16px;font-weight:500">'+r.loyerEffectif.toLocaleString('fr-FR')+' €/mois</div><div style="font-size:10px;color:var(--muted)">'+r.loyerSource+'</div></div>';
+    html += '</div>';
+
+    // Stats rendement
+    html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">';
+    html += '<div class="stat-box"><div class="stat-val">'+r.rdtBrut+' %</div><div class="stat-lbl">Rendement brut</div><div class="stat-sub">Loyer annuel / prix</div></div>';
+    html += '<div class="stat-box" style="border:2px solid var(--teal)"><div class="stat-val" style="font-size:24px">'+r.rdtNet+' %</div><div class="stat-lbl" style="color:var(--teal)">Rendement net</div><div class="stat-sub">Après charges'+(r.travaux>0?' + travaux':' ')+'</div></div>';
+    html += '<div class="stat-box"><div class="stat-val" style="color:'+cashCol+'">'+(r.cashflow>=0?'+':'')+r.cashflow.toLocaleString('fr-FR')+' €</div><div class="stat-lbl">Cashflow mensuel</div><div class="stat-sub">Loyer − charges</div></div>';
+    html += '</div>';
+
+    // Détail charges
+    if (r.charges > 0 || r.travaux > 0) {
+      html += '<div style="background:var(--bg);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.8">';
+      html += '<strong style="color:var(--ink)">Détail des charges :</strong><br>';
+      if (r.charges > 0) html += '• Charges annuelles : '+r.charges.toLocaleString('fr-FR')+' €/an<br>';
+      if (r.travaux > 0) html += '• Travaux amortis sur 10 ans : '+Math.round(r.travauxAnnualises).toLocaleString('fr-FR')+' €/an<br>';
+      html += '• Total charges annuelles : '+Math.round(r.chargesTotal).toLocaleString('fr-FR')+' €/an';
+      html += '</div>';
+    }
+
+    // Matching investisseurs
+    if (r.profilsCompatibles.length > 0) {
+      html += '<div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:14px 16px">';
+      html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">🎯 Investisseurs compatibles alertés à la publication</div>';
+      r.profilsCompatibles.forEach(function(p){
+        html += '<div style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:6px"><span style="width:8px;height:8px;border-radius:50%;background:'+p.color+';flex-shrink:0;display:inline-block"></span><strong>'+p.label+'</strong> — rendement min '+p.seuil+'</div>';
+      });
+      html += '<div style="font-size:11px;color:var(--teal);margin-top:8px">✓ Ces investisseurs reçoivent une alerte dès que votre bien est publié sur ImmoConnect</div>';
+      html += '</div>';
+    } else {
+      html += '<div style="background:#FEF3E7;border:1px solid rgba(212,115,42,.3);border-radius:8px;padding:12px 14px;font-size:12px;color:#633806">⚠️ Rendement insuffisant pour déclencher des alertes investisseurs. Vérifiez votre loyer ou votre prix de vente.</div>';
+    }
+    html += '</div></div>';
   }
 
   // CTA
