@@ -208,14 +208,14 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
               <span>🤖</span> <span id="btn-hanae-label">Générer avec Hanaé</span>
             </button>
           </div>
-          <textarea id="description" placeholder="Décrivez votre bien : état général, atouts, environnement, transports…"></textarea>
+          <textarea id="description" placeholder="Décrivez votre bien : état général, atouts, environnement, transports…" oninput="majScoreDossier()"></textarea>
           <div id="hanae-desc-status" style="display:none;margin-top:6px;font-size:11px;padding:8px 12px;border-radius:6px"></div>
         </div>
       </div>
       <div class="form-grid col3">
         <div class="field">
           <label class="lbl">Surface (m²) *</label>
-          <input type="number" id="surface" placeholder="75" min="1">
+          <input type="number" id="surface" placeholder="75" min="1" oninput="majScoreDossier()">
         </div>
         <div class="field">
           <label class="lbl">Nb de pièces *</label>
@@ -243,7 +243,7 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
       <div class="form-grid">
         <div class="field">
           <label class="lbl">Prix demandé (€) *</label>
-          <input type="number" id="prix" placeholder="250000" min="0">
+          <input type="number" id="prix" placeholder="250000" min="0" oninput="majScoreDossier()">
         </div>
         <div class="field">
           <label class="lbl">Date d'achat du bien</label>
@@ -357,7 +357,7 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
           <div class="ib-title">💎 Platinium — DPE</div>
           <div class="field">
             <label class="lbl" style="color:var(--teal)">Classe énergie (DPE)</label>
-            <select id="classe_dpe" onchange="calcNiveau()">
+            <select id="classe_dpe" onchange="calcNiveau();majScoreDossier()">
               <option value="">Non renseigné</option>
               <option>A</option><option>B</option><option>C</option>
               <option>D</option><option>E</option><option>F</option><option>G</option>
@@ -383,7 +383,7 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
       <div class="form-grid col1">
         <div class="field">
           <label class="lbl">Adresse exacte <span style="font-size:10px;color:var(--muted);text-transform:none;font-weight:400;letter-spacing:0">(visible Gold & Platinium uniquement)</span></label>
-          <input type="text" id="adresse" placeholder="12 rue des Lilas">
+          <input type="text" id="adresse" placeholder="12 rue des Lilas" oninput="majScoreDossier()">
         </div>
       </div>
     </div>
@@ -859,6 +859,63 @@ function updateUI(){
   document.getElementById('sn-label').textContent=cfg.label;
   document.getElementById('sn-desc').textContent=cfg.desc;
   document.getElementById('submit-niveau').className='submit-niveau '+cfg.sn;
+  majScoreDossier();
+}
+
+function majScoreDossier() {
+  var desc = document.getElementById('description') ? document.getElementById('description').value : '';
+  var surface = document.getElementById('surface') ? document.getElementById('surface').value : '';
+  var nbPieces = document.getElementById('nb_pieces') ? document.getElementById('nb_pieces').value : '';
+  var prix = document.getElementById('prix') ? document.getElementById('prix').value : '';
+  var annee = document.getElementById('annee_construction') ? document.getElementById('annee_construction').value : '';
+  var adresse = document.getElementById('adresse') ? document.getElementById('adresse').value : '';
+  var valeurLoc = document.getElementById('valeur_locative') ? document.getElementById('valeur_locative').value : '';
+  var loyer = document.getElementById('loyer_mensuel') ? document.getElementById('loyer_mensuel').value : '';
+  var taxe = document.getElementById('taxe_fonciere_montant') ? document.getElementById('taxe_fonciere_montant').value : '';
+  var dpe = document.getElementById('classe_dpe') ? document.getElementById('classe_dpe').value : '';
+  var isCopro = getRadio('is_copro') === 'Oui';
+
+  var criteres = [
+    { label:'Photos (3 min.)',          ok: photos.length >= 3,                   pts:10 },
+    { label:'Description rédigée',      ok: desc.length > 50,                     pts:10 },
+    { label:'Surface',                  ok: !!surface,                            pts:5  },
+    { label:'Nb de pièces',             ok: !!nbPieces,                           pts:5  },
+    { label:'Prix demandé',             ok: !!prix,                               pts:5  },
+    { label:'Année construction',       ok: !!annee,                              pts:5  },
+    { label:'Valeur locative / Loyer',  ok: !!valeurLoc || !!loyer,               pts:10 },
+    { label:'Taxe foncière',            ok: !!taxe || !!docs['taxe_fonciere_doc'],pts:15 },
+    { label:'Copropriété',              ok: !isCopro || !!docs['copro_doc'],      pts:10 },
+    { label:'DPE renseigné',            ok: !!dpe || !!docs['dpe_doc'],           pts:15 },
+    { label:'Adresse complète',         ok: !!adresse,                            pts:5  },
+  ];
+
+  var total = criteres.reduce(function(a,c){ return a+c.pts; }, 0);
+  var obtenu = criteres.filter(function(c){ return c.ok; }).reduce(function(a,c){ return a+c.pts; }, 0);
+  var score = Math.round(obtenu / total * 100);
+  var color = score >= 80 ? '#1E7A62' : score >= 50 ? '#D4732A' : '#C0392B';
+  var label = score >= 80 ? 'Excellent' : score >= 60 ? 'Bon' : score >= 40 ? 'Moyen' : 'Incomplet';
+
+  var wrap = document.getElementById('score-dossier-widget');
+  if (!wrap) return;
+
+  var itemsHtml = criteres.map(function(c) {
+    return '<div style="display:flex;align-items:center;gap:8px;font-size:11px;padding:3px 0">'
+      + '<div style="width:8px;height:8px;border-radius:50%;background:' + (c.ok?'#1E7A62':'#E8E6E0') + ';flex-shrink:0"></div>'
+      + '<span style="color:' + (c.ok?'#0F0F0E':'#888780') + '">' + c.label + '</span>'
+      + '<span style="margin-left:auto;font-size:10px;color:' + (c.ok?'#1E7A62':'#888780') + '">' + (c.ok?'+'+c.pts+'pts':'—') + '</span>'
+      + '</div>';
+  }).join('');
+
+  wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+    + '<div><div style="font-size:10px;font-weight:700;color:#888780;text-transform:uppercase;letter-spacing:.8px">Score de votre dossier</div>'
+    + '<div style="font-size:11px;color:#888780;margin-top:2px">Vu par les agents immobiliers</div></div>'
+    + '<div style="width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;border:3px solid '+color+';color:'+color+'">'+score+'</div>'
+    + '</div>'
+    + '<div style="height:6px;background:#E8E6E0;border-radius:3px;overflow:hidden;margin-bottom:4px">'
+    + '<div style="height:100%;width:'+score+'%;background:'+color+';border-radius:3px;transition:width .5s"></div></div>'
+    + '<div style="display:flex;justify-content:space-between;font-size:10px;color:#888780;margin-bottom:12px">'
+    + '<span>0</span><span style="color:'+color+';font-weight:600">'+label+' — '+score+'/100</span><span>100</span></div>'
+    + itemsHtml;
 }
 
 function renderPhotos(){

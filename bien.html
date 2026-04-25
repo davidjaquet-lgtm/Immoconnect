@@ -41,6 +41,17 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 .nb-silver{background:#E6F1FB;color:var(--blue)}
 .nb-gold{background:#FAEEDA;color:#854F0B}
 .nb-platinium{background:#E1F5EE;color:var(--teal)}
+.score-dossier{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:14px}
+.score-dossier-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.score-dossier-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+.score-circle-big{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;border:3px solid;flex-shrink:0}
+.score-items{display:flex;flex-direction:column;gap:5px}
+.score-item{display:flex;align-items:center;gap:8px;font-size:11px}
+.score-item-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-ok{background:#1E7A62}
+.dot-no{background:#E8E6E0}
+.score-bar-wrap{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:8px}
+.score-bar-inner{height:100%;border-radius:3px;transition:width .6s ease}
 .mandat-badge{position:absolute;top:16px;right:16px;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;background:#FAEEDA;color:#854F0B}
 .excl-banner{background:linear-gradient(135deg,#854F0B,#C09B5A);border-radius:8px;padding:14px 16px;margin-bottom:14px;color:#fff;font-size:12px;line-height:1.7}
 .excl-banner strong{font-size:14px;display:block;margin-bottom:4px}
@@ -363,6 +374,12 @@ function afficherBien(b, similaires) {
   html += statsHtml;
   if (docsHtml) html += '<div style="margin-bottom:16px">' + docsHtml + '</div>';
 
+  // SCORE DOSSIER — visible uniquement par les agents connectés
+  var userProfils2 = currentUser ? (currentUser.user_metadata?.profils || []) : [];
+  if (userProfils2.includes('agent')) {
+    html += buildScoreDossierHtml(b);
+  }
+
   // RENDEMENT INVESTISSEUR
   var loyer = b.loyer_mensuel || 0;
   var loyerM2 = (b.type_bien||'').toLowerCase().includes('maison') ? 8.5 : 11;
@@ -414,6 +431,53 @@ function afficherBien(b, similaires) {
   document.getElementById('loading').style.display = 'none';
   document.getElementById('content').innerHTML = html;
   document.getElementById('content').style.display = 'block';
+}
+
+// ── SCORE DOSSIER VENDEUR ──
+function calculerScoreDossier(b) {
+  var criteres = [
+    { label: 'Photos (3 minimum)',         ok: b.photos && b.photos.length >= 3,           pts: 10 },
+    { label: 'Description rédigée',        ok: b.description && b.description.length > 50, pts: 10 },
+    { label: 'Surface renseignée',         ok: !!b.surface,                                pts: 5  },
+    { label: 'Nombre de pièces',           ok: !!b.nb_pieces,                              pts: 5  },
+    { label: 'Prix demandé',               ok: !!b.prix,                                   pts: 5  },
+    { label: 'Année de construction',      ok: !!b.annee_construction,                     pts: 5  },
+    { label: 'Valeur locative / Loyer',    ok: !!b.valeur_locative || !!b.loyer_mensuel,   pts: 10 },
+    { label: 'Taxe foncière vérifiée',     ok: !!b.taxe_fonciere_montant,                  pts: 15 },
+    { label: 'Règlement de copropriété',   ok: !!b.copro_doc || b.is_copro === 'Non',      pts: 10 },
+    { label: 'DPE renseigné',              ok: !!b.classe_dpe,                             pts: 15 },
+    { label: 'Adresse complète',           ok: !!b.adresse,                                pts: 5  },
+    { label: 'Géolocalisation',            ok: !!b.latitude && !!b.longitude,              pts: 5  }
+  ]
+  var total = criteres.reduce(function(acc, c) { return acc + c.pts; }, 0)
+  var obtenu = criteres.filter(function(c) { return c.ok; }).reduce(function(acc, c) { return acc + c.pts; }, 0)
+  var score = Math.round(obtenu / total * 100)
+  return { score, criteres, obtenu, total }
+}
+
+function buildScoreDossierHtml(b) {
+  var sd = calculerScoreDossier(b)
+  var s = sd.score
+  var color = s >= 80 ? '#1E7A62' : s >= 50 ? '#D4732A' : '#C0392B'
+  var label = s >= 80 ? 'Excellent' : s >= 60 ? 'Bon' : s >= 40 ? 'Moyen' : 'Incomplet'
+  var html = '<div class="score-dossier">'
+  html += '<div class="score-dossier-header">'
+  html += '<div><div class="score-dossier-title">Score du dossier</div>'
+  html += '<div style="font-size:11px;color:var(--muted);margin-top:2px">Qualité du dossier vendeur</div></div>'
+  html += '<div class="score-circle-big" style="color:' + color + ';border-color:' + color + '">' + s + '</div>'
+  html += '</div>'
+  html += '<div class="score-bar-wrap"><div class="score-bar-inner" style="width:' + s + '%;background:' + color + '"></div></div>'
+  html += '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin:4px 0 10px">'
+  html += '<span>0</span><span style="color:' + color + ';font-weight:600">' + label + ' — ' + s + '/100</span><span>100</span></div>'
+  html += '<div class="score-items">'
+  sd.criteres.forEach(function(c) {
+    html += '<div class="score-item"><div class="score-item-dot ' + (c.ok ? 'dot-ok' : 'dot-no') + '"></div>'
+    html += '<span style="color:' + (c.ok ? 'var(--ink)' : 'var(--muted)') + '">' + c.label + '</span>'
+    html += '<span style="margin-left:auto;font-size:10px;color:' + (c.ok ? 'var(--teal)' : 'var(--muted)') + '">' + (c.ok ? '+' + c.pts + 'pts' : '—') + '</span>'
+    html += '</div>'
+  })
+  html += '</div></div>'
+  return html
 }
 
 // Variable globale exclusivité
