@@ -202,7 +202,14 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
       <div class="form-grid col1">
         <div class="field">
           <label class="lbl">Description *</label>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:10px;color:var(--muted)">Rédigez votre description ou laissez Hanaé le faire pour vous</span>
+            <button type="button" id="btn-hanae-desc" onclick="genererDescriptionHanae()" style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:linear-gradient(135deg,#1E7A62,#185FA5);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:opacity .15s;flex-shrink:0">
+              <span>🤖</span> <span id="btn-hanae-label">Générer avec Hanaé</span>
+            </button>
+          </div>
           <textarea id="description" placeholder="Décrivez votre bien : état général, atouts, environnement, transports…"></textarea>
+          <div id="hanae-desc-status" style="display:none;margin-top:6px;font-size:11px;padding:8px 12px;border-radius:6px"></div>
         </div>
       </div>
       <div class="form-grid col3">
@@ -697,6 +704,118 @@ function getRadio(name){
   return s?s.value:'';
 }
 function showCopro(v){document.getElementById('bloc-copro').style.display=v?'block':'none';}
+// ── GÉNÉRATION DESCRIPTION HANAÉ ──
+async function genererDescriptionHanae() {
+  var btn = document.getElementById('btn-hanae-desc');
+  var label = document.getElementById('btn-hanae-label');
+  var status = document.getElementById('hanae-desc-status');
+  var textarea = document.getElementById('description');
+
+  // Collecter les données du formulaire
+  var type = document.getElementById('type_bien').value;
+  var ville = document.getElementById('ville').value;
+  var cp = document.getElementById('code_postal') ? document.getElementById('code_postal').value : '';
+  var surface = document.getElementById('surface').value;
+  var nbPieces = document.getElementById('nb_pieces').value;
+  var nbChambres = document.getElementById('nb_chambres').value;
+  var etage = document.getElementById('etage').value;
+  var annee = document.getElementById('annee_construction').value;
+  var prix = document.getElementById('prix').value;
+  var parking = getRadio('parking') || 'Non';
+  var exterieur = getRadio('exterieur') || 'Aucun';
+  var cave = getRadio('cave') || 'Non';
+  var ascenseur = getRadio('ascenseur') || 'Non';
+  var piscine = getRadio('piscine') || 'Non';
+  var chauffage = document.getElementById('chauffage') ? document.getElementById('chauffage').value : '';
+  var dpe = document.getElementById('classe_dpe') ? document.getElementById('classe_dpe').value : '';
+  var negociable = getRadio('negociable') || 'Non';
+  var travaux = getRadio('travaux_bool') || 'Non';
+  var natureTravaux = document.getElementById('nature_travaux') ? document.getElementById('nature_travaux').value : '';
+  var descTravaux = document.getElementById('description_travaux') ? document.getElementById('description_travaux').value : '';
+
+  if (!type || !ville) {
+    status.style.display = 'block';
+    status.style.background = '#FAECE7';
+    status.style.color = '#712B13';
+    status.textContent = 'Renseignez au minimum le type de bien et la ville pour générer la description.';
+    return;
+  }
+
+  btn.disabled = true;
+  label.textContent = 'Génération en cours…';
+  status.style.display = 'none';
+
+  var prompt = 'Tu es Hanaé, experte immobilière ImmoConnect. Rédige une description d'annonce immobilière professionnelle, accrocheuse et complète en français, en 3-4 paragraphes (150-200 mots). Ton style : élégant, factuel, valorisant sans être excessif. NE commence PAS par "Découvrez" ou "Venez". Commence directement par les atouts du bien.
+
+'
+    + 'BIEN :
+'
+    + '- Type : ' + type + '
+'
+    + '- Localisation : ' + ville + (cp ? ' (' + cp + ')' : '') + '
+'
+    + '- Surface : ' + (surface || 'NC') + ' m²
+'
+    + '- Pièces : ' + (nbPieces || 'NC') + (nbChambres ? ' dont ' + nbChambres + ' chambres' : '') + '
+'
+    + (etage ? '- Étage : ' + etage + '
+' : '')
+    + (annee ? '- Année construction : ' + annee + '
+' : '')
+    + (prix ? '- Prix : ' + parseInt(prix).toLocaleString('fr-FR') + ' €' + (negociable === 'Oui' ? ' (négociable)' : '') + '
+' : '')
+    + '- Parking : ' + parking + '
+'
+    + '- Extérieur : ' + exterieur + '
+'
+    + (cave !== 'Non' ? '- Cave : oui
+' : '')
+    + (ascenseur !== 'Non' ? '- Ascenseur : oui
+' : '')
+    + (piscine !== 'Non' ? '- Piscine : oui
+' : '')
+    + (chauffage ? '- Chauffage : ' + chauffage + '
+' : '')
+    + (dpe ? '- DPE : ' + dpe + '
+' : '')
+    + (travaux === 'Oui' && natureTravaux ? '- Travaux réalisés : ' + natureTravaux + (descTravaux ? ' — ' + descTravaux : '') + '
+' : '')
+    + '
+Rédige uniquement la description, sans titre, sans bullet points.';
+
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 400,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    var data = await res.json();
+    var texte = data.content && data.content[0] ? data.content[0].text : null;
+
+    if (texte) {
+      textarea.value = texte.trim();
+      status.style.display = 'block';
+      status.style.background = '#E1F5EE';
+      status.style.color = '#085041';
+      status.textContent = '✅ Description générée par Hanaé — vous pouvez la modifier librement.';
+      label.textContent = 'Régénérer';
+    } else {
+      throw new Error('Réponse vide');
+    }
+  } catch(e) {
+    status.style.display = 'block';
+    status.style.background = '#FAECE7';
+    status.style.color = '#712B13';
+    status.textContent = 'Erreur lors de la génération. Réessayez ou rédigez manuellement.';
+    label.textContent = 'Générer avec Hanaé';
+  }
+  btn.disabled = false;
+}
+
 function toggleTravaux(v){document.getElementById('bloc-travaux').style.display=v?'block':'none';}
 
 function calcNiveau(){
@@ -1073,10 +1192,13 @@ async function soumettre(){
   }
 
   btn.textContent = '⏳ Publication…';
-  var {error}=await db.from('annonces_vendeurs').insert([payload]);
+  var {data:insertData, error}=await db.from('annonces_vendeurs').insert([payload]).select('id').single();
   if(error){showToast('Erreur : '+error.message,'err');btn.disabled=false;btn.textContent='Publier mon annonce';return;}
   showToast('✅ Annonce publiée — '+NIV[niveau].label,'ok');
   btn.textContent='✓ Annonce publiée';
+
+  // Ajouter l'id du bien dans le payload pour les alertes
+  if (insertData) payload.id = insertData.id;
 
   // Envoyer alertes agents si Silver, Gold ou Platinium
   if (['silver','gold','platinium'].includes(niveau)) {
