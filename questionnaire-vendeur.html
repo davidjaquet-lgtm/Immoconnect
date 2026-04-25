@@ -704,6 +704,55 @@ function getRadio(name){
   return s?s.value:'';
 }
 function showCopro(v){document.getElementById('bloc-copro').style.display=v?'block':'none';}
+// ── ALERTES BAISSE DE PRIX ──
+async function envoyerAlertesBaissePrix(annonceId, ancienPrix, nouveauPrix, baissePct, bien) {
+  try {
+    // 1. Récupérer tous les utilisateurs qui suivent ce bien
+    var { data: suiveurs } = await db.from('suivi_biens').select('email, profil').eq('annonce_id', annonceId);
+
+    // 2. Récupérer aussi les acheteurs/agents qui ont déjà contacté ce vendeur
+    var { data: contacts } = await db.from('conversations')
+      .select('email_agent, email_vendeur')
+      .or('email_vendeur.eq.' + bien.email_contact + ',annonce_id.eq.' + annonceId);
+
+    // Fusionner les emails uniques
+    var emails = new Set();
+    (suiveurs || []).forEach(function(s) { emails.add(s.email + '|' + s.profil); });
+    (contacts || []).forEach(function(c) {
+      if (c.email_agent && c.email_agent !== bien.email_contact) emails.add(c.email_agent + '|agent');
+    });
+
+    // 3. Envoyer l'alerte à chaque personne
+    for (var entry of emails) {
+      var parts = entry.split('|');
+      var emailDest = parts[0];
+      var profil = parts[1] || 'acheteur';
+      if (!emailDest) continue;
+
+      await db.functions.invoke('envoyer-email', {
+        body: {
+          type: 'baisse_prix',
+          to: emailDest,
+          subject: 'Baisse de prix -' + baissePct + '% sur un bien que vous suivez - ImmoConnect',
+          bien_titre: bien.titre || (bien.type_bien + ' ' + bien.ville),
+          ville: bien.ville || '',
+          surface: bien.surface || '',
+          type_bien: bien.type_bien || '',
+          ancien_prix: Math.round(ancienPrix),
+          nouveau_prix: Math.round(nouveauPrix),
+          baisse_pct: baissePct,
+          baisse_montant: Math.round(ancienPrix - nouveauPrix),
+          profil: profil,
+          lien: 'https://immoconnect-agence.fr/bien.html?id=' + annonceId
+        }
+      }).catch(function(){});
+    }
+    console.log('Alertes baisse prix envoyées : ' + emails.size);
+  } catch(e) {
+    console.warn('Erreur alertes baisse prix:', e.message);
+  }
+}
+
 // ── GÉNÉRATION DESCRIPTION HANAÉ ──
 async function genererDescriptionHanae() {
   var btn = document.getElementById('btn-hanae-desc');
@@ -1249,7 +1298,35 @@ async function soumettre(){
   }
 
   btn.textContent = '⏳ Publication…';
-  var {data:insertData, error}=await db.from('annonces_vendeurs').insert([payload]).select('id').single();
+  // Vérifier si c'est une mise à jour de prix (mode édition)
+  var urlParams = new URLSearchParams(window.location.search);
+  var editId = urlParams.get('edit');
+  var ancienPrix = 0;
+
+  if (editId) {
+    // Mode édition — vérifier si le prix a baissé
+    var { data: ancienBien } = await db.from('annonces_vendeurs').select('prix, prix_initial').eq('id', editId).single();
+    ancienPrix = ancienBien ? (ancienBien.prix || 0) : 0;
+    var nouveauPrix = parseFloat(payload.prix) || 0;
+    var isPrixInitialSet = ancienBien && ancienBien.prix_initial;
+
+    // Définir le prix initial si c'est la première modification
+    if (!isPrixInitialSet && ancienPrix > 0) payload.prix_initial = ancienPrix;
+
+    var { data:insertData, error } = await db.from('annonces_vendeurs').update(payload).eq('id', editId).select('id').single();
+    if (!error && nouveauPrix > 0 && ancienPrix > 0 && nouveauPrix < ancienPrix) {
+      // BAISSE DE PRIX DÉTECTÉE
+      var baissePct = Math.round((ancienPrix - nouveauPrix) / ancienPrix * 100);
+      if (baissePct >= 1) { // Seuil minimum 1%
+        await db.rpc('enregistrer_baisse_prix', { p_annonce_id: editId, p_nouveau_prix: nouveauPrix, p_ancien_prix: ancienPrix }).catch(function(){});
+        await envoyerAlertesBaissePrix(editId, ancienPrix, nouveauPrix, baissePct, payload);
+      }
+    }
+  } else {
+    // Nouvelle annonce — enregistrer le prix initial
+    payload.prix_initial = parseFloat(payload.prix) || 0;
+    var {data:insertData, error}=await db.from('annonces_vendeurs').insert([payload]).select('id').single();
+  }
   if(error){showToast('Erreur : '+error.message,'err');btn.disabled=false;btn.textContent='Publier mon annonce';return;}
   showToast('✅ Annonce publiée — '+NIV[niveau].label,'ok');
   btn.textContent='✓ Annonce publiée';

@@ -289,6 +289,18 @@ function afficherBien(b, similaires) {
   var dpeHtml = '<span class="dpe-badge dpe-' + dpe + '">DPE ' + dpe + '</span>';
 
   // Stats rapides
+  // BADGE BAISSE DE PRIX
+  if (b.prix_precedent && b.prix_precedent > b.prix) {
+    var baissePct = Math.round((b.prix_precedent - b.prix) / b.prix_precedent * 100);
+    var baisseMontant = Math.round(b.prix_precedent - b.prix);
+    html += '<div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px">';
+    html += '<div style="font-size:20px">📉</div>';
+    html += '<div><div style="font-size:13px;font-weight:500;color:#085041">Baisse de prix — -' + baissePct + '% (-' + baisseMontant.toLocaleString("fr-FR") + ' €)</div>';
+    html += '<div style="font-size:11px;color:#1E7A62">Ancien prix : ' + Math.round(b.prix_precedent).toLocaleString("fr-FR") + ' €';
+    if (b.date_derniere_baisse) html += ' · Baissé le ' + new Date(b.date_derniere_baisse).toLocaleDateString("fr-FR");
+    html += '</div></div></div>';
+  }
+
   var statsHtml = '<div class="stats-rapides">';
   statsHtml += '<div class="stat-r"><div class="stat-r-val">' + (b.surface || '—') + '</div><div class="stat-r-lbl">m²</div></div>';
   statsHtml += '<div class="stat-r"><div class="stat-r-val">' + (b.nb_pieces || '—') + '</div><div class="stat-r-lbl">Pièces</div></div>';
@@ -329,8 +341,9 @@ function afficherBien(b, similaires) {
   if (b.taxe_fonciere_verifie) docsHtml += '<div style="font-size:12px;color:var(--teal);margin-bottom:4px">✅ Taxe foncière vérifiée</div>';
   if (b.classe_dpe && b.classe_dpe !== 'NC') docsHtml += '<div style="font-size:12px;color:var(--teal);margin-bottom:4px">✅ DPE disponible</div>';
 
-  // Vérifier exclusivité active avant de construire les boutons
+  // Vérifier exclusivité active et suivi baisse prix
   await checkExclusivite(b.id);
+  await checkSuivi(b.id);
   currentNiv = niv;
   var contactHtml = buildContactButtons(b, niv);
 
@@ -535,6 +548,13 @@ function buildContactButtons(b, niv) {
     html += '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-out" style="margin-top:4px">📊 Rapport Hanaé</a>';
   }
 
+  // BOUTON SUIVI BAISSES DE PRIX pour acheteurs connectés
+  if (currentUser && !isAgent) {
+    html += '<div style="margin-top:8px" id="suivi-wrap-' + b.id + '">';
+    html += '<button id="btn-suivi-' + b.id + '" onclick="toggleSuivi('' + b.id + '')" style="width:100%;padding:9px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:12px;cursor:pointer;color:var(--muted);transition:all .15s" onmouseover="this.style.borderColor='var(--ink)'" onmouseout="this.style.borderColor='var(--line)'">🔔 Alertes baisse de prix</button>';
+    html += '</div>';
+  }
+
   // BOUTON EXCLUSIVITÉ pour agents Expert et Platinium
   if (isAgent && (userForfait === 'expert' || userForfait === 'platinium') && !exclusiviteActive) {
     var duree = userForfait === 'platinium' ? 96 : 48;
@@ -547,6 +567,46 @@ function buildContactButtons(b, niv) {
   }
 
   return html;
+}
+
+// ── SUIVI BAISSES DE PRIX ──
+var isSuivant = false;
+
+async function checkSuivi(bienId) {
+  if (!currentUser) return;
+  var { data } = await db.from('suivi_biens').select('id').eq('annonce_id', bienId).eq('email', currentUser.email).single().catch(function(){ return { data: null }; });
+  isSuivant = !!data;
+  majBtnSuivi(bienId);
+}
+
+function majBtnSuivi(bienId) {
+  var btn = document.getElementById('btn-suivi-' + bienId);
+  if (!btn) return;
+  if (isSuivant) {
+    btn.textContent = '🔔 Alertes activées — Cliquer pour désactiver';
+    btn.style.borderColor = 'var(--teal)';
+    btn.style.color = 'var(--teal)';
+    btn.style.background = '#E1F5EE';
+  } else {
+    btn.textContent = '🔔 Alertes baisse de prix';
+    btn.style.borderColor = 'var(--line)';
+    btn.style.color = 'var(--muted)';
+    btn.style.background = 'transparent';
+  }
+}
+
+async function toggleSuivi(bienId) {
+  if (!currentUser) { alert('Connectez-vous pour activer les alertes.'); return; }
+  var profils = currentUser.user_metadata?.profils || [];
+  var profil = profils.includes('agent') ? 'agent' : profils.includes('investisseur') ? 'investisseur' : 'acheteur';
+  if (isSuivant) {
+    await db.from('suivi_biens').delete().eq('annonce_id', bienId).eq('email', currentUser.email);
+    isSuivant = false;
+  } else {
+    await db.from('suivi_biens').insert({ annonce_id: bienId, email: currentUser.email, profil });
+    isSuivant = true;
+  }
+  majBtnSuivi(bienId);
 }
 
 // ── EXCLUSIVITÉ DE CONTACT ──
