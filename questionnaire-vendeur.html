@@ -103,6 +103,11 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
 /* PHOTOS */
 .photos-limit-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;padding:4px 10px;border-radius:20px}
 .plb-standard{background:#F1EFE8;border:1px solid var(--line);color:var(--muted)}
+.vv-box{background:linear-gradient(135deg,#E1F5EE,#E6F1FB);border:1px solid #9FE1CB;border-radius:8px;padding:14px 16px;margin-top:12px}
+.vv-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(30,122,98,.15);border:1px solid rgba(30,122,98,.3);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;color:#1E7A62;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.vv-tabs{display:flex;gap:6px;margin-bottom:12px}
+.vv-tab{flex:1;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--warm);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;transition:all .15s;text-align:center;font-weight:500;color:var(--muted)}
+.vv-tab.active{border-color:#1E7A62;background:#E1F5EE;color:#1E7A62}
 .plb-silver{background:#E6F1FB;border:1px solid rgba(24,95,165,.2);color:var(--blue)}
 .plb-gold{background:#EAF3DE;border:1px solid #9FD9C0;color:#27500A}
 .plb-platinium{background:#EAF3DE;border:1px solid #9FD9C0;color:#27500A}
@@ -522,6 +527,57 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
     </div>
   </div>
 
+  <!-- VISITE VIRTUELLE — Silver+ -->
+  <div class="section" id="section-vv" style="display:none">
+    <div class="section-head" onclick="toggle('s-vv')">
+      <div class="sec-num num-silver">🥽</div>
+      <div class="sec-ttl">Visite virtuelle <span class="sec-sub">→ disponible Silver et +</span></div>
+      <span class="sec-badge b-silver">Silver+</span>
+      <span class="sec-arrow" id="arr-s-vv">▼</span>
+    </div>
+    <div class="sec-body" id="s-vv">
+      <div class="vv-box">
+        <div class="vv-badge">🥽 Visite virtuelle</div>
+        <p style="font-size:12px;color:#085041;margin-bottom:12px;line-height:1.6">Permettez aux acheteurs et agents de visiter votre bien sans se déplacer. Un badge "Visite virtuelle" apparaît sur votre annonce.</p>
+
+        <div class="vv-tabs">
+          <button type="button" class="vv-tab active" id="vv-tab-lien" onclick="switchVVTab('lien')">🔗 Lien externe</button>
+          <button type="button" class="vv-tab" id="vv-tab-video" onclick="switchVVTab('video')">🎬 Uploader une vidéo</button>
+        </div>
+
+        <!-- Lien externe -->
+        <div id="vv-panel-lien">
+          <div class="field">
+            <label class="lbl">URL de visite virtuelle</label>
+            <input type="url" id="visite_virtuelle_url" placeholder="ex: https://my.matterport.com/show/?m=xxx ou lien YouTube" oninput="majScoreDossier()">
+            <span class="hint">Matterport, YouTube, Vimeo, Kuula, Google Street View…</span>
+          </div>
+          <div id="vv-preview" style="display:none;margin-top:8px;border-radius:8px;overflow:hidden;border:1px solid var(--line)"></div>
+        </div>
+
+        <!-- Upload vidéo -->
+        <div id="vv-panel-video" style="display:none">
+          <div class="field">
+            <label class="lbl">Vidéo de visite (MP4, max 100 Mo)</label>
+            <div class="upload-zone uz-silver" style="padding:20px" id="vv-upload-zone">
+              <input type="file" id="file-visite-video" accept="video/mp4,video/webm,video/mov" onchange="uploadVideoVisite(this)">
+              <div class="upload-icon">🎬</div>
+              <div class="upload-title">Glissez votre vidéo ici</div>
+              <div class="upload-sub">MP4, WebM, MOV — max 100 Mo</div>
+            </div>
+            <div id="vv-upload-progress" style="display:none;margin-top:8px">
+              <div style="background:var(--line);border-radius:4px;height:6px;overflow:hidden">
+                <div id="vv-progress-bar" style="height:100%;background:#1E7A62;width:0%;transition:width .3s;border-radius:4px"></div>
+              </div>
+              <div id="vv-progress-label" style="font-size:11px;color:var(--muted);margin-top:4px">Upload en cours…</div>
+            </div>
+            <div id="vv-video-preview" style="display:none;margin-top:8px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 5 : SILVER — JUSTIFICATIF VALEUR LOCATIVE -->
   <div class="section">
     <div class="section-head" onclick="toggle('s5')">
@@ -865,6 +921,98 @@ Rédige uniquement la description, sans titre, sans bullet points.';
   btn.disabled = false;
 }
 
+// ── VISITE VIRTUELLE ──
+var visitVirtuelleVideoUrl = null;
+
+function switchVVTab(tab) {
+  document.getElementById('vv-tab-lien').className = 'vv-tab' + (tab==='lien'?' active':'');
+  document.getElementById('vv-tab-video').className = 'vv-tab' + (tab==='video'?' active':'');
+  document.getElementById('vv-panel-lien').style.display = tab==='lien' ? 'block' : 'none';
+  document.getElementById('vv-panel-video').style.display = tab==='video' ? 'block' : 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var urlInput = document.getElementById('visite_virtuelle_url');
+  if (urlInput) {
+    urlInput.addEventListener('input', function() {
+      var url = this.value.trim();
+      var preview = document.getElementById('vv-preview');
+      if (!url) { preview.style.display='none'; return; }
+
+      var html = '';
+      if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        var id = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        if (id) html = '<iframe width="100%" height="200" src="https://www.youtube.com/embed/'+id[1]+'" frameborder="0" allowfullscreen></iframe>';
+      } else if (url.includes('vimeo.com')) {
+        var vid = url.match(/vimeo\.com\/(\d+)/);
+        if (vid) html = '<iframe width="100%" height="200" src="https://player.vimeo.com/video/'+vid[1]+'" frameborder="0" allowfullscreen></iframe>';
+      } else if (url.includes('matterport.com')) {
+        html = '<iframe width="100%" height="200" src="'+url+'" frameborder="0" allowfullscreen></iframe>';
+      } else {
+        html = '<div style="padding:12px;font-size:12px;color:var(--teal)">✅ Lien sauvegardé : <a href="'+url+'" target="_blank" style="color:var(--teal)">Ouvrir</a></div>';
+      }
+      if (html) { preview.innerHTML=html; preview.style.display='block'; }
+    });
+  }
+});
+
+async function uploadVideoVisite(input) {
+  var file = input.files[0];
+  if (!file) return;
+  if (file.size > 100 * 1024 * 1024) { alert('Vidéo trop lourde — max 100 Mo.'); return; }
+
+  var progress = document.getElementById('vv-upload-progress');
+  var bar = document.getElementById('vv-progress-bar');
+  var label = document.getElementById('vv-progress-label');
+  var videoPreview = document.getElementById('vv-video-preview');
+
+  progress.style.display = 'block';
+  bar.style.width = '10%';
+  label.textContent = 'Préparation de l'upload…';
+
+  try {
+    var { data: { session } } = await db.auth.getSession();
+    if (!session) { alert('Connectez-vous pour uploader une vidéo.'); return; }
+
+    var ext = file.name.split('.').pop();
+    var fileName = 'visite-' + session.user.id + '-' + Date.now() + '.' + ext;
+
+    bar.style.width = '30%';
+    label.textContent = 'Upload en cours…';
+
+    var { data, error } = await db.storage.from('videos').upload(fileName, file, {
+      contentType: file.type,
+      upsert: true
+    });
+
+    if (error) throw error;
+
+    bar.style.width = '100%';
+    label.textContent = 'Upload terminé !';
+
+    var { data: urlData } = db.storage.from('videos').getPublicUrl(fileName);
+    visitVirtuelleVideoUrl = urlData.publicUrl;
+
+    videoPreview.innerHTML = '<video src="'+visitVirtuelleVideoUrl+'" controls style="width:100%;border-radius:8px;margin-top:4px" preload="metadata"></video>'
+      + '<div style="font-size:11px;color:var(--teal);margin-top:4px">✅ Vidéo uploadée avec succès</div>';
+    videoPreview.style.display = 'block';
+
+    setTimeout(function(){ progress.style.display='none'; }, 1500);
+
+  } catch(e) {
+    label.textContent = 'Erreur : ' + e.message;
+    bar.style.background = 'var(--coral)';
+  }
+}
+
+// Afficher section visite virtuelle si Silver+
+function majSectionVV() {
+  var sectionVV = document.getElementById('section-vv');
+  if (sectionVV) {
+    sectionVV.style.display = (niveau !== 'standard') ? 'block' : 'none';
+  }
+}
+
 function toggleTravaux(v){document.getElementById('bloc-travaux').style.display=v?'block':'none';}
 
 function calcNiveau(){
@@ -909,6 +1057,7 @@ function updateUI(){
   document.getElementById('sn-desc').textContent=cfg.desc;
   document.getElementById('submit-niveau').className='submit-niveau '+cfg.sn;
   majScoreDossier();
+  majSectionVV();
 }
 
 function majScoreDossier() {
