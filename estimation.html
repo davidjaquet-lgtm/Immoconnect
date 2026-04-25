@@ -194,6 +194,7 @@ input:focus,select:focus{border-color:var(--ink)}
     <div class="step-tab active" id="tab1"><span class="step-num">1</span>Votre bien</div>
     <div class="step-tab" id="tab2"><span class="step-num">2</span>Score qualité</div>
     <div class="step-tab" id="tab3"><span class="step-num">3</span>Revenus & rendement</div>
+    <div class="step-tab" id="tab4"><span class="step-num">4</span>Simulation financière</div>
   </div>
   <div class="form-card">
 
@@ -412,9 +413,93 @@ input:focus,select:focus{border-color:var(--ink)}
 
       <div class="form-nav">
         <button class="btn-prev" onclick="allerEtape2()">← Retour</button>
-        <button class="btn-estimer-final" onclick="lancerEstimation()">✨ Lancer l'estimation complète →</button>
+        <button class="btn-next" onclick="allerEtape4()">Étape suivante : simulation financière →</button>
       </div>
       <div class="form-garantie">🎯 Les investisseurs compatibles seront alertés automatiquement · Gratuit</div>
+    </div>
+
+    <!-- ÉTAPE 4 : SIMULATION FINANCIÈRE -->
+    <div id="step4" style="display:none">
+      <div class="form-section-title">🏦 Simulation de financement</div>
+      <div class="form-section-sub">Calculez votre cashflow réel après crédit, la fiscalité et votre enrichissement sur 10-20 ans.</div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="lbl">Apport personnel (€)</label>
+          <input type="number" id="apport" placeholder="ex: 30000" min="0" oninput="majSimulation()">
+        </div>
+        <div class="form-group">
+          <label class="lbl">Taux d'emprunt (%)</label>
+          <input type="number" id="taux-emprunt" placeholder="ex: 3.5" min="0" max="20" step="0.1" value="3.5" oninput="majSimulation()">
+        </div>
+        <div class="form-group">
+          <label class="lbl">Durée du crédit (ans)</label>
+          <select id="duree-credit" onchange="majSimulation()">
+            <option value="10">10 ans</option>
+            <option value="15">15 ans</option>
+            <option value="20" selected>20 ans</option>
+            <option value="25">25 ans</option>
+            <option value="30">30 ans</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="lbl">Assurance emprunteur (%/an)</label>
+          <input type="number" id="taux-assurance" placeholder="ex: 0.3" min="0" max="2" step="0.05" value="0.3" oninput="majSimulation()">
+        </div>
+      </div>
+
+      <div class="form-section-title" style="margin-top:8px">💶 Fiscalité</div>
+      <div class="form-grid" style="margin-top:8px">
+        <div class="form-group">
+          <label class="lbl">Régime fiscal</label>
+          <select id="regime-fiscal" onchange="majSimulation()">
+            <option value="micro">Micro-foncier (30% abattement)</option>
+            <option value="reel">Réel (déduction charges réelles)</option>
+            <option value="lmnp_micro">LMNP Micro-BIC (50% abattement)</option>
+            <option value="lmnp_reel">LMNP Réel (amortissement)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="lbl">Tranche marginale d'imposition</label>
+          <select id="tmi" onchange="majSimulation()">
+            <option value="0">0% — Non imposable</option>
+            <option value="11">11% — Tranche 2</option>
+            <option value="30" selected>30% — Tranche 3</option>
+            <option value="41">41% — Tranche 4</option>
+            <option value="45">45% — Tranche 5</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section-title" style="margin-top:8px">📈 Horizon temporel</div>
+      <div class="form-grid" style="margin-top:8px">
+        <div class="form-group">
+          <label class="lbl">Horizon de projection (ans)</label>
+          <select id="horizon" onchange="majSimulation()">
+            <option value="5">5 ans</option>
+            <option value="10" selected>10 ans</option>
+            <option value="15">15 ans</option>
+            <option value="20">20 ans</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="lbl">Revalorisation annuelle bien (%)</label>
+          <input type="number" id="revalorisation" placeholder="ex: 1.5" min="-5" max="10" step="0.5" value="1.5" oninput="majSimulation()">
+        </div>
+      </div>
+
+      <!-- PREVIEW SIMULATION LIVE -->
+      <div id="simulation-preview" style="display:none;background:var(--bg);border-radius:10px;padding:16px;margin-top:8px;margin-bottom:20px">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">Simulation en temps réel</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px" id="sim-grid"></div>
+        <div id="sim-scenarios" style="margin-top:12px"></div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn-prev" onclick="allerEtape3()">← Retour</button>
+        <button class="btn-estimer-final" onclick="lancerEstimation()">✨ Lancer l'estimation complète →</button>
+      </div>
+      <div class="form-garantie">Simulation indicative — ne constitue pas un conseil en investissement</div>
     </div>
   </div>
 </div>
@@ -580,6 +665,167 @@ function majRendement() {
   document.getElementById('rendement-preview').style.display = 'block';
 }
 
+// ── NAVIGATION ÉTAPE 4 ──
+function allerEtape4() {
+  document.getElementById('step3').style.display = 'none';
+  document.getElementById('step4').style.display = 'block';
+  document.getElementById('tab3').className = 'step-tab done';
+  document.getElementById('tab4').className = 'step-tab active';
+  var prixVente = document.getElementById('prix-vente').value;
+  if (prixVente) majSimulation();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function allerEtape3() {
+  document.getElementById('step4').style.display = 'none';
+  document.getElementById('step3').style.display = 'block';
+  document.getElementById('tab4').className = 'step-tab';
+  document.getElementById('tab3').className = 'step-tab active';
+}
+
+// ── CALCUL MENSUALITÉ CRÉDIT ──
+function calculerMensualite(capital, tauxAnnuel, dureeAns, tauxAssurance) {
+  if (!capital || capital <= 0) return 0;
+  var tauxMensuel = tauxAnnuel / 100 / 12;
+  var assuranceMensuelle = capital * (tauxAssurance / 100) / 12;
+  var n = dureeAns * 12;
+  if (tauxMensuel === 0) return capital / n + assuranceMensuelle;
+  var mensualite = capital * tauxMensuel * Math.pow(1+tauxMensuel, n) / (Math.pow(1+tauxMensuel, n) - 1);
+  return mensualite + assuranceMensuelle;
+}
+
+// ── CALCUL IMPÔT LOCATIF ──
+function calculerImpot(loyerAnnuel, charges, prix, regime, tmi) {
+  var tmiNum = parseFloat(tmi) / 100;
+  var prelevement = 0.172; // prélèvements sociaux 17.2%
+  var revenuImposable = 0;
+
+  if (regime === 'micro') {
+    revenuImposable = loyerAnnuel * 0.70; // 30% abattement
+  } else if (regime === 'reel') {
+    revenuImposable = Math.max(0, loyerAnnuel - charges);
+  } else if (regime === 'lmnp_micro') {
+    revenuImposable = loyerAnnuel * 0.50; // 50% abattement meublé
+  } else if (regime === 'lmnp_reel') {
+    // Amortissement sur 30 ans = 3.33%/an du prix
+    var amortissement = prix * 0.0333;
+    revenuImposable = Math.max(0, loyerAnnuel - charges - amortissement);
+  }
+
+  return Math.round(revenuImposable * (tmiNum + prelevement));
+}
+
+// ── SIMULATION LIVE ──
+function majSimulation() {
+  var prix = parseFloat(document.getElementById('prix-vente').value) || 0;
+  var loyer = parseFloat(document.getElementById('loyer-mensuel').value) || 0;
+  var charges = parseFloat(document.getElementById('charges-annuelles').value) || 0;
+  var travaux = parseFloat(document.getElementById('travaux-montant').value) || 0;
+  var surface = parseFloat(document.getElementById('surface').value) || 0;
+  var type = document.getElementById('type-bien').value || '';
+
+  // Loyer auto si non saisi
+  var loyerM2 = type.toLowerCase().includes('maison') ? 8.5 : 11;
+  var loyerEffectif = loyer > 0 ? loyer : (surface > 0 ? Math.round(loyerM2 * surface) : 0);
+
+  var apport = parseFloat(document.getElementById('apport').value) || 0;
+  var tauxEmprunt = parseFloat(document.getElementById('taux-emprunt').value) || 3.5;
+  var dureeCredit = parseInt(document.getElementById('duree-credit').value) || 20;
+  var tauxAssurance = parseFloat(document.getElementById('taux-assurance').value) || 0.3;
+  var regime = document.getElementById('regime-fiscal').value;
+  var tmi = document.getElementById('tmi').value;
+  var horizon = parseInt(document.getElementById('horizon').value) || 10;
+  var revalorisation = parseFloat(document.getElementById('revalorisation').value) || 1.5;
+
+  if (!prix || !loyerEffectif) {
+    document.getElementById('simulation-preview').style.display = 'none';
+    return;
+  }
+
+  var fraisNotaire = prix * 0.075;
+  var coutTotal = prix + fraisNotaire + travaux;
+  var capitalEmprunte = Math.max(0, coutTotal - apport);
+  var mensualiteCredit = calculerMensualite(capitalEmprunte, tauxEmprunt, dureeCredit, tauxAssurance);
+  var loyerAnnuel = loyerEffectif * 12;
+  var chargesTotal = charges + travaux / 10;
+  var impotAnnuel = calculerImpot(loyerAnnuel, chargesTotal, prix, regime, tmi);
+  var cashflowBrut = loyerEffectif - chargesTotal / 12;
+  var cashflowNet = loyerEffectif - chargesTotal / 12 - mensualiteCredit - impotAnnuel / 12;
+  var rdtBrut = (loyerAnnuel / prix * 100).toFixed(2);
+  var rdtNet = ((loyerAnnuel - chargesTotal) / prix * 100).toFixed(2);
+
+  // Horizon temporel
+  var valeurFuture = prix * Math.pow(1 + revalorisation/100, horizon);
+  var plusValue = valeurFuture - prix;
+  var cashflowsCumules = cashflowNet * 12 * Math.min(horizon, dureeCredit);
+  var capitalRembourse = capitalEmprunte - (capitalEmprunte * Math.pow(1+tauxEmprunt/100/12, -dureeCredit*12+horizon*12) / (1 - Math.pow(1+tauxEmprunt/100/12, -(dureeCredit-horizon)*12)));
+  var richesseCree = plusValue + cashflowsCumules;
+  var tri = richesseCree > 0 ? ((Math.pow(richesseCree / Math.max(1,apport), 1/horizon) - 1) * 100).toFixed(1) : '0';
+
+  // Scénarios
+  var scenarios = [
+    {
+      label: 'Vide',
+      loyerM2Vide: loyerM2,
+      loyer: loyerEffectif,
+      rdtBrut: rdtBrut,
+      cashflow: Math.round(cashflowNet),
+      impot: Math.round(impotAnnuel/12)
+    },
+    {
+      label: 'Meublé (LMNP)',
+      loyer: Math.round(loyerEffectif * 1.15),
+      rdtBrut: (loyerAnnuel * 1.15 / prix * 100).toFixed(1),
+      cashflow: Math.round(cashflowNet + loyerEffectif * 0.15 - calculerImpot(loyerAnnuel*1.15, chargesTotal, prix, 'lmnp_micro', tmi)/12 + impotAnnuel/12),
+      impot: Math.round(calculerImpot(loyerAnnuel*1.15, chargesTotal, prix, 'lmnp_micro', tmi)/12)
+    },
+    {
+      label: 'Courte durée (Airbnb)',
+      loyer: Math.round(loyerEffectif * 1.8),
+      rdtBrut: (loyerAnnuel * 1.8 / prix * 100).toFixed(1),
+      cashflow: Math.round(cashflowNet + loyerEffectif * 0.8 - calculerImpot(loyerAnnuel*1.8, chargesTotal+loyerAnnuel*0.15, prix, 'lmnp_micro', tmi)/12 + impotAnnuel/12),
+      impot: Math.round(calculerImpot(loyerAnnuel*1.8, chargesTotal+loyerAnnuel*0.15, prix, 'lmnp_micro', tmi)/12)
+    }
+  ];
+
+  // Afficher
+  document.getElementById('simulation-preview').style.display = 'block';
+
+  var cashCol = cashflowNet >= 0 ? 'var(--teal)' : 'var(--coral)';
+  var simGrid = ''
+    + '<div style="background:var(--warm);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--line)"><div style="font-size:18px;font-weight:500">' + Math.round(mensualiteCredit).toLocaleString('fr-FR') + ' €</div><div style="font-size:10px;color:var(--muted)">Mensualité crédit</div></div>'
+    + '<div style="background:var(--warm);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--line)"><div style="font-size:18px;font-weight:500">' + Math.round(impotAnnuel/12).toLocaleString('fr-FR') + ' €</div><div style="font-size:10px;color:var(--muted)">Impôt/mois (' + regime + ')</div></div>'
+    + '<div style="background:'+(cashflowNet>=0?'#E1F5EE':'#FAECE7')+';border-radius:8px;padding:12px;text-align:center;border:2px solid '+(cashflowNet>=0?'#9FE1CB':'#F4B8A8')+'"><div style="font-size:20px;font-weight:600;color:'+cashCol+'">'+(cashflowNet>=0?'+':'')+Math.round(cashflowNet).toLocaleString('fr-FR')+' €</div><div style="font-size:10px;color:'+cashCol+';font-weight:600">Cashflow net/mois</div></div>'
+    + '<div style="background:var(--warm);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--line)"><div style="font-size:18px;font-weight:500;color:var(--teal)">' + tri + '%</div><div style="font-size:10px;color:var(--muted)">TRI sur ' + horizon + ' ans</div></div>';
+  document.getElementById('sim-grid').innerHTML = simGrid;
+
+  // Projection
+  var projHtml = '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Enrichissement sur ' + horizon + ' ans</div>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+    + '<div style="flex:1;min-width:120px;background:var(--warm);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--line)"><div style="font-size:14px;font-weight:500;color:var(--teal)">+' + Math.round(plusValue/1000) + ' k€</div><div style="font-size:10px;color:var(--muted)">Plus-value estimée</div></div>'
+    + '<div style="flex:1;min-width:120px;background:var(--warm);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--line)"><div style="font-size:14px;font-weight:500;color:'+(cashflowsCumules>=0?'var(--teal)':'var(--coral)')+'">'+(cashflowsCumules>=0?'+':'')+Math.round(cashflowsCumules/1000)+' k€</div><div style="font-size:10px;color:var(--muted)">Cashflows cumulés</div></div>'
+    + '<div style="flex:1;min-width:120px;background:#E1F5EE;border-radius:8px;padding:10px;text-align:center;border:1px solid #9FE1CB"><div style="font-size:14px;font-weight:600;color:var(--teal)">'+(richesseCree>=0?'+':'')+Math.round(richesseCree/1000)+' k€</div><div style="font-size:10px;color:var(--teal);font-weight:600">Richesse créée</div></div>'
+    + '</div>';
+
+  // Comparaison scénarios
+  projHtml += '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 8px">Comparaison des scénarios locatifs</div>';
+  projHtml += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">';
+  projHtml += '<thead><tr style="background:var(--ink);color:#fff"><th style="padding:8px 10px;text-align:left;border-radius:4px 0 0 0">Scénario</th><th style="padding:8px 10px;text-align:right">Loyer/mois</th><th style="padding:8px 10px;text-align:right">Rdt brut</th><th style="padding:8px 10px;text-align:right">Impôt/mois</th><th style="padding:8px 10px;text-align:right;border-radius:0 4px 0 0">Cashflow net</th></tr></thead><tbody>';
+  scenarios.forEach(function(sc, i) {
+    var cf = sc.cashflow;
+    var cfCol = cf >= 0 ? '#1E7A62' : '#C0392B';
+    projHtml += '<tr style="background:'+(i%2===0?'var(--warm)':'var(--bg)')+'">'
+      + '<td style="padding:7px 10px;font-weight:500">' + sc.label + '</td>'
+      + '<td style="padding:7px 10px;text-align:right">' + sc.loyer.toLocaleString('fr-FR') + ' €</td>'
+      + '<td style="padding:7px 10px;text-align:right;color:var(--teal)">' + sc.rdtBrut + '%</td>'
+      + '<td style="padding:7px 10px;text-align:right;color:var(--coral)">-' + sc.impot.toLocaleString('fr-FR') + ' €</td>'
+      + '<td style="padding:7px 10px;text-align:right;font-weight:600;color:'+cfCol+'">'+(cf>=0?'+':'')+cf.toLocaleString('fr-FR')+' €</td>'
+      + '</tr>';
+  });
+  projHtml += '</tbody></table></div>';
+  document.getElementById('sim-scenarios').innerHTML = projHtml;
+}
+
 // ── LANCER ESTIMATION ──
 async function lancerEstimation() {
   var type = document.getElementById('type-bien').value;
@@ -593,6 +839,15 @@ async function lancerEstimation() {
   var chargesAnnuelles = parseFloat(document.getElementById('charges-annuelles').value) || 0;
   var travauxMontant = parseFloat(document.getElementById('travaux-montant').value) || 0;
   var coeffQualite = calculerCoeffTotal();
+  // Étape 4 — Simulation financière
+  var apport = parseFloat(document.getElementById('apport').value) || 0;
+  var tauxEmprunt = parseFloat(document.getElementById('taux-emprunt').value) || 3.5;
+  var dureeCredit = parseInt(document.getElementById('duree-credit').value) || 20;
+  var tauxAssurance = parseFloat(document.getElementById('taux-assurance').value) || 0.3;
+  var regimeFiscal = document.getElementById('regime-fiscal').value;
+  var tmi = document.getElementById('tmi').value;
+  var horizon = parseInt(document.getElementById('horizon').value) || 10;
+  var revalorisation = parseFloat(document.getElementById('revalorisation').value) || 1.5;
 
   document.getElementById('form-section').style.display = 'none';
   document.getElementById('hero-section').style.paddingBottom = '40px';
@@ -613,7 +868,13 @@ async function lancerEstimation() {
 
   // Calcul rendement final
   var rdtData = calculerRendement(prixVente, loyerMensuel, chargesAnnuelles, travauxMontant, surface, type);
-  afficherResultats({type, cp, surface, annee, nbPieces, prixSouhaite, prixVente, loyerMensuel, chargesAnnuelles, travauxMontant, coeffQualite, dvf, insee, calculs, synthese, scoreData: Object.assign({},scoreData), rdtData});
+  // Calcul simulation financière
+  var simData = null;
+  if (prixVente > 0) {
+    var loyerEff = loyerMensuel > 0 ? loyerMensuel : (surface > 0 ? Math.round((type.toLowerCase().includes('maison')?8.5:11)*surface) : 0);
+    simData = calculerSimulationFinanciere(prixVente, loyerEff, chargesAnnuelles, travauxMontant, apport, tauxEmprunt, dureeCredit, tauxAssurance, regimeFiscal, tmi, horizon, revalorisation, type);
+  }
+  afficherResultats({type, cp, surface, annee, nbPieces, prixSouhaite, prixVente, loyerMensuel, chargesAnnuelles, travauxMontant, coeffQualite, dvf, insee, calculs, synthese, scoreData: Object.assign({},scoreData), rdtData, simData});
 }
 
 async function animerEtape(idActif, idSuivant, delai) {
@@ -719,6 +980,35 @@ Explique brièvement la méthode (DVF + Notaires-INSEE + score qualité). Commen
     var data = await res.json();
     return data.content&&data.content[0] ? data.content[0].text : null;
   } catch(e) { return null; }
+}
+
+// ── CALCUL SIMULATION FINANCIÈRE ──
+function calculerSimulationFinanciere(prix, loyer, charges, travaux, apport, tauxEmprunt, dureeCredit, tauxAssurance, regime, tmi, horizon, revalorisation, type) {
+  var fraisNotaire = prix * 0.075;
+  var coutTotal = prix + fraisNotaire + travaux;
+  var capitalEmprunte = Math.max(0, coutTotal - apport);
+  var mensualiteCredit = calculerMensualite(capitalEmprunte, tauxEmprunt, dureeCredit, tauxAssurance);
+  var loyerAnnuel = loyer * 12;
+  var chargesTotal = charges + travaux / 10;
+  var impotAnnuel = calculerImpot(loyerAnnuel, chargesTotal, prix, regime, tmi);
+  var cashflowNet = loyer - chargesTotal/12 - mensualiteCredit - impotAnnuel/12;
+  var rdtBrut = loyerAnnuel / prix * 100;
+  var rdtNet = (loyerAnnuel - chargesTotal) / prix * 100;
+  var valeurFuture = prix * Math.pow(1+revalorisation/100, horizon);
+  var plusValue = valeurFuture - prix;
+  var cashflowsCumules = cashflowNet * 12 * Math.min(horizon, dureeCredit);
+  var richesseCree = plusValue + cashflowsCumules;
+  var tri = richesseCree > 0 && apport > 0 ? (Math.pow(richesseCree/apport, 1/horizon) - 1) * 100 : null;
+
+  // Scénarios
+  var loyerM2 = type.toLowerCase().includes('maison') ? 8.5 : 11;
+  var scenarios = [
+    { label:'Location vide', loyer:loyer, impot:Math.round(impotAnnuel/12), cashflow:Math.round(cashflowNet), rdtBrut:rdtBrut.toFixed(1) },
+    { label:'Meublé LMNP', loyer:Math.round(loyer*1.15), impot:Math.round(calculerImpot(loyerAnnuel*1.15,chargesTotal,prix,'lmnp_micro',tmi)/12), cashflow:Math.round(cashflowNet+loyer*0.15-(calculerImpot(loyerAnnuel*1.15,chargesTotal,prix,'lmnp_micro',tmi)-impotAnnuel)/12), rdtBrut:(loyerAnnuel*1.15/prix*100).toFixed(1) },
+    { label:'Courte durée', loyer:Math.round(loyer*1.8), impot:Math.round(calculerImpot(loyerAnnuel*1.8,chargesTotal+loyerAnnuel*0.15,prix,'lmnp_micro',tmi)/12), cashflow:Math.round(cashflowNet+loyer*0.8-(calculerImpot(loyerAnnuel*1.8,chargesTotal+loyerAnnuel*0.15,prix,'lmnp_micro',tmi)-impotAnnuel)/12), rdtBrut:(loyerAnnuel*1.8/prix*100).toFixed(1) }
+  ];
+
+  return { capitalEmprunte:Math.round(capitalEmprunte), mensualiteCredit:Math.round(mensualiteCredit), impotMensuel:Math.round(impotAnnuel/12), cashflowNet:Math.round(cashflowNet), rdtBrut:rdtBrut.toFixed(2), rdtNet:rdtNet.toFixed(2), valeurFuture:Math.round(valeurFuture), plusValue:Math.round(plusValue), cashflowsCumules:Math.round(cashflowsCumules), richesseCree:Math.round(richesseCree), tri:tri?tri.toFixed(1):null, regime, tmi, horizon, dureeCredit, scenarios };
 }
 
 // ── CALCUL RENDEMENT FINAL ──
@@ -877,6 +1167,41 @@ function afficherResultats(d) {
     html += '</div></div>';
   }
 
+  // SIMULATION FINANCIÈRE
+  if (d.simData) {
+    var sim = d.simData;
+    var cashCol = sim.cashflowNet >= 0 ? 'var(--teal)' : 'var(--coral)';
+    html += '<div class="section"><div class="section-head"><div class="section-icon">🏦</div><div class="section-title">Simulation financière complète</div><div class="section-badge">Financement + Fiscalité + Horizon</div></div><div class="section-body">';
+
+    // Stats principales
+    html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">';
+    html += '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><div style="font-size:16px;font-weight:500">' + sim.mensualiteCredit.toLocaleString('fr-FR') + ' €</div><div style="font-size:10px;color:var(--muted)">Mensualité crédit</div></div>';
+    html += '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><div style="font-size:16px;font-weight:500;color:var(--coral)">-' + sim.impotMensuel.toLocaleString('fr-FR') + ' €</div><div style="font-size:10px;color:var(--muted)">Impôt/mois</div></div>';
+    html += '<div style="background:'+(sim.cashflowNet>=0?'#E1F5EE':'#FAECE7')+';border-radius:8px;padding:12px;text-align:center;border:2px solid '+(sim.cashflowNet>=0?'#9FE1CB':'#F4B8A8')+'"><div style="font-size:18px;font-weight:600;color:'+cashCol+'">'+(sim.cashflowNet>=0?'+':'')+sim.cashflowNet.toLocaleString('fr-FR')+' €</div><div style="font-size:10px;color:'+cashCol+';font-weight:600">Cashflow net/mois</div></div>';
+    html += '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><div style="font-size:16px;font-weight:500;color:var(--teal)">'+(sim.tri?sim.tri+'%':'ND')+'</div><div style="font-size:10px;color:var(--muted)">TRI ' + sim.horizon + ' ans</div></div>';
+    html += '</div>';
+
+    // Projection horizon
+    html += '<div style="background:var(--bg);border-radius:8px;padding:14px;margin-bottom:16px">';
+    html += '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Enrichissement sur ' + sim.horizon + ' ans</div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
+    html += '<div style="text-align:center"><div style="font-size:15px;font-weight:500;color:var(--teal)">+' + Math.round(sim.plusValue/1000) + ' k€</div><div style="font-size:10px;color:var(--muted)">Plus-value estimée</div></div>';
+    html += '<div style="text-align:center"><div style="font-size:15px;font-weight:500;color:'+(sim.cashflowsCumules>=0?'var(--teal)':'var(--coral)')+'">'+(sim.cashflowsCumules>=0?'+':'')+Math.round(sim.cashflowsCumules/1000)+' k€</div><div style="font-size:10px;color:var(--muted)">Cashflows cumulés</div></div>';
+    html += '<div style="text-align:center"><div style="font-size:18px;font-weight:700;color:var(--teal)">'+(sim.richesseCree>=0?'+':'')+Math.round(sim.richesseCree/1000)+' k€</div><div style="font-size:10px;color:var(--teal);font-weight:600">Richesse créée totale</div></div>';
+    html += '</div></div>';
+
+    // Comparaison scénarios
+    html += '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Comparaison des scénarios locatifs</div>';
+    html += '<div style="overflow-x:auto"><table class="ventes-table"><thead><tr><th>Scénario</th><th style="text-align:right">Loyer/mois</th><th style="text-align:right">Rdt brut</th><th style="text-align:right">Impôt/mois</th><th style="text-align:right">Cashflow net</th></tr></thead><tbody>';
+    sim.scenarios.forEach(function(sc) {
+      var cfCol = sc.cashflow >= 0 ? 'var(--teal)' : 'var(--coral)';
+      html += '<tr><td style="font-weight:500">' + sc.label + '</td><td style="text-align:right">' + sc.loyer.toLocaleString('fr-FR') + ' €</td><td style="text-align:right;color:var(--teal)">' + sc.rdtBrut + '%</td><td style="text-align:right;color:var(--coral)">-' + sc.impot.toLocaleString('fr-FR') + ' €</td><td style="text-align:right;font-weight:600;color:'+cfCol+'">'+(sc.cashflow>=0?'+':'')+sc.cashflow.toLocaleString('fr-FR')+' €</td></tr>';
+    });
+    html += '</tbody></table></div>';
+    html += '<div style="font-size:10px;color:var(--muted);margin-top:10px;line-height:1.6">Simulation indicative basée sur les données saisies · Régime : ' + sim.regime + ' · TMI : ' + sim.tmi + '% · Durée crédit : ' + sim.dureeCredit + ' ans</div>';
+    html += '</div></div>';
+  }
+
   // CTA
   html += '<div class="cta-box"><div class="cta-title">Publiez votre bien gratuitement</div><div class="cta-sub">Votre estimation est prête. Publiez maintenant et bénéficiez<br>de tout le réseau ImmoConnect — agents et acheteurs qualifiés.</div><div class="cta-btns"><a href="questionnaire-vendeur.html" class="btn-gold">🏠 Publier mon annonce gratuitement →</a><a href="rapport-hanae.html" class="btn-outline-w">📋 Rapport complet Hanaé</a></div></div>';
 
@@ -894,6 +1219,8 @@ function recommencer() {
   document.getElementById('step2').style.display = 'none';
   document.getElementById('tab1').className = 'step-tab active';
   document.getElementById('tab2').className = 'step-tab';
+  document.getElementById('step4').style.display = 'none';
+  document.getElementById('tab4').className = 'step-tab';
   ['step-dvf','step-insee','step-notaires','step-qualite','step-hanae'].forEach(function(id,i){ document.getElementById(id).className=i===0?'step-item active':'step-item'; });
   window.scrollTo({top:0,behavior:'smooth'});
 }
