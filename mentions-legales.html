@@ -22,6 +22,8 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 .sec-body a{color:var(--teal);text-decoration:none}
 .sec-body ul{padding-left:18px;margin-top:8px}
 .sec-body ul li{margin-bottom:6px}
+.alert-box{background:#FAECE7;border:1px solid rgba(153,60,29,.2);border-radius:8px;padding:12px 14px;margin:12px 0;font-size:12px;color:#712B13;line-height:1.7}
+.info-box{background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:12px 14px;margin:12px 0;font-size:12px;color:#0A4A35;line-height:1.7}
 </style>
 </head>
 <body>
@@ -30,112 +32,172 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 </nav>
 <div class="page">
   <div class="page-title">Mentions légales</div>
-  <div class="page-sub">Dernière mise à jour : avril 2026</div>
+  <div class="page-sub">Dernière mise à jour : 25 avril 2026 — Conformes aux articles L111-1 à L111-7 du Code de la consommation et à la LCEN</div>
 
+  <!-- 1. ÉDITEUR -->
   <div class="section">
     <div class="sec-title">1. Éditeur du site</div>
     <div class="sec-body">
       <strong>ImmoConnect</strong><br>
-      Plateforme de mise en relation immobilière<br>
+      Plateforme numérique de mise en relation immobilière<br>
       Site web : <a href="https://immoconnect-agence.fr">immoconnect-agence.fr</a><br>
-      Email : contact@immoconnect-agence.fr<br><br>
-      <strong>Directeur de la publication :</strong> [Nom du responsable]<br>
-      <strong>Statut :</strong> [SAS / SARL / Auto-entrepreneur — à compléter]<br>
-      <strong>SIRET :</strong> [Numéro SIRET — à compléter]<br>
-      <strong>Siège social :</strong> [Adresse — à compléter]
+      Email : <a href="mailto:contact@immoconnect-agence.fr">contact@immoconnect-agence.fr</a><br><br>
+      <strong>Directeur de la publication :</strong> David Jaquet<br>
+      <strong>Statut juridique :</strong> [Auto-entrepreneur / SAS — à compléter après immatriculation]<br>
+      <strong>SIRET :</strong> [À compléter après immatriculation]<br>
+      <strong>Siège social :</strong> [Adresse complète — à compléter]<br><br>
+      <div class="alert-box">⚠️ Les mentions SIRET, adresse et statut juridique seront complétées dès l'immatriculation de la société. Dans l'intervalle, ImmoConnect opère à titre de projet en phase de test.</div>
     </div>
   </div>
 
+  <!-- 2. HÉBERGEMENT -->
   <div class="section">
     <div class="sec-title">2. Hébergement</div>
     <div class="sec-body">
-      Le site ImmoConnect est hébergé par :<br><br>
-      <strong>Vercel Inc.</strong><br>
+      <strong>Hébergeur du site web :</strong><br>
+      Vercel Inc.<br>
       340 Pine Street, Suite 701<br>
       San Francisco, CA 94104, États-Unis<br>
-      <a href="https://vercel.com">vercel.com</a><br><br>
-      Les données sont également stockées sur :<br>
-      <strong>Supabase Inc.</strong> — infrastructure cloud conforme RGPD (serveurs en Europe)
+      <a href="https://vercel.com" target="_blank">vercel.com</a><br><br>
+      <strong>Hébergeur de la base de données et des fichiers :</strong><br>
+      Supabase Inc.<br>
+      Infrastructure cloud — Serveurs hébergés en Europe (région AWS eu-west-1)<br>
+      Conforme RGPD — DPA disponible sur <a href="https://supabase.com/privacy" target="_blank">supabase.com/privacy</a><br><br>
+      <strong>Service d'envoi d'emails :</strong><br>
+      Resend Inc. — <a href="https://resend.com" target="_blank">resend.com</a><br><br>
+      <strong>Intelligence artificielle :</strong><br>
+      Anthropic PBC — API Claude utilisée pour le Rapport Hanaé<br>
+      <a href="https://anthropic.com/privacy" target="_blank">anthropic.com/privacy</a>
     </div>
   </div>
 
+  <!-- 3. ACTIVITÉ -->
   <div class="section">
-    <div class="sec-title">3. Activité de la plateforme</div>
+    <div class="sec-title">3. Nature et activité de la plateforme</div>
     <div class="sec-body">
-      ImmoConnect est une <strong>plateforme de mise en relation</strong> entre vendeurs particuliers, acheteurs, investisseurs et agents immobiliers professionnels. ImmoConnect n'est pas une agence immobilière et n'agit pas en qualité de mandataire immobilier.<br><br>
-      Les agents immobiliers inscrits sur la plateforme sont des professionnels indépendants titulaires de leur carte professionnelle délivrée par la CCI conformément à la loi Hoguet du 2 janvier 1970.
+      ImmoConnect est une <strong>plateforme numérique de mise en relation</strong> entre vendeurs particuliers, acheteurs, investisseurs et agents immobiliers professionnels.<br><br>
+      <strong>ImmoConnect n'est pas une agence immobilière.</strong> La société n'exerce pas d'activité d'entremise immobilière au sens de la loi Hoguet n°70-9 du 2 janvier 1970, ne détient pas de carte professionnelle immobilière et n'intervient pas dans la négociation ou la conclusion des transactions entre utilisateurs.<br><br>
+      ImmoConnect agit en qualité d'<strong>hébergeur de contenu</strong> au sens de l'article 6-I-2 de la loi pour la Confiance dans l'Économie Numérique (LCEN) du 21 juin 2004 et d'<strong>opérateur de plateforme en ligne</strong> au sens du règlement européen DSA (Digital Services Act — Règlement UE 2022/2065).<br><br>
+      <div class="info-box">✅ Les agents immobiliers inscrits sur la plateforme sont des professionnels indépendants titulaires de leur propre carte professionnelle délivrée par la CCI conformément à la loi Hoguet. Ils exercent leur activité sous leur seule responsabilité et dans le cadre légal qui leur est propre.</div>
     </div>
   </div>
 
+  <!-- 4. RGPD -->
   <div class="section">
     <div class="sec-title">4. Protection des données personnelles — RGPD</div>
     <div class="sec-body">
-      ImmoConnect collecte et traite des données personnelles dans le respect du Règlement Général sur la Protection des Données (RGPD) — Règlement UE 2016/679.<br><br>
+      ImmoConnect collecte et traite des données personnelles conformément au Règlement Général sur la Protection des Données (RGPD — Règlement UE 2016/679) et à la loi Informatique et Libertés modifiée.<br><br>
+      <strong>Responsable du traitement :</strong> ImmoConnect — <a href="mailto:contact@immoconnect-agence.fr">contact@immoconnect-agence.fr</a><br><br>
       <strong>Données collectées :</strong>
       <ul>
         <li>Données d'identification (nom, prénom, email, téléphone)</li>
-        <li>Données relatives au bien immobilier</li>
-        <li>Documents justificatifs uploadés (taxe foncière, DPE, copropriété)</li>
-        <li>Données de navigation (cookies, logs)</li>
+        <li>Données professionnelles agents (carte T, numéro CCI, agence)</li>
+        <li>Documents justificatifs vendeurs (taxe foncière, DPE, copropriété) — stockés de façon sécurisée, jamais transmis directement aux tiers</li>
+        <li>Données financières indicatives (capacité d'emprunt, budget, rendement souhaité)</li>
+        <li>Données de navigation (logs, adresse IP) — 12 mois maximum</li>
       </ul>
       <br>
       <strong>Finalités du traitement :</strong>
       <ul>
-        <li>Mise en relation entre vendeurs, acheteurs et agents</li>
-        <li>Vérification de la véracité des annonces</li>
+        <li>Fourniture du service de mise en relation</li>
+        <li>Vérification indicative des annonces et des habilitations professionnelles</li>
+        <li>Envoi d'alertes et notifications personnalisées</li>
+        <li>Sécurité et prévention de la fraude</li>
         <li>Amélioration du service</li>
       </ul>
       <br>
-      <strong>Confidentialité des documents :</strong> Les justificatifs uploadés (taxe foncière, DPE, copropriété) ne sont jamais transmis directement aux acheteurs ou agents. Seul leur statut "vérifié et attesté" est rendu visible. ImmoConnect agit en tant que tiers de confiance.<br><br>
-      <strong>Durée de conservation :</strong> Les données sont conservées 3 ans après la dernière activité du compte, puis supprimées.<br><br>
-      <strong>Vos droits :</strong> Conformément au RGPD, vous disposez des droits d'accès, rectification, suppression, portabilité et opposition. Pour les exercer : <a href="mailto:contact@immoconnect-agence.fr">contact@immoconnect-agence.fr</a><br><br>
-      <strong>Autorité de contrôle :</strong> CNIL — <a href="https://www.cnil.fr" target="_blank">cnil.fr</a>
+      <strong>Durées de conservation :</strong>
+      <ul>
+        <li>Données de compte : 3 ans après la dernière activité</li>
+        <li>Documents fiscaux : durée de publication + 1 an</li>
+        <li>Données de facturation : 10 ans (obligation légale)</li>
+        <li>Logs de connexion : 12 mois (obligation légale LCEN)</li>
+      </ul>
+      <br>
+      <strong>Vos droits :</strong> Accès, rectification, suppression, portabilité, limitation, opposition — à exercer à : <a href="mailto:contact@immoconnect-agence.fr">contact@immoconnect-agence.fr</a> (délai de réponse : 30 jours).<br><br>
+      <strong>Autorité de contrôle :</strong> CNIL — <a href="https://www.cnil.fr" target="_blank">cnil.fr</a> — 3 Place de Fontenoy, 75007 Paris.<br><br>
+      <strong>Notification de violation :</strong> En cas de violation de données à caractère personnel susceptible d'engendrer un risque, ImmoConnect notifiera la CNIL dans les 72 heures et informera les personnes concernées dans les meilleurs délais.
     </div>
   </div>
 
+  <!-- 5. RESPONSABILITÉ -->
   <div class="section">
-    <div class="sec-title">5. Responsabilité</div>
+    <div class="sec-title">5. Limitation de responsabilité</div>
     <div class="sec-body">
-      ImmoConnect s'efforce de maintenir des informations exactes sur sa plateforme mais ne peut garantir l'exhaustivité ou l'exactitude des annonces publiées par les vendeurs. Chaque vendeur est responsable des informations qu'il déclare et signe une déclaration sur l'honneur attestant leur véracité.<br><br>
-      ImmoConnect ne saurait être tenu responsable des dommages résultant d'une utilisation frauduleuse de la plateforme ou d'informations inexactes communiquées par un utilisateur.
+      ImmoConnect s'efforce de maintenir la plateforme disponible et ses informations à jour, mais ne peut garantir l'exhaustivité, l'exactitude ou la sincérité des annonces publiées par les utilisateurs.<br><br>
+      <strong>Chaque vendeur est seul responsable</strong> des informations qu'il déclare. Il signe une déclaration sur l'honneur lors de la publication attestant la véracité des informations communiquées. Toute fausse déclaration engage sa responsabilité civile et pénale.<br><br>
+      ImmoConnect ne saurait être tenu responsable des dommages résultant de :
+      <ul>
+        <li>Informations inexactes, incomplètes ou frauduleuses communiquées par un utilisateur</li>
+        <li>Vices cachés, servitudes ou charges non déclarés par le vendeur</li>
+        <li>Transactions conclues entre utilisateurs (prix, conditions, résultat)</li>
+        <li>Comportement des utilisateurs lors des visites ou après la transaction</li>
+        <li>Erreurs ou biais des estimations générées par intelligence artificielle</li>
+        <li>Interruptions de service, cas de force majeure ou défaillances de prestataires tiers</li>
+        <li>Utilisation frauduleuse de la plateforme par un tiers</li>
+      </ul>
+      <br>
+      La responsabilité d'ImmoConnect, si elle devait être retenue, serait limitée aux sommes versées par l'utilisateur au cours des 12 derniers mois.
     </div>
   </div>
 
+  <!-- 6. PROPRIÉTÉ INTELLECTUELLE -->
   <div class="section">
     <div class="sec-title">6. Propriété intellectuelle</div>
     <div class="sec-body">
-      L'ensemble des contenus présents sur le site immoconnect-agence.fr (textes, visuels, logo, architecture) est la propriété exclusive d'ImmoConnect. Toute reproduction, même partielle, est interdite sans autorisation préalable écrite.
+      L'ensemble des contenus présents sur immoconnect-agence.fr (textes, visuels, logo, charte graphique, code source, algorithmes, structure, Rapport Hanaé) est la propriété exclusive d'ImmoConnect et protégé par le droit de la propriété intellectuelle français et européen.<br><br>
+      Toute reproduction, représentation, modification, adaptation ou extraction, totale ou partielle, est interdite sans autorisation préalable écrite d'ImmoConnect, sous peine de poursuites civiles et pénales.<br><br>
+      Les données DVF, INSEE et carte des loyers utilisées dans le Rapport Hanaé sont des données publiques soumises à la <strong>Licence Ouverte Etalab v2.0</strong>. ImmoConnect les utilise conformément aux conditions de cette licence.
     </div>
   </div>
 
+  <!-- 7. COOKIES -->
   <div class="section">
-    <div class="sec-title">7. Cookies</div>
+    <div class="sec-title">7. Cookies et traceurs</div>
     <div class="sec-body">
-      Le site utilise des cookies strictement nécessaires au fonctionnement du service (authentification, session). Aucun cookie publicitaire ou de tracking tiers n'est utilisé. ImmoConnect ne revend jamais vos données à des tiers à des fins publicitaires.
+      Le site utilise uniquement des <strong>cookies strictement nécessaires</strong> au fonctionnement du service :
+      <ul>
+        <li>Cookies d'authentification (session utilisateur — Supabase Auth)</li>
+        <li>Cookies de préférence (consentement cookies, onboarding)</li>
+        <li>Cookies de sécurité (protection CSRF)</li>
+      </ul>
+      <br>
+      <strong>Aucun cookie publicitaire, analytique tiers ou de tracking comportemental n'est utilisé.</strong> ImmoConnect ne revend jamais vos données à des fins publicitaires. Les produits Claude/ImmoConnect sont exempts de publicité.<br><br>
+      Vous pouvez paramétrer votre navigateur pour refuser les cookies, mais certaines fonctionnalités du service nécessitent les cookies de session pour fonctionner correctement.
     </div>
   </div>
 
+  <!-- 8. LUTTE ANTI-BLANCHIMENT -->
   <div class="section">
-    <div class="sec-title">8. Droit applicable</div>
+    <div class="sec-title">8. Lutte contre le blanchiment (LCB-FT)</div>
     <div class="sec-body">
-      Les présentes mentions légales sont soumises au droit français. En cas de litige, les tribunaux français seront seuls compétents.
+      ImmoConnect n'est pas un organisme assujetti aux obligations de lutte contre le blanchiment de capitaux et le financement du terrorisme (LCB-FT) au titre de la directive 2015/849 et de son ordonnance de transposition française.<br><br>
+      Les <strong>agents immobiliers inscrits</strong> sont des professionnels assujettis à ces obligations en vertu de l'article L561-2 du Code monétaire et financier. Ils sont seuls responsables de l'exercice de leurs obligations de vigilance, d'identification de leurs clients et de déclaration de soupçon auprès de Tracfin, indépendamment de leur utilisation d'ImmoConnect.
+    </div>
+  </div>
+
+  <!-- 9. MÉDIATION -->
+  <div class="section">
+    <div class="sec-title">9. Médiation des litiges</div>
+    <div class="sec-body">
+      Conformément aux articles L616-1 et R616-1 du Code de la consommation, ImmoConnect propose un dispositif de médiation de la consommation.<br><br>
+      <strong>Médiateur compétent :</strong> CNPM — Médiation de la Consommation<br>
+      27 avenue de la Libération — 42400 Saint-Chamond<br>
+      <a href="https://www.cnpm-mediation-consommation.eu" target="_blank">cnpm-mediation-consommation.eu</a><br><br>
+      En cas de litige entre ImmoConnect et un utilisateur professionnel (agent immo), les parties s'engagent à rechercher une solution amiable dans un délai de 30 jours avant toute action judiciaire. À défaut, le litige sera soumis à la compétence exclusive du Tribunal de Commerce compétent.<br><br>
+      Pour les litiges transfrontaliers au sein de l'Union européenne : <a href="https://ec.europa.eu/consumers/odr" target="_blank">Plateforme ODR de la Commission européenne</a>.
+    </div>
+  </div>
+
+  <!-- 10. DROIT APPLICABLE -->
+  <div class="section">
+    <div class="sec-title">10. Droit applicable et juridiction</div>
+    <div class="sec-body">
+      Les présentes mentions légales et l'ensemble des relations entre ImmoConnect et ses utilisateurs sont régies par le <strong>droit français</strong>.<br><br>
+      En cas de litige non résolu par voie amiable ou de médiation, la juridiction compétente sera celle du ressort du siège social d'ImmoConnect, sous réserve des règles d'ordre public applicables aux consommateurs.
     </div>
   </div>
 
 </div>
-<script>
-(function() {
-  var consent = localStorage.getItem('ic_cookie_consent');
-  if (!consent) {
-    var b = document.createElement('div');
-    b.id = 'cookie-banner';
-    b.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1C1C1A;border-top:1px solid rgba(255,255,255,.1);padding:16px 32px;font-family:Outfit,sans-serif';
-    b.innerHTML = '<div style="max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;font-weight:500;color:#FAFAF7;margin-bottom:4px">🍪 Cookies & confidentialité</div><div style="font-size:12px;color:rgba(250,250,247,.6);line-height:1.6">ImmoConnect utilise des cookies strictement nécessaires. Aucun cookie publicitaire. <a href=\"mentions-legales.html\" style=\"color:#C09B5A\">En savoir plus</a></div></div><div style="display:flex;gap:10px;flex-shrink:0"><button onclick=\"icRefuser()\" style=\"padding:9px 20px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(250,250,247,.7);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer\">Refuser</button><button onclick=\"icAccepter()\" style=\"padding:9px 20px;border-radius:8px;border:none;background:#C09B5A;color:#1C1C1A;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer\">Accepter</button></div></div>';
-    document.body.appendChild(b);
-  }
-})();
-function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
-function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
-</script>
 </body>
 </html>
