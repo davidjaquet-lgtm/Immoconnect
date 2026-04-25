@@ -42,6 +42,14 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 .nb-gold{background:#FAEEDA;color:#854F0B}
 .nb-platinium{background:#E1F5EE;color:var(--teal)}
 .mandat-badge{position:absolute;top:16px;right:16px;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;background:#FAEEDA;color:#854F0B}
+.excl-banner{background:linear-gradient(135deg,#854F0B,#C09B5A);border-radius:8px;padding:14px 16px;margin-bottom:14px;color:#fff;font-size:12px;line-height:1.7}
+.excl-banner strong{font-size:14px;display:block;margin-bottom:4px}
+.excl-timer{font-size:22px;font-weight:600;color:#FAEEDA;margin:6px 0}
+.excl-blocked{background:#F5F2EC;border:2px solid #E8E6E0;border-radius:8px;padding:14px 16px;margin-bottom:14px;text-align:center;font-size:12px;color:var(--muted);line-height:1.7}
+.excl-blocked strong{color:var(--ink);display:block;margin-bottom:4px;font-size:13px}
+.btn-excl{width:100%;padding:12px;border-radius:8px;border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:6px;transition:opacity .15s;background:linear-gradient(135deg,#854F0B,#C09B5A);color:#fff}
+.btn-excl:hover{opacity:.88}
+.btn-excl:disabled{opacity:.5;cursor:not-allowed}
 
 /* INFOS BIEN */
 .bien-titre{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;margin-bottom:8px;line-height:1.2}
@@ -310,7 +318,9 @@ function afficherBien(b, similaires) {
   if (b.taxe_fonciere_verifie) docsHtml += '<div style="font-size:12px;color:var(--teal);margin-bottom:4px">✅ Taxe foncière vérifiée</div>';
   if (b.classe_dpe && b.classe_dpe !== 'NC') docsHtml += '<div style="font-size:12px;color:var(--teal);margin-bottom:4px">✅ DPE disponible</div>';
 
-  // Boutons contact selon niveau et connexion
+  // Vérifier exclusivité active avant de construire les boutons
+  await checkExclusivite(b.id);
+  currentNiv = niv;
   var contactHtml = buildContactButtons(b, niv);
 
   // Sidebar rapport
@@ -406,9 +416,48 @@ function afficherBien(b, similaires) {
   document.getElementById('content').style.display = 'block';
 }
 
+// Variable globale exclusivité
+var exclusiviteActive = null;
+
+async function checkExclusivite(bienId) {
+  var { data } = await db.rpc('get_exclusivite_active', { p_annonce_id: bienId }).catch(function(){ return { data: null }; });
+  exclusiviteActive = (data && data.length > 0) ? data[0] : null;
+  return exclusiviteActive;
+}
+
 function buildContactButtons(b, niv) {
   var html = '';
+  var userEmail = currentUser ? currentUser.email : null;
+  var userProfils = currentUser ? (currentUser.user_metadata?.profils || []) : [];
+  var isAgent = userProfils.includes('agent');
+  var userForfait = currentUser ? (currentUser.user_metadata?.forfait_agent || 'starter') : null;
 
+  // EXCLUSIVITÉ ACTIVE ?
+  if (exclusiviteActive) {
+    var heures = Math.ceil(parseFloat(exclusiviteActive.heures_restantes));
+    var isMonExclusivite = userEmail && exclusiviteActive.agent_email === userEmail;
+
+    if (isMonExclusivite) {
+      // L'agent qui a l'exclusivité voit son statut
+      html += '<div class="excl-banner"><strong>✅ Vous avez l\'exclusivité de contact</strong>';
+      html += '<div class="excl-timer">⏱ ' + heures + 'h restantes</div>';
+      html += 'Vous êtes le seul agent à pouvoir contacter ce vendeur pendant cette période.</div>';
+      html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">💬 Contacter le vendeur</button>';
+      html += '<button class="btn-contact bc-blue" onclick="ouvrirVisite()">📅 Réserver une visite</button>';
+      if (niv === 'gold' || niv === 'platinium') {
+        html += '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-out" style="margin-top:4px">📊 Rapport Hanaé</a>';
+      }
+      return html;
+    } else if (isAgent) {
+      // Autre agent : bien bloqué
+      html += '<div class="excl-blocked"><strong>🔒 Exclusivité de contact en cours</strong>';
+      html += 'Un agent a une exclusivité sur ce bien.<br>Disponible dans <strong>' + heures + 'h</strong>.</div>';
+      html += '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px">Revenez dans ' + heures + 'h pour contacter ce vendeur</div>';
+      return html;
+    }
+  }
+
+  // PAS D\'EXCLUSIVITÉ — boutons normaux
   if (niv === 'standard') {
     html += '<div class="lock-info">📍 <strong>Ville : ' + (b.ville||'—') + '</strong><br>Connectez-vous pour voir l\'adresse complète</div>';
     html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">Contacter le vendeur</button>';
@@ -422,8 +471,83 @@ function buildContactButtons(b, niv) {
     html += '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-out" style="margin-top:4px">📊 Rapport Hanaé</a>';
   }
 
+  // BOUTON EXCLUSIVITÉ pour agents Expert et Platinium
+  if (isAgent && (userForfait === 'expert' || userForfait === 'platinium') && !exclusiviteActive) {
+    var duree = userForfait === 'platinium' ? 96 : 48;
+    var prix = userForfait === 'platinium' ? '19,99' : '9,99';
+    html += '<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">';
+    html += '<button class="btn-excl" onclick="acheterExclusivite(' + duree + ',' + prix.replace(',','.') + ')">';
+    html += '🔒 Exclusivité ' + duree + 'h — ' + prix + ' €</button>';
+    html += '<div style="font-size:10px;color:var(--muted);text-align:center">Seul agent à contacter ce vendeur pendant ' + duree + 'h</div>';
+    html += '</div>';
+  }
+
   return html;
 }
+
+// ── EXCLUSIVITÉ DE CONTACT ──
+async function acheterExclusivite(dureeHeures, prix) {
+  if (!currentUser) { alert('Connectez-vous pour activer une exclusivité.'); return; }
+  if (!bien) return;
+
+  var btn = event.target;
+  btn.disabled = true;
+  btn.textContent = 'Activation en cours…';
+
+  try {
+    // Note : le paiement Stripe sera intégré ici
+    // Pour l'instant on enregistre directement (à conditionner au paiement)
+    var debut = new Date();
+    var fin = new Date(debut.getTime() + dureeHeures * 3600000);
+
+    var { error } = await db.from('exclusivites_contact').insert({
+      annonce_id: bien.id,
+      agent_email: currentUser.email,
+      forfait_agent: currentUser.user_metadata?.forfait_agent || 'expert',
+      duree_heures: dureeHeures,
+      debut_at: debut.toISOString(),
+      fin_at: fin.toISOString(),
+      prix_paye: prix,
+      email_vendeur: bien.email_contact,
+      statut: 'active'
+    });
+
+    if (error) throw error;
+
+    // Email au vendeur
+    var nomAgent = currentUser.user_metadata?.nom_complet || currentUser.email.split('@')[0];
+    var finStr = fin.toLocaleDateString('fr-FR', { weekday:'long', day:'2-digit', month:'long', hour:'2-digit', minute:'2-digit' });
+    await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'exclusivite_contact',
+        to: bien.email_contact,
+        subject: 'Un agent a une exclusivite de contact sur votre bien - ImmoConnect',
+        agent_nom: nomAgent,
+        agent_email: currentUser.email,
+        bien_titre: bien.titre || (bien.type_bien + ' ' + bien.ville),
+        duree_heures: dureeHeures,
+        fin_at: finStr,
+        lien: 'https://immoconnect-agence.fr/connexion.html'
+      }
+    });
+
+    // Rafraîchir la page
+    exclusiviteActive = { agent_email: currentUser.email, heures_restantes: dureeHeures, duree_heures: dureeHeures };
+    var contactCard = document.querySelector('.contact-card');
+    if (contactCard) {
+      contactCard.innerHTML = '<div class="contact-title">Intéressé(e) par ce bien ?</div>' + buildContactButtons(bien, currentNiv);
+    }
+
+    alert('✅ Exclusivité de ' + dureeHeures + 'h activée ! Le vendeur a été prévenu. Vous êtes maintenant le seul agent à pouvoir le contacter.');
+
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Exclusivité ' + dureeHeures + 'h — ' + prix.toFixed(2).replace('.',',') + ' €';
+    alert('Erreur : ' + e.message);
+  }
+}
+
+var currentNiv = 'standard';
 
 // ── CONTACT ──
 function ouvrirContact() {
