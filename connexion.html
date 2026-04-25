@@ -19,6 +19,33 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 .nav-gold{padding:7px 16px;background:var(--gold);color:var(--ink)!important;border-radius:4px;font-weight:500}
 .nav-out{padding:8px 20px;border:1px solid #444;color:#fff!important;border-radius:4px;font-size:13px;font-weight:500;text-decoration:none}
 
+/* ONBOARDING */
+.onboarding-overlay{position:fixed;inset:0;background:rgba(15,15,14,.7);backdrop-filter:blur(6px);z-index:9999;display:none;align-items:center;justify-content:center;padding:24px}
+.onboarding-overlay.open{display:flex}
+.onboarding-box{background:var(--warm);border-radius:16px;max-width:520px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.3);overflow:hidden}
+.onboarding-header{background:var(--ink);padding:24px 28px;position:relative;overflow:hidden}
+.onboarding-header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 50%,rgba(192,155,90,.15) 0%,transparent 70%)}
+.onboarding-step-label{font-size:10px;font-weight:600;color:rgba(250,250,247,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;position:relative}
+.onboarding-title{font-size:20px;font-weight:500;color:#FAFAF7;position:relative}
+.onboarding-sub{font-size:13px;color:rgba(250,250,247,.55);margin-top:4px;position:relative}
+.onboarding-progress{display:flex;gap:4px;margin-top:16px;position:relative}
+.onboarding-dot{height:4px;border-radius:2px;background:rgba(255,255,255,.2);flex:1;transition:background .3s}
+.onboarding-dot.active{background:var(--gold)}
+.onboarding-dot.done{background:rgba(255,255,255,.5)}
+.onboarding-body{padding:24px 28px}
+.onboarding-actions{display:flex;gap:10px;padding:16px 28px 24px;border-top:1px solid var(--line)}
+.ob-item{display:flex;align-items:flex-start;gap:14px;padding:12px;border-radius:10px;background:var(--bg);margin-bottom:10px;transition:background .15s;cursor:pointer}
+.ob-item:hover{background:#EEECEA}
+.ob-item.done-item{background:#E1F5EE;border:1px solid #9FE1CB}
+.ob-icon{font-size:24px;flex-shrink:0;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:var(--warm)}
+.ob-title{font-size:13px;font-weight:600;margin-bottom:2px}
+.ob-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.ob-check{margin-left:auto;font-size:18px;flex-shrink:0;align-self:center;opacity:0;transition:opacity .2s}
+.ob-item.done-item .ob-check{opacity:1}
+.btn-ob-next{flex:2;padding:12px;border-radius:8px;background:var(--ink);color:#fff;border:none;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:opacity .15s}
+.btn-ob-next:hover{opacity:.88}
+.btn-ob-skip{flex:1;padding:12px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;color:var(--muted)}
+
 /* LOGIN */
 .login-wrap{max-width:480px;margin:0 auto;padding:48px 24px 80px}
 .login-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:32px}
@@ -518,6 +545,9 @@ async function afficherDashboard(user) {
 
   document.getElementById('dash-content').innerHTML = html;
   document.getElementById('dash-loading').style.display  = 'none';
+
+  // Lancer l'onboarding si première visite
+  checkOnboarding(profils);
   document.getElementById('dash-content').style.display  = 'block';
 }
 
@@ -840,7 +870,196 @@ async function logout() {
   switchTab('login');
   var { data: { session } } = await db.auth.getSession();
   if (session && session.user) afficherDashboard(session.user);
-  db.auth.onAuthStateChange(function(event, session) {
+  // ══════════════════════════════════════════
+// ONBOARDING
+// ══════════════════════════════════════════
+var obStep = 0;
+var obSteps = [];
+var obProfil = 'vendeur';
+
+var OB_STEPS = {
+  vendeur: [
+    {
+      title: 'Publiez votre annonce',
+      sub: 'Mettez votre bien en ligne en 5 minutes — gratuitement',
+      items: [
+        { icon:'🏠', title:'Créer votre annonce', desc:'Renseignez les infos de votre bien et ajoutez vos photos', lien:'questionnaire-vendeur.html' },
+        { icon:'🤖', title:'Laisser Hanaé rédiger', desc:'Notre IA génère une description professionnelle automatiquement', lien:null },
+        { icon:'📋', title:'Ajouter vos documents', desc:'Taxe foncière, DPE, copropriété — montez en niveau Silver, Gold ou Platinium', lien:null }
+      ]
+    },
+    {
+      title: 'Maximisez votre visibilité',
+      sub: 'Plus votre dossier est complet, plus les agents vous contactent',
+      items: [
+        { icon:'⭐', title:'Visez le niveau Gold ou Platinium', desc:'Adresse visible + mise en avant + rapport Hanaé IA', lien:null },
+        { icon:'📊', title:'Suivez vos statistiques', desc:'Vues, contacts, visites — tout est dans votre tableau de bord', lien:null },
+        { icon:'📅', title:'Ouvrez votre calendrier', desc:'Définissez vos disponibilités pour les visites en ligne', lien:'calendrier.html' }
+      ]
+    },
+    {
+      title: 'Votre réseau d'agents',
+      sub: 'Des dizaines d'agents avec des acheteurs prêts peuvent vous contacter',
+      items: [
+        { icon:'🤝', title:'Recevez les contacts agents', desc:'Ils ont des clients acheteurs — vous êtes notifié par email', lien:null },
+        { icon:'💬', title:'Répondez via la messagerie', desc:'Chat en temps réel avec les agents et acheteurs', lien:'messagerie.html' },
+        { icon:'🔒', title:'Exclusivité de contact', desc:'Accordez jusqu'à 96h d'exclusivité à un agent de confiance', lien:null }
+      ]
+    }
+  ],
+  acheteur: [
+    {
+      title: 'Trouvez votre bien idéal',
+      sub: 'Des biens avec dossiers vérifiés — prêts à visiter',
+      items: [
+        { icon:'🗺️', title:'Explorer la carte', desc:'Visualisez tous les biens disponibles dans votre secteur', lien:'carte.html' },
+        { icon:'🔍', title:'Compléter votre profil', desc:'Renseignez vos critères pour recevoir des alertes personnalisées', lien:'questionnaire-acheteur.html' },
+        { icon:'📊', title:'Voir les estimations DVF', desc:'Vérifiez que le prix est juste avec nos données officielles', lien:'estimation.html' }
+      ]
+    },
+    {
+      title: 'Activez vos alertes',
+      sub: 'Soyez le premier averti dès qu'un bien vous correspond',
+      items: [
+        { icon:'🔔', title:'Alertes nouveaux biens', desc:'Recevez un email dès qu'un bien correspond à votre budget et critères', lien:null },
+        { icon:'📉', title:'Alertes baisses de prix', desc:'Suivez les biens qui vous intéressent — notifié à chaque baisse', lien:null },
+        { icon:'💬', title:'Contactez les vendeurs', desc:'Message direct ou réservation de visite en ligne', lien:'messagerie.html' }
+      ]
+    },
+    {
+      title: 'Visitez et négociez',
+      sub: 'Tout se passe sur ImmoConnect — simplement',
+      items: [
+        { icon:'📅', title:'Réservez une visite', desc:'Choisissez un créneau dans le calendrier du vendeur', lien:'calendrier.html' },
+        { icon:'⭐', title:'Notez les agents', desc:'Après un contact, donnez votre avis sur la qualité de l'échange', lien:null },
+        { icon:'🤝', title:'Trouvez un agent', desc:'Les agents ImmoConnect peuvent vous accompagner dans votre projet', lien:null }
+      ]
+    }
+  ],
+  investisseur: [
+    {
+      title: 'Calculez votre rendement',
+      sub: 'Des outils IA pour trouver les meilleures opportunités',
+      items: [
+        { icon:'📈', title:'Simulateur de rendement', desc:'Rendement brut/net, cashflow, frais de notaire — tout calculé', lien:'estimation.html' },
+        { icon:'🎯', title:'Définir vos critères', desc:'Rendement minimum, budget max — les biens compatibles vous sont alertés', lien:'questionnaire-acheteur.html' },
+        { icon:'🗺️', title:'Explorer les biens', desc:'Filtrez par rendement sur la carte ImmoConnect', lien:'carte.html' }
+      ]
+    },
+    {
+      title: 'Recevez les alertes matching',
+      sub: 'Chaque nouveau bien compatible vous est signalé immédiatement',
+      items: [
+        { icon:'🔔', title:'Alertes automatiques', desc:'Dès qu'un bien dépasse votre rendement minimum et est dans votre budget', lien:null },
+        { icon:'📊', title:'Rapport Hanaé IA', desc:'Analyse complète : DVF, loyers, tendances, rendement estimé', lien:null },
+        { icon:'📉', title:'Suivre les baisses de prix', desc:'Activez les alertes baisse sur les biens qui vous intéressent', lien:null }
+      ]
+    },
+    {
+      title: 'Passez à l'action',
+      sub: 'Contactez les vendeurs et agents en priorité',
+      items: [
+        { icon:'💬', title:'Contacter directement', desc:'Message au vendeur ou à l'agent dès la fiche bien', lien:'messagerie.html' },
+        { icon:'🔒', title:'Exclusivité de contact', desc:'48h ou 96h pour travailler un dossier sans concurrent', lien:null },
+        { icon:'📅', title:'Réserver une visite', desc:'Créneau en ligne dans le calendrier du vendeur', lien:'calendrier.html' }
+      ]
+    }
+  ],
+  agent: [
+    {
+      title: 'Activez votre compte agent',
+      sub: 'Votre carte T est vérifiée — voici vos premières actions',
+      items: [
+        { icon:'🔔', title:'Choisir votre forfait', desc:'Starter, Pro, Expert ou Platinium — accès aux dossiers vendeurs selon votre forfait', lien:'forfaits.html' },
+        { icon:'📋', title:'Explorer les dossiers', desc:'Biens Silver, Gold et Platinium avec documents vérifiés', lien:'carte.html' },
+        { icon:'⚡', title:'Alertes en temps réel', desc:'Soyez notifié en priorité selon votre forfait (H+0 à J+4)', lien:null }
+      ]
+    },
+    {
+      title: 'Contactez les vendeurs',
+      sub: 'Des dossiers complets — agissez vite',
+      items: [
+        { icon:'💬', title:'Messagerie intégrée', desc:'Chat en temps réel avec les vendeurs — réponse immédiate', lien:'messagerie.html' },
+        { icon:'🔒', title:'Exclusivité de contact', desc:'Bloquez la concurrence pendant 48h ou 96h sur un bien clé', lien:null },
+        { icon:'📅', title:'Réserver une visite', desc:'Directement dans le calendrier du vendeur', lien:'calendrier.html' }
+      ]
+    },
+    {
+      title: 'Boostez votre activité',
+      sub: 'Les outils ImmoConnect pour vendre plus vite',
+      items: [
+        { icon:'📊', title:'Rapport Hanaé IA', desc:'DVF + Notaires-INSEE + loyers — valorisez votre expertise', lien:null },
+        { icon:'⭐', title:'Construisez votre réputation', desc:'Chaque avis client renforce votre profil agent', lien:null },
+        { icon:'🎯', title:'Matching acheteurs', desc:'Vos acheteurs sont alertés dès qu'un bien leur correspond', lien:null }
+      ]
+    }
+  ]
+};
+
+function lancerOnboarding(profil) {
+  obProfil = profil || 'vendeur';
+  obStep = 0;
+  obSteps = OB_STEPS[obProfil] || OB_STEPS['vendeur'];
+  afficherEtapeOnboarding();
+  document.getElementById('onboarding-overlay').classList.add('open');
+}
+
+function afficherEtapeOnboarding() {
+  var step = obSteps[obStep];
+  var total = obSteps.length;
+
+  document.getElementById('ob-step-label').textContent = 'Étape ' + (obStep+1) + ' sur ' + total;
+  document.getElementById('ob-title').textContent = step.title;
+  document.getElementById('ob-sub').textContent = step.sub;
+  document.getElementById('ob-btn-next').textContent = obStep < total-1 ? 'Continuer →' : 'Commencer !';
+
+  // Progress dots
+  for (var i = 0; i < total; i++) {
+    var dot = document.getElementById('ob-dot-' + i);
+    if (!dot) continue;
+    dot.className = 'onboarding-dot' + (i === obStep ? ' active' : i < obStep ? ' done' : '');
+  }
+
+  // Items
+  var html = '';
+  step.items.forEach(function(item) {
+    var isLink = !!item.lien;
+    html += '<div class="ob-item" onclick="' + (isLink ? 'window.location.href='' + item.lien + ''' : '') + '">';
+    html += '<div class="ob-icon">' + item.icon + '</div>';
+    html += '<div style="flex:1"><div class="ob-title">' + item.title + '</div><div class="ob-desc">' + item.desc + '</div></div>';
+    if (isLink) html += '<div class="ob-check">→</div>';
+    html += '</div>';
+  });
+  document.getElementById('ob-body').innerHTML = html;
+}
+
+function obNext() {
+  if (obStep < obSteps.length - 1) {
+    obStep++;
+    afficherEtapeOnboarding();
+  } else {
+    obFermer();
+  }
+}
+
+function obSkip() { obFermer(); }
+
+function obFermer() {
+  document.getElementById('onboarding-overlay').classList.remove('open');
+  // Marquer onboarding comme vu dans localStorage
+  localStorage.setItem('ic_onboarding_done_' + obProfil, '1');
+}
+
+function checkOnboarding(profils) {
+  // Ne montrer l'onboarding que si jamais vu pour ce profil
+  var profil = profils[0] || 'vendeur';
+  var done = localStorage.getItem('ic_onboarding_done_' + profil);
+  if (!done) {
+    setTimeout(function() { lancerOnboarding(profil); }, 800);
+  }
+}
+
+db.auth.onAuthStateChange(function(event, session) {
     if ((event==='SIGNED_IN') && session && session.user) afficherDashboard(session.user);
   });
 })();
@@ -955,5 +1174,26 @@ function afficherPopupProfil(user) {
 function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
 function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
 </script>
+<!-- MODAL ONBOARDING -->
+<div class="onboarding-overlay" id="onboarding-overlay">
+  <div class="onboarding-box">
+    <div class="onboarding-header">
+      <div class="onboarding-step-label" id="ob-step-label">Étape 1 sur 3</div>
+      <div class="onboarding-title" id="ob-title">Bienvenue sur ImmoConnect !</div>
+      <div class="onboarding-sub" id="ob-sub">Voici vos 3 premières actions pour bien démarrer</div>
+      <div class="onboarding-progress" id="ob-progress">
+        <div class="onboarding-dot active" id="ob-dot-0"></div>
+        <div class="onboarding-dot" id="ob-dot-1"></div>
+        <div class="onboarding-dot" id="ob-dot-2"></div>
+      </div>
+    </div>
+    <div class="onboarding-body" id="ob-body"></div>
+    <div class="onboarding-actions">
+      <button class="btn-ob-skip" onclick="obSkip()">Passer</button>
+      <button class="btn-ob-next" id="ob-btn-next" onclick="obNext()">Continuer →</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
