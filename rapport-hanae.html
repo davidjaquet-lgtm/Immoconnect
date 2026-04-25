@@ -148,7 +148,6 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
 <script>
 const SUPABASE_URL  = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGh5ZWZhamZ3cWN4Y2Z4cG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjYwNDAsImV4cCI6MjA5MTUwMjA0MH0.jB8Z_9eT9lYkqxUUD0G001Y87iSAv94fSu_gVOdqa-A';
-const ANTHROPIC_KEY = 'VOTRE_CLE_ANTHROPIC'; // clé API Anthropic pour Hanaé
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
@@ -677,17 +676,13 @@ MARCHÉ : ${dvf.nbVentes} ventes DVF analysées · Tendance 2023 : ${calculs.ten
 
 Sois professionnel et factuel. Explique la méthode des 3 sources (DVF + indice Notaires-INSEE + carte des loyers). Donne un avis clair sur le positionnement prix.`;
 
-    var res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 400,
-        messages: [{ role: 'user', content: prompt }]
-      })
+    // Appel sécurisé via Edge Function (clé Anthropic protégée côté serveur)
+    var res = await db.functions.invoke('rapport-hanae', {
+      body: { prompt: prompt }
     });
-    var data = await res.json();
-    return data.content && data.content[0] ? data.content[0].text : 'Synthèse indisponible.';
+    if (res.error) throw new Error(res.error.message);
+    var data = res.data;
+    return data && data.synthese ? data.synthese : 'Synthèse indisponible.';
   } catch(e) {
     return 'Les données de ce bien ont été analysées sur la base des transactions DVF officielles de la DGFiP. ' +
            'Le prix demandé de ' + (annonce.prix ? Math.round(annonce.prix/annonce.surface) : '—') + ' €/m² se compare aux ventes similaires recensées dans le secteur. ' +
