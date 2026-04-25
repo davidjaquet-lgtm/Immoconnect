@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Estimation gratuite de votre bien</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1C1C1A;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#B89A5E;--teal:#1E7A62;--blue:#185FA5;--coral:#993C1D;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;min-height:100vh}
+nav{background:var(--ink);height:56px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none;letter-spacing:-.3px}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:24px;align-items:center;flex:1;margin-left:32px}
+.nav-links a{text-decoration:none;color:#888780;font-size:13px;transition:color .15s}
+.nav-links a:hover{color:#fff}
+.nav-cta{padding:8px 18px;background:var(--gold);color:var(--ink)!important;border-radius:6px;font-weight:500;font-size:13px}
+
+/* HERO */
+.hero{background:var(--ink);padding:56px 24px 90px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(184,154,94,.12) 0%,transparent 65%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(184,154,94,.15);border:1px solid rgba(184,154,94,.3);border-radius:20px;padding:6px 14px;font-size:11px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:20px}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(30px,5vw,50px);color:#FAFAF7;line-height:1.15;margin-bottom:14px}
+.hero h1 em{font-style:italic;color:var(--gold)}
+.hero-sub{font-size:15px;color:rgba(250,250,247,.6);max-width:560px;margin:0 auto;line-height:1.7}
+
+/* FORM WRAPPER */
+.form-outer{max-width:760px;margin:-44px auto 0;padding:0 24px;position:relative;z-index:2}
+
+/* ÉTAPES */
+.steps-nav{display:flex;gap:0;margin-bottom:0;background:var(--warm);border-radius:var(--r) var(--r) 0 0;border:1px solid var(--line);border-bottom:none;overflow:hidden}
+.step-tab{flex:1;padding:14px;text-align:center;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-right:1px solid var(--line);transition:all .2s;position:relative}
+.step-tab:last-child{border-right:none}
+.step-tab.active{color:var(--ink);background:var(--warm);font-weight:600}
+.step-tab.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--gold)}
+.step-tab.done{color:var(--teal)}
+.step-num{display:inline-flex;width:20px;height:20px;border-radius:50%;background:var(--line);color:var(--muted);font-size:10px;font-weight:700;align-items:center;justify-content:center;margin-right:6px;transition:all .2s}
+.step-tab.active .step-num{background:var(--gold);color:var(--ink)}
+.step-tab.done .step-num{background:var(--teal);color:#fff}
+
+/* FORM CARD */
+.form-card{background:var(--warm);border-radius:0 0 var(--r) var(--r);border:1px solid var(--line);border-top:none;padding:28px 32px 32px}
+.form-section-title{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.form-section-sub{font-size:11px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+label.lbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+input,select{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);outline:none;transition:border .15s;width:100%}
+input:focus,select:focus{border-color:var(--ink)}
+
+/* SCORE QUALITE — BOUTONS RADIO VISUELS */
+.score-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.score-group{background:var(--bg);border-radius:10px;padding:14px}
+.score-group-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.score-options{display:flex;flex-direction:column;gap:6px}
+.score-opt{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;border:1.5px solid var(--line);background:var(--warm);cursor:pointer;transition:all .15s;font-size:12px;color:var(--ink)}
+.score-opt:hover{border-color:var(--muted)}
+.score-opt.selected{border-color:var(--teal);background:#E1F5EE;font-weight:500}
+.score-opt.selected.neg{border-color:var(--coral);background:#FAECE7}
+.score-opt.selected.mid{border-color:#D4732A;background:#FEF3E7}
+.score-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;transition:all .15s}
+.score-opt.selected .score-dot{background:var(--teal);border-color:var(--teal)}
+.score-opt.selected.neg .score-dot{background:var(--coral);border-color:var(--coral)}
+.score-opt.selected.mid .score-dot{background:#D4732A;border-color:#D4732A}
+.score-badge-mini{margin-left:auto;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px}
+.bg-pos{background:#E1F5EE;color:var(--teal)}
+.bg-neu{background:#F1EFE8;color:var(--muted)}
+.bg-neg{background:#FAECE7;color:var(--coral)}
+
+/* SCORE RÉSUMÉ */
+.score-resume{background:var(--bg);border-radius:10px;padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;gap:14px}
+.score-circle{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;border:3px solid}
+.score-resume-info{flex:1}
+.score-resume-val{font-size:15px;font-weight:600;margin-bottom:2px}
+.score-resume-sub{font-size:11px;color:var(--muted)}
+.score-bar-mini{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:6px;max-width:200px}
+.score-bar-fill{height:100%;border-radius:3px;transition:width .5s}
+
+/* BOUTONS NAV */
+.form-nav{display:flex;gap:10px;margin-top:24px}
+.btn-prev{flex:1;padding:12px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;color:var(--muted);transition:all .15s}
+.btn-prev:hover{border-color:var(--ink);color:var(--ink)}
+.btn-next{flex:2;padding:12px;border-radius:8px;background:var(--ink);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:opacity .15s}
+.btn-next:hover{opacity:.88}
+.btn-estimer-final{flex:2;padding:13px;border-radius:8px;background:var(--gold);color:var(--ink);border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-estimer-final:hover{opacity:.88}
+.form-garantie{font-size:11px;color:var(--muted);text-align:center;margin-top:12px}
+
+/* LOADING */
+.loading-wrap{text-align:center;padding:60px 20px;display:none;max-width:480px;margin:60px auto;padding:0 24px}
+.loading-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#1E7A62,#185FA5);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px;animation:pls 2s infinite}
+@keyframes pls{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.loading-steps{display:flex;flex-direction:column;gap:8px;max-width:320px;margin:20px auto 0;text-align:left}
+.step-item{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);padding:8px 0}
+.step-item.done{color:var(--teal)}
+.step-item.active{color:var(--ink);font-weight:500}
+.step-dot-l{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px}
+.step-item.done .step-dot-l{background:var(--teal);border-color:var(--teal);color:#fff}
+.step-item.active .step-dot-l{border-color:var(--ink);animation:sd .8s linear infinite}
+@keyframes sd{to{transform:rotate(360deg)}}
+
+/* RÉSULTATS */
+.result-wrap{display:none;max-width:900px;margin:40px auto;padding:0 24px 80px}
+.result-header{background:var(--ink);border-radius:var(--r);padding:24px 28px;margin-bottom:16px;display:flex;align-items:center;gap:16px;position:relative;overflow:hidden}
+.result-header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 50%,rgba(184,154,94,.1) 0%,transparent 60%)}
+.hanae-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1E7A62,#185FA5);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.result-title{font-size:17px;font-weight:500;color:#FAFAF7;margin-bottom:3px}
+.result-sub{font-size:11px;color:rgba(250,250,247,.5)}
+.result-date{margin-left:auto;font-size:11px;color:rgba(250,250,247,.4);flex-shrink:0}
+
+/* CORRECTION BADGE */
+.correction-box{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:16px 20px;margin-bottom:16px}
+.correction-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.correction-items{display:flex;flex-wrap:wrap;gap:8px}
+.corr-item{display:flex;align-items:center;gap:5px;font-size:11px;padding:4px 10px;border-radius:20px}
+.corr-pos{background:#E1F5EE;color:var(--teal)}
+.corr-neg{background:#FAECE7;color:var(--coral)}
+.corr-neu{background:#F1EFE8;color:var(--muted)}
+
+/* FOURCHETTE */
+.fourchette-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:28px;margin-bottom:16px;text-align:center}
+.fourchette-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.fourchette-range{font-family:'DM Serif Display',serif;font-size:clamp(26px,5vw,40px);color:var(--teal);margin-bottom:8px}
+.prix-central{background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:500;color:var(--teal);display:inline-block;margin-bottom:10px}
+.score-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600}
+.gauge-wrap{max-width:480px;margin:16px auto 0}
+.gauge-bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-bottom:6px}
+.gauge-fill{height:100%;border-radius:4px;transition:width 1s ease}
+.gauge-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-box{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:16px;text-align:center}
+.stat-val{font-size:19px;font-weight:500;color:var(--teal);margin-bottom:2px}
+.stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+.stat-sub{font-size:10px;color:var(--muted);margin-top:3px}
+
+/* SECTIONS */
+.section{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
+.section-head{padding:13px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);background:var(--bg)}
+.section-icon{font-size:16px}
+.section-title{font-size:13px;font-weight:600;flex:1}
+.section-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#E1F5EE;color:#085041}
+.section-body{padding:18px}
+.ventes-table{width:100%;border-collapse:collapse;font-size:12px}
+.ventes-table th{padding:7px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line);font-weight:600}
+.ventes-table td{padding:8px 12px;border-bottom:1px solid var(--line);color:var(--muted)}
+.ventes-table td:first-child{color:var(--ink);font-weight:500}
+.ventes-table tr:last-child td{border-bottom:none}
+.ventes-table tr:hover td{background:#F9F7F2}
+
+/* SYNTHESE */
+.synthese-box{background:linear-gradient(135deg,#E1F5EE,#E6F1FB);border:1px solid #9FE1CB;border-radius:var(--r);padding:18px;font-size:13px;line-height:1.8}
+.synthese-name{font-size:10px;font-weight:600;color:var(--teal);margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px}
+
+/* CTA */
+.cta-box{background:var(--ink);border-radius:var(--r);padding:30px;text-align:center;margin-top:20px;position:relative;overflow:hidden}
+.cta-box::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(184,154,94,.12) 0%,transparent 70%)}
+.cta-title{font-family:'DM Serif Display',serif;font-size:22px;color:#FAFAF7;margin-bottom:8px}
+.cta-sub{font-size:13px;color:rgba(250,250,247,.6);margin-bottom:20px;line-height:1.6}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative}
+.btn-gold{padding:12px 26px;background:var(--gold);color:var(--ink);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;display:inline-block}
+.btn-outline-w{padding:12px 26px;background:transparent;color:#FAFAF7;border:1px solid rgba(255,255,255,.2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;text-decoration:none;display:inline-block}
+
+.btn-recommencer{display:flex;align-items:center;gap:8px;background:transparent;border:1px solid var(--line);border-radius:8px;padding:9px 18px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;color:var(--muted);margin:0 auto 20px;transition:all .15s}
+.btn-recommencer:hover{border-color:var(--ink);color:var(--ink)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:640px){.form-grid{grid-template-columns:1fr}.score-grid{grid-template-columns:1fr}.stats-grid{grid-template-columns:1fr 1fr}.steps-nav{font-size:11px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-links">
+    <a href="index.html">Accueil</a>
+    <a href="carte.html">Carte</a>
+    <a href="forfaits.html">Forfaits</a>
+    <a href="connexion.html">Mon espace</a>
+    <a href="questionnaire-vendeur.html" class="nav-cta">Vendre</a>
+  </div>
+</nav>
+
+<div class="hero" id="hero-section">
+  <div class="hero-badge">✨ Hanaé — IA immobilière</div>
+  <h1>Combien vaut<br>votre bien <em>vraiment</em> ?</h1>
+  <p class="hero-sub">Estimation en 2 étapes · DVF + Indices Notaires-INSEE + Score qualité personnalisé · Gratuit, sans engagement</p>
+</div>
+
+<!-- FORMULAIRE 2 ÉTAPES -->
+<div class="form-outer" id="form-section">
+  <div class="steps-nav">
+    <div class="step-tab active" id="tab1"><span class="step-num">1</span>Votre bien</div>
+    <div class="step-tab" id="tab2"><span class="step-num">2</span>Score qualité</div>
+  </div>
+  <div class="form-card">
+
+    <!-- ÉTAPE 1 -->
+    <div id="step1">
+      <div class="form-section-title">🏠 Informations de base</div>
+      <div class="form-section-sub">Les champs * sont obligatoires pour lancer l'estimation.</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="lbl">Type de bien *</label>
+          <select id="type-bien">
+            <option value="">Choisir…</option>
+            <option value="Appartement">Appartement</option>
+            <option value="Maison">Maison</option>
+            <option value="Villa">Villa</option>
+            <option value="Studio">Studio</option>
+            <option value="Loft">Loft</option>
+            <option value="Terrain">Terrain</option>
+            <option value="Local commercial">Local commercial</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="lbl">Code postal *</label>
+          <input type="text" id="code-postal" placeholder="ex: 65000" maxlength="5" oninput="this.value=this.value.replace(/\D/g,'')">
+        </div>
+        <div class="form-group">
+          <label class="lbl">Surface habitable (m²) *</label>
+          <input type="number" id="surface" placeholder="ex: 85" min="5" max="2000">
+        </div>
+        <div class="form-group">
+          <label class="lbl">Nombre de pièces</label>
+          <select id="nb-pieces">
+            <option value="">—</option>
+            <option value="1">Studio / T1</option>
+            <option value="2">T2 — 2 pièces</option>
+            <option value="3">T3 — 3 pièces</option>
+            <option value="4">T4 — 4 pièces</option>
+            <option value="5">T5 — 5 pièces</option>
+            <option value="6">6 pièces et +</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="lbl">Année de construction</label>
+          <input type="number" id="annee-construction" placeholder="ex: 1985" min="1800" max="2025">
+        </div>
+        <div class="form-group">
+          <label class="lbl">Votre prix souhaité (€)</label>
+          <input type="number" id="prix-souhaite" placeholder="Optionnel — pour comparaison">
+        </div>
+      </div>
+      <div class="form-nav">
+        <button class="btn-next" style="flex:1" onclick="allerEtape2()">Étape suivante : score qualité →</button>
+      </div>
+      <div class="form-garantie">🔒 Gratuit · Sans inscription · Sans engagement · Données DVF officielles</div>
+    </div>
+
+    <!-- ÉTAPE 2 : SCORE QUALITÉ -->
+    <div id="step2" style="display:none">
+      <div class="form-section-title">⭐ Score de qualité — affine votre estimation</div>
+      <div class="form-section-sub">Ces critères corrigent le prix DVF en fonction des caractéristiques réelles de votre bien. Impact : ±20% sur l'estimation finale.</div>
+
+      <div class="score-grid">
+
+        <!-- DPE -->
+        <div class="score-group">
+          <div class="score-group-title">⚡ Classe DPE</div>
+          <div class="score-options">
+            <div class="score-opt selected" data-group="dpe" data-val="AC" data-coeff="0.04" onclick="selScore(this)"><div class="score-dot"></div>A / B / C — Économe<span class="score-badge-mini bg-pos">+4%</span></div>
+            <div class="score-opt" data-group="dpe" data-val="D" data-coeff="0" onclick="selScore(this)"><div class="score-dot"></div>D — Standard<span class="score-badge-mini bg-neu">0%</span></div>
+            <div class="score-opt mid" data-group="dpe" data-val="E" data-coeff="-0.06" onclick="selScore(this)"><div class="score-dot"></div>E — Énergivore<span class="score-badge-mini bg-neg">-6%</span></div>
+            <div class="score-opt neg" data-group="dpe" data-val="FG" data-coeff="-0.15" onclick="selScore(this)"><div class="score-dot"></div>F / G — Passoire<span class="score-badge-mini bg-neg">-15%</span></div>
+          </div>
+        </div>
+
+        <!-- ÉTAT -->
+        <div class="score-group">
+          <div class="score-group-title">🔨 État du bien</div>
+          <div class="score-options">
+            <div class="score-opt" data-group="etat" data-val="neuf" data-coeff="0.12" onclick="selScore(this)"><div class="score-dot"></div>Neuf / Récent<span class="score-badge-mini bg-pos">+12%</span></div>
+            <div class="score-opt selected" data-group="etat" data-val="bon" data-coeff="0.04" onclick="selScore(this)"><div class="score-dot"></div>Bon état<span class="score-badge-mini bg-pos">+4%</span></div>
+            <div class="score-opt" data-group="etat" data-val="moyen" data-coeff="0" onclick="selScore(this)"><div class="score-dot"></div>État moyen<span class="score-badge-mini bg-neu">0%</span></div>
+            <div class="score-opt neg" data-group="etat" data-val="travaux" data-coeff="-0.10" onclick="selScore(this)"><div class="score-dot"></div>Travaux importants<span class="score-badge-mini bg-neg">-10%</span></div>
+          </div>
+        </div>
+
+        <!-- ÉTAGE / EXPOSITION -->
+        <div class="score-group">
+          <div class="score-group-title">🏢 Étage & exposition</div>
+          <div class="score-options">
+            <div class="score-opt" data-group="etage" data-val="dernier" data-coeff="0.08" onclick="selScore(this)"><div class="score-dot"></div>Dernier étage<span class="score-badge-mini bg-pos">+8%</span></div>
+            <div class="score-opt selected" data-group="etage" data-val="haut" data-coeff="0.04" onclick="selScore(this)"><div class="score-dot"></div>Étage élevé + ascenseur<span class="score-badge-mini bg-pos">+4%</span></div>
+            <div class="score-opt" data-group="etage" data-val="mid" data-coeff="0" onclick="selScore(this)"><div class="score-dot"></div>Étage intermédiaire<span class="score-badge-mini bg-neu">0%</span></div>
+            <div class="score-opt neg" data-group="etage" data-val="rdc" data-coeff="-0.06" onclick="selScore(this)"><div class="score-dot"></div>RDC (appartement)<span class="score-badge-mini bg-neg">-6%</span></div>
+          </div>
+        </div>
+
+        <!-- EXTÉRIEUR -->
+        <div class="score-group">
+          <div class="score-group-title">🌿 Extérieur</div>
+          <div class="score-options">
+            <div class="score-opt" data-group="exterieur" data-val="jardin" data-coeff="0.10" onclick="selScore(this)"><div class="score-dot"></div>Jardin privatif<span class="score-badge-mini bg-pos">+10%</span></div>
+            <div class="score-opt" data-group="exterieur" data-val="terrasse" data-coeff="0.06" onclick="selScore(this)"><div class="score-dot"></div>Terrasse<span class="score-badge-mini bg-pos">+6%</span></div>
+            <div class="score-opt selected" data-group="exterieur" data-val="balcon" data-coeff="0.03" onclick="selScore(this)"><div class="score-dot"></div>Balcon<span class="score-badge-mini bg-pos">+3%</span></div>
+            <div class="score-opt" data-group="exterieur" data-val="aucun" data-coeff="0" onclick="selScore(this)"><div class="score-dot"></div>Aucun extérieur<span class="score-badge-mini bg-neu">0%</span></div>
+          </div>
+        </div>
+
+        <!-- PARKING -->
+        <div class="score-group">
+          <div class="score-group-title">🚗 Stationnement</div>
+          <div class="score-options">
+            <div class="score-opt" data-group="parking" data-val="garage" data-coeff="0.06" onclick="selScore(this)"><div class="score-dot"></div>Garage fermé<span class="score-badge-mini bg-pos">+6%</span></div>
+            <div class="score-opt selected" data-group="parking" data-val="parking" data-coeff="0.03" onclick="selScore(this)"><div class="score-dot"></div>Parking / Cave<span class="score-badge-mini bg-pos">+3%</span></div>
+            <div class="score-opt" data-group="parking" data-val="aucun" data-coeff="0" onclick="selScore(this)"><div class="score-dot"></div>Aucun<span class="score-badge-mini bg-neu">0%</span></div>
+          </div>
+        </div>
+
+        <!-- NUISANCES -->
+        <div class="score-group">
+          <div class="score-group-title">🔇 Nuisances & environnement</div>
+          <div class="score-options">
+            <div class="score-opt" data-group="nuisances" data-val="excellent" data-coeff="0.05" onclick="selScore(this)"><div class="score-dot"></div>Vue dégagée / calme absolu<span class="score-badge-mini bg-pos">+5%</span></div>
+            <div class="score-opt selected" data-group="nuisances" data-val="bon" data-coeff="0" onclick="selScore(this)"><div class="score-dot"></div>Environnement correct<span class="score-badge-mini bg-neu">0%</span></div>
+            <div class="score-opt mid" data-group="nuisances" data-val="moyen" data-coeff="-0.05" onclick="selScore(this)"><div class="score-dot"></div>Vis-à-vis / légères nuisances<span class="score-badge-mini bg-neg">-5%</span></div>
+            <div class="score-opt neg" data-group="nuisances" data-val="fort" data-coeff="-0.12" onclick="selScore(this)"><div class="score-dot"></div>Nuisances importantes<span class="score-badge-mini bg-neg">-12%</span></div>
+          </div>
+        </div>
+
+        <!-- TRANSPORTS -->
+        <div class="score-group">
+          <div class="score-group-title">🚇 Transports & commerces</div>
+          <div class="score-options">
+            <div class="score-opt" data-group="transport" data-val="excellent" data-coeff="0.06" onclick="selScore(this)"><div class="score-dot"></div>Très bien desservi<span class="score-badge-mini bg-pos">+6%</span></div>
+            <div class="score-opt selected" data-group="transport" data-val="bon" data-coeff="0.02" onclick="selScore(this)"><div class="score-dot"></div>Bien desservi<span class="score-badge-mini bg-pos">+2%</span></div>
+            <div class="score-opt" data-group="transport" data-val="moyen" data-coeff="0" onclick="selScore(this)"><div class="score-dot"></div>Accessibilité correcte<span class="score-badge-mini bg-neu">0%</span></div>
+            <div class="score-opt neg" data-group="transport" data-val="faible" data-coeff="-0.05" onclick="selScore(this)"><div class="score-dot"></div>Isolé / difficile d'accès<span class="score-badge-mini bg-neg">-5%</span></div>
+          </div>
+        </div>
+
+        <!-- COPROPRIÉTÉ -->
+        <div class="score-group">
+          <div class="score-group-title">🏘️ Copropriété / Immeuble</div>
+          <div class="score-options">
+            <div class="score-opt" data-group="copro" data-val="excellent" data-coeff="0.04" onclick="selScore(this)"><div class="score-dot"></div>Standing · très bien entretenu<span class="score-badge-mini bg-pos">+4%</span></div>
+            <div class="score-opt selected" data-group="copro" data-val="bon" data-coeff="0" onclick="selScore(this)"><div class="score-dot"></div>Bon état général<span class="score-badge-mini bg-neu">0%</span></div>
+            <div class="score-opt mid" data-group="copro" data-val="moyen" data-coeff="-0.04" onclick="selScore(this)"><div class="score-dot"></div>Entretien passable<span class="score-badge-mini bg-neg">-4%</span></div>
+            <div class="score-opt neg" data-group="copro" data-val="mauvais" data-coeff="-0.10" onclick="selScore(this)"><div class="score-dot"></div>Copropriété dégradée<span class="score-badge-mini bg-neg">-10%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RÉSUMÉ SCORE -->
+      <div class="score-resume" id="score-resume">
+        <div class="score-circle" id="score-circle" style="color:var(--teal);border-color:var(--teal)">+</div>
+        <div class="score-resume-info">
+          <div class="score-resume-val" id="score-resume-val">Score qualité : calcul en cours…</div>
+          <div class="score-resume-sub" id="score-resume-sub">Sélectionnez vos critères ci-dessus</div>
+          <div class="score-bar-mini"><div class="score-bar-fill" id="score-bar-fill" style="width:50%;background:var(--teal)"></div></div>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn-prev" onclick="allerEtape1()">← Retour</button>
+        <button class="btn-estimer-final" onclick="lancerEstimation()">✨ Estimer mon bien →</button>
+      </div>
+      <div class="form-garantie">Le score qualité affine l'estimation DVF avec un correctif de ±30%</div>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="loading-section" style="display:none;text-align:center;max-width:480px;margin:60px auto;padding:0 24px">
+  <div class="loading-avatar">🏡</div>
+  <div style="font-size:16px;font-weight:500;margin-bottom:6px">Hanaé analyse votre bien…</div>
+  <div style="font-size:13px;color:var(--muted)">5 sources de données croisées</div>
+  <div class="loading-steps">
+    <div class="step-item active" id="step-dvf"><div class="step-dot-l">1</div><span>Base DVF DGFiP — ventes similaires</span></div>
+    <div class="step-item" id="step-insee"><div class="step-dot-l">2</div><span>API INSEE — données commune</span></div>
+    <div class="step-item" id="step-notaires"><div class="step-dot-l">3</div><span>Indices Notaires-INSEE — tendances</span></div>
+    <div class="step-item" id="step-qualite"><div class="step-dot-l">4</div><span>Application score qualité personnalisé</span></div>
+    <div class="step-item" id="step-hanae"><div class="step-dot-l">5</div><span>Synthèse Hanaé — IA ImmoConnect</span></div>
+  </div>
+</div>
+
+<!-- RÉSULTATS -->
+<div class="result-wrap" id="result-section"></div>
+
+<script>
+// ── SCORE QUALITE ──
+var scoreData = {};
+
+function selScore(el) {
+  var group = el.dataset.group;
+  // Désélectionner tous du groupe
+  document.querySelectorAll('[data-group="'+group+'"]').forEach(function(o){
+    o.classList.remove('selected','neg','mid');
+  });
+  el.classList.add('selected');
+  var coeff = parseFloat(el.dataset.coeff);
+  if (coeff < -0.08) el.classList.add('neg');
+  else if (coeff < 0) el.classList.add('mid');
+  scoreData[group] = { val: el.dataset.val, coeff: coeff, label: el.textContent.trim() };
+  mettreAJourScoreResume();
+}
+
+function mettreAJourScoreResume() {
+  var total = 0;
+  Object.values(scoreData).forEach(function(s){ total += s.coeff; });
+  var pct = Math.round(total * 100);
+  var circle = document.getElementById('score-circle');
+  var val = document.getElementById('score-resume-val');
+  var sub = document.getElementById('score-resume-sub');
+  var bar = document.getElementById('score-bar-fill');
+  var sign = pct >= 0 ? '+' : '';
+  circle.textContent = sign + pct + '%';
+  val.textContent = 'Score qualité : ' + sign + pct + '% vs marché';
+  var nbCrit = Object.keys(scoreData).length;
+  sub.textContent = nbCrit + ' critère' + (nbCrit>1?'s':'') + ' renseigné' + (nbCrit>1?'s':'');
+  var barW = Math.min(100, Math.max(5, 50 + pct * 2));
+  bar.style.width = barW + '%';
+  if (pct >= 5) { circle.style.color = 'var(--teal)'; circle.style.borderColor = 'var(--teal)'; bar.style.background = 'var(--teal)'; }
+  else if (pct >= 0) { circle.style.color = '#D4732A'; circle.style.borderColor = '#D4732A'; bar.style.background = '#D4732A'; }
+  else { circle.style.color = 'var(--coral)'; circle.style.borderColor = 'var(--coral)'; bar.style.background = 'var(--coral)'; }
+}
+
+function calculerCoeffTotal() {
+  // Initialiser les sélections par défaut si vides
+  document.querySelectorAll('.score-opt.selected').forEach(function(el){
+    var group = el.dataset.group;
+    if (!scoreData[group]) scoreData[group] = { val: el.dataset.val, coeff: parseFloat(el.dataset.coeff), label: el.textContent.trim() };
+  });
+  var total = 0;
+  Object.values(scoreData).forEach(function(s){ total += s.coeff; });
+  return total;
+}
+
+// ── NAVIGATION ÉTAPES ──
+function allerEtape2() {
+  var type = document.getElementById('type-bien').value;
+  var cp = document.getElementById('code-postal').value.trim();
+  var surface = parseFloat(document.getElementById('surface').value);
+  if (!type) { alert('Choisissez un type de bien.'); return; }
+  if (!cp || cp.length !== 5) { alert('Renseignez un code postal valide (5 chiffres).'); return; }
+  if (!surface || surface < 5) { alert('Renseignez la surface de votre bien.'); return; }
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').style.display = 'block';
+  document.getElementById('tab1').className = 'step-tab done';
+  document.getElementById('tab2').className = 'step-tab active';
+  mettreAJourScoreResume();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function allerEtape1() {
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step1').style.display = 'block';
+  document.getElementById('tab1').className = 'step-tab active';
+  document.getElementById('tab2').className = 'step-tab';
+}
+
+// ── LANCER ESTIMATION ──
+async function lancerEstimation() {
+  var type = document.getElementById('type-bien').value;
+  var cp = document.getElementById('code-postal').value.trim();
+  var surface = parseFloat(document.getElementById('surface').value);
+  var annee = document.getElementById('annee-construction').value;
+  var nbPieces = document.getElementById('nb-pieces').value;
+  var prixSouhaite = parseFloat(document.getElementById('prix-souhaite').value) || 0;
+  var coeffQualite = calculerCoeffTotal();
+
+  document.getElementById('form-section').style.display = 'none';
+  document.getElementById('hero-section').style.paddingBottom = '40px';
+  document.getElementById('loading-section').style.display = 'block';
+  document.getElementById('result-section').style.display = 'none';
+
+  await animerEtape('step-dvf', 'step-insee', 900);
+  var dvf = await fetchDVF(cp, type, surface);
+  await animerEtape('step-insee', 'step-notaires', 600);
+  var insee = await fetchINSEE(cp);
+  await animerEtape('step-notaires', 'step-qualite', 500);
+  var indice = fetchIndice(type);
+  await animerEtape('step-qualite', 'step-hanae', 400);
+  var calculs = calculer({surface, prix:prixSouhaite, annee_construction:annee, type_bien:type}, dvf, indice, coeffQualite);
+  var synthese = await genererSynthese({type_bien:type, surface, code_postal:cp, ville:insee.nom, annee_construction:annee}, dvf, calculs, prixSouhaite, coeffQualite, scoreData);
+  document.getElementById('step-hanae').className = 'step-item done';
+  await new Promise(function(r){ setTimeout(r,400); });
+
+  afficherResultats({type, cp, surface, annee, nbPieces, prixSouhaite, coeffQualite, dvf, insee, calculs, synthese, scoreData: Object.assign({},scoreData)});
+}
+
+async function animerEtape(idActif, idSuivant, delai) {
+  document.getElementById(idActif).className = 'step-item done';
+  if (idSuivant) document.getElementById(idSuivant).className = 'step-item active';
+  await new Promise(function(r){ setTimeout(r, delai); });
+}
+
+// ── API DVF ──
+async function fetchDVF(cp, type, surface) {
+  try {
+    var typeCode = (type||'').toLowerCase().includes('maison')||(type||'').toLowerCase().includes('villa') ? 'Maison' : 'Appartement';
+    var url = 'https://api.dvf.etalab.gouv.fr/geoapi/dvf/?code_postal='+cp+'&type_local='+encodeURIComponent(typeCode)+'&nb_resultats=50';
+    var res = await fetch(url);
+    var data = await res.json();
+    var mutations = data.features || [];
+    var surf = parseFloat(surface) || 50;
+    var similaires = mutations.filter(function(m){
+      var s = m.properties.surface_reelle_bati;
+      return s && s >= surf*0.65 && s <= surf*1.4 && m.properties.valeur_fonciere > 0;
+    });
+    var prixM2 = similaires.map(function(m){ return m.properties.valeur_fonciere/m.properties.surface_reelle_bati; }).filter(function(v){ return v>0&&v<20000; });
+    var moy = function(arr){ return arr.length ? arr.reduce(function(a,b){return a+b},0)/arr.length : 0; };
+    var med = function(arr){ if(!arr.length) return 0; var s=arr.slice().sort(function(a,b){return a-b}); return s[Math.floor(s.length/2)]; };
+    var parAnnee = {};
+    similaires.forEach(function(m){
+      var a=(m.properties.date_mutation||'').substring(0,4);
+      if(a>='2019'){if(!parAnnee[a])parAnnee[a]=[];parAnnee[a].push(m.properties.valeur_fonciere/m.properties.surface_reelle_bati);}
+    });
+    var historique = Object.keys(parAnnee).sort().map(function(a){ return {annee:a,prixM2:Math.round(moy(parAnnee[a])),nb:parAnnee[a].length}; });
+    return { similaires:similaires.slice(0,8), prixM2Moyen:Math.round(moy(prixM2)), prixM2Median:Math.round(med(prixM2)), nbVentes:similaires.length, historique, source:'DVF Etalab — DGFiP' };
+  } catch(e) { return { similaires:[], prixM2Moyen:0, prixM2Median:0, nbVentes:0, historique:[], source:'DVF indisponible' }; }
+}
+
+// ── API INSEE ──
+async function fetchINSEE(cp) {
+  try {
+    var res = await fetch('https://geo.api.gouv.fr/communes?codePostal='+cp+'&fields=nom,code,population&format=json');
+    var c = (await res.json())[0];
+    return { nom:c?c.nom:'', code:c?c.code:'', population:c?c.population:null };
+  } catch(e) { return {nom:'',code:'',population:null}; }
+}
+
+// ── INDICE NOTAIRES ──
+function fetchIndice(type) {
+  var t = (type||'').toLowerCase().includes('maison')||(type||'').toLowerCase().includes('villa')?'maison':'appartement';
+  return {maison:{tendance2024:-3.2,tendance2023:-3.8,correctionPct:-0.032},appartement:{tendance2024:-2.5,tendance2023:-4.1,correctionPct:-0.025}}[t];
+}
+
+// ── CALCULS AVEC SCORE QUALITÉ ──
+function calculer(annonce, dvf, indice, coeffQualite) {
+  var surface = parseFloat(annonce.surface) || 1;
+  var prix = parseFloat(annonce.prix) || 0;
+  var prixM2DVF = dvf.prixM2Moyen || 0;
+  var prixM2DVFCorrige = prixM2DVF > 0 ? Math.round(prixM2DVF * (1 + indice.correctionPct)) : 0;
+  var prixM2Marche = prixM2DVFCorrige > 0 && prixM2DVF > 0
+    ? Math.round(prixM2DVFCorrige * 0.6 + prixM2DVF * 0.4)
+    : (prixM2DVF || 0);
+
+  // APPLICATION DU SCORE QUALITÉ — clé de voûte de l'amélioration
+  var coeffQ = coeffQualite || 0;
+  // Limiter le coefficient entre -30% et +30% pour rester réaliste
+  coeffQ = Math.max(-0.30, Math.min(0.30, coeffQ));
+  var prixM2Corrige = Math.round(prixM2Marche * (1 + coeffQ));
+
+  var fourchetteBas = Math.round(prixM2Corrige * surface * 0.93);
+  var fourchettHaut = Math.round(prixM2Corrige * surface * 1.07);
+  var prixEstime = Math.round(prixM2Corrige * surface);
+
+  var ecartMarche = prix > 0 && prixM2Corrige > 0 ? Math.round((prix/surface - prixM2Corrige) / prixM2Corrige * 100) : null;
+  var score = ecartMarche===null?null:(ecartMarche<-10?'Sous-évalué':ecartMarche>10?'Surévalué':Math.abs(ecartMarche)<=5?'Prix marché':'Correct');
+  var scoreColor = !score?null:(score==='Sous-évalué'?'#1E7A62':score==='Surévalué'?'#C0392B':'#D4732A');
+  var anneeConst = parseInt(annonce.annee_construction) || 0;
+  var tauxNotaire = anneeConst >= 2020 ? 0.03 : 0.075;
+  var fraisNotaire = prixEstime * tauxNotaire;
+
+  return { prixEstime, prixM2Marche, prixM2DVF, prixM2DVFCorrige, prixM2Corrige, coeffQualite:Math.round(coeffQ*100), fourchetteBas, fourchettHaut, ecartMarche, score, scoreColor, fraisNotaire:Math.round(fraisNotaire), prixTotal:Math.round(prixEstime+fraisNotaire), tauxNotaire:(tauxNotaire*100).toFixed(1), tendance2024:indice.tendance2024, tendance2023:indice.tendance2023 };
+}
+
+// ── SYNTHÈSE HANAÉ ──
+async function genererSynthese(annonce, dvf, calculs, prixSouhaite, coeffQualite, scoreData) {
+  try {
+    var criteres = Object.values(scoreData).map(function(s){ return s.label; }).join(', ');
+    var prompt = `Tu es Hanaé, l'agent IA ImmoConnect. En 3 paragraphes courts (160 mots max), synthétise cette estimation immobilière.
+
+BIEN : ${annonce.type_bien} ${annonce.surface}m² à ${annonce.ville||'?'} (${annonce.code_postal})${annonce.annee_construction?' · Construction '+annonce.annee_construction:''}
+
+DONNÉES DVF : ${dvf.nbVentes} ventes similaires analysées · Prix/m² DVF : ${calculs.prixM2DVF} € · DVF corrigé Notaires-INSEE (tendance ${calculs.tendance2024}%) : ${calculs.prixM2DVFCorrige} €/m²
+
+SCORE QUALITÉ : ${coeffQualite>0?'+':''}${Math.round(coeffQualite*100)}% de correction appliquée
+Critères renseignés : ${criteres}
+Prix/m² après correction qualité : ${calculs.prixM2Corrige} €/m²
+
+ESTIMATION FINALE : ${calculs.fourchetteBas.toLocaleString('fr-FR')} € — ${calculs.fourchettHaut.toLocaleString('fr-FR')} € · Valeur centrale : ${calculs.prixEstime.toLocaleString('fr-FR')} €
+${prixSouhaite>0?'Prix souhaité : '+prixSouhaite.toLocaleString('fr-FR')+' € → '+(calculs.ecartMarche>0?'+':'')+calculs.ecartMarche+'% vs estimation ('+(calculs.score||'—')+')'  :''}
+
+Explique brièvement la méthode (DVF + Notaires-INSEE + score qualité). Commente les critères qui ont le plus impacté l'estimation. Conclus avec un conseil actionnable.`;
+
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:350,messages:[{role:'user',content:prompt}]})
+    });
+    var data = await res.json();
+    return data.content&&data.content[0] ? data.content[0].text : null;
+  } catch(e) { return null; }
+}
+
+// ── AFFICHER RÉSULTATS ──
+function afficherResultats(d) {
+  document.getElementById('loading-section').style.display = 'none';
+  var c = d.calculs;
+  var ville = d.insee.nom || d.cp;
+  var today = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+  var html = '';
+
+  html += '<button class="btn-recommencer" onclick="recommencer()">← Nouvelle estimation</button>';
+
+  // Header
+  html += '<div class="result-header"><div class="hanae-avatar">🤖</div><div><div class="result-title">Estimation de votre '+d.type+' à '+ville+'</div><div class="result-sub">'+d.surface+' m²'+(d.annee?' · Construction '+d.annee:'')+(d.nbPieces?' · '+d.nbPieces+' pièce'+(d.nbPieces>1?'s':''):'')+'</div></div><div class="result-date">'+today+'</div></div>';
+
+  // Corrections appliquées
+  var corrItems = Object.values(d.scoreData).filter(function(s){ return s.coeff !== 0; });
+  if (corrItems.length) {
+    html += '<div class="correction-box"><div class="correction-title">Corrections score qualité appliquées — total : '+(c.coeffQualite>=0?'+':'')+c.coeffQualite+'% vs DVF brut</div><div class="correction-items">';
+    corrItems.forEach(function(s){
+      var sign = s.coeff>=0?'+':'';
+      var cls = s.coeff>0?'corr-pos':s.coeff<0?'corr-neg':'corr-neu';
+      var label = s.label.replace(/[+\-]\d+%/,'').trim();
+      html += '<div class="corr-item '+cls+'">'+label+' <strong>'+sign+Math.round(s.coeff*100)+'%</strong></div>';
+    });
+    html += '</div></div>';
+  }
+
+  // Fourchette
+  html += '<div class="fourchette-card">';
+  html += '<div class="fourchette-label">Estimation personnalisée — DVF + Notaires-INSEE + Score qualité</div>';
+  if (c.fourchetteBas > 0) {
+    html += '<div class="fourchette-range">'+c.fourchetteBas.toLocaleString('fr-FR')+' € — '+c.fourchettHaut.toLocaleString('fr-FR')+' €</div>';
+    html += '<div class="fourchette-center"><div class="prix-central">≈ '+c.prixEstime.toLocaleString('fr-FR')+' € (valeur centrale)</div></div>';
+    if (c.ecartMarche !== null) {
+      var sc = c.score?'<span class="score-badge" style="background:'+(c.scoreColor+'22')+';color:'+c.scoreColor+'">'+c.score+'</span>':'';
+      html += '<div style="font-size:13px;color:var(--muted);margin-top:8px">Votre prix souhaité : '+(c.ecartMarche>0?'+':'')+c.ecartMarche+'% vs estimation '+sc+'</div>';
+    }
+    var gaugeW = Math.min(95, Math.max(5, 50 + c.coeffQualite));
+    html += '<div class="gauge-wrap"><div class="gauge-bar"><div class="gauge-fill" style="width:'+gaugeW+'%;background:'+(c.coeffQualite>=0?'var(--teal)':'var(--coral)')+'"></div></div><div class="gauge-labels"><span>Score bas</span><span>Score qualité : '+(c.coeffQualite>=0?'+':'')+c.coeffQualite+'%</span><span>Score haut</span></div></div>';
+  } else {
+    html += '<div style="padding:20px;color:var(--muted);font-size:13px">⚠️ Données DVF insuffisantes dans ce secteur.<br>Estimation basée sur indices Notaires-INSEE nationaux.</div>';
+    html += '<div style="font-size:22px;font-weight:500;color:var(--teal);margin:12px 0">'+c.prixM2Corrige.toLocaleString('fr-FR')+' €/m² estimé</div>';
+    html += '<div style="font-size:13px;color:var(--muted)">≈ '+c.prixEstime.toLocaleString('fr-FR')+' € pour '+d.surface+' m²</div>';
+  }
+  html += '</div>';
+
+  // Stats 4 colonnes
+  html += '<div class="stats-grid">';
+  html += '<div class="stat-box"><div class="stat-val">'+(c.prixM2DVF>0?c.prixM2DVF.toLocaleString('fr-FR')+' €':'ND')+'</div><div class="stat-lbl">Prix/m² DVF brut</div><div class="stat-sub">'+d.dvf.nbVentes+' ventes</div></div>';
+  html += '<div class="stat-box"><div class="stat-val">'+(c.prixM2DVFCorrige>0?c.prixM2DVFCorrige.toLocaleString('fr-FR')+' €':'ND')+'</div><div class="stat-lbl">DVF + Notaires-INSEE</div><div class="stat-sub">Tendance '+c.tendance2024+'%</div></div>';
+  html += '<div class="stat-box" style="border:2px solid var(--teal)"><div class="stat-val" style="font-size:22px">'+c.prixM2Corrige.toLocaleString('fr-FR')+' €</div><div class="stat-lbl" style="color:var(--teal)">Prix/m² final estimé</div><div class="stat-sub">Score qualité '+(c.coeffQualite>=0?'+':'')+c.coeffQualite+'%</div></div>';
+  html += '<div class="stat-box"><div class="stat-val">'+c.fraisNotaire.toLocaleString('fr-FR')+' €</div><div class="stat-lbl">Frais de notaire</div><div class="stat-sub">Taux '+c.tauxNotaire+'%</div></div>';
+  html += '</div>';
+
+  // Ventes similaires
+  if (d.dvf.similaires && d.dvf.similaires.length) {
+    html += '<div class="section"><div class="section-head"><div class="section-icon">📊</div><div class="section-title">Ventes DVF similaires dans votre secteur</div><div class="section-badge">'+d.dvf.similaires.length+' transactions</div></div><div class="section-body">';
+    html += '<table class="ventes-table"><thead><tr><th>Date</th><th>Surface</th><th>Prix vendu</th><th>€/m²</th></tr></thead><tbody>';
+    d.dvf.similaires.forEach(function(m){
+      var p = m.properties;
+      var pm2 = p.surface_reelle_bati>0 ? Math.round(p.valeur_fonciere/p.surface_reelle_bati) : 0;
+      html += '<tr><td>'+(p.date_mutation||'').substring(0,7)+'</td><td>'+Math.round(p.surface_reelle_bati)+' m²</td><td>'+Math.round(p.valeur_fonciere).toLocaleString('fr-FR')+' €</td><td style="color:var(--teal);font-weight:600">'+(pm2>0?pm2.toLocaleString('fr-FR')+' €':'—')+'</td></tr>';
+    });
+    html += '</tbody></table></div></div>';
+  }
+
+  // Historique
+  if (d.dvf.historique && d.dvf.historique.length > 1) {
+    html += '<div class="section"><div class="section-head"><div class="section-icon">📈</div><div class="section-title">Évolution du marché local</div></div><div class="section-body">';
+    html += '<table class="ventes-table"><thead><tr><th>Année</th><th>Prix moyen/m²</th><th>Nb ventes analysées</th></tr></thead><tbody>';
+    d.dvf.historique.forEach(function(h){
+      html += '<tr><td>'+h.annee+'</td><td style="color:var(--teal);font-weight:600">'+h.prixM2.toLocaleString('fr-FR')+' €/m²</td><td>'+h.nb+'</td></tr>';
+    });
+    html += '</tbody></table></div></div>';
+  }
+
+  // Synthèse Hanaé
+  if (d.synthese) {
+    html += '<div class="section"><div class="section-head"><div class="section-icon">🤖</div><div class="section-title">Synthèse de Hanaé</div><div class="section-badge">IA ImmoConnect</div></div><div class="section-body"><div class="synthese-box"><div class="synthese-name">🤖 Hanaé — Conseillère IA ImmoConnect</div>'+d.synthese.replace(/\n/g,'<br>')+'</div></div></div>';
+  }
+
+  // CTA
+  html += '<div class="cta-box"><div class="cta-title">Publiez votre bien gratuitement</div><div class="cta-sub">Votre estimation est prête. Publiez maintenant et bénéficiez<br>de tout le réseau ImmoConnect — agents et acheteurs qualifiés.</div><div class="cta-btns"><a href="questionnaire-vendeur.html" class="btn-gold">🏠 Publier mon annonce gratuitement →</a><a href="rapport-hanae.html" class="btn-outline-w">📋 Rapport complet Hanaé</a></div></div>';
+
+  document.getElementById('result-section').innerHTML = html;
+  document.getElementById('result-section').style.display = 'block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function recommencer() {
+  document.getElementById('result-section').style.display = 'none';
+  document.getElementById('loading-section').style.display = 'none';
+  document.getElementById('form-section').style.display = 'block';
+  document.getElementById('hero-section').style.paddingBottom = '90px';
+  document.getElementById('step1').style.display = 'block';
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('tab1').className = 'step-tab active';
+  document.getElementById('tab2').className = 'step-tab';
+  ['step-dvf','step-insee','step-notaires','step-qualite','step-hanae'].forEach(function(id,i){ document.getElementById(id).className=i===0?'step-item active':'step-item'; });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
