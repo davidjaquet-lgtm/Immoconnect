@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Comment ça marche pour les agents</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;
+  --line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;
+  --amber:#D4732A;--r:12px
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+
+/* NAV */
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:24px;align-items:center;flex:1;margin-left:32px}
+.nav-links a{text-decoration:none;color:#888780;font-size:13px}
+.nav-cta{padding:8px 20px;border:1px solid #444;color:#fff!important;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none}
+
+/* HERO */
+.hero{background:var(--ink);padding:72px 32px 64px;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(192,155,90,.15);border:1px solid rgba(192,155,90,.3);border-radius:20px;padding:5px 16px;font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:20px}
+.hero h1{font-size:40px;font-weight:300;color:#FAFAF7;line-height:1.2;max-width:640px;margin:0 auto 16px}
+.hero h1 strong{font-weight:600;color:var(--gold)}
+.hero-sub{font-size:16px;color:rgba(250,250,247,.5);max-width:480px;margin:0 auto 32px;line-height:1.7}
+.hero-cta{display:inline-block;background:var(--gold);color:var(--ink);padding:14px 32px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600}
+
+/* PAGE */
+.page{max-width:860px;margin:0 auto;padding:64px 24px 100px}
+
+/* SECTION TITLES */
+.section-eyebrow{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.section-title{font-size:26px;font-weight:400;margin-bottom:8px;line-height:1.3}
+.section-sub{font-size:14px;color:var(--muted);line-height:1.7;max-width:560px;margin-bottom:32px}
+
+/* CARDS */
+.card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:24px}
+.card+.card{margin-top:12px}
+
+/* ETAPES */
+.etapes{display:flex;flex-direction:column;gap:0}
+.etape{display:grid;grid-template-columns:48px 1fr;gap:20px;padding:24px 0;border-bottom:1px solid var(--line);position:relative}
+.etape:last-child{border-bottom:none}
+.etape-num{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;flex-shrink:0}
+.etape-body{}
+.etape-title{font-size:16px;font-weight:600;margin-bottom:6px}
+.etape-desc{font-size:13px;color:var(--muted);line-height:1.7}
+.etape-detail{background:var(--bg);border-radius:8px;padding:12px 14px;margin-top:10px;font-size:12px;line-height:1.7}
+
+/* SCORING */
+.score-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.score-item{background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:16px}
+.score-item-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.score-label{font-size:12px;font-weight:600}
+.score-pts{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
+.score-bar{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:2px}
+.score-desc{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
+
+/* NIVEAUX */
+.niveaux-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.niveau-card{border-radius:10px;padding:18px;text-align:center;border:2px solid transparent}
+.niveau-icon{font-size:28px;margin-bottom:8px}
+.niveau-name{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
+.niveau-score{font-size:11px;opacity:.7;margin-bottom:10px}
+.niveau-avantage{font-size:11px;line-height:1.5}
+
+/* BADGES */
+.badges-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.badge-item{background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;align-items:flex-start;gap:10px}
+.badge-icon{font-size:22px;flex-shrink:0}
+.badge-name{font-size:12px;font-weight:600;margin-bottom:3px}
+.badge-cond{font-size:11px;color:var(--muted);line-height:1.5}
+
+/* TIMELINE CANDIDATURE */
+.timeline{position:relative;padding-left:24px}
+.timeline::before{content:'';position:absolute;left:7px;top:0;bottom:0;width:2px;background:var(--line)}
+.tl-item{position:relative;padding-bottom:20px}
+.tl-item:last-child{padding-bottom:0}
+.tl-dot{width:16px;height:16px;border-radius:50%;position:absolute;left:-21px;top:2px;flex-shrink:0}
+.tl-time{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+.tl-desc{font-size:13px;line-height:1.6}
+
+/* EMAIL PREVIEW */
+.email-preview{background:var(--warm);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.email-header{background:var(--ink);padding:14px 20px;display:flex;align-items:center;gap:10px}
+.email-from{font-size:12px;color:#888780}
+.email-from strong{color:#FAFAF7}
+.email-body{padding:20px}
+.email-score-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:12px}
+.email-score-row:last-child{border-bottom:none}
+
+/* COMPARAISON */
+.compare-table{width:100%;border-collapse:collapse;font-size:12px}
+.compare-table th{padding:10px 12px;background:var(--ink);color:#fff;font-weight:500;text-align:center}
+.compare-table th:first-child{text-align:left;border-radius:6px 0 0 0}
+.compare-table th:last-child{border-radius:0 6px 0 0}
+.compare-table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:center}
+.compare-table td:first-child{text-align:left;color:var(--muted)}
+.compare-table tr:last-child td{border-bottom:none}
+.compare-table tr:nth-child(even) td{background:var(--bg)}
+.td-yes{color:var(--teal);font-weight:600}
+.td-no{color:var(--muted)}
+
+/* REMBOURSEMENT */
+.rembours-box{background:linear-gradient(135deg,#E1F5EE,#E6F1FB);border:1px solid #9FE1CB;border-radius:10px;padding:20px 24px;display:flex;align-items:flex-start;gap:16px}
+
+/* DASHBOARD PREVIEW */
+.dash-preview{background:var(--ink);border-radius:12px;padding:24px;color:#FAFAF7}
+.dash-score-big{font-size:48px;font-weight:300;line-height:1}
+.dash-bar-wrap{margin:12px 0}
+.dash-bar{height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden}
+.dash-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold),var(--teal))}
+.dash-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.dash-badge{background:rgba(255,255,255,.1);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:500}
+
+/* FAQ */
+.faq-item{border-bottom:1px solid var(--line);padding:16px 0}
+.faq-q{font-size:14px;font-weight:500;margin-bottom:6px;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+.faq-a{font-size:13px;color:var(--muted);line-height:1.7}
+
+/* CTA FINAL */
+.cta-final{background:var(--ink);border-radius:12px;padding:40px;text-align:center}
+
+@media(max-width:600px){
+  .score-grid{grid-template-columns:1fr}
+  .niveaux-grid{grid-template-columns:1fr 1fr}
+  .badges-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-links">
+    <a href="forfaits.html">Forfaits</a>
+    <a href="index.html">Annonces</a>
+  </div>
+  <a href="questionnaire-agent.html" class="nav-cta">S'inscrire gratuitement</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">Guide complet · Agents immobiliers</div>
+  <h1>Candidatez. Progressez. <strong>Gagnez.</strong></h1>
+  <p class="hero-sub">Un système transparent basé sur votre performance réelle — pas sur qui paie le plus.</p>
+  <a href="questionnaire-agent.html" class="hero-cta">Commencer gratuitement →</a>
+</div>
+
+<div class="page">
+
+  <!-- ══ 1. COMMENT ÇA MARCHE ══ -->
+  <div style="margin-bottom:60px">
+    <div class="section-eyebrow">Le processus</div>
+    <div class="section-title">Comment fonctionne ImmoConnect pour les agents</div>
+    <div class="section-sub">Un fonctionnement simple en 4 étapes, transparent de bout en bout.</div>
+
+    <div class="card">
+      <div class="etapes">
+        <div class="etape">
+          <div class="etape-num" style="background:#E1F5EE;color:#1E7A62">1</div>
+          <div class="etape-body">
+            <div class="etape-title">Un vendeur publie son bien</div>
+            <div class="etape-desc">Dès qu'un vendeur dépose une annonce, vous êtes alerté selon votre forfait. Si le vendeur choisit le mode "ImmoConnect sélectionne les 3 meilleurs", tous les agents sont alertés immédiatement sans délai.</div>
+            <div class="etape-detail" style="background:#E1F5EE;color:#085041">
+              <strong>Mode "Je choisis mon agent" :</strong> alertes H+0 (Premium), H+4 (Pro), H+12 (Starter) — Pay per use exclu<br>
+              <strong>Mode "Sélection des 3 meilleurs" :</strong> tous les agents alertés H+0, y compris Pay per use
+            </div>
+          </div>
+        </div>
+
+        <div class="etape">
+          <div class="etape-num" style="background:#E6F1FB;color:#185FA5">2</div>
+          <div class="etape-body">
+            <div class="etape-title">Vous candidatez — Flux A ou Flux B</div>
+            <div class="etape-desc">Vous avez <strong>48 heures</strong> pour candidater. Deux options selon votre situation :</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+              <div class="etape-detail">
+                <div style="font-weight:600;margin-bottom:4px">🎯 Flux A — Je veux le mandat</div>
+                <div style="color:var(--muted)">Vous pensez pouvoir vendre ce bien. Vous proposez votre stratégie marketing, vos honoraires et votre délai estimé.</div>
+              </div>
+              <div class="etape-detail">
+                <div style="font-weight:600;margin-bottom:4px">👥 Flux B — J'ai un acheteur</div>
+                <div style="color:var(--muted)">Vous avez un acheteur en portefeuille compatible avec ce bien. Vous déclarez son budget, type et surface recherchés.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="etape">
+          <div class="etape-num" style="background:#FAEEDA;color:#854F0B">3</div>
+          <div class="etape-body">
+            <div class="etape-title">L'algorithme Hanaé calcule votre score</div>
+            <div class="etape-desc">À la clôture des 48h, Hanaé calcule un score sur 100 pour chaque candidat selon des critères objectifs. Les <strong>3 meilleurs scores</strong> sont présentés au vendeur dans un tableau comparatif.</div>
+            <div class="etape-detail">
+              ⚠️ <strong>L'estimation de prix est confidentielle.</strong> Elle est utilisée par l'algorithme pour évaluer la cohérence de votre proposition, mais jamais communiquée aux agents. L'agent sélectionné évaluera le bien de manière optimale lors de la visite.
+            </div>
+          </div>
+        </div>
+
+        <div class="etape">
+          <div class="etape-num" style="background:#0F0F0E;color:#fff">4</div>
+          <div class="etape-body">
+            <div class="etape-title">Le vendeur choisit — mandat automatique</div>
+            <div class="etape-desc">Si vous êtes sélectionné, le vendeur vous choisit depuis son espace. Le mandat simple est généré automatiquement et signé électroniquement via Docage. Le calendrier de visites s'ouvre immédiatement.</div>
+            <div class="etape-detail" style="background:#E1F5EE;color:#085041">
+              ✅ Si vous n'êtes pas sélectionné, vous recevez votre score détaillé et des conseils personnalisés de Hanaé pour progresser.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 2. LE SCORING ══ -->
+  <div style="margin-bottom:60px">
+    <div class="section-eyebrow">L'algorithme</div>
+    <div class="section-title">Comment votre score est calculé</div>
+    <div class="section-sub">Un score sur 100, calculé de façon objective et transparente. Vous savez exactement sur quoi vous êtes évalué.</div>
+
+    <div style="background:#FAEEDA;border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:12px;color:#633806;line-height:1.7">
+      ℹ️ <strong>Score commun (50 pts)</strong> appliqué à tous les agents + <strong>bonus selon votre flux (50 pts)</strong> selon que vous candidatez en Flux A ou Flux B.
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Score commun — 50 points</div>
+      <div class="score-grid">
+        <div class="score-item">
+          <div class="score-item-head">
+            <span class="score-label">Expérience locale</span>
+            <span class="score-pts" style="background:#E1F5EE;color:#1E7A62">20 pts max</span>
+          </div>
+          <div class="score-bar"><div class="score-bar-fill" style="width:100%;background:#1E7A62"></div></div>
+          <div class="score-desc">Nombre de ventes réalisées dans un rayon de 20km sur les 12 derniers mois. 10+ ventes = score maximum.</div>
+        </div>
+        <div class="score-item">
+          <div class="score-item-head">
+            <span class="score-label">Cohérence estimation</span>
+            <span class="score-pts" style="background:#FAEEDA;color:#854F0B">15 pts max</span>
+          </div>
+          <div class="score-bar"><div class="score-bar-fill" style="width:75%;background:#854F0B"></div></div>
+          <div class="score-desc">Écart entre votre estimation et l'évaluation DVF du marché. Plus vous êtes proche, plus vous scorez. Confidentiel.</div>
+        </div>
+        <div class="score-item">
+          <div class="score-item-head">
+            <span class="score-label">Réputation & avis</span>
+            <span class="score-pts" style="background:#E6F1FB;color:#185FA5">10 pts max</span>
+          </div>
+          <div class="score-bar"><div class="score-bar-fill" style="width:50%;background:#185FA5"></div></div>
+          <div class="score-desc">Moyenne de vos avis clients sur ImmoConnect. 4,8/5 ou plus = score maximum. Nouveau agent = score neutre 5/10.</div>
+        </div>
+        <div class="score-item">
+          <div class="score-item-head">
+            <span class="score-label">Profil complet</span>
+            <span class="score-pts" style="background:#F1EFE8;color:#555">5 pts max</span>
+          </div>
+          <div class="score-bar"><div class="score-bar-fill" style="width:25%;background:#888780"></div></div>
+          <div class="score-desc">Photo pro + présentation + honoraires + ventes renseignées + Carte T vérifiée. Chaque élément compte.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Bonus Flux A — 50 points</div>
+        <div class="card" style="padding:16px">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500">Stratégie marketing</span><span style="color:var(--teal);font-weight:600">20 pts</span></div>
+              <div style="font-size:11px;color:var(--muted)">Qualité de votre présentation, honoraires définis, volume de ventes annuel</div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500">Délai moyen de vente</span><span style="color:var(--teal);font-weight:600">15 pts</span></div>
+              <div style="font-size:11px;color:var(--muted)">≤30j=15pts · ≤45j=12pts · ≤60j=8pts · ≤90j=4pts</div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500">Taux de vente au prix</span><span style="color:var(--teal);font-weight:600">15 pts</span></div>
+              <div style="font-size:11px;color:var(--muted)">≥98%=15pts · ≥95%=10pts · ≥90%=6pts</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Bonus Flux B — 50 points</div>
+        <div class="card" style="padding:16px">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500">Pertinence acheteur</span><span style="color:var(--teal);font-weight:600">25 pts</span></div>
+              <div style="font-size:11px;color:var(--muted)">Budget, type de bien et surface de votre acheteur vs le bien proposé</div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500">Mandat de recherche signé</span><span style="color:var(--teal);font-weight:600">15 pts</span></div>
+              <div style="font-size:11px;color:var(--muted)">Document uploadé = 15 pts automatiques. Forte preuve de sérieux.</div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500">Historique ventes similaires</span><span style="color:var(--teal);font-weight:600">10 pts</span></div>
+              <div style="font-size:11px;color:var(--muted)">Avez-vous déjà vendu ce type de bien dans ce secteur ?</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 3. GAMIFICATION ══ -->
+  <div style="margin-bottom:60px">
+    <div class="section-eyebrow">Votre progression</div>
+    <div class="section-title">Un système qui récompense l'excellence</div>
+    <div class="section-sub">Chaque candidature, gagnée ou non, améliore votre profil et votre score futur. Vous ne perdez jamais — vous progressez toujours.</div>
+
+    <!-- NIVEAUX -->
+    <div style="margin-bottom:24px">
+      <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:12px">Les 4 niveaux</div>
+      <div class="niveaux-grid">
+        <div class="niveau-card" style="background:#F1EFE8;border-color:var(--line)">
+          <div class="niveau-icon">🌱</div>
+          <div class="niveau-name" style="color:var(--muted)">Débutant</div>
+          <div class="niveau-score">0 — 40 pts</div>
+          <div class="niveau-avantage" style="color:var(--muted)">Accès standard à la plateforme. Complétez votre profil pour progresser.</div>
+        </div>
+        <div class="niveau-card" style="background:#E6F1FB;border-color:rgba(24,95,165,.3)">
+          <div class="niveau-icon">⭐</div>
+          <div class="niveau-name" style="color:#185FA5">Confirmé</div>
+          <div class="niveau-score">41 — 60 pts</div>
+          <div class="niveau-avantage" style="color:#185FA5">Badge visible sur votre fiche. Confiance accrue auprès des vendeurs.</div>
+        </div>
+        <div class="niveau-card" style="background:#FAEEDA;border-color:rgba(192,155,90,.4)">
+          <div class="niveau-icon">🏆</div>
+          <div class="niveau-name" style="color:#854F0B">Expert</div>
+          <div class="niveau-score">61 — 80 pts</div>
+          <div class="niveau-avantage" style="color:#854F0B">Mise en avant dans les résultats. Badge affiché en priorité aux vendeurs.</div>
+        </div>
+        <div class="niveau-card" style="background:#E1F5EE;border-color:rgba(30,122,98,.35)">
+          <div class="niveau-icon">💎</div>
+          <div class="niveau-name" style="color:#1E7A62">Elite</div>
+          <div class="niveau-score">81 — 100 pts</div>
+          <div class="niveau-avantage" style="color:#1E7A62">Badge doré "Elite ImmoConnect". Mention spéciale dans le comparatif Hanaé.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BADGES -->
+    <div style="margin-bottom:24px">
+      <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:12px">Les badges de spécialité — débloqués selon vos performances réelles</div>
+      <div class="badges-grid">
+        <div class="badge-item">
+          <div class="badge-icon">🏙️</div>
+          <div><div class="badge-name">Spécialiste [ville]</div><div class="badge-cond">5+ ventes dans un rayon de 10km sur 12 mois</div></div>
+        </div>
+        <div class="badge-item">
+          <div class="badge-icon">⚡</div>
+          <div><div class="badge-name">Agent réactif</div><div class="badge-cond">Confirme ses candidatures en moins de 2 heures</div></div>
+        </div>
+        <div class="badge-item">
+          <div class="badge-icon">🎯</div>
+          <div><div class="badge-name">Estimation précise</div><div class="badge-cond">Écart < 3% avec l'analyse de marché sur 3 candidatures</div></div>
+        </div>
+        <div class="badge-item">
+          <div class="badge-icon">🤝</div>
+          <div><div class="badge-name">Top vendeur</div><div class="badge-cond">Taux de vente au prix affiché supérieur à 97%</div></div>
+        </div>
+        <div class="badge-item">
+          <div class="badge-icon">🔥</div>
+          <div><div class="badge-name">En série</div><div class="badge-cond">Sélectionné par 3 vendeurs consécutifs</div></div>
+        </div>
+        <div class="badge-item">
+          <div class="badge-icon">⭐</div>
+          <div><div class="badge-name">Très bien noté</div><div class="badge-cond">Moyenne avis supérieure à 4,8 sur minimum 5 avis</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLASSEMENT LOCAL -->
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="width:36px;height:36px;border-radius:8px;background:#FAEEDA;display:flex;align-items:center;justify-content:center;font-size:16px">📍</div>
+        <div>
+          <div style="font-size:14px;font-weight:600">Classement local</div>
+          <div style="font-size:12px;color:var(--muted)">Votre position parmi les agents de votre secteur</div>
+        </div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:14px 16px;font-size:13px;line-height:1.8">
+        Vous verrez dans votre dashboard : <strong>"Vous êtes 4ème sur 12 agents dans le secteur Tarbes. Il vous manque 6 points pour passer 3ème."</strong><br>
+        <span style="font-size:12px;color:var(--muted)">Le classement est mis à jour en temps réel. Ce n'est pas de la compétition agressive — c'est de l'information précise sur comment vous améliorer.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 4. NON SÉLECTIONNÉ ══ -->
+  <div style="margin-bottom:60px">
+    <div class="section-eyebrow">Quand vous n'êtes pas retenu</div>
+    <div class="section-title">La transparence comme moteur de progrès</div>
+    <div class="section-sub">Pas de message vague. Un score détaillé, des conseils personnalisés de Hanaé et des actions concrètes pour progresser.</div>
+
+    <!-- EMAIL PREVIEW -->
+    <div class="email-preview" style="margin-bottom:16px">
+      <div class="email-header">
+        <div>
+          <div class="email-from"><strong>ImmoConnect</strong> · contact@immoconnect-agence.fr</div>
+          <div style="font-size:13px;color:#FAFAF7;margin-top:2px">Votre candidature — Ce qui s'est passé et comment progresser</div>
+        </div>
+      </div>
+      <div class="email-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+          <div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Votre score</div>
+            <div style="font-size:28px;font-weight:600;color:#854F0B">67</div>
+            <div style="font-size:11px;color:var(--muted)">/100</div>
+          </div>
+          <div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Seuil de sélection</div>
+            <div style="font-size:28px;font-weight:600;color:var(--teal)">74</div>
+            <div style="font-size:11px;color:var(--muted)">Il vous manquait 7 pts</div>
+          </div>
+        </div>
+        <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Détail de votre score</div>
+        <div class="email-score-row"><span>Expérience locale</span><span>⚠️ 8/20 — Renseignez vos ventes locales</span></div>
+        <div class="email-score-row"><span>Cohérence estimation</span><span>✅ 12/15</span></div>
+        <div class="email-score-row"><span>Réputation</span><span>✅ 8/10</span></div>
+        <div class="email-score-row"><span>Profil complet</span><span>✅ 5/5</span></div>
+        <div class="email-score-row"><span>Délai de vente</span><span>⚠️ 5/15 — Délai non renseigné</span></div>
+        <div style="background:#E1F5EE;border-radius:8px;padding:12px 14px;margin-top:12px;font-size:12px;color:#085041;line-height:1.7">
+          💡 <strong>Conseil Hanaé :</strong> En renseignant vos 3 dernières ventes dans ce secteur, vous gagneriez +12 points et seriez dans le top 3 sur des biens similaires à Tarbes.
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <div style="flex:1;background:var(--ink);color:#fff;padding:10px;border-radius:6px;text-align:center;font-size:12px;font-weight:500">Améliorer mon profil →</div>
+          <div style="flex:1;border:1px solid var(--line);padding:10px;border-radius:6px;text-align:center;font-size:12px">Voir les nouveaux biens →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REMBOURSEMENT -->
+    <div class="rembours-box">
+      <div style="font-size:28px;flex-shrink:0">🎁</div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:#085041;margin-bottom:4px">Garantie 3 candidatures</div>
+        <div style="font-size:13px;color:#1E7A62;line-height:1.7">Si vous n'êtes sélectionné sur aucune de vos 3 premières candidatures, la 3ème vous est remboursée automatiquement en crédit ImmoConnect (9,99€). Nous croyons en votre potentiel — complétez votre profil et les résultats suivront.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 5. DÉLAI ══ -->
+  <div style="margin-bottom:60px">
+    <div class="section-eyebrow">La fenêtre de candidature</div>
+    <div class="section-title">48 heures pour candidater</div>
+    <div class="section-sub">Une fenêtre courte pour créer l'urgence, assez longue pour des candidatures de qualité.</div>
+
+    <div class="card">
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#1E7A62"></div>
+          <div class="tl-time">J+0 · Immédiat</div>
+          <div class="tl-desc">Annonce publiée → alerte immédiate à tous les agents (mode comparatif) ou selon délai forfait (mode agents indépendants)</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#854F0B"></div>
+          <div class="tl-time">J+1 · 24h après</div>
+          <div class="tl-desc">Email de rappel aux agents qui n'ont pas encore candidaté — "Il vous reste 24h pour candidater sur ce bien"</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#185FA5"></div>
+          <div class="tl-time">J+2 · Clôture automatique</div>
+          <div class="tl-desc">Fenêtre fermée → Hanaé calcule tous les scores et sélectionne les 3 meilleurs profils automatiquement</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#1E7A62"></div>
+          <div class="tl-time">J+2 · Résultats</div>
+          <div class="tl-desc">Le vendeur reçoit le comparatif des 3 agents. Les agents non retenus reçoivent leur score détaillé + conseils Hanaé</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#0F0F0E"></div>
+          <div class="tl-time">J+2 à J+5</div>
+          <div class="tl-desc">Le vendeur a 3 jours pour choisir son agent. Si pas de choix à J+5 → relance automatique au vendeur</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#C09B5A"></div>
+          <div class="tl-time">J+7 maximum</div>
+          <div class="tl-desc">Mandat signé via Docage + calendrier visites ouvert. L'agent retenu reçoit le dossier complet du vendeur.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 6. TABLEAU COMPARATIF FORFAITS ══ -->
+  <div style="margin-bottom:60px">
+    <div class="section-eyebrow">Vos options</div>
+    <div class="section-title">Choisissez votre mode d'accès</div>
+    <div class="section-sub">Commencez sans abonnement. Passez à un forfait quand vous êtes prêt.</div>
+
+    <div style="overflow-x:auto">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th style="text-align:left">Fonctionnalité</th>
+            <th>Pay per use</th>
+            <th>Starter 49€</th>
+            <th style="background:rgba(30,122,98,.3)">Pro 99€</th>
+            <th>Premium 199€</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Alertes nouvelles annonces</td><td class="td-no">❌ Aucune</td><td>H+12</td><td style="background:rgba(30,122,98,.05)"><strong>H+4</strong></td><td class="td-yes"><strong>H+0</strong></td></tr>
+          <tr><td>Niveau dossier visible</td><td class="td-no">❌</td><td class="td-yes">✓</td><td style="background:rgba(30,122,98,.05)" class="td-yes">✓</td><td class="td-yes">✓</td></tr>
+          <tr><td>Dossier complet + documents</td><td class="td-no">❌</td><td class="td-yes">✓</td><td style="background:rgba(30,122,98,.05)" class="td-yes">✓</td><td class="td-yes">✓</td></tr>
+          <tr><td>Analyse de marché Hanaé</td><td class="td-no">❌</td><td class="td-yes">✓</td><td style="background:rgba(30,122,98,.05)" class="td-yes">✓</td><td class="td-yes">✓</td></tr>
+          <tr><td>Candidatures/mois</td><td>9,99€/unité</td><td><strong>5 incluses</strong></td><td style="background:rgba(30,122,98,.05)"><strong>20 incluses</strong></td><td class="td-yes"><strong>Illimitées</strong></td></tr>
+          <tr><td>Leads vendeurs/semaine</td><td>2</td><td>5</td><td style="background:rgba(30,122,98,.05)"><strong>15</strong></td><td class="td-yes"><strong>Illimité</strong></td></tr>
+          <tr><td>Mandats publiables</td><td>2</td><td>5</td><td style="background:rgba(30,122,98,.05)">20</td><td class="td-yes">Illimité</td></tr>
+          <tr><td>Matching automatique gratuit</td><td class="td-yes">✓</td><td class="td-yes">✓</td><td style="background:rgba(30,122,98,.05)" class="td-yes">✓</td><td class="td-yes">✓</td></tr>
+          <tr><td>Bonus score IA</td><td class="td-no">—</td><td class="td-no">—</td><td style="background:rgba(30,122,98,.05)" class="td-no">—</td><td class="td-yes"><strong>+10 pts</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CTA FINAL -->
+  <div class="cta-final">
+    <div style="font-size:10px;font-weight:700;color:rgba(250,250,247,.4);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px">Commencez aujourd'hui</div>
+    <div style="font-size:28px;font-weight:300;color:#FAFAF7;margin-bottom:8px">Inscription gratuite.<br>Carte T obligatoire.</div>
+    <div style="font-size:14px;color:rgba(250,250,247,.5);margin-bottom:28px;line-height:1.7">Aucun abonnement requis. Candidatez à 9,99€ par dossier.<br>Les abonnements Starter/Pro/Premium arrivent bientôt.</div>
+    <a href="questionnaire-agent.html" style="display:inline-block;background:var(--gold);color:var(--ink);padding:14px 36px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:600;margin-bottom:12px">S'inscrire gratuitement →</a>
+    <div style="font-size:11px;color:rgba(250,250,247,.3)">Carte T vérifiée par OCR · Compte actif sous 48h</div>
+  </div>
+
+</div>
+
+</body>
+</html>
