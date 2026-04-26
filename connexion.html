@@ -1123,10 +1123,11 @@ function checkOnboarding(profils) {
 
 // ── CHANGEMENT MODE CONTACT ──
 async function changerModeContact(annonceId, modeCurrent) {
-  var modes = ['acheteurs', 'agents', 'comparatif'];
+  var modes = ['acheteurs', 'agents', 'tous', 'comparatif'];
   var labels = {
     acheteurs: '👤 Acheteurs uniquement - Les agents sont bloques',
-    agents: '🤝 Agents independants - Ils peuvent vous contacter selon leur quota',
+    agents: '🤝 Agents independants - Ils peuvent vous contacter selon quota',
+    tous: '👥 Acheteurs + Agents - Les deux peuvent vous contacter',
     comparatif: '📊 Comparatif automatique - Top 3 agents + acheteurs directs'
   };
 
@@ -1137,14 +1138,16 @@ async function changerModeContact(annonceId, modeCurrent) {
 '
     + '2. ' + labels.agents + '
 '
-    + '3. ' + labels.comparatif + '
+    + '3. ' + labels.tous + '
+'
+    + '4. ' + labels.comparatif + '
 
 '
     + 'Actuel : ' + (modeCurrent || 'acheteurs');
 
   var choix = prompt(msg + '
 
-Entrez 1, 2 ou 3 :');
+Entrez 1, 2, 3 ou 4 :');
   if (!choix) return;
 
   var nouveauMode = modes[parseInt(choix) - 1];

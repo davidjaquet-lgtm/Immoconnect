@@ -7,3 +7,7 @@ ALTER TABLE annonces_vendeurs
 CREATE INDEX IF NOT EXISTS idx_annonces_coords 
   ON annonces_vendeurs(latitude, longitude) 
   WHERE latitude IS NOT NULL AND longitude IS NOT NULL;
+
+-- Visite virtuelle
+ALTER TABLE annonces_vendeurs
+  ADD COLUMN IF NOT EXISTS visite_virtuelle_url TEXT;

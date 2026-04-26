@@ -218,7 +218,7 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
         <div class="field">
           <label class="lbl">Mode de contact *</label>
           <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Choisissez qui peut vous contacter. Modifiable à tout moment depuis votre tableau de bord.</div>
-          <div class="mode-cards" id="mode-cards">
+          <div class="mode-cards" id="mode-cards" style="grid-template-columns:repeat(2,1fr)">
             <div class="mode-card selected-acheteurs" id="mc-acheteurs" onclick="setModeContact('acheteurs')">
               <div class="mode-icon">👤</div>
               <div class="mode-name" style="color:#185FA5">Acheteurs uniquement</div>
@@ -227,12 +227,17 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
             <div class="mode-card" id="mc-agents" onclick="setModeContact('agents')">
               <div class="mode-icon">🤝</div>
               <div class="mode-name" style="color:#1E7A62">Agents indépendants</div>
-              <div class="mode-desc">Les agents peuvent vous contacter selon leur quota de leads. Matching acheteur inclus.</div>
+              <div class="mode-desc">Les agents peuvent vous contacter selon leur quota de leads. Sans acheteurs directs.</div>
+            </div>
+            <div class="mode-card" id="mc-tous" onclick="setModeContact('tous')">
+              <div class="mode-icon">👥</div>
+              <div class="mode-name" style="color:#C09B5A">Acheteurs + Agents</div>
+              <div class="mode-desc">Les deux peuvent vous contacter simultanément. Maximum d'exposition. Recommandé.</div>
             </div>
             <div class="mode-card" id="mc-comparatif" onclick="setModeContact('comparatif')">
               <div class="mode-icon">📊</div>
               <div class="mode-name" style="color:#854F0B">Comparatif automatique</div>
-              <div class="mode-desc">Recevez le top 3 agents scorés par ImmoConnect + les acheteurs directs.</div>
+              <div class="mode-desc">Recevez le top 3 agents scorés par Hanaé + les acheteurs directs.</div>
             </div>
           </div>
           <input type="hidden" id="mode_contact" value="acheteurs">
@@ -1051,7 +1056,7 @@ function majSectionVV() {
 // ── MODE DE CONTACT ──
 function setModeContact(mode) {
   document.getElementById('mode_contact').value = mode;
-  var cards = ['acheteurs','agents','comparatif'];
+  var cards = ['acheteurs','agents','tous','comparatif'];
   cards.forEach(function(m) {
     var card = document.getElementById('mc-' + m);
     if (!card) return;

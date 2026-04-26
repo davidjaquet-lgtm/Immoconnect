@@ -84,3 +84,8 @@ CREATE INDEX IF NOT EXISTS idx_agents_val_statut ON agents_validation(statut);
 
 ALTER TABLE agents_validation ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Acces agents validation" ON agents_validation FOR ALL USING (true);
+
+-- Rapport de visite généré par Hanaé
+ALTER TABLE reservations_visites
+  ADD COLUMN IF NOT EXISTS rapport_visite TEXT,
+  ADD COLUMN IF NOT EXISTS rapport_genere_at TIMESTAMPTZ;
