@@ -617,10 +617,13 @@ function buildContactButtons(b, niv) {
 
   // AFFICHAGE QUOTA LEADS pour agents (mode agents ou comparatif)
   if (isAgent && (modeContact === 'agents' || modeContact === 'tous' || modeContact === 'comparatif')) {
-    var leadsRestants = currentUser ? (currentUser.user_metadata?.leads_restants || '?') : '?'
     var forfaitAgent = currentUser ? (currentUser.user_metadata?.forfait_agent || 'pay_per_use') : 'pay_per_use'
     var maxLeads = { pay_per_use: 2, starter: 5, pro: 15, premium: '∞' }
     html += '<div class="quota-agent"><span>Leads disponibles cette semaine</span><span style="font-weight:600;color:var(--teal)">' + (maxLeads[forfaitAgent] || '?') + ' max</span></div>'
+    html += '<a href="candidature-agent.html?annonce=' + b.id + '" class="btn-contact bc-teal" style="display:block;text-align:center;text-decoration:none;padding:12px;margin-top:8px;border-radius:8px;font-weight:500">🎯 Candidater sur ce bien — 9,99 €</a>'
+  }
+  if (isAgent && modeContact === 'comparatif') {
+    html += '<a href="candidature-agent.html?annonce=' + b.id + '" class="btn-contact" style="display:block;text-align:center;text-decoration:none;padding:12px;margin-top:4px;border-radius:8px;background:#E1F5EE;color:#1E7A62;font-weight:500">🏆 Candidater — Selection top 3</a>'
   }
 
   // BOUTON SUIVI BAISSES DE PRIX pour acheteurs connectés
