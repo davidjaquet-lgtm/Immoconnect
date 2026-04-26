@@ -118,3 +118,7 @@ SELECT * FROM (VALUES
 -- 9. Realtime
 ALTER PUBLICATION supabase_realtime ADD TABLE mandats_agents;
 ALTER PUBLICATION supabase_realtime ADD TABLE penalites_agents;
+
+-- Estimation Hanaé confidentielle (jamais affichée aux agents)
+ALTER TABLE annonces_vendeurs
+  ADD COLUMN IF NOT EXISTS estimation_hanae NUMERIC;

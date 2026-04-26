@@ -352,14 +352,43 @@ function afficherBien(b, similaires) {
   currentNiv = niv;
   var contactHtml = buildContactButtons(b, niv);
 
-  // Sidebar rapport
+  // Sidebar rapport — différencié selon profil et forfait
   var rapportHtml = '';
+  var userProfilsRap = currentUser ? (currentUser.user_metadata?.profils || []) : [];
+  var forfaitRap = currentUser ? (currentUser.user_metadata?.forfait_agent || 'pay_per_use') : null;
+  var isAgentRap = userProfilsRap.includes('agent');
+  var isAgentAbonne = isAgentRap && forfaitRap !== 'pay_per_use';
+  var isAgentPPU = isAgentRap && forfaitRap === 'pay_per_use';
+
   if (['silver','gold','platinium'].includes(niv)) {
-    rapportHtml = '<div class="rapport-card">' +
-      '<div class="rapport-title">Rapport Hanaé IA</div>' +
-      '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px">Estimation basée sur DVF + Notaires-INSEE + carte des loyers</div>' +
-      '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;padding:10px">📊 Voir le rapport complet</a>' +
-      '</div>';
+    if (!isAgentRap) {
+      // Acheteur/investisseur : rapport complet avec estimation
+      rapportHtml = '<div class="rapport-card">'
+        + '<div class="rapport-title">Rapport Hanaé IA</div>'
+        + '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px">Estimation basée sur DVF + Notaires-INSEE + carte des loyers</div>'
+        + '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;padding:10px">📊 Voir le rapport complet</a>'
+        + '</div>';
+    } else if (isAgentAbonne) {
+      // Agent abonné : analyse de marché SANS le prix estimé
+      rapportHtml = '<div class="rapport-card">'
+        + '<div class="rapport-title">Analyse de marché Hanaé</div>'
+        + '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:8px">DVF · Notaires-INSEE · Loyers du secteur</div>'
+        + '<div style="background:#FAEEDA;border-radius:6px;padding:8px 10px;font-size:11px;color:#854F0B;line-height:1.6;margin-bottom:10px">'
+        + '💡 L'estimation de prix est confidentielle — elle sert à évaluer la cohérence de votre proposition lors du scoring. L'agent retenu pourra évaluer le bien de manière optimale en le visitant.'
+        + '</div>'
+        + '<a href="rapport-hanae.html?annonce=' + b.id + '&mode=agent" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;padding:10px">📊 Voir l'analyse de marché</a>'
+        + '</div>';
+    } else if (isAgentPPU) {
+      // Agent pay per use : pas d'accès au rapport
+      rapportHtml = '<div class="rapport-card">'
+        + '<div class="rapport-title">Analyse de marché Hanaé</div>'
+        + '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:8px">Disponible avec un forfait abonnement</div>'
+        + '<div style="background:#F5F2EC;border-radius:6px;padding:10px 12px;font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:10px">'
+        + '🔒 L'analyse de marché et l'accès complet au dossier sont réservés aux agents abonnés (Starter, Pro, Premium).'
+        + '</div>'
+        + '<a href="forfaits.html#agents" class="btn-contact bc-out" style="display:block;text-align:center;text-decoration:none;padding:10px">Voir les forfaits →</a>'
+        + '</div>';
+    }
   }
 
   // Biens similaires
@@ -384,7 +413,25 @@ function afficherBien(b, similaires) {
 
   // COLONNE GAUCHE
   html += '<div>';
-  html += '<div class="galerie">' + mainPhoto + thumbsHtml + '<div class="niveau-badge nb-' + niv + '">' + nivLabel + '</div>' + mandatHtml + '</div>';
+  // Badge niveau — masqué pour agents pay per use
+  var userProfilsBadge = currentUser ? (currentUser.user_metadata?.profils || []) : [];
+  var forfaitBadge = currentUser ? (currentUser.user_metadata?.forfait_agent || 'pay_per_use') : null;
+  var isAgentPayPerUse = userProfilsBadge.includes('agent') && forfaitBadge === 'pay_per_use';
+  var niveauBadgeHtml = isAgentPayPerUse
+    ? '<div class="niveau-badge" style="background:#F1EFE8;color:#888780">Dossier disponible</div>'
+    : '<div class="niveau-badge nb-' + niv + '">' + nivLabel + '</div>';
+  html += '<div class="galerie">' + mainPhoto + thumbsHtml + niveauBadgeHtml + mandatHtml + '</div>';
+  // Bandeau info pour agents pay per use
+  if (isAgentPayPerUse) {
+    html += '<div style="background:#FAEEDA;border:1px solid rgba(212,115,42,.3);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px">'
+      + '<div style="font-size:16px;flex-shrink:0">ℹ️</div>'
+      + '<div style="font-size:12px;color:#633806;line-height:1.6">'
+      + '<strong>Accès limité — Pay per use</strong><br>'
+      + 'Vous voyez ce bien comme un acheteur payant : adresse, photos et prix vendeur. '
+      + 'La qualification du dossier (Silver/Gold/Platinium), les alertes de publication et l'analyse de marché Hanaé sont réservées aux forfaits abonnés.'
+      + ' <a href="forfaits.html" style="color:#854F0B;font-weight:600">Voir les forfaits →</a>'
+      + '</div></div>';
+  }
   html += '<h1 class="bien-titre">' + titre + '</h1>';
   html += '<div class="bien-localisation">' + adresseHtml + '</div>';
   html += '<div class="bien-prix">' + prixFmt + '</div>';
