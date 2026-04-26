@@ -229,41 +229,121 @@ tr:hover td{background:#F9F7F2}
 
   <!-- ══ AGENTS ══ -->
   <div id="panel-agents" class="panel">
-    <div class="sec-eye">4 forfaits · Agents immobiliers</div>
-    <div class="sec-title">Plans agents immobiliers</div>
-    <div class="sec-sub">Accédez aux dossiers vendeurs Gold &amp; Platinium en priorité. Contacts vendeurs et acheteurs, exclusivité, rapport Hanaé inclus.</div>
-    <div class="promo-banner">🎁 <strong>Offre de lancement — 50% de réduction jusqu'au 01/09/2026</strong> &nbsp;· Les tarifs affichés sont les tarifs promotionnels.</div>
-    <div class="toggle-wrap">
-      <span class="toggle-lbl active" id="lbl-m">Mensuel</span>
-      <button class="toggle-sw" id="ag-toggle"><div class="toggle-thumb"></div></button>
-      <span class="toggle-lbl" id="lbl-a">Annuel <span class="ann-pill">2 mois offerts</span></span>
+    <div class="sec-eye">Offre de lancement · Agents immobiliers</div>
+    <div class="sec-title">Candidatez sur les biens qui vous correspondent</div>
+    <div class="sec-sub">Un nouveau concept : vous candidatez uniquement sur les biens qui vous intéressent. Payez à la candidature, pas à l'abonnement. Carte T obligatoire.</div>
+
+    <!-- OFFRE PRINCIPALE -->
+    <div style="background:linear-gradient(135deg,#E1F5EE,#E6F1FB);border:1px solid #9FE1CB;border-radius:12px;padding:28px;margin-bottom:20px;text-align:center">
+      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(30,122,98,.15);border-radius:20px;padding:4px 14px;font-size:10px;font-weight:700;color:#1E7A62;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px">Offre de lancement</div>
+      <div style="font-size:48px;font-weight:300;color:#0F0F0E;line-height:1">9,99 <span style="font-size:20px;font-weight:500">€</span></div>
+      <div style="font-size:14px;color:#888780;margin-top:6px;margin-bottom:20px">par candidature · sans abonnement · sans engagement</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:480px;margin:0 auto 24px;text-align:left">
+        <div style="background:rgba(255,255,255,.7);border-radius:8px;padding:12px">
+          <div style="font-size:20px;margin-bottom:4px">🎯</div>
+          <div style="font-size:12px;font-weight:600;color:#0F0F0E;margin-bottom:2px">Flux A</div>
+          <div style="font-size:11px;color:#888780;line-height:1.5">Je veux le mandat de vente</div>
+        </div>
+        <div style="background:rgba(255,255,255,.7);border-radius:8px;padding:12px">
+          <div style="font-size:20px;margin-bottom:4px">👥</div>
+          <div style="font-size:12px;font-weight:600;color:#0F0F0E;margin-bottom:2px">Flux B</div>
+          <div style="font-size:11px;color:#888780;line-height:1.5">J'ai un acheteur pour ce bien</div>
+        </div>
+        <div style="background:rgba(255,255,255,.7);border-radius:8px;padding:12px">
+          <div style="font-size:20px;margin-bottom:4px">🤖</div>
+          <div style="font-size:12px;font-weight:600;color:#0F0F0E;margin-bottom:2px">Scoring IA</div>
+          <div style="font-size:11px;color:#888780;line-height:1.5">Les 3 meilleurs passent au vendeur</div>
+        </div>
+      </div>
+      <a href="questionnaire-agent.html" style="display:inline-block;background:#0F0F0E;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:500">S'inscrire gratuitement</a>
+      <div style="font-size:11px;color:#888780;margin-top:10px">Inscription gratuite · Paiement uniquement à la candidature</div>
     </div>
-    <div class="grid4" id="ag-cards"></div>
-    <div class="timing">
-      <div class="timing-head">Alerte dossiers Gold &amp; Platinium vendeurs — Délai selon forfait</div>
-      <div class="timing-grid">
-        <div class="timing-cell"><div class="timing-plan" style="color:#BA7517">Platinium</div><div class="timing-val">H+0</div><div class="timing-desc">SMS immédiat</div></div>
-        <div class="timing-cell"><div class="timing-plan" style="color:#1E7A62">Expert</div><div class="timing-val">J+1</div><div class="timing-desc">Email prioritaire</div></div>
-        <div class="timing-cell"><div class="timing-plan" style="color:#185FA5">Pro</div><div class="timing-val">J+2</div><div class="timing-desc">Email immédiat</div></div>
-        <div class="timing-cell"><div class="timing-plan" style="color:#888780">Starter</div><div class="timing-val">J+4</div><div class="timing-desc">Dashboard</div></div>
+
+    <!-- CE QUI EST INCLUS -->
+    <div style="background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:20px 24px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px">Ce qui est inclus dans chaque candidature à 9,99 €</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
+          <span style="color:#1E7A62;flex-shrink:0;font-weight:600">✓</span>
+          <span>Accès complet au dossier vendeur (photos, documents, taxe foncière, DPE)</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
+          <span style="color:#1E7A62;flex-shrink:0;font-weight:600">✓</span>
+          <span>Rapport Hanaé IA — estimation DVF + Notaires-INSEE</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
+          <span style="color:#1E7A62;flex-shrink:0;font-weight:600">✓</span>
+          <span>Score de sélection calculé automatiquement (algo invisible)</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
+          <span style="color:#1E7A62;flex-shrink:0;font-weight:600">✓</span>
+          <span>Si sélectionné : contact direct avec le vendeur + messagerie</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
+          <span style="color:#1E7A62;flex-shrink:0;font-weight:600">✓</span>
+          <span>Si sélectionné : génération automatique du mandat simple via Docage</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
+          <span style="color:#1E7A62;flex-shrink:0;font-weight:600">✓</span>
+          <span>Calendrier de visites + rapport de visite Hanaé IA</span>
+        </div>
       </div>
     </div>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Critère</th><th>Starter</th><th>Pro</th><th>Expert</th><th style="background:rgba(192,155,90,.06)">Platinium</th></tr></thead>
-      <tbody>
-        <tr><td>Annonces publiables</td><td>5 max</td><td>20 max</td><td>50 max</td><td><span class="td-yes">Illimitées</span></td></tr>
-        <tr><td>Contacts vendeurs/semaine</td><td style="font-weight:600;color:#185FA5">10</td><td style="font-weight:600;color:#185FA5">15</td><td style="font-weight:600;color:#1E7A62">30</td><td><span class="td-yes">Illimités</span></td></tr>
-        <tr><td>Contacts acheteurs/semaine</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td style="font-weight:600;color:#1E7A62">15</td><td><span class="td-yes">Illimités</span></td></tr>
-        <tr><td>Contact supp. vendeur</td><td style="font-size:11px">1,99 €</td><td style="font-size:11px">1,99 €</td><td style="font-size:11px">1,99 €</td><td><span class="td-yes">Inclus</span></td></tr>
-        <tr><td>Alerte Gold &amp; Platinium</td><td>J+4</td><td>J+2</td><td>J+1</td><td><span class="td-yes">H+0</span></td></tr>
-        <tr><td>Rapport Hanaé IA</td><td><span class="td-yes">✓</span></td><td><span class="td-yes">✓</span></td><td><span class="td-yes">✓</span></td><td><span class="td-yes">✓</span></td></tr>
-        <tr><td>Mandat exclusif vendeur</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td style="color:#1E7A62;font-weight:600">Oui</td><td><span class="td-yes">Oui</span></td></tr>
-        <tr><td>Exclusivité vendeur 48h</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td style="font-size:11px;font-weight:600;color:#854F0B">99 €</td><td style="font-size:11px;font-weight:600;color:#1E7A62">49 €</td></tr>
-        <tr><td>Exclusivité vendeur 96h</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td style="font-size:11px;font-weight:600;color:#1E7A62">99 €</td></tr>
-        <tr><td style="color:var(--muted);font-size:11px">Tarif normal</td><td style="text-decoration:line-through;color:var(--muted);font-size:11px">49 €</td><td style="text-decoration:line-through;color:var(--muted);font-size:11px">99 €</td><td style="text-decoration:line-through;color:var(--muted);font-size:11px">149 €</td><td class="td-gold" style="text-decoration:line-through;color:var(--muted);font-size:11px">199 €</td></tr>
-        <tr class="td-promo"><td style="color:#1E7A62;font-weight:600">🎁 Promo -50% jusqu'au 01/09/2026</td><td style="color:#1E7A62;font-weight:700">24,50 €/mois</td><td style="color:#1E7A62;font-weight:700">49,50 €/mois</td><td style="color:#1E7A62;font-weight:700">74,50 €/mois</td><td class="td-gold" style="color:#1E7A62;font-weight:700">99,50 €/mois</td></tr>
-      </tbody>
-    </table></div>
+
+    <!-- COMMENT CA MARCHE -->
+    <div style="background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:20px 24px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px">Comment ca marche</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <div style="width:26px;height:26px;border-radius:50%;background:#E1F5EE;color:#1E7A62;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">1</div>
+          <div style="font-size:13px;padding-top:3px">Un vendeur publie son bien — vous recevez une alerte immediat</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <div style="width:26px;height:26px;border-radius:50%;background:#E6F1FB;color:#185FA5;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">2</div>
+          <div style="font-size:13px;padding-top:3px">Vous choisissez Flux A (je veux le mandat) ou Flux B (j'ai un acheteur) — vous payez 9,99 €</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <div style="width:26px;height:26px;border-radius:50%;background:#FAEEDA;color:#854F0B;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">3</div>
+          <div style="font-size:13px;padding-top:3px">L'algorithme ImmoConnect calcule votre score (experience locale, avis, coherence estimation) — les 3 meilleurs agents sont presentes au vendeur</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <div style="width:26px;height:26px;border-radius:50%;background:#0F0F0E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">4</div>
+          <div style="font-size:13px;padding-top:3px">Si vous etes selectionne : contact vendeur + mandat simple automatique + calendrier visites</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARTE T OBLIGATOIRE -->
+    <div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:10px;padding:16px 20px;margin-bottom:16px">
+      <div style="font-size:12px;font-weight:600;color:#712B13;margin-bottom:6px">Carte T obligatoire — Loi Hoguet</div>
+      <div style="font-size:12px;color:#712B13;line-height:1.7">Seuls les agents titulaires d'une carte professionnelle valide delivree par la CCI peuvent s'inscrire sur ImmoConnect. Votre Carte T est verifiee par OCR automatique a l'inscription. Votre compte est suspendu automatiquement en cas d'expiration non renouvelee.</div>
+    </div>
+
+    <!-- ABONNEMENTS A VENIR -->
+    <div style="background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:20px 24px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">Abonnements — Bientot disponibles</div>
+        <div style="font-size:10px;padding:2px 10px;background:#FAEEDA;color:#854F0B;border-radius:20px;font-weight:600">Prochainement</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">
+        <div style="background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:14px;text-align:center;opacity:.7">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Starter</div>
+          <div style="font-size:22px;font-weight:500;color:var(--ink)">49 €</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">/mois · 5 candidatures</div>
+        </div>
+        <div style="background:var(--warm);border:2px solid var(--line);border-radius:8px;padding:14px;text-align:center;opacity:.7">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Pro</div>
+          <div style="font-size:22px;font-weight:500;color:var(--ink)">99 €</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">/mois · 20 candidatures</div>
+        </div>
+        <div style="background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:14px;text-align:center;opacity:.7">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Premium</div>
+          <div style="font-size:22px;font-weight:500;color:var(--ink)">199 €</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">/mois · Illimite</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7">Les abonnements seront disponibles en phase 2. Les agents deja inscrits en pay-per-use bénéficieront d'un tarif early adopter preferentiel.</div>
+    </div>
   </div>
 
 </div>
