@@ -46,6 +46,9 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 .cap-bar-fill{height:100%;border-radius:4px;transition:width .4s ease,background .4s ease}
 .cap-ratio-lbl{font-size:11px;color:var(--muted);text-align:right}
 .cap-warning{background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:8px 12px;font-size:12px;color:#712B13;display:none}
+.agent-warning{background:#FAECE7;border:2px solid #F5C4B3;border-radius:10px;padding:16px 18px;margin-bottom:16px;display:none}
+.agent-warning-title{font-size:13px;font-weight:600;color:#712B13;margin-bottom:6px}
+.agent-warning-txt{font-size:12px;color:#712B13;line-height:1.7}
 .cap-ok{background:#EAF3DE;border:1px solid #9FD9C0;border-radius:8px;padding:8px 12px;font-size:12px;color:#27500A;display:none}
 
 /* SECTION */
@@ -224,8 +227,15 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
         <div class="field"><label class="lbl">Téléphone *</label>
           <input type="tel" id="telephone" placeholder="06 12 34 56 78"></div>
         <div class="field"><label class="lbl">Email *</label>
-          <input type="email" id="email" placeholder="votre@email.fr"></div>
+          <input type="email" id="email" placeholder="votre@email.fr" oninput="detecterEmailAgent(this.value)"></div>
       </div>
+      <!-- WARNING EMAIL AGENT DETECTE -->
+      <div class="agent-warning" id="agent-email-warning">
+        <div class="agent-warning-title">Etes-vous un agent immobilier professionnel ?</div>
+        <div class="agent-warning-txt">Votre adresse email semble appartenir a une agence immobiliere. Les professionnels de l'immobilier doivent s'inscrire en tant qu'agent via la page dediee — pas comme acheteur ou investisseur.<br><br>
+        <a href="questionnaire-agent.html" style="color:#712B13;font-weight:600;text-decoration:underline">Inscription agent immobilier →</a></div>
+      </div>
+
       <div class="form-grid">
         <div class="field"><label class="lbl">Situation familiale</label>
           <select id="situation_familiale">
@@ -491,16 +501,25 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
 
       <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;line-height:1.6;color:#0F0F0E;margin-bottom:10px">
         <input type="checkbox" id="consentement-acheteur" style="width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:#185FA5;cursor:pointer" required>
-        <span><strong>J'autorise ImmoConnect à transmettre mes informations aux vendeurs et agents immo</strong> afin d'être mis en relation avec les biens et professionnels correspondant à mon projet immobilier.</span>
+        <span><strong>J'autorise ImmoConnect a transmettre mes informations aux vendeurs et agents immo</strong> afin d'etre mis en relation avec les biens et professionnels correspondant a mon projet immobilier.</span>
       </label>
 
       <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;line-height:1.6;color:#0F0F0E;margin-bottom:10px">
         <input type="checkbox" id="consentement-rgpd-acheteur" style="width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:#185FA5;cursor:pointer" required>
-        <span>J'ai lu et j'accepte la <a href="#" style="color:#185FA5;text-decoration:underline">Politique de confidentialité</a> d'ImmoConnect. Mes données sont traitées conformément au RGPD. Je peux exercer mes droits d'accès, rectification et suppression à tout moment.</span>
+        <span>J'ai lu et j'accepte la <a href="mentions-legales.html" style="color:#185FA5;text-decoration:underline">Politique de confidentialite</a> d'ImmoConnect. Mes donnees sont traitees conformement au RGPD.</span>
       </label>
 
-      <div style="background:rgba(24,95,165,.06);border-radius:6px;padding:10px 12px;font-size:11px;color:#0F0F0E;line-height:1.65">
-        🛡️ <strong>Vos données sont protégées.</strong> ImmoConnect ne revend jamais vos données à des tiers. Vos coordonnées ne sont transmises qu'aux vendeurs et agents dont les biens correspondent à vos critères, uniquement dans le cadre de votre recherche immobilière.
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;line-height:1.6;color:#0F0F0E;margin-bottom:10px">
+        <input type="checkbox" id="consentement-non-agent" style="width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:#185FA5;cursor:pointer" required>
+        <span>Je certifie sur l'honneur <strong>ne pas etre agent immobilier professionnel</strong> et ne pas agir pour le compte d'une agence immobiliere dans le cadre de cette inscription. Je reconnais que toute fausse declaration engage ma responsabilite civile et penale et entraine la suppression immediate de mon compte.</span>
+      </label>
+
+      <div style="background:rgba(24,95,165,.06);border-radius:6px;padding:10px 12px;font-size:11px;color:#0F0F0E;line-height:1.65;margin-bottom:8px">
+        Vos donnees sont protegees. ImmoConnect ne revend jamais vos donnees a des tiers. Vos coordonnees ne sont transmises qu'aux vendeurs et agents dont les biens correspondent a vos criteres.
+      </div>
+
+      <div style="background:#F5F2EC;border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:11px;color:#888780;line-height:1.65">
+        Vous etes agent immobilier ? <a href="questionnaire-agent.html" style="color:#185FA5;font-weight:600;text-decoration:none">Inscrivez-vous en tant qu'agent →</a> — l'inscription acheteur est reservee aux particuliers.
       </div>
     </div>
     <button class="btn-submit" id="btn-submit" onclick="soumettre()">Déposer mon projet</button>
@@ -510,6 +529,36 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
 <div class="toast" id="toast"></div>
 
 <script>
+// ── DÉTECTION EMAIL AGENT IMMOBILIER ──
+var DOMAINES_AGENCES = [
+  'century21.fr','orpi.com','laforet.com','guy-hoquet.com','foncia.com',
+  'fnaim.fr','era.fr','solvimo.com','stepsstone.fr','stéphane-plaza.fr',
+  'stephane-plaza.fr','iad-france.fr','safti.fr','megAgences.com',
+  'megagences.com','arthurimmo.com','optimhome.com','capifrance.fr',
+  'remax.fr','square-habitat.fr','credit-agricole-immobilier.fr',
+  'loimmo.fr','proprietes-privees.com','effiCity.fr','efficity.fr',
+  'human-immobilier.fr','laresidence.fr','agence-principale.com',
+  'bouygues-immobilier.fr','nexity.fr','kaufman-broadbertrand.fr',
+  'lodegim.com','jll.fr','cbre.fr','bnpparibas-real-estate.fr',
+  'knightfrank.fr','coldwellbanker.fr','engelvoelkers.com',
+  'sothebysrealty.fr','barnes-international.com','theagency.fr'
+];
+
+function detecterEmailAgent(email) {
+  var warning = document.getElementById('agent-email-warning');
+  if (!warning) return;
+  if (!email || !email.includes('@')) { warning.style.display = 'none'; return; }
+  var domaine = email.split('@')[1].toLowerCase();
+  var estAgence = DOMAINES_AGENCES.some(function(d) { return domaine === d || domaine.endsWith('.' + d); });
+  // Aussi détecter les patterns typiques d'agences
+  var patternAgence = /immo|agence|immobilier|realty|estate|property|invest/i.test(domaine);
+  if (estAgence || patternAgence) {
+    warning.style.display = 'block';
+  } else {
+    warning.style.display = 'none';
+  }
+}
+
 const SUPABASE_URL  = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGh5ZWZhamZ3cWN4Y2Z4cG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjYwNDAsImV4cCI6MjA5MTUwMjA0MH0.jB8Z_9eT9lYkqxUUD0G001Y87iSAv94fSu_gVOdqa-A';
 const { createClient } = supabase;
@@ -628,6 +677,7 @@ function updateRecap() {
 async function soumettre() {
   var consent1 = document.getElementById('consentement-acheteur');
   var consent2 = document.getElementById('consentement-rgpd-acheteur');
+  var consent3 = document.getElementById('consentement-non-agent');
   if (!consent1 || !consent1.checked) {
     showToast && showToast('Vous devez autoriser la transmission de vos informations pour continuer.','err');
     if (!showToast) alert('Veuillez cocher la case de consentement.');
@@ -638,6 +688,12 @@ async function soumettre() {
     showToast && showToast('Vous devez accepter la politique de confidentialité pour continuer.','err');
     if (!showToast) alert('Veuillez accepter la politique de confidentialité.');
     consent2 && consent2.focus();
+  if (!consent3 || !consent3.checked) {
+    if (typeof showToast === 'function') showToast('Certifiez ne pas etre agent immobilier.', 'err');
+    else alert('Certifiez ne pas etre agent immobilier.');
+    consent3 && consent3.focus();
+    return false;
+  }
     return;
   }
   var btn = document.getElementById('btn-submit');
