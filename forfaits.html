@@ -496,23 +496,49 @@ tr:hover td{background:#F9F7F2}
 
     <!-- COMMENT CA MARCHE -->
     <div style="background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:20px 24px;margin-bottom:16px">
-      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px">Comment ca marche</div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="display:flex;align-items:flex-start;gap:14px">
-          <div style="width:26px;height:26px;border-radius:50%;background:#E1F5EE;color:#1E7A62;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">1</div>
-          <div style="font-size:13px;padding-top:3px">Un vendeur publie son bien — les abonnés recoivent une alerte selon leur forfait (H+12 à H+0)</div>
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px">Comment ca marche</div>
+
+      <!-- MODE JE CHOISIS MON AGENT -->
+      <div style="margin-bottom:16px">
+        <div style="display:inline-flex;align-items:center;gap:6px;background:#E6F1FB;border-radius:20px;padding:3px 12px;font-size:10px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">🤝 Je choisis mon agent</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="width:22px;height:22px;border-radius:50%;background:#E6F1FB;color:#185FA5;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">1</div>
+            <div style="font-size:12px;padding-top:2px;color:var(--ink)">Le vendeur choisit ce mode — <strong>seuls les agents abonnés</strong> recoivent une alerte selon leur forfait : H+0 (Premium), H+4 (Pro), H+12 (Starter)</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="width:22px;height:22px;border-radius:50%;background:#E6F1FB;color:#185FA5;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">2</div>
+            <div style="font-size:12px;padding-top:2px;color:var(--ink)">Les agents abonnés consultent le dossier complet + analyse Hanaé et contactent le vendeur selon leur quota de leads</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="width:22px;height:22px;border-radius:50%;background:#E6F1FB;color:#185FA5;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">3</div>
+            <div style="font-size:12px;padding-top:2px;color:var(--ink)">Le vendeur choisit librement l'agent qui lui convient → mandat simple signé via Docage</div>
+          </div>
         </div>
-        <div style="display:flex;align-items:flex-start;gap:14px">
-          <div style="width:26px;height:26px;border-radius:50%;background:#E6F1FB;color:#185FA5;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">2</div>
-          <div style="font-size:13px;padding-top:3px">Vous choisissez <strong>Flux A</strong> (je veux le mandat) ou <strong>Flux B</strong> (j'ai un acheteur) et candidatez</div>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:14px">
-          <div style="width:26px;height:26px;border-radius:50%;background:#FAEEDA;color:#854F0B;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">3</div>
-          <div style="font-size:13px;padding-top:3px">L'algorithme ImmoConnect calcule votre score (expérience locale, avis, cohérence d'estimation) — les 3 meilleurs profils sont présentés au vendeur</div>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:14px">
-          <div style="width:26px;height:26px;border-radius:50%;background:#0F0F0E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">4</div>
-          <div style="font-size:13px;padding-top:3px">Si sélectionné : contact direct + mandat simple automatique (Docage) + calendrier visites</div>
+      </div>
+
+      <div style="height:1px;background:var(--line);margin-bottom:16px"></div>
+
+      <!-- MODE SÉLECTION 3 MEILLEURS -->
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:6px;background:#E1F5EE;border-radius:20px;padding:3px 12px;font-size:10px;font-weight:700;color:#1E7A62;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">📊 ImmoConnect sélectionne les 3 meilleurs</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="width:22px;height:22px;border-radius:50%;background:#E1F5EE;color:#1E7A62;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">1</div>
+            <div style="font-size:12px;padding-top:2px;color:var(--ink)">Le vendeur choisit ce mode — <strong>tous les agents sans exception</strong> recoivent une alerte immédiate (H+0), abonnés comme pay per use</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="width:22px;height:22px;border-radius:50%;background:#E1F5EE;color:#1E7A62;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">2</div>
+            <div style="font-size:12px;padding-top:2px;color:var(--ink)">Chaque agent peut candidater en <strong>Flux A</strong> (je veux le mandat) ou <strong>Flux B</strong> (j'ai un acheteur) — 9,99€ par candidature</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="width:22px;height:22px;border-radius:50%;background:#E1F5EE;color:#1E7A62;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">3</div>
+            <div style="font-size:12px;padding-top:2px;color:var(--ink)">L'algorithme Hanaé calcule le score de chaque candidat (expérience locale, avis, cohérence d'estimation) et sélectionne les <strong>3 meilleurs profils</strong></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="width:22px;height:22px;border-radius:50%;background:#0F0F0E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">4</div>
+            <div style="font-size:12px;padding-top:2px;color:var(--ink)">Le vendeur reçoit le comparatif des 3 agents + choisit → mandat simple automatique (Docage) + calendrier visites</div>
+          </div>
         </div>
       </div>
     </div>
