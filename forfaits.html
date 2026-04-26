@@ -146,23 +146,152 @@ tr:hover td{background:#F9F7F2}
 
   <!-- ══ VENDEURS ══ -->
   <div id="panel-vendeurs" class="panel active">
-    <div class="sec-eye">Stratégie marketplace</div>
-    <div class="sec-title">Plans vendeurs — 100% gratuits</div>
-    <div class="sec-sub">Tous les niveaux sont gratuits. Plus vous fournissez de justificatifs, plus votre annonce gagne en visibilité et en fonctionnalités.</div>
+    <div class="sec-eye">4 niveaux · 100% gratuits</div>
+    <div class="sec-title">Vendez comme vous voulez — gratuitement</div>
+    <div class="sec-sub">Complétez votre dossier pour débloquer plus d'options. Plus votre dossier est complet, plus vous choisissez librement qui peut vous contacter.</div>
+
+    <!-- CARTES NIVEAUX -->
     <div class="grid4" id="ve-cards"></div>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Critère</th><th>Standard</th><th>Silver</th><th>Gold</th><th>Platinium</th></tr></thead>
-      <tbody>
-        <tr><td>Tarif</td><td style="color:#1E7A62;font-weight:600">Gratuit</td><td style="color:#1E7A62;font-weight:600">Gratuit</td><td style="color:#1E7A62;font-weight:600">Gratuit</td><td style="color:#1E7A62;font-weight:600">Gratuit</td></tr>
-        <tr><td>Photos</td><td>3 max</td><td style="color:#185FA5;font-weight:600">Illimitées</td><td style="color:#854F0B;font-weight:600">Illimitées</td><td style="color:#1E7A62;font-weight:600">Illimitées</td></tr>
-        <tr><td>Adresse visible</td><td><span class="td-no">—</span> Ville seule</td><td style="color:#185FA5;font-size:11px;font-weight:600">Acheteurs éligibles</td><td style="color:#854F0B;font-size:11px;font-weight:600">Acheteurs éligibles</td><td><span class="td-yes">Acheteurs éligibles</span></td></tr>
-        <tr><td>Contact acheteurs</td><td style="color:#854F0B;font-size:11px">19,99 €/contact</td><td><span class="td-yes">Gratuit &amp; direct</span></td><td><span class="td-yes">Gratuit &amp; direct</span></td><td><span class="td-yes">Gratuit &amp; direct</span></td></tr>
-        <tr><td>Matching investisseurs</td><td><span class="td-no">—</span></td><td style="color:#185FA5;font-weight:600">Oui</td><td><span class="td-yes">Oui</span></td><td><span class="td-yes">Oui</span></td></tr>
-        <tr><td>Contact agents immo</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td><span class="td-yes">Oui</span></td></tr>
-        <tr><td>Mise en avant</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td><span class="td-yes">Prioritaire</span></td></tr>
-        <tr><td>Documents requis</td><td>Aucun</td><td style="font-size:11px">Val. locative ou bail</td><td style="font-size:11px">Silver + Copro + Taxe</td><td style="font-size:11px">Gold + DPE</td></tr>
-      </tbody>
-    </table></div>
+
+    <!-- OPTIONS DE VENTE PAR NIVEAU -->
+    <div style="margin-top:28px;margin-bottom:8px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;text-align:center">Options de vente disponibles selon votre niveau</div>
+
+      <!-- STANDARD -->
+      <div style="background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:20px 24px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div style="width:36px;height:36px;border-radius:10px;background:#F1EFE8;display:flex;align-items:center;justify-content:center;font-size:18px">🏠</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--ink)">Standard</div>
+            <div style="font-size:11px;color:var(--muted)">Aucun document requis · Gratuit</div>
+          </div>
+          <div style="margin-left:auto;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:#F1EFE8;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">Limité</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+          <div style="background:#E6F1FB;border-radius:8px;padding:12px 14px;border:1px solid rgba(24,95,165,.15)">
+            <div style="font-size:12px;font-weight:600;color:#185FA5;margin-bottom:4px">👤 Acheteurs particuliers</div>
+            <div style="font-size:11px;color:#185FA5;line-height:1.6">Contact possible à <strong>19,99 €/contact</strong>. Ville uniquement visible. 3 photos maximum.</div>
+          </div>
+          <div style="background:#F1EFE8;border-radius:8px;padding:12px 14px;border:1px solid var(--line);opacity:.5">
+            <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px">🔒 Autres options</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.6">Passez au niveau Silver pour débloquer le matching investisseurs et les contacts gratuits.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SILVER -->
+      <div style="background:var(--warm);border:2px solid rgba(24,95,165,.25);border-radius:12px;padding:20px 24px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div style="width:36px;height:36px;border-radius:10px;background:#E6F1FB;display:flex;align-items:center;justify-content:center;font-size:18px">🏅</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:#185FA5">Silver</div>
+            <div style="font-size:11px;color:var(--muted)">Valeur locative ou bail · Gratuit</div>
+          </div>
+          <div style="margin-left:auto;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:#E6F1FB;color:#185FA5;text-transform:uppercase;letter-spacing:.8px">Recommandé débutant</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+          <div style="background:#E6F1FB;border-radius:8px;padding:12px 14px;border:1px solid rgba(24,95,165,.2)">
+            <div style="font-size:12px;font-weight:600;color:#185FA5;margin-bottom:4px">👤 Acheteurs particuliers</div>
+            <div style="font-size:11px;color:#185FA5;line-height:1.6">Contact <strong>gratuit et direct</strong>. Photos illimitées. Adresse visible aux acheteurs éligibles.</div>
+          </div>
+          <div style="background:#E1F5EE;border-radius:8px;padding:12px 14px;border:1px solid rgba(30,122,98,.2)">
+            <div style="font-size:12px;font-weight:600;color:#1E7A62;margin-bottom:4px">📈 Investisseurs</div>
+            <div style="font-size:11px;color:#1E7A62;line-height:1.6">Matching automatique <strong>gratuit</strong>. Alertes aux investisseurs compatibles avec votre bien.</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;background:#FAECE7;border-radius:8px;padding:10px 14px;font-size:11px;color:#712B13;line-height:1.6;border:1px solid rgba(192,56,43,.15)">
+          🔒 <strong>Agents immobiliers :</strong> non disponible au niveau Silver. Passez au niveau Gold pour accéder aux options agents.
+        </div>
+      </div>
+
+      <!-- GOLD -->
+      <div style="background:var(--warm);border:2px solid rgba(192,155,90,.4);border-radius:12px;padding:20px 24px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div style="width:36px;height:36px;border-radius:10px;background:#FAEEDA;display:flex;align-items:center;justify-content:center;font-size:18px">🥇</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:#854F0B">Gold</div>
+            <div style="font-size:11px;color:var(--muted)">Silver + Copropriété + Taxe foncière · Gratuit</div>
+          </div>
+          <div style="margin-left:auto;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:#FAEEDA;color:#854F0B;text-transform:uppercase;letter-spacing:.8px">Recommandé</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px">
+          <div style="background:#E6F1FB;border-radius:8px;padding:12px 14px;border:1px solid rgba(24,95,165,.2)">
+            <div style="font-size:12px;font-weight:600;color:#185FA5;margin-bottom:4px">👤 Acheteurs particuliers</div>
+            <div style="font-size:11px;color:#185FA5;line-height:1.6">Contact <strong>gratuit et direct</strong>. Toutes informations visibles.</div>
+          </div>
+          <div style="background:#E1F5EE;border-radius:8px;padding:12px 14px;border:1px solid rgba(30,122,98,.2)">
+            <div style="font-size:12px;font-weight:600;color:#1E7A62;margin-bottom:4px">📈 Investisseurs</div>
+            <div style="font-size:11px;color:#1E7A62;line-height:1.6">Matching automatique <strong>gratuit</strong> sur rendement et budget.</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+          <div style="background:#FAEEDA;border-radius:8px;padding:12px 14px;border:1px solid rgba(192,155,90,.3)">
+            <div style="font-size:12px;font-weight:600;color:#854F0B;margin-bottom:4px">🤝 Agent choisi par vous</div>
+            <div style="font-size:11px;color:#854F0B;line-height:1.6">Vous choisissez <strong>vous-même</strong> un agent parmi ceux qui vous contactent. Mode indépendant ou acheteurs + agents.</div>
+          </div>
+          <div style="background:#FAEEDA;border-radius:8px;padding:12px 14px;border:1px solid rgba(192,155,90,.3)">
+            <div style="font-size:12px;font-weight:600;color:#854F0B;margin-bottom:4px">📊 Top 3 agents sélectionnés</div>
+            <div style="font-size:11px;color:#854F0B;line-height:1.6">Hanaé sélectionne les <strong>3 meilleurs agents</strong> du secteur et vous présente un comparatif automatique.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLATINIUM -->
+      <div style="background:linear-gradient(135deg,rgba(30,122,98,.04),rgba(30,122,98,.08));border:2px solid rgba(30,122,98,.35);border-radius:12px;padding:20px 24px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div style="width:36px;height:36px;border-radius:10px;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:18px">💎</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:#1E7A62">Platinium</div>
+            <div style="font-size:11px;color:var(--muted)">Gold + DPE · Gratuit · Mise en avant prioritaire</div>
+          </div>
+          <div style="margin-left:auto;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:#E1F5EE;color:#1E7A62;text-transform:uppercase;letter-spacing:.8px">Maximum</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px">
+          <div style="background:#E6F1FB;border-radius:8px;padding:12px 14px;border:1px solid rgba(24,95,165,.2)">
+            <div style="font-size:12px;font-weight:600;color:#185FA5;margin-bottom:4px">👤 Acheteurs particuliers</div>
+            <div style="font-size:11px;color:#185FA5;line-height:1.6">Contact <strong>gratuit et direct</strong>. Mise en avant prioritaire dans les résultats.</div>
+          </div>
+          <div style="background:#E1F5EE;border-radius:8px;padding:12px 14px;border:1px solid rgba(30,122,98,.2)">
+            <div style="font-size:12px;font-weight:600;color:#1E7A62;margin-bottom:4px">📈 Investisseurs</div>
+            <div style="font-size:11px;color:#1E7A62;line-height:1.6">Matching automatique + alertes <strong>H+0</strong> aux investisseurs.</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div style="background:#E1F5EE;border-radius:8px;padding:12px 14px;border:1px solid rgba(30,122,98,.25)">
+            <div style="font-size:12px;font-weight:600;color:#1E7A62;margin-bottom:4px">🤝 Agent choisi par vous</div>
+            <div style="font-size:11px;color:#1E7A62;line-height:1.6">Vous sélectionnez librement l'agent qui vous convient parmi ceux qui vous contactent.</div>
+          </div>
+          <div style="background:#E1F5EE;border-radius:8px;padding:12px 14px;border:1px solid rgba(30,122,98,.25)">
+            <div style="font-size:12px;font-weight:600;color:#1E7A62;margin-bottom:4px">📊 Top 3 agents sélectionnés</div>
+            <div style="font-size:11px;color:#1E7A62;line-height:1.6">Hanaé vous présente les <strong>3 meilleurs agents</strong> du secteur avec tableau comparatif.</div>
+          </div>
+          <div style="background:#E1F5EE;border-radius:8px;padding:12px 14px;border:1px solid rgba(30,122,98,.25)">
+            <div style="font-size:12px;font-weight:600;color:#1E7A62;margin-bottom:4px">👥 Acheteurs + Agents</div>
+            <div style="font-size:11px;color:#1E7A62;line-height:1.6">Les deux simultanément. <strong>Exposition maximale</strong>. Vendez plus vite.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLEAU COMPARATIF -->
+    <div style="margin-top:24px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Tableau comparatif complet</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Critère</th><th>Standard</th><th style="background:rgba(24,95,165,.06)">Silver</th><th style="background:rgba(192,155,90,.06)">Gold</th><th style="background:rgba(30,122,98,.06)">Platinium</th></tr></thead>
+        <tbody>
+          <tr><td>Tarif</td><td style="color:#1E7A62;font-weight:600">Gratuit</td><td style="color:#1E7A62;font-weight:600">Gratuit</td><td style="color:#1E7A62;font-weight:600">Gratuit</td><td style="color:#1E7A62;font-weight:600">Gratuit</td></tr>
+          <tr><td>Photos</td><td>3 max</td><td style="color:#185FA5;font-weight:600">Illimitées</td><td style="color:#854F0B;font-weight:600">Illimitées</td><td style="color:#1E7A62;font-weight:600">Illimitées</td></tr>
+          <tr><td>Adresse visible</td><td style="color:var(--muted);font-size:11px">Ville seule</td><td style="font-size:11px;color:#185FA5">Acheteurs éligibles</td><td style="font-size:11px;color:#854F0B">Acheteurs éligibles</td><td><span class="td-yes">Tous acheteurs</span></td></tr>
+          <tr><td>Contact acheteurs</td><td style="color:#854F0B;font-size:11px">19,99 €/contact</td><td><span class="td-yes">Gratuit</span></td><td><span class="td-yes">Gratuit</span></td><td><span class="td-yes">Gratuit</span></td></tr>
+          <tr><td>Matching investisseurs</td><td><span class="td-no">—</span></td><td style="color:#185FA5;font-weight:600">✓ Gratuit</td><td><span class="td-yes">✓ Gratuit</span></td><td><span class="td-yes">✓ Gratuit</span></td></tr>
+          <tr><td>Agent choisi par vendeur</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td style="color:#854F0B;font-weight:600">✓ Disponible</td><td><span class="td-yes">✓ Disponible</span></td></tr>
+          <tr><td>Top 3 agents Hanaé IA</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td style="color:#854F0B;font-weight:600">✓ Comparatif auto</td><td><span class="td-yes">✓ Comparatif auto</span></td></tr>
+          <tr><td>Acheteurs + Agents simultané</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td style="color:#854F0B;font-weight:600">✓ Disponible</td><td><span class="td-yes">✓ Disponible</span></td></tr>
+          <tr><td>Mise en avant</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td><span class="td-yes">Prioritaire</span></td></tr>
+          <tr><td>Documents requis</td><td>Aucun</td><td style="font-size:11px">Val. locative ou bail</td><td style="font-size:11px">Silver + Copro + Taxe</td><td style="font-size:11px">Gold + DPE</td></tr>
+        </tbody>
+      </table></div>
+    </div>
   </div>
 
   <!-- ══ ACHETEURS ══ -->
@@ -176,14 +305,6 @@ tr:hover td{background:#F9F7F2}
       <tbody>
         <tr><td>Accès annonces</td><td style="font-size:11px">Ville · surface · 3 photos</td><td><span class="td-yes">Infos complètes</span></td></tr>
         <tr><td>Adresse exacte</td><td><span class="td-no">—</span></td><td><span class="td-yes">Oui</span></td></tr>
-        <tr><td>Mode de contact agents</td>
-          <td style="text-align:center;color:var(--muted)">—</td>
-          <td style="text-align:center;color:var(--muted)">—</td>
-          <td style="text-align:center;font-size:11px;color:#854F0B">Acheteurs uniquement</td>
-          <td style="text-align:center;font-size:11px;color:#1E7A62">Acheteurs uniquement</td>
-          <td style="text-align:center;font-size:11px;color:#1E7A62">Tous les modes</td>
-          <td style="text-align:center;font-size:11px;color:#1E7A62">Tous les modes</td>
-        </tr>
         <tr><td>Rapport Hanaé IA</td><td><span class="td-no">—</span></td><td><span class="td-yes">Inclus</span></td></tr>
         <tr><td>Contact vendeur/semaine</td><td style="color:#854F0B;font-size:11px">19,99 €/contact</td><td style="color:#185FA5;font-size:11px;font-weight:600">1 illimité</td></tr>
         <tr><td>Contact supplémentaire</td><td><span class="td-no">—</span></td><td style="font-size:11px">9,99 €/contact</td></tr>
