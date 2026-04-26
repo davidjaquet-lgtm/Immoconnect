@@ -58,6 +58,11 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 .excl-timer{font-size:22px;font-weight:600;color:#FAEEDA;margin:6px 0}
 .excl-blocked{background:#F5F2EC;border:2px solid #E8E6E0;border-radius:8px;padding:14px 16px;margin-bottom:14px;text-align:center;font-size:12px;color:var(--muted);line-height:1.7}
 .excl-blocked strong{color:var(--ink);display:block;margin-bottom:4px;font-size:13px}
+.mode-badge{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;margin-bottom:10px}
+.mode-acheteurs{background:#E6F1FB;color:#0C447C}
+.mode-agents{background:#E1F5EE;color:#085041}
+.mode-comparatif{background:#FAEEDA;color:#633806}
+.quota-agent{background:#F5F2EC;border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
 .btn-excl{width:100%;padding:12px;border-radius:8px;border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:6px;transition:opacity .15s;background:linear-gradient(135deg,#854F0B,#C09B5A);color:#fff}
 .btn-excl:hover{opacity:.88}
 .btn-excl:disabled{opacity:.5;cursor:not-allowed}
@@ -534,6 +539,21 @@ function buildContactButtons(b, niv) {
     }
   }
 
+  // BADGE MODE CONTACT
+  var modeContact = b.mode_contact || 'acheteurs'
+  var modeLabels = { acheteurs: '👤 Acheteurs uniquement', agents: '🤝 Agents independants', comparatif: '📊 Comparatif automatique' }
+  var modeClasses = { acheteurs: 'mode-acheteurs', agents: 'mode-agents', comparatif: 'mode-comparatif' }
+  html += '<div class="mode-badge ' + (modeClasses[modeContact] || 'mode-acheteurs') + '">' + (modeLabels[modeContact] || '') + '</div>'
+
+  // BLOCAGE AGENT si mode acheteurs
+  if (isAgent && modeContact === 'acheteurs') {
+    html += '<div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:14px;text-align:center;margin-bottom:8px">'
+    html += '<div style="font-size:13px;font-weight:500;color:#712B13;margin-bottom:4px">Ce vendeur n'accepte pas les contacts agents</div>'
+    html += '<div style="font-size:11px;color:#712B13;line-height:1.6">Tout contact de votre part entraine une penalite de -5 points sur votre score de selection.</div>'
+    html += '</div>'
+    return html
+  }
+
   // PAS D\'EXCLUSIVITÉ — boutons normaux
   if (niv === 'standard') {
     html += '<div class="lock-info">📍 <strong>Ville : ' + (b.ville||'—') + '</strong><br>Connectez-vous pour voir l\'adresse complète</div>';
@@ -546,6 +566,14 @@ function buildContactButtons(b, niv) {
     html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">💬 Contacter le vendeur</button>';
     html += '<button class="btn-contact bc-blue" onclick="ouvrirVisite()">📅 Réserver une visite</button>';
     html += '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-out" style="margin-top:4px">📊 Rapport Hanaé</a>';
+  }
+
+  // AFFICHAGE QUOTA LEADS pour agents (mode agents ou comparatif)
+  if (isAgent && (modeContact === 'agents' || modeContact === 'comparatif')) {
+    var leadsRestants = currentUser ? (currentUser.user_metadata?.leads_restants || '?') : '?'
+    var forfaitAgent = currentUser ? (currentUser.user_metadata?.forfait_agent || 'pay_per_use') : 'pay_per_use'
+    var maxLeads = { pay_per_use: 2, starter: 5, pro: 15, premium: '∞' }
+    html += '<div class="quota-agent"><span>Leads disponibles cette semaine</span><span style="font-weight:600;color:var(--teal)">' + (maxLeads[forfaitAgent] || '?') + ' max</span></div>'
   }
 
   // BOUTON SUIVI BAISSES DE PRIX pour acheteurs connectés

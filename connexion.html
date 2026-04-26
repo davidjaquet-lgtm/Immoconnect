@@ -1121,6 +1121,61 @@ function checkOnboarding(profils) {
 // RAPPORT DE VISITE AUTOMATIQUE
 // ══════════════════════════════════════════
 
+// ── CHANGEMENT MODE CONTACT ──
+async function changerModeContact(annonceId, modeCurrent) {
+  var modes = ['acheteurs', 'agents', 'comparatif'];
+  var labels = {
+    acheteurs: '👤 Acheteurs uniquement - Les agents sont bloques',
+    agents: '🤝 Agents independants - Ils peuvent vous contacter selon leur quota',
+    comparatif: '📊 Comparatif automatique - Top 3 agents + acheteurs directs'
+  };
+
+  var msg = 'Choisissez votre mode de contact :
+
+'
+    + '1. ' + labels.acheteurs + '
+'
+    + '2. ' + labels.agents + '
+'
+    + '3. ' + labels.comparatif + '
+
+'
+    + 'Actuel : ' + (modeCurrent || 'acheteurs');
+
+  var choix = prompt(msg + '
+
+Entrez 1, 2 ou 3 :');
+  if (!choix) return;
+
+  var nouveauMode = modes[parseInt(choix) - 1];
+  if (!nouveauMode) { alert('Choix invalide.'); return; }
+  if (nouveauMode === modeCurrent) return;
+
+  var { data: annonce } = await db.from('annonces_vendeurs').select('*').eq('id', annonceId).single();
+
+  var { error } = await db.from('annonces_vendeurs')
+    .update({ mode_contact: nouveauMode })
+    .eq('id', annonceId);
+
+  if (error) { alert('Erreur : ' + error.message); return; }
+
+  // Appeler matcher-mandats pour notifier les agents concernés
+  await db.functions.invoke('matcher-mandats', {
+    body: {
+      type: 'changement_mode',
+      data: {
+        annonce_id: annonceId,
+        nouveau_mode: nouveauMode,
+        ancien_mode: modeCurrent,
+        bien: annonce
+      }
+    }
+  }).catch(function(){});
+
+  alert('Mode de contact mis a jour : ' + nouveauMode + '. Les agents concernes ont ete notifies.');
+  location.reload();
+}
+
 async function voirRapportVisites(annonceId, titreBien) {
   // Charger les visites pour cette annonce
   var { data: visites } = await db.from('reservations_visites')

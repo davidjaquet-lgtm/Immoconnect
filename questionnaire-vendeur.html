@@ -106,6 +106,15 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
 .vv-box{background:linear-gradient(135deg,#E1F5EE,#E6F1FB);border:1px solid #9FE1CB;border-radius:8px;padding:14px 16px;margin-top:12px}
 .vv-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(30,122,98,.15);border:1px solid rgba(30,122,98,.3);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;color:#1E7A62;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
 .vv-tabs{display:flex;gap:6px;margin-bottom:12px}
+.mode-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.mode-card{border:2px solid var(--line);border-radius:10px;padding:14px;cursor:pointer;transition:all .2s;background:var(--warm)}
+.mode-card:hover{border-color:var(--muted)}
+.mode-card.selected-acheteurs{border-color:var(--blue);background:#E6F1FB}
+.mode-card.selected-agents{border-color:var(--teal);background:#E1F5EE}
+.mode-card.selected-comparatif{border-color:var(--gold);background:#FAEEDA}
+.mode-icon{font-size:22px;margin-bottom:8px}
+.mode-name{font-size:12px;font-weight:600;margin-bottom:4px}
+.mode-desc{font-size:10px;color:var(--muted);line-height:1.5}
 .vv-tab{flex:1;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--warm);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;transition:all .15s;text-align:center;font-weight:500;color:var(--muted)}
 .vv-tab.active{border-color:#1E7A62;background:#E1F5EE;color:#1E7A62}
 .plb-silver{background:#E6F1FB;border:1px solid rgba(24,95,165,.2);color:var(--blue)}
@@ -204,6 +213,32 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
           <input type="text" id="titre" placeholder="Ex : Bel appartement T3 avec balcon — Toulouse centre">
         </div>
       </div>
+      <!-- MODE DE CONTACT -->
+      <div class="form-grid col1">
+        <div class="field">
+          <label class="lbl">Mode de contact *</label>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Choisissez qui peut vous contacter. Modifiable à tout moment depuis votre tableau de bord.</div>
+          <div class="mode-cards" id="mode-cards">
+            <div class="mode-card selected-acheteurs" id="mc-acheteurs" onclick="setModeContact('acheteurs')">
+              <div class="mode-icon">👤</div>
+              <div class="mode-name" style="color:#185FA5">Acheteurs uniquement</div>
+              <div class="mode-desc">Seuls les acheteurs particuliers peuvent vous contacter. Les agents sont bloqués.</div>
+            </div>
+            <div class="mode-card" id="mc-agents" onclick="setModeContact('agents')">
+              <div class="mode-icon">🤝</div>
+              <div class="mode-name" style="color:#1E7A62">Agents indépendants</div>
+              <div class="mode-desc">Les agents peuvent vous contacter selon leur quota de leads. Matching acheteur inclus.</div>
+            </div>
+            <div class="mode-card" id="mc-comparatif" onclick="setModeContact('comparatif')">
+              <div class="mode-icon">📊</div>
+              <div class="mode-name" style="color:#854F0B">Comparatif automatique</div>
+              <div class="mode-desc">Recevez le top 3 agents scorés par ImmoConnect + les acheteurs directs.</div>
+            </div>
+          </div>
+          <input type="hidden" id="mode_contact" value="acheteurs">
+        </div>
+      </div>
+
       <div class="form-grid col1">
         <div class="field">
           <label class="lbl">Description *</label>
@@ -1011,6 +1046,17 @@ function majSectionVV() {
   if (sectionVV) {
     sectionVV.style.display = (niveau !== 'standard') ? 'block' : 'none';
   }
+}
+
+// ── MODE DE CONTACT ──
+function setModeContact(mode) {
+  document.getElementById('mode_contact').value = mode;
+  var cards = ['acheteurs','agents','comparatif'];
+  cards.forEach(function(m) {
+    var card = document.getElementById('mc-' + m);
+    if (!card) return;
+    card.className = 'mode-card' + (m === mode ? ' selected-' + m : '');
+  });
 }
 
 function toggleTravaux(v){document.getElementById('bloc-travaux').style.display=v?'block':'none';}
