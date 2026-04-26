@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">Immobilier — ImmoConnect</title>
+<meta name="description" id="page-desc" content="Annonces immobilières sur ImmoConnect">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:24px;align-items:center;flex:1;margin-left:32px}
+.nav-links a{text-decoration:none;color:#888780;font-size:13px}
+.nav-cta{padding:8px 20px;border:1px solid #444;color:#fff!important;border-radius:4px;font-size:13px;font-weight:500;text-decoration:none}
+
+.hero-ville{background:var(--ink);padding:48px 32px 40px;text-align:center}
+.hero-breadcrumb{font-size:11px;color:rgba(250,250,247,.3);margin-bottom:10px}
+.hero-breadcrumb a{color:rgba(250,250,247,.3);text-decoration:none}
+.hero-h1{font-size:32px;font-weight:300;color:#FAFAF7;margin-bottom:8px}
+.hero-h1 strong{font-weight:600;color:var(--gold)}
+.hero-sub{font-size:14px;color:rgba(250,250,247,.4);max-width:500px;margin:0 auto 24px}
+.hero-stats{display:flex;gap:24px;justify-content:center;flex-wrap:wrap}
+.hero-stat{text-align:center}
+.hero-stat-val{font-size:24px;font-weight:300;color:#FAFAF7}
+.hero-stat-lbl{font-size:11px;color:rgba(250,250,247,.3)}
+
+.page{max-width:1060px;margin:0 auto;padding:32px 24px 80px}
+
+/* FILTRES */
+.filtres{background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:16px 20px;margin-bottom:24px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.filtre-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;flex-shrink:0}
+.filtre-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--line);background:transparent;font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;color:var(--muted)}
+.filtre-btn.active{background:var(--ink);color:#fff;border-color:transparent}
+
+/* LAYOUT */
+.layout-2col{display:grid;grid-template-columns:1fr 300px;gap:20px}
+
+/* ANNONCES */
+.annonces-list{display:flex;flex-direction:column;gap:10px}
+.annonce-card{background:var(--warm);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;cursor:pointer;transition:border-color .15s}
+.annonce-card:hover{border-color:var(--muted)}
+.annonce-img{width:140px;min-height:110px;background:#E8E6E0;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--muted)}
+.annonce-body{padding:14px 16px;flex:1}
+.annonce-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+.annonce-titre{font-size:14px;font-weight:500;margin-bottom:2px}
+.annonce-loc{font-size:12px;color:var(--muted)}
+.annonce-prix{font-size:18px;font-weight:400;color:var(--ink);white-space:nowrap;margin-left:12px}
+.annonce-metas{display:flex;gap:12px;font-size:12px;color:var(--muted);margin-bottom:8px}
+.annonce-badges{display:flex;gap:6px;flex-wrap:wrap}
+.annonce-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500}
+
+/* SIDEBAR STATS */
+.marche-card{background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:14px}
+.marche-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}
+.marche-stat{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}
+.marche-stat:last-child{border-bottom:none}
+.marche-val{font-weight:500}
+
+/* ALERTE */
+.alerte-box{background:linear-gradient(135deg,#E1F5EE,#E6F1FB);border:1px solid #9FE1CB;border-radius:10px;padding:18px;margin-bottom:14px;text-align:center}
+
+/* TYPES */
+.types-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.type-btn{padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--warm);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;text-align:center;text-decoration:none;color:var(--ink);display:block}
+.type-btn:hover{border-color:var(--teal);color:var(--teal)}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 24px;background:var(--warm);border:1px solid var(--line);border-radius:10px;color:var(--muted)}
+
+/* SEO CONTENT */
+.seo-content{margin-top:40px;padding-top:32px;border-top:1px solid var(--line)}
+.seo-title{font-size:20px;font-weight:400;margin-bottom:12px}
+.seo-text{font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:16px}
+
+@media(max-width:760px){.layout-2col{grid-template-columns:1fr}.annonce-img{width:100px}.hero-stats{gap:16px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-links">
+    <a href="index.html">Annonces</a>
+    <a href="estimation.html">Estimer</a>
+    <a href="carte.html">Carte</a>
+  </div>
+  <a href="questionnaire-vendeur.html" class="nav-cta">Vendre gratuitement</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero-ville">
+  <div class="hero-breadcrumb"><a href="index.html">Accueil</a> › <a href="index.html">Annonces</a> › <span id="breadcrumb-ville">Chargement...</span></div>
+  <div class="hero-h1">Immobilier à <strong id="hero-ville-nom">...</strong></div>
+  <div class="hero-sub" id="hero-sub">Annonces de particuliers vérifiées · Acheteurs et agents qualifiés</div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-stat-val" id="stat-annonces">—</div><div class="hero-stat-lbl">Annonces actives</div></div>
+    <div class="hero-stat"><div class="hero-stat-val" id="stat-prix-m2">—</div><div class="hero-stat-lbl">Prix moyen m2</div></div>
+    <div class="hero-stat"><div class="hero-stat-val" id="stat-delai">—</div><div class="hero-stat-lbl">Délai vente moyen</div></div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- FILTRES -->
+  <div class="filtres">
+    <span class="filtre-label">Type</span>
+    <button class="filtre-btn active" onclick="filtrer('tous',this)">Tous</button>
+    <button class="filtre-btn" onclick="filtrer('Appartement',this)">Appartements</button>
+    <button class="filtre-btn" onclick="filtrer('Maison',this)">Maisons</button>
+    <button class="filtre-btn" onclick="filtrer('Terrain',this)">Terrains</button>
+    <button class="filtre-btn" onclick="filtrer('Commerce',this)">Commerces</button>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button class="filtre-btn" onclick="trierPar('prix_asc',this)">Prix ↑</button>
+      <button class="filtre-btn" onclick="trierPar('prix_desc',this)">Prix ↓</button>
+    </div>
+  </div>
+
+  <div class="layout-2col">
+
+    <!-- LISTE ANNONCES -->
+    <div>
+      <div id="annonces-list">
+        <div class="empty"><div style="font-size:24px;margin-bottom:8px">⏳</div>Chargement des annonces...</div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div>
+
+      <!-- MARCHE LOCAL -->
+      <div class="marche-card">
+        <div class="marche-title">Marché local</div>
+        <div id="marche-stats">
+          <div class="marche-stat"><span>Prix moyen m2</span><span class="marche-val" id="m-prixm2">—</span></div>
+          <div class="marche-stat"><span>Appartements</span><span class="marche-val" id="m-appart">—</span></div>
+          <div class="marche-stat"><span>Maisons</span><span class="marche-val" id="m-maisons">—</span></div>
+          <div class="marche-stat"><span>Variation 1 an</span><span class="marche-val" id="m-variation" style="color:var(--teal)">—</span></div>
+          <div class="marche-stat"><span>Délai vente moyen</span><span class="marche-val" id="m-delai">—</span></div>
+          <div class="marche-stat"><span>Taux de négociation</span><span class="marche-val" id="m-nego">—</span></div>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:var(--muted)">Source : DVF Notaires · Mise a jour 2025</div>
+      </div>
+
+      <!-- ALERTE -->
+      <div class="alerte-box">
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px">Nouvelle annonce dans cette ville ?</div>
+        <div style="font-size:12px;color:#085041;margin-bottom:10px;line-height:1.6">Recevez une alerte dès qu'un bien correspond à vos critères.</div>
+        <a href="questionnaire-acheteur.html" style="display:inline-block;background:#1E7A62;color:#fff;padding:9px 20px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:500">Créer une alerte gratuite</a>
+      </div>
+
+      <!-- TYPES DE BIENS -->
+      <div class="marche-card">
+        <div class="marche-title">Explorer par type</div>
+        <div class="types-grid" id="types-links"></div>
+      </div>
+
+      <!-- VILLES PROCHES -->
+      <div class="marche-card">
+        <div class="marche-title">Villes proches</div>
+        <div id="villes-proches" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+
+      <!-- ESTIMER -->
+      <div style="background:var(--ink);border-radius:10px;padding:16px;text-align:center">
+        <div style="font-size:12px;font-weight:500;color:#FAFAF7;margin-bottom:4px">Vendez à <span id="sidebar-ville">cette ville</span></div>
+        <div style="font-size:11px;color:rgba(250,250,247,.4);margin-bottom:12px;line-height:1.5">Estimation gratuite en 2 minutes. 100% gratuit.</div>
+        <a href="questionnaire-vendeur.html" style="display:block;background:var(--gold);color:var(--ink);padding:10px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:500">Estimer mon bien</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CONTENU SEO -->
+  <div class="seo-content">
+    <h2 class="seo-title" id="seo-h2">Le marché immobilier</h2>
+    <p class="seo-text" id="seo-p1"></p>
+    <p class="seo-text" id="seo-p2"></p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px" id="seo-links"></div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGh5ZWZhamZ3cWN4Y2Z4cG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjYwNDAsImV4cCI6MjA5MTUwMjA0MH0.jB8Z_9eT9lYkqxUUD0G001Y87iSAv94fSu_gVOdqa-A';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+var params = new URLSearchParams(window.location.search);
+var ville = decodeURIComponent(params.get('ville') || '');
+var cp = params.get('cp') || '';
+var typeFilter = 'tous';
+var triFilter = 'date';
+var annoncesRaw = [];
+
+if (!ville) window.location.href = 'index.html';
+
+// SEO meta
+document.title = 'Immobilier ' + ville + ' — Annonces ImmoConnect';
+document.getElementById('page-title').textContent = 'Immobilier ' + ville + ' — ImmoConnect';
+document.getElementById('page-desc').content = 'Annonces immobilières à ' + ville + (cp ? ' (' + cp + ')' : '') + ' — Vente appartements, maisons, terrains. Estimation gratuite.';
+document.getElementById('hero-ville-nom').textContent = ville;
+document.getElementById('breadcrumb-ville').textContent = ville;
+document.getElementById('sidebar-ville').textContent = ville;
+
+// Breadcrumb
+document.title = 'Immobilier ' + ville + ' — ImmoConnect';
+
+(async function() {
+  await Promise.all([chargerAnnonces(), chargerMarcheLocal()]);
+  genererSEO();
+  genererVillesProches();
+  genererTypesLinks();
+})();
+
+async function chargerAnnonces() {
+  var q = db.from('annonces_vendeurs').select('*')
+    .ilike('ville', '%' + ville + '%')
+    .in('niveau_vendeur', ['silver', 'gold', 'platinium'])
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  if (cp) q = db.from('annonces_vendeurs').select('*').eq('code_postal', cp).order('created_at', { ascending: false }).limit(20);
+
+  var { data } = await q;
+  annoncesRaw = data || [];
+
+  document.getElementById('stat-annonces').textContent = annoncesRaw.length;
+  afficherAnnonces();
+}
+
+function afficherAnnonces() {
+  var annonces = annoncesRaw.filter(function(a) {
+    if (typeFilter !== 'tous' && a.type_bien !== typeFilter) return false;
+    return true;
+  });
+
+  if (triFilter === 'prix_asc') annonces.sort(function(a,b){ return (a.prix||0)-(b.prix||0); });
+  else if (triFilter === 'prix_desc') annonces.sort(function(a,b){ return (b.prix||0)-(a.prix||0); });
+
+  if (!annonces.length) {
+    document.getElementById('annonces-list').innerHTML = '<div class="empty"><div style="font-size:24px;margin-bottom:8px">🔍</div>Aucune annonce pour le moment à ' + ville + '<br><span style="font-size:12px">Soyez le premier à publier !</span><br><br><a href="questionnaire-vendeur.html" style="color:var(--teal)">Vendre mon bien gratuitement →</a></div>';
+    return;
+  }
+
+  var html = annonces.map(function(a) {
+    var titre = a.titre || ((a.type_bien || 'Bien') + ' ' + (a.surface || '') + 'm2');
+    var prix = a.prix ? Math.round(a.prix).toLocaleString('fr-FR') + ' €' : '—';
+    var prixM2 = a.prix && a.surface ? Math.round(a.prix / a.surface).toLocaleString('fr-FR') + ' €/m2' : '';
+    var niv = a.niveau_vendeur || '';
+    var nivLabel = { silver: 'Silver', gold: 'Gold', platinium: 'Platinium' }[niv] || '';
+    var nivColor = { silver: '#E6F1FB', gold: '#FAEEDA', platinium: '#E1F5EE' }[niv] || '';
+    var nivTextColor = { silver: '#185FA5', gold: '#854F0B', platinium: '#1E7A62' }[niv] || '';
+    var hasVisite = !!a.visite_virtuelle_url;
+    var hasDPE = !!(a.dpe_classe);
+    var icon = { Appartement:'🏢', Maison:'🏡', Terrain:'🌳', Commerce:'🏪' }[a.type_bien] || '🏠';
+
+    return '<div class="annonce-card" onclick="window.location.href=\'bien.html?id=' + a.id + '\'">'
+      + '<div class="annonce-img">' + icon + '</div>'
+      + '<div class="annonce-body">'
+      + '<div class="annonce-top">'
+      + '<div><div class="annonce-titre">' + titre + '</div><div class="annonce-loc">' + (a.ville || '') + (a.code_postal ? ' ' + a.code_postal : '') + '</div></div>'
+      + '<div class="annonce-prix">' + prix + '</div>'
+      + '</div>'
+      + '<div class="annonce-metas">'
+      + (a.surface ? '<span>' + a.surface + ' m2</span>' : '')
+      + (a.nb_pieces ? '<span>' + a.nb_pieces + ' pieces</span>' : '')
+      + (prixM2 ? '<span>' + prixM2 + '</span>' : '')
+      + '</div>'
+      + '<div class="annonce-badges">'
+      + (nivLabel ? '<span class="annonce-badge" style="background:' + nivColor + ';color:' + nivTextColor + '">' + nivLabel + '</span>' : '')
+      + (hasVisite ? '<span class="annonce-badge" style="background:#F1EFE8;color:#888780">Visite virtuelle</span>' : '')
+      + (hasDPE ? '<span class="annonce-badge" style="background:#F1EFE8;color:#888780">DPE ' + a.dpe_classe + '</span>' : '')
+      + '</div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+
+  document.getElementById('annonces-list').innerHTML = html;
+}
+
+function filtrer(type, btn) {
+  typeFilter = type;
+  document.querySelectorAll('.filtre-btn').forEach(function(b){ if(['Tous','Appartements','Maisons','Terrains','Commerces'].some(function(l){ return b.textContent.startsWith(l); })) b.classList.remove('active'); });
+  btn.classList.add('active');
+  afficherAnnonces();
+}
+
+function trierPar(tri, btn) {
+  triFilter = tri;
+  afficherAnnonces();
+}
+
+async function chargerMarcheLocal() {
+  // Données de marché DVF simulées (à remplacer par vraies données DVF)
+  var MARCHES = {
+    'Tarbes': { prixM2Appart: 1650, prixM2Maison: 1850, variation: '+2.3%', delai: '68 jours', nego: '4.2%' },
+    'Pau': { prixM2Appart: 2100, prixM2Maison: 2400, variation: '+3.1%', delai: '54 jours', nego: '3.8%' },
+    'Toulouse': { prixM2Appart: 3800, prixM2Maison: 3200, variation: '+1.8%', delai: '45 jours', nego: '2.9%' },
+    'Bordeaux': { prixM2Appart: 4200, prixM2Maison: 3900, variation: '-0.5%', delai: '52 jours', nego: '3.2%' },
+    'Paris': { prixM2Appart: 9800, prixM2Maison: 8500, variation: '-2.1%', delai: '38 jours', nego: '2.1%' }
+  };
+
+  var m = MARCHES[ville] || { prixM2Appart: 2200, prixM2Maison: 2100, variation: '+1.5%', delai: '60 jours', nego: '3.5%' };
+  var prixMoyenM2 = Math.round((m.prixM2Appart + m.prixM2Maison) / 2);
+
+  document.getElementById('stat-prix-m2').textContent = prixMoyenM2.toLocaleString('fr-FR') + ' €';
+  document.getElementById('stat-delai').textContent = m.delai;
+  document.getElementById('m-prixm2').textContent = prixMoyenM2.toLocaleString('fr-FR') + ' €/m2';
+  document.getElementById('m-appart').textContent = m.prixM2Appart.toLocaleString('fr-FR') + ' €/m2';
+  document.getElementById('m-maisons').textContent = m.prixM2Maison.toLocaleString('fr-FR') + ' €/m2';
+  document.getElementById('m-variation').textContent = m.variation;
+  document.getElementById('m-variation').style.color = m.variation.startsWith('+') ? 'var(--teal)' : 'var(--coral, #C0392B)';
+  document.getElementById('m-delai').textContent = m.delai;
+  document.getElementById('m-nego').textContent = m.nego;
+}
+
+function genererSEO() {
+  document.getElementById('seo-h2').textContent = 'Le marché immobilier à ' + ville;
+  document.getElementById('seo-p1').textContent = 'ImmoConnect propose les annonces immobilières de particuliers à ' + ville + (cp ? ' (' + cp + ')' : '') + '. Achetez ou vendez un appartement, une maison ou un terrain directement entre particuliers, sans commission agence, ou faites-vous accompagner par un agent immobilier qualifié sélectionné par notre algorithme.';
+  document.getElementById('seo-p2').textContent = 'Le marché immobilier à ' + ville + ' se caractérise par des prix stables et une demande soutenue. Toutes les annonces ImmoConnect sont vérifiées et accompagnées d\'une estimation DVF gratuite. Les vendeurs peuvent recevoir les 3 meilleures propositions d\'agents immo locaux en 48h.';
+
+  var types = ['Appartement', 'Maison', 'Terrain', 'Commerce'];
+  document.getElementById('seo-links').innerHTML = types.map(function(t) {
+    return '<a href="ville.html?ville=' + encodeURIComponent(ville) + '&type=' + t + '" style="display:block;background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:12px;text-align:center;text-decoration:none;color:var(--ink);font-size:13px">' + t + 's à ' + ville + '</a>';
+  }).join('');
+}
+
+function genererVillesProches() {
+  var VOISINES = {
+    'Tarbes': ['Pau', 'Lourdes', 'Bagneres-de-Bigorre', 'Vic-en-Bigorre'],
+    'Pau': ['Tarbes', 'Bayonne', 'Orthez', 'Oloron-Sainte-Marie'],
+    'Toulouse': ['Blagnac', 'Colomiers', 'Muret', 'Saint-Gaudens'],
+    'default': []
+  };
+  var voisines = VOISINES[ville] || VOISINES.default;
+  if (!voisines.length) return;
+  document.getElementById('villes-proches').innerHTML = voisines.map(function(v) {
+    return '<a href="ville.html?ville=' + encodeURIComponent(v) + '" style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink);font-size:13px"><span>' + v + '</span><span style="font-size:11px;color:var(--teal)">Voir →</span></a>';
+  }).join('');
+}
+
+function genererTypesLinks() {
+  var types = [{ icon: '🏢', label: 'Appartements', val: 'Appartement' }, { icon: '🏡', label: 'Maisons', val: 'Maison' }, { icon: '🌳', label: 'Terrains', val: 'Terrain' }, { icon: '🏪', label: 'Commerces', val: 'Commerce' }];
+  document.getElementById('types-links').innerHTML = types.map(function(t) {
+    return '<a href="ville.html?ville=' + encodeURIComponent(ville) + '&type=' + t.val + '" class="type-btn">' + t.icon + ' ' + t.label + '</a>';
+  }).join('');
+}
+</script>
+</body>
+</html>
