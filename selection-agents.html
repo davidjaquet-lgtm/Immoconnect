@@ -464,7 +464,38 @@ async function confirmerChoix() {
     // 1. Marquer la candidature comme gagnante
     await db.from('candidatures_agents').update({ statut: 'gagnant' }).eq('id', agentChoisi.id);
 
-    // 2. Notifier les autres agents
+    // 2. Marquer le bien comme vendu/choisi
+    await db.from('annonces_vendeurs').update({ statut_selection: 'choisi' }).eq('id', annonceId);
+
+    // 3. Récupérer l'estimation Hanaé pour la transmettre à l'agent retenu
+    var estimHanae = null;
+    if (bien && bien.estimation_hanae) {
+      estimHanae = Math.round(bien.estimation_hanae).toLocaleString('fr-FR') + ' EUR';
+    }
+
+    // 4. Notifier l'agent choisi — avec estimation Hanaé confidentielle
+    var msgAgent = 'Felicitations ! Vous avez ete selectionne par le vendeur pour ce bien.\n\n'
+      + 'Le mandat simple va etre genere et envoye pour signature electronique.\n\n';
+    if (estimHanae) {
+      msgAgent += 'Estimation de marche Hanaé (confidentielle — pour vous seul) : ' + estimHanae
+        + '.\nCette estimation est basee sur les donnees DVF et Notaires-INSEE. '
+        + 'Elle vous est transmise pour vous aider dans votre evaluation. '
+        + 'Votre estimation finale apres visite du bien primera sur cette valeur indicative.';
+    }
+
+    await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'nouveau_message',
+        to: agentChoisi.agent_email,
+        subject: 'Felicitations — Vous etes selectionne ! - ImmoConnect',
+        expediteur: 'ImmoConnect',
+        message: msgAgent,
+        bien: bien ? (bien.titre || bien.type_bien + ' ' + bien.ville) : '',
+        lien: 'https://immoconnect-agence.fr/connexion.html'
+      }
+    }).catch(function(){});
+
+    // 5. Notifier les autres agents non retenus
     for (var ag of agents) {
       if (ag.id !== agentChoisi.id) {
         await db.functions.invoke('envoyer-email', {
@@ -472,25 +503,12 @@ async function confirmerChoix() {
             type: 'vendeur_mode_acheteurs',
             to: ag.agent_email,
             subject: 'Ce bien a trouve son agent - ImmoConnect',
-            bien_titre: bien.titre || bien.type_bien + ' ' + bien.ville,
+            bien_titre: bien ? (bien.titre || bien.type_bien + ' ' + bien.ville) : '',
             lien: 'https://immoconnect-agence.fr/connexion.html'
           }
         }).catch(function(){});
       }
     }
-
-    // 3. Notifier l'agent choisi
-    await db.functions.invoke('envoyer-email', {
-      body: {
-        type: 'nouveau_message',
-        to: agentChoisi.agent_email,
-        subject: 'Felicitations — Vous avez ete selectionne ! - ImmoConnect',
-        expediteur: 'ImmoConnect (au nom du vendeur)',
-        message: 'Vous avez ete selectionne pour ce bien. Le mandat simple va etre genere sous peu. Le vendeur vous contactera directement.',
-        bien: bien.titre || bien.type_bien + ' ' + bien.ville,
-        lien: 'https://immoconnect-agence.fr/connexion.html'
-      }
-    }).catch(function(){});
 
     fermerModal();
     showToast('Agent selectionne ! Le mandat sera genere automatiquement.', 'ok');

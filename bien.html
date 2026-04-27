@@ -379,14 +379,14 @@ function afficherBien(b, similaires) {
         + '<a href="rapport-hanae.html?annonce=' + b.id + '&mode=agent" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;padding:10px">📊 Voir l'analyse de marché</a>'
         + '</div>';
     } else if (isAgentPPU) {
-      // Agent pay per use : pas d'accès au rapport
+      // Agent pay per use : accès dossier complet MAIS pas analyse Hanaé
       rapportHtml = '<div class="rapport-card">'
-        + '<div class="rapport-title">Analyse de marché Hanaé</div>'
-        + '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:8px">Disponible avec un forfait abonnement</div>'
-        + '<div style="background:#F5F2EC;border-radius:6px;padding:10px 12px;font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:10px">'
-        + '🔒 L'analyse de marché et l'accès complet au dossier sont réservés aux agents abonnés (Starter, Pro, Premium).'
+        + '<div class="rapport-title">Dossier complet</div>'
+        + '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:8px">Accès aux documents vendeur disponible</div>'
+        + '<div style="background:#FAEEDA;border-radius:6px;padding:10px 12px;font-size:11px;color:#633806;line-height:1.6;margin-bottom:10px">'
+        + '📋 Vous avez accès au dossier complet. L'analyse de marché Hanaé est réservée aux agents abonnés (Starter, Pro, Premium).'
         + '</div>'
-        + '<a href="forfaits.html#agents" class="btn-contact bc-out" style="display:block;text-align:center;text-decoration:none;padding:10px">Voir les forfaits →</a>'
+        + '<a href="candidature-agent.html?annonce=' + b.id + '" class="btn-contact bc-teal" style="display:block;text-align:center;text-decoration:none;padding:10px">Candidater sur ce bien →</a>'
         + '</div>';
     }
   }
