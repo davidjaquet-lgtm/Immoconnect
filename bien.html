@@ -619,11 +619,23 @@ function buildContactButtons(b, niv) {
   if (isAgent && (modeContact === 'agents' || modeContact === 'tous' || modeContact === 'comparatif')) {
     var forfaitAgent = currentUser ? (currentUser.user_metadata?.forfait_agent || 'pay_per_use') : 'pay_per_use'
     var maxLeads = { pay_per_use: 2, starter: 5, pro: 15, premium: '∞' }
-    html += '<div class="quota-agent"><span>Leads disponibles cette semaine</span><span style="font-weight:600;color:var(--teal)">' + (maxLeads[forfaitAgent] || '?') + ' max</span></div>'
-    html += '<a href="candidature-agent.html?annonce=' + b.id + '" class="btn-contact bc-teal" style="display:block;text-align:center;text-decoration:none;padding:12px;margin-top:8px;border-radius:8px;font-weight:500">🎯 Candidater sur ce bien — 9,99 €</a>'
+    var isAgentPPUContact = forfaitAgent === 'pay_per_use'
+
+    if (modeContact === 'agents' || modeContact === 'tous') {
+      if (isAgentPPUContact) {
+        // PPU — contact payant 4,99€
+        html += '<div style="background:#FAEEDA;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:12px;color:#633806;line-height:1.6">'
+          + '💳 <strong>Contact payant — Pay per use</strong><br>Les agents abonnés contactent ce vendeur gratuitement selon leur quota de leads. En pay per use, chaque contact coûte 4,99€.'
+          + '</div>'
+        html += '<a href="contact-agent-ppu.html?annonce=' + b.id + '" class="btn-contact bc-amber" style="display:block;text-align:center;text-decoration:none;padding:12px;border-radius:8px;font-weight:500;background:#D4732A;color:#fff">Contacter ce vendeur — 4,99 €</a>'
+      } else {
+        html += '<div class="quota-agent"><span>Leads disponibles cette semaine</span><span style="font-weight:600;color:var(--teal)">' + (maxLeads[forfaitAgent] || '?') + ' max</span></div>'
+        html += '<a href="messagerie.html?annonce=' + b.id + '" class="btn-contact bc-teal" style="display:block;text-align:center;text-decoration:none;padding:12px;margin-top:8px;border-radius:8px;font-weight:500">Contacter ce vendeur →</a>'
+      }
+    }
   }
   if (isAgent && modeContact === 'comparatif') {
-    html += '<a href="candidature-agent.html?annonce=' + b.id + '" class="btn-contact" style="display:block;text-align:center;text-decoration:none;padding:12px;margin-top:4px;border-radius:8px;background:#E1F5EE;color:#1E7A62;font-weight:500">🏆 Candidater — Selection top 3</a>'
+    html += '<a href="candidature-agent.html?annonce=' + b.id + '" class="btn-contact" style="display:block;text-align:center;text-decoration:none;padding:12px;margin-top:4px;border-radius:8px;background:#E1F5EE;color:#1E7A62;font-weight:500">🏆 Candidater — Selection top 3 — 9,99 €</a>'
   }
 
   // BOUTON SUIVI BAISSES DE PRIX pour acheteurs connectés

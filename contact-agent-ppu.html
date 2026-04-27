@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Contacter ce vendeur</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--amber:#D4732A;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}.nav-logo span{color:var(--gold)}
+.page{max-width:520px;margin:40px auto;padding:0 24px 80px}
+.card{background:var(--warm);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.card-header{background:var(--ink);padding:20px 24px}
+.card-body{padding:24px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+input,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink);outline:none;width:100%}
+input:focus,textarea:focus{border-color:var(--ink)}
+.prix-box{background:var(--ink);border-radius:10px;padding:20px 24px;margin-bottom:16px;text-align:center}
+.prix-num{font-size:40px;font-weight:300;color:#fff;line-height:1}
+.prix-sub{font-size:12px;color:rgba(250,250,247,.4);margin-top:4px}
+.avantages{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.av{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.av-ok{color:var(--teal)}
+.info-abonne{background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:12px 14px;font-size:12px;color:#085041;line-height:1.6;margin-bottom:16px}
+.btn-payer{width:100%;padding:14px;border-radius:8px;border:none;background:var(--amber);color:#fff;font-family:'Outfit',sans-serif;font-size:15px;font-weight:500;cursor:pointer}
+.btn-payer:disabled{opacity:.4;cursor:not-allowed}
+.spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:11px 24px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;display:none}
+.toast.ok{background:#1E7A62;color:#fff}
+.toast.err{background:#C0392B;color:#fff}
+</style>
+</head>
+<body>
+<nav><a href="index.html" class="nav-logo">Immo<span>Connect</span></a></nav>
+
+<div class="page">
+  <div class="card">
+    <div class="card-header">
+      <div style="font-size:10px;font-weight:700;color:rgba(250,250,247,.4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Contact vendeur — Pay per use</div>
+      <div style="font-size:16px;font-weight:500;color:#fff" id="bien-titre">Chargement...</div>
+      <div style="font-size:12px;color:rgba(250,250,247,.4);margin-top:3px" id="bien-meta">—</div>
+    </div>
+
+    <div class="card-body">
+
+      <div class="prix-box">
+        <div class="prix-num">4<span style="font-size:22px;font-weight:400">,99 €</span></div>
+        <div class="prix-sub">par contact · paiement unique · accès immédiat</div>
+      </div>
+
+      <div class="avantages">
+        <div class="av"><span class="av-ok">✓</span>Contact direct avec le vendeur</div>
+        <div class="av"><span class="av-ok">✓</span>Dossier complet transmis après paiement</div>
+        <div class="av"><span class="av-ok">✓</span>Messagerie sécurisée ImmoConnect</div>
+        <div class="av" style="color:#854F0B"><span>→</span>Passez abonné pour des contacts inclus sans frais</div>
+      </div>
+
+      <div class="info-abonne">
+        🎁 <strong>Astuce :</strong> Un forfait Starter à 49€/mois inclut 5 leads vendeurs/semaine — soit moins de 2,50€ par contact. <a href="forfaits.html" style="color:#085041;font-weight:600">Voir les forfaits →</a>
+      </div>
+
+      <div class="field">
+        <label>Votre message au vendeur *</label>
+        <textarea id="message" rows="4" placeholder="Présentez-vous brièvement et expliquez votre intérêt pour ce bien..."></textarea>
+      </div>
+
+      <div class="field">
+        <label>Type de démarche</label>
+        <select id="type-contact" style="background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink)">
+          <option value="mandat">Je souhaite obtenir le mandat de vente</option>
+          <option value="acheteur">J'ai un acheteur potentiel en portefeuille</option>
+          <option value="info">Demande d'informations complémentaires</option>
+        </select>
+      </div>
+
+      <button class="btn-payer" id="btn-payer" onclick="payer()">Payer 4,99 € et contacter ce vendeur</button>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co'
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGh5ZWZhamZ3cWN4Y2Z4cG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjYwNDAsImV4cCI6MjA5MTUwMjA0MH0.jB8Z_9eT9lYkqxUUD0G001Y87iSAv94fSu_gVOdqa-A'
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
+
+var params = new URLSearchParams(window.location.search)
+var annonceId = params.get('annonce')
+var bien = null
+var currentUser = null
+
+;(async function() {
+  var { data: { user } } = await db.auth.getUser()
+  if (!user) { window.location.href = 'connexion.html'; return }
+  currentUser = user
+
+  var meta = user.user_metadata || {}
+  if (!meta.profils?.includes('agent')) { showToast('Accès réservé aux agents.', 'err'); return }
+
+  var forfait = meta.forfait_agent || 'pay_per_use'
+  var quotaMax = { pay_per_use: 2, starter: 5, pro: 15, premium: 999 }
+  var leadsUtilises = parseInt(meta.leads_semaine_utilises || 0)
+  var quota = quotaMax[forfait] || 2
+  var PPU_GRATUITS = 2 // Les 2 premiers contacts PPU sont gratuits
+
+  // Abonné avec leads restants → messagerie directement sans payer
+  if (forfait !== 'pay_per_use' && leadsUtilises < quota) {
+    window.location.href = 'messagerie.html?annonce=' + annonceId
+    return
+  }
+
+  // PPU — 2 premiers contacts gratuits
+  if (forfait === 'pay_per_use' && leadsUtilises < PPU_GRATUITS) {
+    // Incrémenter et rediriger directement sans paiement
+    await db.auth.updateUser({ data: { leads_semaine_utilises: leadsUtilises + 1 } })
+    window.location.href = 'messagerie.html?annonce=' + annonceId
+    return
+  }
+
+  // Abonné quota dépassé → afficher message adapté
+  if (forfait !== 'pay_per_use' && leadsUtilises >= quota) {
+    var header = document.querySelector('.card-header')
+    if (header) header.innerHTML += '<div style="background:rgba(192,155,90,.15);border-radius:6px;padding:6px 10px;margin-top:8px;font-size:11px;color:var(--gold)">Quota ' + forfait + ' atteint (' + quota + '/sem) — Contact supplémentaire à 4,99€</div>'
+  }
+
+  var { data: b } = await db.from('annonces_vendeurs').select('*').eq('id', annonceId).single()
+  if (!b) { showToast('Bien introuvable.', 'err'); return }
+  bien = b
+
+  document.getElementById('bien-titre').textContent = b.titre || ((b.type_bien || 'Bien') + ' ' + (b.surface || '') + 'm2')
+  document.getElementById('bien-meta').textContent = (b.ville || '') + (b.prix ? ' · ' + Math.round(b.prix).toLocaleString('fr-FR') + ' €' : '')
+})()
+
+async function payer() {
+  var message = document.getElementById('message').value
+  var typeContact = document.getElementById('type-contact').value
+  if (!message || message.length < 20) { showToast('Message trop court (20 caractères minimum).', 'err'); return }
+
+  var btn = document.getElementById('btn-payer')
+  btn.disabled = true
+  btn.innerHTML = '<span class="spin"></span>Traitement...'
+
+  try {
+    // Enregistrer le contact payant
+    var { data: contact, error } = await db.from('contacts_semaine').insert({
+      agent_email: currentUser.email,
+      annonce_id: annonceId,
+      type_contact: typeContact,
+      message: message,
+      paiement_montant: 4.99,
+      paiement_statut: 'en_attente', // → Stripe à brancher
+      statut: 'envoye'
+    }).select().single()
+
+    if (error) throw error
+
+    // Simuler paiement accepté (Stripe à intégrer)
+    await db.from('contacts_semaine').update({ paiement_statut: 'paye' }).eq('id', contact.id)
+
+    // Incrémenter leads utilisés
+    var meta = currentUser.user_metadata || {}
+    var leadsUtilises = parseInt(meta.leads_semaine_utilises || 0) + 1
+    await db.auth.updateUser({ data: { leads_semaine_utilises: leadsUtilises } })
+
+    // Notifier le vendeur
+    await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'nouveau_message',
+        to: bien.email_contact,
+        subject: 'Un agent souhaite vous contacter - ImmoConnect',
+        expediteur: 'Agent ImmoConnect (via contact payant)',
+        message: message,
+        bien: bien.titre || bien.type_bien + ' ' + bien.ville,
+        lien: 'https://immoconnect-agence.fr/messagerie.html?annonce=' + annonceId
+      }
+    }).catch(function(){})
+
+    // Rediriger vers messagerie
+    showToast('Paiement confirmé ! Accès à la messagerie...', 'ok')
+    setTimeout(function(){ window.location.href = 'messagerie.html?annonce=' + annonceId }, 1500)
+
+  } catch(e) {
+    showToast('Erreur : ' + (e.message || 'Réessayez.'), 'err')
+    btn.disabled = false
+    btn.innerHTML = 'Payer 4,99 € et contacter ce vendeur'
+  }
+}
+
+function showToast(msg, type) {
+  var t = document.getElementById('toast')
+  t.textContent = msg; t.className = 'toast ' + type; t.style.display = 'block'
+  setTimeout(function(){ t.style.display = 'none' }, 3500)
+}
+</script>
+</body>
+</html>
