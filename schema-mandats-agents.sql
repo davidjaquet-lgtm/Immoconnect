@@ -122,3 +122,8 @@ ALTER PUBLICATION supabase_realtime ADD TABLE penalites_agents;
 -- Estimation Hanaé confidentielle (jamais affichée aux agents)
 ALTER TABLE annonces_vendeurs
   ADD COLUMN IF NOT EXISTS estimation_hanae NUMERIC;
+
+-- Statut selection pour le mode comparatif
+ALTER TABLE annonces_vendeurs
+  ADD COLUMN IF NOT EXISTS statut_selection TEXT DEFAULT 'en_attente'
+    CHECK (statut_selection IN ('en_attente','top3_pret','attente_fantomes','choisi','libre'));

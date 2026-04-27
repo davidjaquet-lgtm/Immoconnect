@@ -188,6 +188,16 @@ input:focus,select:focus,textarea:focus{border-color:var(--ink)}
       💡 <strong>Estimation confidentielle</strong> — L'estimation de prix Hanae est utilisee par l'algorithme de scoring mais jamais communiquee aux agents. L'agent retenu evaluera le bien de maniere optimale lors de la visite.
     </div>
 
+    <div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:10px;padding:14px 18px;margin-bottom:16px">
+      <div style="font-size:12px;font-weight:600;color:#712B13;margin-bottom:6px">⚠️ Important — Lisez avant de candidater</div>
+      <div style="font-size:12px;color:#712B13;line-height:1.8">
+        <div style="margin-bottom:4px">• Votre candidature est soumise a un <strong>seuil de qualite de 60 points</strong>. En dessous de ce seuil, votre profil ne sera pas presente au vendeur.</div>
+        <div style="margin-bottom:4px">• Si les 3 meilleurs scores sont tous inferieurs a 60 pts, le vendeur <strong>ne sera pas oblige de vous choisir</strong> et pourra attendre de nouvelles candidatures.</div>
+        <div style="margin-bottom:4px">• Des agents non-candidats ayant un meilleur profil peuvent etre alertes et vous depasser dans le classement.</div>
+        <div>• Le paiement de 9,99 EUR est du des l'envoi de la candidature, quel que soit le resultat. La <strong>garantie remboursement</strong> s'applique uniquement a la 3eme non-selection consecutive.</div>
+      </div>
+    </div>
+
     <button class="btn-submit" id="btn-next-1" onclick="goStep(2)" disabled>Continuer avec ce flux →</button>
   </div>
 
@@ -580,9 +590,19 @@ function majScorePreview() {
       + '</div>';
   }).join('');
 
-  var col = total >= 70 ? 'var(--teal)' : total >= 50 ? 'var(--amber)' : 'var(--coral)';
-  var lbl = total >= 70 ? 'Excellent — vous serez probablement selectionne' : total >= 50 ? 'Bon — completez votre profil pour ameliorer' : 'A ameliorer — renseignez vos ventes locales';
+  var col = total >= 60 ? 'var(--teal)' : total >= 45 ? 'var(--amber)' : 'var(--coral)';
+  var lbl = total >= 60 ? 'Bon — au-dessus du seuil de 60 pts, vous serez present au vendeur'
+          : total >= 45 ? 'Insuffisant — en dessous du seuil de 60 pts, votre profil risque de ne pas etre presente'
+          : 'Faible — vous ne serez probablement pas presente au vendeur';
   html += '<div class="score-total-row"><div class="score-total-num" style="color:' + col + '">' + total + '</div><div class="score-total-lbl">/100 — ' + lbl + '</div></div>';
+
+  // Avertissement si sous le seuil
+  if (total < 60) {
+    html += '<div style="background:#FAECE7;border-radius:6px;padding:10px 12px;margin-top:10px;font-size:11px;color:#712B13;line-height:1.6">'
+      + '⚠️ Votre score estime est en dessous du seuil de 60 pts. Votre candidature ne sera probablement pas presentee au vendeur. '
+      + 'Completez votre profil (ventes locales, delai moyen, taux au prix) pour ameliorer votre score avant de candidater.'
+      + '</div>';
+  }
   box.innerHTML = html;
 }
 

@@ -129,14 +129,26 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 <!-- MODAL CHOISIR -->
 <div class="modal-overlay" id="modal-choisir">
   <div class="modal">
-    <div class="modal-title">Confirmer votre choix</div>
-    <div class="modal-sub" id="modal-sub">Vous etes sur le point de choisir cet agent. Un mandat simple sera genere automatiquement et envoye aux deux parties pour signature electronique.</div>
+    <div class="modal-title" id="modal-title">Confirmer votre choix</div>
+    <div class="modal-sub" id="modal-sub">Vous etes sur le point de choisir cet agent. Un mandat simple sera genere automatiquement.</div>
     <div style="background:var(--bg);border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;line-height:1.8" id="modal-recap"></div>
-    <div style="background:#FAEEDA;border-radius:8px;padding:10px 14px;font-size:12px;color:#633806;line-height:1.6;margin-bottom:16px">
-      ⚠️ Une fois confirme, les 2 autres agents seront notifies que le bien a trouve son agent. Cette action est definitive.
+    <div id="modal-warning" style="background:#FAEEDA;border-radius:8px;padding:10px 14px;font-size:12px;color:#633806;line-height:1.6;margin-bottom:16px">
+      Une fois confirme, les autres agents seront notifies. Cette action est definitive.
     </div>
     <button class="btn-confirmer" id="btn-confirmer-final" onclick="confirmerChoix()">Confirmer et generer le mandat</button>
-    <button class="btn-annuler" onclick="fermerModal()">Annuler</button>
+    <button class="btn-annuler" id="btn-modal-annuler" onclick="fermerModal()" style="display:none">Annuler</button>
+  </div>
+
+  <!-- MODAL CHOIX LIBRE -->
+  <div class="modal-overlay" id="modal-libre">
+    <div class="modal">
+      <div class="modal-title">Choisir librement un agent</div>
+      <div style="background:#E1F5EE;border-radius:8px;padding:12px 14px;font-size:12px;color:#085041;line-height:1.7;margin-bottom:16px">
+        Nous vous conseillons de vous limiter a <strong>3 mandats simples</strong> simultanes pour rester efficace et bien coordonne avec vos agents.
+      </div>
+      <div id="modal-libre-content">Chargement...</div>
+      <button class="btn-annuler" onclick="document.getElementById('modal-libre').classList.remove('open')" style="margin-top:8px">Fermer</button>
+    </div>
   </div>
 </div>
 
@@ -180,6 +192,8 @@ async function charger() {
   agents = cands;
   render();
 }
+
+var SEUIL_QUALITE = 60
 
 function render() {
   var titre = bien.titre || ((bien.type_bien || 'Bien') + ' ' + (bien.surface || '') + 'm2');
@@ -264,6 +278,40 @@ function render() {
   });
   h += '</tbody></table></div>';
 
+  // Vérifier qualité du top 3
+  var tousAuDessus = agents.every(function(a){ return a.score_total >= SEUIL_QUALITE; });
+  var qualiteInsuffisante = agents.some(function(a){ return a.score_total < SEUIL_QUALITE; });
+
+  if (tousAuDessus) {
+    h += '<div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px">'
+      + '<div style="font-size:18px;flex-shrink:0">✅</div>'
+      + '<div><div style="font-size:13px;font-weight:500;color:#1E7A62;margin-bottom:2px">Selection de qualite confirmee</div>'
+      + '<div style="font-size:12px;color:#1E7A62;line-height:1.6">Les 3 agents proposes ont tous atteint notre seuil de qualite (60/100 minimum). Vous devez choisir l'un d'eux pour avancer.</div></div>'
+      + '</div>';
+  }
+
+  if (qualiteInsuffisante && !tousAuDessus) {
+    h += '<div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:10px;padding:16px 20px;margin-bottom:16px">'
+      + '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">'
+      + '<div style="font-size:20px;flex-shrink:0">⚠️</div>'
+      + '<div><div style="font-size:13px;font-weight:500;color:#712B13;margin-bottom:4px">Scores partiellement insuffisants — seuil 60/100</div>'
+      + '<div style="font-size:12px;color:#712B13;line-height:1.7">Certains agents n'ont pas atteint notre seuil de qualite de 60 points. <strong>Vous n'etes pas oblige de choisir parmi ces profils.</strong> Des agents complementaires ont ete alertes et peuvent encore candidater dans les prochaines heures.</div></div>'
+      + '</div>'
+      + '<div style="background:rgba(255,255,255,.6);border-radius:8px;padding:10px 14px;font-size:12px;color:#712B13;line-height:1.6">'
+      + 'Options : choisir quand meme parmi ces agents · attendre de nouvelles candidatures · passer au choix libre pour elargir votre selection.'
+      + '</div>'
+      + '</div>';
+  }
+
+  // Bouton choix libre EN PLUS (affiché dans tous les cas)
+  h += '<div style="background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin-bottom:16px">'
+    + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'
+    + '<div style="width:36px;height:36px;border-radius:8px;background:#FAEEDA;display:flex;align-items:center;justify-content:center;font-size:16px">🤝</div>'
+    + '<div><div style="font-size:13px;font-weight:500">Vous souhaitez aussi choisir librement ?</div><div style="font-size:11px;color:var(--muted)">En plus du top 3, vous pouvez mandater d'autres agents. Max 3 mandats conseilles.</div></div>'
+    + '</div>'
+    + '<button onclick="ouvrirChoixLibre()" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;color:var(--ink)">Voir les agents disponibles pour un mandat libre →</button>'
+    + '</div>';
+
   h += '<div style="display:flex;gap:10px;margin-top:8px">'
     + '<a href="connexion.html" style="flex:1;padding:12px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;text-align:center;text-decoration:none;color:var(--ink)">← Retour au tableau de bord</a>'
     + '</div>';
@@ -304,11 +352,101 @@ async function genererAnalyseHanae() {
 function ouvrirModal(idx) {
   agentChoisi = agents[idx];
   var lettre = String.fromCharCode(65+idx);
+  var tousAuDessus = agents.every(function(a){ return a.score_total >= SEUIL_QUALITE; });
+
   document.getElementById('modal-recap').innerHTML =
     '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--muted)">Agent selectionne</span><strong>Agent ' + lettre + '</strong></div>'
     + '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--muted)">Type</span><span>' + (agentChoisi.flux === 'A' ? 'Mandat de vente' : 'Acheteur en portefeuille') + '</span></div>'
     + '<div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Score IA</span><span style="color:var(--teal);font-weight:600">' + agentChoisi.score_total + '/100</span></div>';
+
+  // Si scores suffisants : pas de bouton annuler (choix obligatoire)
+  // Si scores insuffisants : bouton annuler visible (choix facultatif)
+  var btnAnnuler = document.getElementById('btn-modal-annuler');
+  if (btnAnnuler) btnAnnuler.style.display = tousAuDessus ? 'none' : 'block';
+
+  var warning = document.getElementById('modal-warning');
+  if (warning) {
+    warning.textContent = tousAuDessus
+      ? 'Les 3 agents proposes ont tous atteint notre seuil de qualite. Ce choix est definitif — les autres agents seront notifies.'
+      : 'Les scores sont partiellement insuffisants. Vous pouvez choisir cet agent ou attendre de nouvelles candidatures.';
+  }
+
   document.getElementById('modal-choisir').classList.add('open');
+}
+
+async function ouvrirChoixLibre() {
+  var modal = document.getElementById('modal-libre');
+  var content = document.getElementById('modal-libre-content');
+  modal.classList.add('open');
+  content.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Chargement des candidats...</div>';
+
+  // Récupérer tous les candidats sur ce bien
+  var { data: cands } = await db.from('candidatures_agents')
+    .select('agent_email, flux, score_total, statut')
+    .eq('annonce_id', annonceId)
+    .eq('paiement_statut', 'paye')
+    .order('score_total', { ascending: false });
+
+  var emailsCandidats = (cands || []).map(function(c){ return c.agent_email; });
+
+  if (!emailsCandidats.length) {
+    // Aucun candidat — déclencher élargissement
+    await db.functions.invoke('matcher-mandats', {
+      body: {
+        type: 'elargir_pool_libre',
+        data: {
+          annonce_id: annonceId,
+          bien: bien,
+          candidats_existants: [],
+          score_min_top3: agents.length > 0 ? agents[agents.length-1].score_total : 0
+        }
+      }
+    }).catch(function(){});
+
+    content.innerHTML = '<div style="background:#E1F5EE;border-radius:8px;padding:14px;font-size:13px;color:#085041;line-height:1.7;margin-bottom:12px">Aucun candidat supplementaire disponible. Nous avons envoye une alerte a tous les agents abonnes de votre secteur. Revenez dans 48h.</div>';
+    return;
+  }
+
+  var html = '<div style="font-size:12px;color:var(--muted);margin-bottom:12px">' + emailsCandidats.length + ' agent(s) disponible(s) — choisissez ceux avec qui vous souhaitez travailler</div>';
+
+  (cands || []).forEach(function(c, i) {
+    var lettre = String.fromCharCode(65 + i);
+    var fluxLabel = c.flux === 'A' ? 'Mandat' : 'Acheteur';
+    var scoreColor = c.score_total >= SEUIL_QUALITE ? 'var(--teal)' : 'var(--amber)';
+    html += '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)">'
+      + '<div style="font-size:12px;font-weight:500;flex:1">Agent ' + lettre + ' · ' + fluxLabel + '</div>'
+      + '<div style="font-size:14px;font-weight:500;color:' + scoreColor + '">' + c.score_total + ' pts</div>'
+      + '<button onclick="mandaterLibre('' + c.agent_email + '')" style="padding:6px 14px;border-radius:6px;border:none;background:var(--teal);color:#fff;font-family:Outfit,sans-serif;font-size:12px;cursor:pointer">Mandater</button>'
+      + '</div>';
+  });
+
+  // Si < 3 candidats → alerter secteur aussi
+  if (emailsCandidats.length < 3) {
+    html += '<div style="background:#FAEEDA;border-radius:8px;padding:12px 14px;font-size:12px;color:#633806;line-height:1.6;margin-top:12px">'
+      + 'Seulement ' + emailsCandidats.length + ' candidat(s). Une alerte a ete envoyee aux agents abonnes de votre secteur pour elargir votre choix.</div>';
+    await db.functions.invoke('matcher-mandats', {
+      body: {
+        type: 'elargir_pool_libre',
+        data: { annonce_id: annonceId, bien: bien, candidats_existants: emailsCandidats, score_min_top3: 0 }
+      }
+    }).catch(function(){});
+  }
+
+  content.innerHTML = html;
+}
+
+async function mandaterLibre(agentEmail) {
+  showToast('Mandat libre initie avec cet agent. Il sera notifie.', 'ok');
+  await db.functions.invoke('envoyer-email', {
+    body: {
+      type: 'alerte_choix_libre',
+      to: agentEmail,
+      subject: 'Le vendeur souhaite travailler avec vous - ImmoConnect',
+      bien_titre: bien ? (bien.titre || bien.type_bien + ' ' + bien.ville) : '',
+      lien: 'https://immoconnect-agence.fr/connexion.html',
+      priorite: true
+    }
+  }).catch(function(){});
 }
 
 function fermerModal() {

@@ -489,7 +489,19 @@ async function genererConseils() {
     return '<div class="conseil-item"><span style="font-size:16px;margin-right:8px">' + c.icon + '</span>' + c.txt + '</div>';
   }).join('');
 
-  html += '<div style="margin-top:14px;padding:12px 14px;background:var(--bg);border-radius:8px;font-size:12px;color:var(--muted);line-height:1.6">Score actuel : <strong style="color:var(--ink)">' + score + '/100</strong> — ' + (score >= 70 ? 'Excellent, vous etes regularement dans le top 3.' : score >= 50 ? 'Bon profil. Quelques ajustements vous mettront regulierement dans le top 3.' : 'Profil a developper. Commencez par les conseils 1 et 2 ci-dessus.') + '</div>';
+  // Alerte seuil qualité
+  if (score < 60) {
+    html = '<div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#712B13;line-height:1.7">'
+      + '⚠️ <strong>Votre score actuel est en dessous du seuil de 60 pts.</strong> Vos candidatures ne seront pas presentees aux vendeurs tant que vous n'atteignez pas ce seuil. '
+      + 'Completez les elements ci-dessous en priorite pour franchir ce seuil rapidement.'
+      + '</div>' + html;
+  }
+
+  html += '<div style="margin-top:14px;padding:12px 14px;background:var(--bg);border-radius:8px;font-size:12px;color:var(--muted);line-height:1.6">'
+    + 'Score actuel : <strong style="color:' + (score >= 60 ? 'var(--teal)' : '#C0392B') + '">' + score + '/100</strong>'
+    + (score >= 60 ? ' — Au-dessus du seuil de 60 pts. Vos candidatures sont presentees aux vendeurs.' : ' — En dessous du seuil de 60 pts. Ameliorez votre profil avant de candidater.')
+    + '</div>'
+    + '<div style="margin-top:8px;text-align:center"><a href="comment-ca-marche-agents.html" style="font-size:12px;color:var(--teal);text-decoration:none">Comprendre le seuil de qualite →</a></div>';
 
   document.getElementById('conseils-content').innerHTML = html;
 }
