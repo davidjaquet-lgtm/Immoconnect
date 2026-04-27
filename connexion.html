@@ -1170,31 +1170,20 @@ async function voirEstimationHanae(annonceId, titreBien) {
 
 // ── CHANGEMENT MODE CONTACT ──
 async function changerModeContact(annonceId, modeCurrent) {
-  var modes = ['acheteurs', 'agents', 'tous', 'comparatif'];
+  var modes = ['acheteurs', 'acheteurs_agents', 'comparatif'];
   var labels = {
-    acheteurs: '👤 Acheteurs uniquement - Les agents sont bloques',
-    agents: '🤝 Agents independants - Ils peuvent vous contacter selon quota',
-    tous: '👥 Acheteurs + Agents - Les deux peuvent vous contacter',
-    comparatif: '📊 Comparatif automatique - Top 3 agents + acheteurs directs'
+    acheteurs:        '👤 Acheteurs & investisseurs uniquement — les agents sont bloqués',
+    acheteurs_agents: '🤝 Acheteurs + Je choisis mon agent — tous les agents peuvent vous contacter',
+    comparatif:       '📊 ImmoConnect sélectionne les 3 meilleurs — Hanaé vous présente le top 3'
   };
 
-  var msg = 'Choisissez votre mode de contact :
-
-'
-    + '1. ' + labels.acheteurs + '
-'
-    + '2. ' + labels.agents + '
-'
-    + '3. ' + labels.tous + '
-'
-    + '4. ' + labels.comparatif + '
-
-'
+  var msg = 'Choisissez votre mode de contact :\n\n'
+    + '1. ' + labels.acheteurs + '\n'
+    + '2. ' + labels.acheteurs_agents + '\n'
+    + '3. ' + labels.comparatif + '\n\n'
     + 'Actuel : ' + (modeCurrent || 'acheteurs');
 
-  var choix = prompt(msg + '
-
-Entrez 1, 2, 3 ou 4 :');
+  var choix = prompt(msg + '\n\nEntrez 1, 2 ou 3 :');
   if (!choix) return;
 
   var nouveauMode = modes[parseInt(choix) - 1];
@@ -1222,7 +1211,7 @@ Entrez 1, 2, 3 ou 4 :');
     }
   }).catch(function(){});
 
-  alert('Mode de contact mis a jour : ' + nouveauMode + '. Les agents concernes ont ete notifies.');
+  alert('Mode de contact mis à jour : ' + nouveauMode + '. Les agents concernés ont été notifiés.');
   location.reload();
 }
 

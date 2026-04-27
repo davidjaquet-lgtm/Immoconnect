@@ -218,28 +218,22 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
         <div class="field">
           <label class="lbl">Mode de contact *</label>
           <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Choisissez qui peut vous contacter. Modifiable à tout moment depuis votre tableau de bord.</div>
-          <div class="mode-cards" id="mode-cards" style="grid-template-columns:repeat(2,1fr)">
+          <div class="mode-cards" id="mode-cards" style="grid-template-columns:repeat(3,1fr)">
             <div class="mode-card selected-acheteurs" id="mc-acheteurs" onclick="setModeContact('acheteurs')">
               <div class="mode-icon">👤</div>
-              <div class="mode-name" style="color:#185FA5">Acheteurs & Investisseurs</div>
-              <div class="mode-desc">Seuls les particuliers et investisseurs peuvent vous contacter directement. Les agents immobiliers sont bloqués.</div>
+              <div class="mode-name" style="color:#185FA5">Acheteurs &amp; investisseurs</div>
+              <div class="mode-desc">Acheteurs et investisseurs peuvent vous contacter selon leurs droits habituels. Aucun agent immobilier ne peut vous joindre. Vous gérez la vente en direct.</div>
             </div>
-            <div class="mode-card" id="mc-agents" onclick="setModeContact('agents')">
+            <div class="mode-card" id="mc-acheteurs_agents" onclick="setModeContact('acheteurs_agents')">
               <div class="mode-icon">🤝</div>
-              <div class="mode-name" style="color:#1E7A62">Je choisis mon agent</div>
-              <div class="mode-desc">Les agents vous contactent et vous choisissez librement celui qui vous convient selon son profil et ses honoraires.</div>
-              <div class="mode-lock">🏅 Silver, Gold et Platinium</div>
-            </div>
-            <div class="mode-card" id="mc-tous" onclick="setModeContact('tous')">
-              <div class="mode-icon">👥</div>
-              <div class="mode-name" style="color:#C09B5A">Acheteurs + Je choisis mon agent</div>
-              <div class="mode-desc">Les acheteurs et les agents peuvent vous contacter simultanément. Exposition maximale.</div>
+              <div class="mode-name" style="color:#1E7A62">Acheteurs + Je choisis mon agent</div>
+              <div class="mode-desc">Acheteurs et investisseurs peuvent vous contacter, et tous les agents peuvent également vous joindre. Vous choisissez librement l'agent qui vous convient.</div>
               <div class="mode-lock">🏅 Silver, Gold et Platinium</div>
             </div>
             <div class="mode-card" id="mc-comparatif" onclick="setModeContact('comparatif')">
               <div class="mode-icon">📊</div>
               <div class="mode-name" style="color:#854F0B">ImmoConnect sélectionne les 3 meilleurs</div>
-              <div class="mode-desc">Hanaé analyse tous les agents candidats et vous présente un comparatif des 3 meilleurs profils du secteur.</div>
+              <div class="mode-desc">Acheteurs et investisseurs peuvent vous contacter. Hanaé analyse tous les agents candidats et vous présente les 3 les plus aptes à vendre votre bien.</div>
               <div class="mode-lock">🏅 Silver, Gold et Platinium</div>
             </div>
           </div>
@@ -1060,41 +1054,24 @@ function majSectionVV() {
 // ── MODE DE CONTACT ──
 // ── RESTRICTIONS MODE CONTACT SELON NIVEAU ──
 function majModeContact() {
-  var cardsAgents = document.getElementById('mc-agents');
-  var cardsTous = document.getElementById('mc-tous');
-  var cardsComparatif = document.getElementById('mc-comparatif');
+  var cardsAA = document.getElementById('mc-acheteurs_agents');
+  var cardsComp = document.getElementById('mc-comparatif');
   var modeActuel = document.getElementById('mode_contact').value;
   var infoNiveau = document.getElementById('mode-niveau-info');
 
   if (niveau === 'standard') {
-    // Standard uniquement : acheteurs uniquement
-    if (cardsAgents) {
-      cardsAgents.classList.add('disabled');
-      cardsAgents.onclick = function(){ afficherAlerteModeNiveau(); };
-    }
-    if (cardsTous) {
-      cardsTous.classList.add('disabled');
-      cardsTous.onclick = function(){ afficherAlerteModeNiveau(); };
-    }
-    if (cardsComparatif) {
-      cardsComparatif.classList.add('disabled');
-      cardsComparatif.onclick = function(){ afficherAlerteModeNiveau(); };
-    }
-    // Forcer le mode acheteurs si le vendeur avait choisi autre chose
-    if (modeActuel !== 'acheteurs') {
-      setModeContactSilent('acheteurs');
-    }
+    if (cardsAA) { cardsAA.classList.add('disabled'); cardsAA.onclick = function(){ afficherAlerteModeNiveau(); }; }
+    if (cardsComp) { cardsComp.classList.add('disabled'); cardsComp.onclick = function(){ afficherAlerteModeNiveau(); }; }
+    if (modeActuel !== 'acheteurs') { setModeContactSilent('acheteurs'); }
     if (infoNiveau) {
       infoNiveau.style.display = 'block';
-      infoNiveau.textContent = 'Niveau Standard : seul le mode Acheteurs & Investisseurs est disponible. Ajoutez votre valeur locative ou un bail pour passer Silver et débloquer le choix des agents et le top 3.';
+      infoNiveau.textContent = 'Niveau Standard : seul le mode Acheteurs & Investisseurs est disponible. Ajoutez votre valeur locative ou un bail pour passer Silver et débloquer les options agents.';
       infoNiveau.style.background = '#F1EFE8';
       infoNiveau.style.color = '#555';
     }
   } else {
-    // Gold et Platinium : tous les modes disponibles
-    if (cardsAgents) { cardsAgents.classList.remove('disabled'); cardsAgents.onclick = function(){ setModeContact('agents'); }; }
-    if (cardsTous) { cardsTous.classList.remove('disabled'); cardsTous.onclick = function(){ setModeContact('tous'); }; }
-    if (cardsComparatif) { cardsComparatif.classList.remove('disabled'); cardsComparatif.onclick = function(){ setModeContact('comparatif'); }; }
+    if (cardsAA) { cardsAA.classList.remove('disabled'); cardsAA.onclick = function(){ setModeContact('acheteurs_agents'); }; }
+    if (cardsComp) { cardsComp.classList.remove('disabled'); cardsComp.onclick = function(){ setModeContact('comparatif'); }; }
     if (infoNiveau) {
       if (niveau === 'silver') {
         infoNiveau.style.display = 'block';
@@ -1117,13 +1094,13 @@ function majModeContact() {
 }
 
 function afficherAlerteModeNiveau() {
-  var msg = 'Ce mode est disponible à partir du niveau Silver. Ajoutez votre valeur locative ou un bail pour passer Silver et accéder au choix libre des agents et au top 3 ImmoConnect.';
+  var msg = 'Ce mode est disponible à partir du niveau Silver. Ajoutez votre valeur locative ou un bail pour passer Silver et accéder aux options agents.';
   alert(msg);
 }
 
 function setModeContactSilent(mode) {
   document.getElementById('mode_contact').value = mode;
-  var cards = ['acheteurs','agents','tous','comparatif'];
+  var cards = ['acheteurs', 'acheteurs_agents', 'comparatif'];
   cards.forEach(function(m) {
     var card = document.getElementById('mc-' + m);
     if (!card) return;
@@ -1133,7 +1110,7 @@ function setModeContactSilent(mode) {
 
 function setModeContact(mode) {
   document.getElementById('mode_contact').value = mode;
-  var cards = ['acheteurs','agents','tous','comparatif'];
+  var cards = ['acheteurs', 'acheteurs_agents', 'comparatif'];
   cards.forEach(function(m) {
     var card = document.getElementById('mc-' + m);
     if (!card) return;
