@@ -6,9 +6,14 @@
 <title>ImmoConnect — Forfaits</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--amber:#D4732A;--blue:#185FA5;--coral:#993C1D;--r:10px}
+:root{
+  --ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;
+  --gold:#C09B5A;--teal:#1E7A62;--amber:#D4732A;--blue:#185FA5;--coral:#993C1D;--r:10px;
+}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+
+/* NAV */
 nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
 .nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none;margin-right:32px}
 .nav-logo span{color:var(--gold)}
@@ -17,109 +22,115 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 .nav-links a:hover{color:#fff}
 .nav-gold{padding:7px 16px;background:var(--gold);color:var(--ink)!important;border-radius:4px;font-weight:500}
 .nav-out{padding:8px 20px;border:1px solid #444;color:#fff!important;border-radius:4px;font-size:13px;font-weight:500;text-decoration:none}
+
+/* PAGE */
 .page{max-width:1080px;margin:0 auto;padding:36px 24px 60px}
 
-/* ONGLETS */
+/* TABS */
 .tabs{display:flex;gap:4px;background:rgba(15,15,14,.06);border-radius:var(--r);padding:4px;margin-bottom:28px}
 .tab{flex:1;padding:9px 8px;border-radius:8px;border:none;background:transparent;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);font-family:'Outfit',sans-serif;transition:all .15s;text-align:center}
 .tab.active{background:var(--warm);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
 .panel{display:none}.panel.active{display:block}
 
-.sec-eye{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:500}
-.sec-title{font-size:22px;font-weight:500;margin-bottom:6px}
-.sec-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px;max-width:620px}
+/* TITRES */
+.eyebrow{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;font-weight:500}
+.sec-title{font-size:22px;font-weight:500;color:var(--ink);margin-bottom:6px}
+.subtitle{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:24px;max-width:580px}
 
-/* PROMO BANNER */
-.promo-banner{background:#EAF3DE;border:1px solid #9FD9C0;border-radius:8px;padding:10px 16px;margin-bottom:20px;font-size:12px;color:#27500A;display:flex;align-items:center;gap:8px}
+/* CARTES VENDEURS */
+.levels-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.level-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:14px 14px 16px}
+.level-card.best{border:2px solid var(--gold)}
+.level-accent{height:3px;border-radius:2px;margin-bottom:12px}
+.level-name{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.level-sub{font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5}
+.level-doc{font-size:11px;background:var(--bg);border-radius:6px;padding:6px 8px;color:var(--muted);line-height:1.5;margin-bottom:10px}
+.level-doc strong{color:var(--ink)}
+.level-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-bottom:8px;letter-spacing:.3px}
+.feat-list{display:flex;flex-direction:column;gap:5px}
+.feat{font-size:11px;display:flex;gap:6px;align-items:flex-start;line-height:1.4}
+.feat-yes{color:var(--teal);font-weight:600;flex-shrink:0}
+.feat-txt{color:var(--muted)}
+.feat-note{font-size:11px;color:var(--amber);margin-top:8px;padding:5px 8px;background:#FDF3EC;border-radius:6px;border:1px solid rgba(212,115,42,.2)}
 
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+/* TABLEAU COMPARATIF */
+.cmp-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px}
+.cmp-wrap{overflow:hidden;border-radius:var(--r);border:1px solid var(--line);margin-bottom:20px}
+.cmp-table{width:100%;border-collapse:collapse;font-size:12px;background:var(--warm)}
+.cmp-table th{padding:9px 12px;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line);font-weight:600;text-align:center}
+.cmp-table th:first-child{text-align:left}
+.cmp-table td{padding:8px 12px;text-align:center;border-bottom:1px solid var(--line);color:var(--muted)}
+.cmp-table td:first-child{text-align:left;color:var(--ink);font-weight:500}
+.cmp-table tr:last-child td{border-bottom:none}
+.yes{color:var(--teal);font-weight:600}
+.no{color:rgba(136,135,128,.35);font-size:15px}
+.plat-col{background:rgba(30,122,98,.04)}
+.amber-txt{color:var(--amber);font-size:11px;font-weight:600}
 
-/* CARDS */
-.card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
-.card.featured{border:2px solid var(--gold)}
-.card-bar{height:4px}
-.bar-gray{background:#888780}.bar-blue{background:#185FA5}.bar-amber{background:#BA7517}.bar-teal{background:#1E7A62}.bar-coral{background:#993C1D}
-.card-head{height:80px;display:flex;align-items:center;justify-content:center;position:relative}
-.bg-gray{background:#F1EFE8}.bg-blue{background:#E6F1FB}.bg-amber{background:#FAEEDA}.bg-teal{background:#E1F5EE}.bg-coral{background:#FAECE7}
-.badge{position:absolute;font-size:9px;font-weight:600;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
-.badge-right{top:10px;right:10px}.badge-left{top:10px;left:10px}
-.badge-blue{background:#E6F1FB;color:#185FA5}.badge-amber{background:#FAEEDA;color:#854F0B}
-.badge-dark{background:var(--ink);color:#fff}.badge-green{background:#EAF3DE;color:#27500A}
-.card-body{padding:14px 16px 18px;display:flex;flex-direction:column;flex:1;gap:5px}
-.plan-name{font-size:15px;font-weight:600}
-.price-wrap{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.price-main{font-size:22px;font-weight:300}
-.price-normal{font-size:13px;color:var(--muted);text-decoration:line-through}
-.price-green{color:var(--teal)}
-.price-sub{font-size:11px;color:var(--teal);font-weight:500}
-.plan-tag{font-size:11px;color:var(--muted);line-height:1.5}
-.divider{border:none;border-top:1px solid var(--line);margin:8px 0}
-.feats{display:flex;flex-direction:column;gap:5px;flex:1}
-.feat{display:flex;align-items:flex-start;gap:7px;font-size:12px}
-.feat.dim{opacity:.4}
-.feat-dot{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;margin-top:1px}
-.feat-dot.y{background:#EAF3DE;color:#27500A}.feat-dot.n{background:#F1EFE8;color:#888780}
-.feat-txt.bold{font-weight:600;color:var(--ink)}
-.gold-box{background:#FAEEDA;border-radius:8px;padding:10px 12px;font-size:11px;margin-bottom:4px}
-.gold-box-title{font-weight:600;color:#854F0B;margin-bottom:4px;font-size:10px;text-transform:uppercase;letter-spacing:.5px}
-.gold-box-docs{color:#633806;line-height:1.6}
-.pay-box{background:#F1EFE8;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:500;color:var(--muted)}
-.btn{width:100%;padding:10px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:opacity .15s;display:block;text-align:center;text-decoration:none;margin-top:auto}
-.btn:hover{opacity:.85}
-.btn-dark{background:var(--ink);color:#fff}.btn-out{background:transparent;border:1px solid var(--line);color:var(--muted)}
-.btn-amber{background:#FAEEDA;color:#633806;border:1px solid #FAC775}
+/* CARTES ACHETEUR / INVESTISSEUR */
+.aplan{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.aplan.featured{border:2px solid var(--gold)}
+.plan-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px}
+.plan-price{font-size:26px;font-weight:300;color:var(--ink);line-height:1}
+.plan-period{font-size:11px;color:var(--muted);margin-bottom:12px}
+.plan-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#EAF3DE;color:#27500A;margin-bottom:8px}
+.plan-sep{border:none;border-top:1px solid var(--line);margin:10px 0}
+.plan-feats{display:flex;flex-direction:column;gap:5px}
+.plan-feat{font-size:12px;display:flex;gap:7px;align-items:flex-start;line-height:1.4;color:var(--muted)}
+.plan-feat strong{color:var(--ink)}
 
-/* TOGGLE */
-.toggle-wrap{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-.toggle-lbl{font-size:13px;color:var(--muted)}.toggle-lbl.active{color:var(--ink);font-weight:500}
-.toggle-sw{width:44px;height:23px;border-radius:12px;background:#D3D1C7;border:none;cursor:pointer;position:relative;flex-shrink:0;transition:background .2s}
-.toggle-sw.on{background:var(--ink)}
-.toggle-thumb{position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:#fff;transition:transform .2s}
-.toggle-sw.on .toggle-thumb{transform:translateX(21px)}
-.ann-pill{font-size:10px;background:#EAF3DE;color:#27500A;padding:2px 8px;border-radius:20px;font-weight:500}
+/* AGENTS — FLUX CARDS */
+.flux-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.flux-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:14px;border-left-width:3px;border-left-style:solid}
+.flux-card-title{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.flux-card-desc{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:8px}
+.flux-price{font-size:20px;font-weight:300;color:var(--ink)}
+.flux-psub{font-size:11px;color:var(--muted)}
 
-/* TIMING */
-.timing{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:20px}
-.timing-head{padding:12px 18px;border-bottom:1px solid var(--line);font-size:13px;font-weight:500}
-.timing-grid{display:grid;grid-template-columns:repeat(4,1fr)}
-.timing-cell{text-align:center;padding:14px 8px;border-right:1px solid var(--line)}
-.timing-cell:last-child{border-right:none}
-.timing-plan{font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:600}
-.timing-val{font-size:18px;font-weight:500;margin-bottom:2px}
-.timing-desc{font-size:10px;color:var(--muted)}
+/* PITCH */
+.pitch{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;margin-bottom:20px}
+.pitch-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:14px}
+.pitch-mode-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;border-radius:20px;padding:2px 10px;margin-bottom:10px}
+.pitch-steps{display:flex;flex-direction:column;gap:10px}
+.pitch-step{display:flex;gap:12px;align-items:flex-start}
+.pitch-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;margin-top:1px}
+.pitch-txt{font-size:12px;color:var(--muted);line-height:1.55;padding-top:2px}
+.pitch-txt strong{color:var(--ink)}
+.pitch-sep{border:none;border-top:1px solid var(--line);margin:14px 0}
 
-/* TABLE */
-.table-wrap{overflow:hidden;border-radius:var(--r);border:1px solid var(--line);margin-bottom:20px}
-table{width:100%;border-collapse:collapse;background:var(--warm);font-size:12px}
-th{padding:10px 14px;text-align:center;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line);font-weight:600}
-th:first-child{text-align:left}
-td{padding:10px 14px;text-align:center;border-bottom:1px solid var(--line);color:var(--muted)}
-td:first-child{text-align:left;font-weight:500;color:var(--ink)}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:#F9F7F2}
-.td-yes{color:#1E7A62;font-weight:600}.td-no{color:rgba(136,135,128,.35);font-size:16px}
-.td-gold{background:rgba(192,155,90,.05)}.td-price{background:var(--bg);font-weight:600}
-.td-promo{background:#EAF3DE}
+/* TABLEAU AGENTS */
+.at-wrap{overflow:hidden;border-radius:var(--r);border:1px solid var(--line);margin-bottom:20px}
+.at-table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;background:var(--warm)}
+.at-table thead tr{background:var(--bg)}
+.at-table th{padding:9px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--line);text-align:center}
+.at-table th:first-child{text-align:left;width:30%}
+.at-table td{padding:8px 10px;text-align:center;border-bottom:1px solid var(--line);color:var(--muted);vertical-align:middle}
+.at-table td:first-child{text-align:left;color:var(--ink);font-weight:500}
+.at-table tr:last-child td{border-bottom:none}
+.at-table .sr td{background:var(--bg);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:5px 10px;text-align:left}
+.prem-col{background:rgba(30,122,98,.04)}
+.hi{color:var(--teal);font-weight:600}
+.dim{opacity:.3}
+.ppu-pill{display:inline-block;font-size:10px;background:var(--bg);color:var(--muted);padding:2px 7px;border-radius:20px;border:1px solid var(--line)}
+
+/* CTA */
+.cta-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cta-box{border-radius:var(--r);padding:14px 16px}
+.cta-title{font-size:13px;font-weight:600;margin-bottom:4px}
+.cta-desc{font-size:12px;color:var(--muted);line-height:1.6}
+.cta-btn{display:block;text-align:center;background:var(--ink);color:#fff;padding:10px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:500;margin-top:10px;cursor:pointer;border:none;width:100%;font-family:'Outfit',sans-serif;transition:opacity .15s}
+.cta-btn:hover{opacity:.85}
 
 /* CASTORUS */
-.castorus{background:var(--bg);border-radius:var(--r);padding:16px 20px}
-.castorus-title{font-size:12px;font-weight:500;margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.castorus-pill{font-size:10px;background:#E6F1FB;color:#0C447C;padding:2px 8px;border-radius:20px;font-weight:500}
-.castorus-median{font-size:11px;color:var(--muted);margin-bottom:12px}
-.castorus-median strong{color:var(--ink)}
-.bien{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
-.bien-info{flex:1}.bien-addr{font-size:12px;font-weight:500;margin-bottom:2px}.bien-meta{font-size:10px;color:var(--muted)}
-.bien-bar-wrap{width:72px;flex-shrink:0}.bien-bar-bg{height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
-.bien-bar-fill{height:100%;border-radius:3px}
-.fill-ok{background:#1E7A62}.fill-warn{background:#D4732A}.fill-bad{background:#C0392B}
-.bien-price{text-align:right;flex-shrink:0;min-width:90px}
-.bien-pm2{font-size:13px;font-weight:600}.bien-pm2.ok{color:#1E7A62}.bien-pm2.warn{color:#D4732A}.bien-pm2.bad{color:#C0392B}
-.bien-lbl{font-size:10px;color:var(--muted);margin-top:1px}
-.castorus-note{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.65}
+.castorus{background:var(--bg);border-radius:var(--r);padding:16px}
+.bien{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.bien-addr{font-size:11px;font-weight:500;color:var(--ink)}
+.bien-meta{font-size:10px;color:var(--muted)}
+.bien-pm2{font-size:13px;font-weight:600;text-align:right}
+.bien-lbl{font-size:10px;text-align:right}
 
-@media(max-width:860px){.grid4{grid-template-columns:1fr 1fr}.timing-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:580px){.grid2,.grid4{grid-template-columns:1fr}.tabs{flex-wrap:wrap}}
+@media(max-width:860px){.levels-grid,.flux-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:580px){.levels-grid,.flux-grid,.cta-row{grid-template-columns:1fr}.tabs{flex-wrap:wrap}}
 </style>
 </head>
 <body>
@@ -138,678 +149,328 @@ tr:hover td{background:#F9F7F2}
 <div class="page">
 
   <div class="tabs">
-    <button class="tab active" id="tab-vendeurs">Vendeurs</button>
-    <button class="tab" id="tab-acheteurs">Acheteurs</button>
-    <button class="tab" id="tab-investisseur">Investisseur</button>
-    <button class="tab" id="tab-agents">Agents immo</button>
+    <button class="tab active" data-panel="vendeurs">Vendeurs</button>
+    <button class="tab" data-panel="acheteurs">Acheteurs</button>
+    <button class="tab" data-panel="investisseur">Investisseurs</button>
+    <button class="tab" data-panel="agents">Agents immo</button>
   </div>
 
   <!-- ══ VENDEURS ══ -->
   <div id="panel-vendeurs" class="panel active">
-    <div class="sec-eye">4 niveaux · 100% gratuits</div>
-    <div class="sec-title">Vendez comme vous voulez — gratuitement</div>
-    <div class="sec-sub">Complétez votre dossier pour débloquer plus d'options. Plus votre dossier est complet, plus vous choisissez librement qui peut vous contacter.</div>
+    <div class="eyebrow">4 niveaux · 100% gratuits</div>
+    <div class="sec-title">Vendez comme vous voulez</div>
+    <div class="subtitle">Complétez votre dossier pour débloquer plus d'options. Plus votre dossier est complet, plus vous choisissez librement qui peut vous contacter.</div>
 
-    <!-- CARTES NIVEAUX -->
-    <div class="grid4" id="ve-cards"></div>
-
-    <!-- OPTIONS DE VENTE PAR NIVEAU -->
-    <div style="margin-top:28px;margin-bottom:8px">
-      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;text-align:center">Options de vente disponibles selon votre niveau</div>
-
+    <div class="levels-grid">
       <!-- STANDARD -->
-      <div style="background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:20px 24px;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-          <div style="width:36px;height:36px;border-radius:10px;background:#F1EFE8;display:flex;align-items:center;justify-content:center;font-size:18px">🏠</div>
-          <div>
-            <div style="font-size:14px;font-weight:600;color:var(--ink)">Standard</div>
-            <div style="font-size:11px;color:var(--muted)">Aucun document requis · Gratuit</div>
-          </div>
-          <div style="margin-left:auto;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:#F1EFE8;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">Limité</div>
+      <div class="level-card">
+        <div class="level-accent" style="background:#B4B2A9"></div>
+        <div class="level-name">Standard</div>
+        <div class="level-sub">Démarrez sans aucun document</div>
+        <div class="level-doc">Aucun document requis</div>
+        <div class="feat-list">
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">1 annonce · 3 photos max</span></div>
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Ville visible (adresse masquée)</span></div>
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Contactable par acheteurs</span></div>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
-          <div style="background:#E6F1FB;border-radius:8px;padding:12px 14px;border:1px solid rgba(24,95,165,.15)">
-            <div style="font-size:12px;font-weight:600;color:#185FA5;margin-bottom:4px">👤 Acheteurs particuliers</div>
-            <div style="font-size:11px;color:#185FA5;line-height:1.6">Contact possible à <strong>19,99 €/contact</strong>. Ville uniquement visible. 3 photos maximum.</div>
-          </div>
-          <div style="background:#F1EFE8;border-radius:8px;padding:12px 14px;border:1px solid var(--line);opacity:.5">
-            <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px">🔒 Autres options</div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.6">Passez au niveau Silver pour débloquer le matching investisseurs et les contacts gratuits.</div>
-          </div>
-        </div>
+        <div class="feat-note">Contact acheteur : 19,99€/contact à leur charge</div>
       </div>
 
       <!-- SILVER -->
-      <div style="background:var(--warm);border:2px solid rgba(24,95,165,.25);border-radius:12px;padding:20px 24px;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-          <div style="width:36px;height:36px;border-radius:10px;background:#E6F1FB;display:flex;align-items:center;justify-content:center;font-size:18px">🏅</div>
-          <div>
-            <div style="font-size:14px;font-weight:600;color:#185FA5">Silver</div>
-            <div style="font-size:11px;color:var(--muted)">Valeur locative ou bail · Gratuit</div>
-          </div>
-          <div style="margin-left:auto;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:#E6F1FB;color:#185FA5;text-transform:uppercase;letter-spacing:.8px">Recommandé débutant</div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
-          <div style="background:#E6F1FB;border-radius:8px;padding:12px 14px;border:1px solid rgba(24,95,165,.2)">
-            <div style="font-size:12px;font-weight:600;color:#185FA5;margin-bottom:4px">👤 Acheteurs particuliers</div>
-            <div style="font-size:11px;color:#185FA5;line-height:1.6">Contact <strong>gratuit et direct</strong>. Photos illimitées. Adresse exacte visible à <strong>tous les acheteurs, investisseurs et agents</strong>.</div>
-          </div>
-          <div style="background:#E1F5EE;border-radius:8px;padding:12px 14px;border:1px solid rgba(30,122,98,.2)">
-            <div style="font-size:12px;font-weight:600;color:#1E7A62;margin-bottom:4px">📈 Investisseurs</div>
-            <div style="font-size:11px;color:#1E7A62;line-height:1.6">Matching automatique <strong>gratuit</strong>. Alertes aux investisseurs compatibles avec votre bien.</div>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-          <div style="background:#FAEEDA;border-radius:8px;padding:12px 14px;border:1px solid rgba(192,155,90,.3)">
-            <div style="font-size:12px;font-weight:600;color:#854F0B;margin-bottom:4px">🤝 Je choisis mon agent</div>
-            <div style="font-size:11px;color:#854F0B;line-height:1.6">Les agents vous contactent et vous choisissez librement celui qui vous convient.</div>
-          </div>
-          <div style="background:#FAEEDA;border-radius:8px;padding:12px 14px;border:1px solid rgba(192,155,90,.3)">
-            <div style="font-size:12px;font-weight:600;color:#854F0B;margin-bottom:4px">📊 ImmoConnect sélectionne les 3 meilleurs</div>
-            <div style="font-size:11px;color:#854F0B;line-height:1.6">Hanaé analyse tous les candidats et présente le top 3 avec comparatif automatique.</div>
-          </div>
+      <div class="level-card">
+        <div class="level-accent" style="background:var(--blue)"></div>
+        <div class="level-name">Silver</div>
+        <div class="level-sub">Le bon équilibre pour commencer</div>
+        <div class="level-doc"><strong>Requis :</strong> valeur locative ou bail en cours</div>
+        <div class="feat-list">
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Photos illimitées</span></div>
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Contact acheteurs gratuit</span></div>
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Adresse visible acheteurs éligibles</span></div>
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Matching investisseurs gratuit</span></div>
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Choix libre d'un agent</span></div>
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Top 3 agents Hanaé IA</span></div>
         </div>
       </div>
 
       <!-- GOLD -->
-      <div style="background:var(--warm);border:2px solid rgba(192,155,90,.4);border-radius:12px;padding:20px 24px;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-          <div style="width:36px;height:36px;border-radius:10px;background:#FAEEDA;display:flex;align-items:center;justify-content:center;font-size:18px">🥇</div>
-          <div>
-            <div style="font-size:14px;font-weight:600;color:#854F0B">Gold</div>
-            <div style="font-size:11px;color:var(--muted)">Silver + Copropriété + Taxe foncière · Gratuit</div>
-          </div>
-          <div style="margin-left:auto;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:#FAEEDA;color:#854F0B;text-transform:uppercase;letter-spacing:.8px">Recommandé</div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px">
-          <div style="background:#E6F1FB;border-radius:8px;padding:12px 14px;border:1px solid rgba(24,95,165,.2)">
-            <div style="font-size:12px;font-weight:600;color:#185FA5;margin-bottom:4px">👤 Acheteurs particuliers</div>
-            <div style="font-size:11px;color:#185FA5;line-height:1.6">Contact <strong>gratuit et direct</strong>. Toutes informations visibles.</div>
-          </div>
-          <div style="background:#E1F5EE;border-radius:8px;padding:12px 14px;border:1px solid rgba(30,122,98,.2)">
-            <div style="font-size:12px;font-weight:600;color:#1E7A62;margin-bottom:4px">📈 Investisseurs</div>
-            <div style="font-size:11px;color:#1E7A62;line-height:1.6">Matching automatique <strong>gratuit</strong> sur rendement et budget.</div>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
-          <div style="background:#FAEEDA;border-radius:8px;padding:12px 14px;border:1px solid rgba(192,155,90,.3)">
-            <div style="font-size:12px;font-weight:600;color:#854F0B;margin-bottom:4px">🤝 Agent choisi par vous</div>
-            <div style="font-size:11px;color:#854F0B;line-height:1.6">Vous choisissez <strong>vous-même</strong> un agent parmi ceux qui vous contactent. Mode indépendant ou acheteurs + agents.</div>
-          </div>
-          <div style="background:#FAEEDA;border-radius:8px;padding:12px 14px;border:1px solid rgba(192,155,90,.3)">
-            <div style="font-size:12px;font-weight:600;color:#854F0B;margin-bottom:4px">📊 Top 3 agents sélectionnés</div>
-            <div style="font-size:11px;color:#854F0B;line-height:1.6">Hanaé sélectionne les <strong>3 meilleurs agents</strong> du secteur et vous présente un comparatif automatique.</div>
-          </div>
+      <div class="level-card best">
+        <div class="level-accent" style="background:var(--gold)"></div>
+        <span class="level-badge" style="background:#FAEEDA;color:#633806">Recommandé</span>
+        <div class="level-name">Gold</div>
+        <div class="level-sub">Visibilité maximale auprès des acheteurs</div>
+        <div class="level-doc"><strong>Requis :</strong> Silver + copro (si applicable) + taxe foncière</div>
+        <div class="feat-list">
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Tout Silver inclus</span></div>
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Adresse exacte visible par tous</span></div>
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Contact direct gratuit</span></div>
         </div>
       </div>
 
       <!-- PLATINIUM -->
-      <div style="background:linear-gradient(135deg,rgba(30,122,98,.04),rgba(30,122,98,.08));border:2px solid rgba(30,122,98,.35);border-radius:12px;padding:20px 24px">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-          <div style="width:36px;height:36px;border-radius:10px;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:18px">💎</div>
-          <div>
-            <div style="font-size:14px;font-weight:600;color:#1E7A62">Platinium</div>
-            <div style="font-size:11px;color:var(--muted)">Gold + DPE · Gratuit · Mise en avant prioritaire</div>
-          </div>
-          <div style="margin-left:auto;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:#E1F5EE;color:#1E7A62;text-transform:uppercase;letter-spacing:.8px">Maximum</div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px">
-          <div style="background:#E6F1FB;border-radius:8px;padding:12px 14px;border:1px solid rgba(24,95,165,.2)">
-            <div style="font-size:12px;font-weight:600;color:#185FA5;margin-bottom:4px">👤 Acheteurs particuliers</div>
-            <div style="font-size:11px;color:#185FA5;line-height:1.6">Contact <strong>gratuit et direct</strong>. Mise en avant prioritaire dans les résultats.</div>
-          </div>
-          <div style="background:#E1F5EE;border-radius:8px;padding:12px 14px;border:1px solid rgba(30,122,98,.2)">
-            <div style="font-size:12px;font-weight:600;color:#1E7A62;margin-bottom:4px">📈 Investisseurs</div>
-            <div style="font-size:11px;color:#1E7A62;line-height:1.6">Matching automatique + alertes <strong>H+0</strong> aux investisseurs.</div>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-          <div style="background:#E1F5EE;border-radius:8px;padding:12px 14px;border:1px solid rgba(30,122,98,.25)">
-            <div style="font-size:12px;font-weight:600;color:#1E7A62;margin-bottom:4px">🤝 Agent choisi par vous</div>
-            <div style="font-size:11px;color:#1E7A62;line-height:1.6">Vous sélectionnez librement l'agent qui vous convient parmi ceux qui vous contactent.</div>
-          </div>
-          <div style="background:#E1F5EE;border-radius:8px;padding:12px 14px;border:1px solid rgba(30,122,98,.25)">
-            <div style="font-size:12px;font-weight:600;color:#1E7A62;margin-bottom:4px">📊 Top 3 agents sélectionnés</div>
-            <div style="font-size:11px;color:#1E7A62;line-height:1.6">Hanaé vous présente les <strong>3 meilleurs agents</strong> du secteur avec tableau comparatif.</div>
-          </div>
-          <div style="background:#E1F5EE;border-radius:8px;padding:12px 14px;border:1px solid rgba(30,122,98,.25)">
-            <div style="font-size:12px;font-weight:600;color:#1E7A62;margin-bottom:4px">👥 Acheteurs + Agents</div>
-            <div style="font-size:11px;color:#1E7A62;line-height:1.6">Les deux simultanément. <strong>Exposition maximale</strong>. Vendez plus vite.</div>
-          </div>
+      <div class="level-card">
+        <div class="level-accent" style="background:var(--teal)"></div>
+        <span class="level-badge" style="background:#E1F5EE;color:#085041">Maximum</span>
+        <div class="level-name">Platinium</div>
+        <div class="level-sub">Mise en avant prioritaire dans les résultats</div>
+        <div class="level-doc"><strong>Requis :</strong> Gold + DPE</div>
+        <div class="feat-list">
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Tout Gold inclus</span></div>
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Mise en avant prioritaire</span></div>
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Alertes investisseurs H+0</span></div>
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Acheteurs + Agents simultané</span></div>
         </div>
       </div>
     </div>
 
-    <!-- TABLEAU COMPARATIF -->
-    <div style="margin-top:24px">
-      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Tableau comparatif complet</div>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Critère</th><th>Standard</th><th style="background:rgba(24,95,165,.06)">Silver</th><th style="background:rgba(192,155,90,.06)">Gold</th><th style="background:rgba(30,122,98,.06)">Platinium</th></tr></thead>
-        <tbody>
-          <tr><td>Tarif</td><td style="color:#1E7A62;font-weight:600">Gratuit</td><td style="color:#1E7A62;font-weight:600">Gratuit</td><td style="color:#1E7A62;font-weight:600">Gratuit</td><td style="color:#1E7A62;font-weight:600">Gratuit</td></tr>
-          <tr><td>Photos</td><td>3 max</td><td style="color:#185FA5;font-weight:600">Illimitées</td><td style="color:#854F0B;font-weight:600">Illimitées</td><td style="color:#1E7A62;font-weight:600">Illimitées</td></tr>
-          <tr><td>Adresse visible</td><td style="color:var(--muted);font-size:11px">Ville seule</td><td style="font-size:11px;color:#185FA5;font-weight:600">Tous (acheteurs, investisseurs, agents)</td><td style="font-size:11px;color:#854F0B;font-weight:600">Tous (acheteurs, investisseurs, agents)</td><td><span class="td-yes">Tous + mise en avant</span></td></tr>
-          <tr><td>Contact acheteurs</td><td style="color:#854F0B;font-size:11px">19,99 €/contact</td><td><span class="td-yes">Gratuit</span></td><td><span class="td-yes">Gratuit</span></td><td><span class="td-yes">Gratuit</span></td></tr>
-          <tr><td>Matching investisseurs</td><td><span class="td-no">—</span></td><td style="color:#185FA5;font-weight:600">✓ Gratuit</td><td><span class="td-yes">✓ Gratuit</span></td><td><span class="td-yes">✓ Gratuit</span></td></tr>
-          <tr><td>Agent choisi par vendeur</td><td><span class="td-no">—</span></td><td style="color:#185FA5;font-weight:600">✓ Disponible</td><td style="color:#854F0B;font-weight:600">✓ Disponible</td><td><span class="td-yes">✓ Disponible</span></td></tr>
-          <tr><td>Top 3 agents Hanaé IA</td><td><span class="td-no">—</span></td><td style="color:#185FA5;font-weight:600">✓ Comparatif auto</td><td style="color:#854F0B;font-weight:600">✓ Comparatif auto</td><td><span class="td-yes">✓ Comparatif auto</span></td></tr>
-          <tr><td>Acheteurs + Agents simultané</td><td><span class="td-no">—</span></td><td style="color:#185FA5;font-weight:600">✓ Disponible</td><td style="color:#854F0B;font-weight:600">✓ Disponible</td><td><span class="td-yes">✓ Disponible</span></td></tr>
-          <tr><td>Mise en avant</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td><td><span class="td-yes">Prioritaire</span></td></tr>
-          <tr><td>Documents requis</td><td>Aucun</td><td style="font-size:11px">Val. locative ou bail</td><td style="font-size:11px">Silver + Copro + Taxe</td><td style="font-size:11px">Gold + DPE</td></tr>
-        </tbody>
-      </table></div>
-    </div>
-  </div>
-
-  <!-- ══ ACHETEURS ══ -->
-  <div id="panel-acheteurs" class="panel">
-    <div class="sec-eye">2 plans · Freemium</div>
-    <div class="sec-title">Plans acheteurs</div>
-    <div class="sec-sub">Gratuit pour explorer. Acheteur à 19,99€ avec infos complètes et rapport Hanaé. Pour investir, voir l'onglet Investisseur.</div>
-    <div class="grid2" id="ac-cards"></div>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Critère</th><th>Gratuit</th><th style="background:rgba(24,95,165,.05)">Acheteur</th></tr></thead>
+    <div class="cmp-title">Tableau comparatif</div>
+    <div class="cmp-wrap"><table class="cmp-table">
+      <thead><tr>
+        <th>Critère</th>
+        <th>Standard</th>
+        <th style="background:rgba(24,95,165,.05)">Silver</th>
+        <th style="background:rgba(192,155,90,.05)">Gold</th>
+        <th class="plat-col">Platinium</th>
+      </tr></thead>
       <tbody>
-        <tr><td>Accès annonces</td><td style="font-size:11px">Ville · surface · 3 photos</td><td><span class="td-yes">Infos complètes</span></td></tr>
-        <tr><td>Adresse exacte</td><td><span class="td-no">—</span></td><td><span class="td-yes">Oui</span></td></tr>
-        <tr><td>Rapport Hanaé IA</td><td><span class="td-no">—</span></td><td><span class="td-yes">Inclus</span></td></tr>
-        <tr><td>Contact vendeur/semaine</td><td style="color:#854F0B;font-size:11px">19,99 €/contact</td><td style="color:#185FA5;font-size:11px;font-weight:600">1 illimité</td></tr>
-        <tr><td>Contact supplémentaire</td><td><span class="td-no">—</span></td><td style="font-size:11px">9,99 €/contact</td></tr>
-        <tr><td>Matching automatique</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td></tr>
-        <tr><td>Alertes</td><td>Quotidien</td><td>Temps réel</td></tr>
-        <tr class="td-price"><td>Tarif</td><td>0 €</td><td style="color:#185FA5;font-weight:600">19,99 €/mois</td></tr>
+        <tr><td>Tarif</td><td class="yes">Gratuit</td><td class="yes">Gratuit</td><td class="yes">Gratuit</td><td class="yes plat-col">Gratuit</td></tr>
+        <tr><td>Photos</td><td>3 max</td><td class="yes">Illimitées</td><td class="yes">Illimitées</td><td class="yes plat-col">Illimitées</td></tr>
+        <tr><td>Adresse visible</td><td style="font-size:11px">Ville seule</td><td style="font-size:11px">Acheteurs éligibles</td><td class="yes" style="font-size:11px">Tous</td><td class="yes plat-col" style="font-size:11px">Tous + prioritaire</td></tr>
+        <tr><td>Contact acheteurs</td><td class="amber-txt">19,99€/contact</td><td class="yes">Gratuit</td><td class="yes">Gratuit</td><td class="yes plat-col">Gratuit</td></tr>
+        <tr><td>Matching investisseurs</td><td><span class="no">—</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes plat-col">✓</td></tr>
+        <tr><td>Choix libre d'agent</td><td><span class="no">—</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes plat-col">✓</td></tr>
+        <tr><td>Top 3 agents Hanaé IA</td><td><span class="no">—</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes plat-col">✓</td></tr>
+        <tr><td>Mise en avant prioritaire</td><td><span class="no">—</span></td><td><span class="no">—</span></td><td><span class="no">—</span></td><td class="yes plat-col">✓</td></tr>
       </tbody>
     </table></div>
   </div>
 
+  <!-- ══ ACHETEURS ══ -->
+  <div id="panel-acheteurs" class="panel">
+    <div class="eyebrow">2 plans · freemium</div>
+    <div class="sec-title">Trouvez votre bien</div>
+    <div class="subtitle">Gratuit pour explorer, payant pour accéder aux infos complètes et contacter les vendeurs directement.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="aplan">
+        <div class="plan-label">Gratuit</div>
+        <div class="plan-price">0 €</div>
+        <div class="plan-period">pour toujours</div>
+        <hr class="plan-sep">
+        <div class="plan-feats">
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Annonces : ville, surface, 3 photos</div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Alertes quotidiennes</div>
+          <div class="plan-feat" style="color:var(--amber);margin-top:4px"><span style="flex-shrink:0">→</span> Contact vendeur : 19,99€/contact</div>
+        </div>
+      </div>
+      <div class="aplan featured">
+        <div class="plan-badge">Recommandé</div>
+        <div class="plan-label">Acheteur</div>
+        <div class="plan-price">19,99 €</div>
+        <div class="plan-period">/mois</div>
+        <hr class="plan-sep">
+        <div class="plan-feats">
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Adresse exacte + toutes infos</strong></div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Rapport Hanaé IA inclus</strong></div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>1 contact vendeur offert/semaine</strong></div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Alertes temps réel</div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Contacté par vendeurs Platinium</div>
+          <div class="plan-feat" style="color:var(--muted);margin-top:4px"><span style="flex-shrink:0">→</span> Contact supp. : 9,99€/contact</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ══ INVESTISSEUR ══ -->
   <div id="panel-investisseur" class="panel">
-    <div class="sec-eye">Forfait investisseur</div>
-    <div class="sec-title">Investisseur</div>
-    <div class="sec-sub">39€/mois — 5 contacts vendeurs/semaine · matching automatique sur rendement · contacté par les vendeurs Platinium · contact supp. à 1,99€.</div>
-    <div class="grid2">
-      <div class="card featured">
-        <div class="card-bar bar-coral"></div>
-        <div class="card-head bg-coral"><div class="badge badge-right badge-amber">39 €/mois</div></div>
-        <div class="card-body">
-          <div class="plan-name">Investisseur</div>
-          <div class="price-wrap"><div class="price-main price-green">39 €</div></div>
-          <div class="price-sub">/mois</div>
-          <div class="plan-tag">5 contacts/semaine · matching rendement · vendeurs Platinium</div>
-          <div class="pay-box">Contact supp. : 1,99 €/contact</div>
-          <hr class="divider">
-          <div class="feats">
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Infos complètes — adresse exacte + toutes données</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Rapport Hanaé IA inclus</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">5 contacts vendeurs offerts par semaine</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Contact supplementaire : 1,99 euros/contact</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Matching auto sur filtres (rendement, prix/m²)</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Contacté directement par vendeurs Platinium</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span>Alertes temps réel sur vos critères</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span>Simulateur rendement net</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span>Calcul capacité d'emprunt intégré</span></div>
-          </div>
-          <a href="questionnaire-acheteur.html" class="btn btn-amber">Choisir Investisseur</a>
+    <div class="eyebrow">Forfait unique</div>
+    <div class="sec-title">Investisseur — 39€/mois</div>
+    <div class="subtitle">Matching automatique sur rendement et budget. Contacté directement par les vendeurs Platinium. 5 contacts vendeurs offerts par semaine.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="aplan featured">
+        <div class="plan-label">Investisseur</div>
+        <div class="plan-price">39 €</div>
+        <div class="plan-period">/mois · contact supp. 1,99€</div>
+        <hr class="plan-sep">
+        <div class="plan-feats">
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>5 contacts vendeurs offerts/semaine</strong></div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Adresse exacte + toutes données</strong></div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Rapport Hanaé IA inclus</strong></div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Matching auto rendement et prix/m²</strong></div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Contacté par vendeurs Platinium</strong></div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Alertes temps réel sur vos critères</div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Simulateur rendement net</div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Calcul capacité d'emprunt intégré</div>
         </div>
       </div>
       <div class="castorus">
-        <div class="castorus-title">Comparaison prix/m² <span class="castorus-pill">Inclus</span></div>
-        <div class="castorus-median">Médiane DVF 2024 — Lons (64) : <strong>2 750 €/m²</strong></div>
-        <div class="bien"><div class="bien-info"><div class="bien-addr">T2 · 45 m² — Allée du Pic d'Anie</div><div class="bien-meta">Lons · 12 jours · 89 000 €</div></div><div class="bien-bar-wrap"><div class="bien-bar-bg"><div class="bien-bar-fill fill-ok" style="width:72%"></div></div></div><div class="bien-price"><div class="bien-pm2 ok">1 978 €/m²</div><div class="bien-lbl">−28 % vs marché</div></div></div>
-        <div class="bien"><div class="bien-info"><div class="bien-addr">T3 · 62 m² — Av. de Santona</div><div class="bien-meta">Lons · 45 jours · 167 000 €</div></div><div class="bien-bar-wrap"><div class="bien-bar-bg"><div class="bien-bar-fill fill-warn" style="width:90%"></div></div></div><div class="bien-price"><div class="bien-pm2 warn">2 694 €/m²</div><div class="bien-lbl">−2 % vs marché</div></div></div>
-        <div class="bien"><div class="bien-info"><div class="bien-addr">T2 · 41 m² — Rue des Chênes</div><div class="bien-meta">Lons · 91 jours · 175 000 €</div></div><div class="bien-bar-wrap"><div class="bien-bar-bg"><div class="bien-bar-fill fill-bad" style="width:100%"></div></div></div><div class="bien-price"><div class="bien-pm2 bad">4 268 €/m²</div><div class="bien-lbl">+55 % vs marché</div></div></div>
-        <div class="castorus-note">Vert = sous-évalué · Orange = prix marché · Rouge = surévalué. Données DVF.</div>
+        <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--ink)">Comparaison prix/m² incluse</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Médiane DVF 2024 — Lons (64) : <strong style="color:var(--ink)">2 750 €/m²</strong></div>
+        <div class="bien">
+          <div><div class="bien-addr">T2 · 45m² — Allée du Pic d'Anie</div><div class="bien-meta">Lons · 12j · 89 000€</div></div>
+          <div><div class="bien-pm2" style="color:var(--teal)">1 978€/m²</div><div class="bien-lbl" style="color:var(--teal)">−28% vs marché</div></div>
+        </div>
+        <div class="bien">
+          <div><div class="bien-addr">T3 · 62m² — Av. de Santona</div><div class="bien-meta">Lons · 45j · 167 000€</div></div>
+          <div><div class="bien-pm2" style="color:var(--amber)">2 694€/m²</div><div class="bien-lbl" style="color:var(--amber)">−2% vs marché</div></div>
+        </div>
+        <div class="bien" style="margin-bottom:0">
+          <div><div class="bien-addr">T2 · 41m² — Rue des Chênes</div><div class="bien-meta">Lons · 91j · 175 000€</div></div>
+          <div><div class="bien-pm2" style="color:var(--coral)">4 268€/m²</div><div class="bien-lbl" style="color:var(--coral)">+55% vs marché</div></div>
+        </div>
+        <div style="margin-top:10px;font-size:10px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px">Vert = sous-évalué · Orange = prix marché · Rouge = surévalué · Données DVF</div>
       </div>
     </div>
   </div>
 
   <!-- ══ AGENTS ══ -->
   <div id="panel-agents" class="panel">
-    <div class="sec-eye">Agents immobiliers · Carte T obligatoire</div>
+    <div class="eyebrow">Agents immobiliers · carte T obligatoire</div>
     <div class="sec-title">Accédez aux meilleurs dossiers vendeurs</div>
-    <div class="sec-sub">Un modèle inédit : candidatez sur les biens qui vous intéressent, publiez vos mandats, déclarez vos acheteurs. Matching automatique gratuit dans les deux sens.</div>
+    <div class="subtitle">Candidatez sur les biens qui vous intéressent. Payez à la candidature ou choisissez un forfait pour gagner en réactivité et volume.</div>
 
-    <!-- TABLEAU COMPARATIF PRINCIPAL -->
-    <div style="overflow-x:auto;margin-bottom:24px">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
-        <thead>
-          <tr style="background:var(--ink);color:#fff">
-            <th style="padding:12px 14px;text-align:left;font-weight:500;border-radius:6px 0 0 0;min-width:180px">Fonctionnalité</th>
-            <th style="padding:12px 14px;text-align:center;font-weight:500;min-width:120px">Pay per use<br><span style="font-size:10px;opacity:.6;font-weight:400">Sans abonnement</span></th>
-            <th style="padding:12px 14px;text-align:center;font-weight:500;background:rgba(255,255,255,.08);min-width:110px">Starter<br><span style="font-size:10px;opacity:.6;font-weight:400">49€/mois</span></th>
-            <th style="padding:12px 14px;text-align:center;font-weight:500;background:rgba(30,122,98,.3);min-width:110px">Pro<br><span style="font-size:10px;opacity:.6;font-weight:400">99€/mois</span></th>
-            <th style="padding:12px 14px;text-align:center;font-weight:500;border-radius:0 6px 0 0;min-width:110px">Premium<br><span style="font-size:10px;opacity:.6;font-weight:400">199€/mois</span></th>
-          </tr>
-        </thead>
+    <!-- FLUX CARDS -->
+    <div class="flux-grid">
+      <div class="flux-card" style="border-left-color:var(--blue)">
+        <div class="flux-card-title">Je veux ce mandat</div>
+        <div class="flux-card-desc">Je candidate pour décrocher le mandat de vente de ce bien</div>
+        <div class="flux-price">9,99 €</div>
+        <div class="flux-psub">par candidature</div>
+      </div>
+      <div class="flux-card" style="border-left-color:var(--gold)">
+        <div class="flux-card-title">J'ai l'acheteur</div>
+        <div class="flux-card-desc">J'ai un acheteur dans mon portefeuille correspondant à ce bien</div>
+        <div class="flux-price">9,99 €</div>
+        <div class="flux-psub">par candidature</div>
+      </div>
+      <div class="flux-card" style="border-left-color:var(--teal)">
+        <div class="flux-card-title">Scoring Hanaé IA</div>
+        <div class="flux-card-desc">Les 3 meilleurs profils sont présentés au vendeur automatiquement</div>
+        <div style="font-size:11px;color:var(--muted);background:var(--bg);border-radius:6px;padding:5px 8px;margin-top:6px">Seuil qualité : 60/100 pts minimum</div>
+      </div>
+    </div>
+
+    <!-- PITCH -->
+    <div class="pitch">
+      <div class="pitch-title">Comment ça marche</div>
+
+      <div class="pitch-mode-badge" style="background:#E6F1FB;color:#0C447C">Mode — Je choisis mon agent</div>
+      <div class="pitch-steps">
+        <div class="pitch-step">
+          <div class="pitch-num" style="background:#E6F1FB;color:#0C447C">1</div>
+          <div class="pitch-txt">Le vendeur active ce mode — <strong>seuls les agents abonnés</strong> reçoivent une alerte selon leur forfait : H+0 (Premium), H+4 (Pro), H+12 (Starter)</div>
+        </div>
+        <div class="pitch-step">
+          <div class="pitch-num" style="background:#E6F1FB;color:#0C447C">2</div>
+          <div class="pitch-txt">Les agents consultent le dossier complet + analyse Hanaé et contactent le vendeur selon leur quota de contacts vendeur</div>
+        </div>
+        <div class="pitch-step">
+          <div class="pitch-num" style="background:#E6F1FB;color:#0C447C">3</div>
+          <div class="pitch-txt">Le vendeur choisit librement l'agent qui lui convient → <strong>mandat simple signé via Docage</strong></div>
+        </div>
+      </div>
+
+      <hr class="pitch-sep">
+
+      <div class="pitch-mode-badge" style="background:#E1F5EE;color:#085041">Mode — ImmoConnect sélectionne les 3 meilleurs</div>
+      <div class="pitch-steps">
+        <div class="pitch-step">
+          <div class="pitch-num" style="background:#E1F5EE;color:#085041">1</div>
+          <div class="pitch-txt"><strong>Tous les agents</strong> reçoivent une alerte immédiate (H+0), abonnés comme pay per use</div>
+        </div>
+        <div class="pitch-step">
+          <div class="pitch-num" style="background:#E1F5EE;color:#085041">2</div>
+          <div class="pitch-txt">Chaque agent candidate : <strong>Je veux ce mandat</strong> (mandat de vente) ou <strong>J'ai l'acheteur</strong> (acheteur en portefeuille) — 9,99€ par candidature</div>
+        </div>
+        <div class="pitch-step">
+          <div class="pitch-num" style="background:#E1F5EE;color:#085041">3</div>
+          <div class="pitch-txt">L'algorithme Hanaé calcule le score de chaque candidat (expérience locale, avis, cohérence d'estimation) et sélectionne les <strong>3 meilleurs profils</strong></div>
+        </div>
+        <div class="pitch-step">
+          <div class="pitch-num" style="background:var(--ink);color:#fff">4</div>
+          <div class="pitch-txt">Le vendeur reçoit le comparatif des 3 agents, choisit → <strong>mandat simple automatique (Docage)</strong> + calendrier de visites</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLEAU FORFAITS -->
+    <div class="cmp-title">Comparer les forfaits</div>
+    <div class="at-wrap">
+      <table class="at-table">
+        <thead><tr>
+          <th style="text-align:left">Fonctionnalité</th>
+          <th>Pay per use<br><span style="font-size:10px;font-weight:400;opacity:.6">sans abonnement</span></th>
+          <th>Starter<br><span style="font-size:10px;font-weight:400;opacity:.6">49€/mois</span></th>
+          <th>Pro<br><span style="font-size:10px;font-weight:400;opacity:.6">99€/mois</span></th>
+          <th class="prem-col" style="color:#085041">Premium<br><span style="font-size:10px;font-weight:400;opacity:.8">199€/mois</span></th>
+        </tr></thead>
         <tbody>
-          <!-- ACCÈS AUX ANNONCES -->
-          <tr style="background:#F5F2EC">
-            <td colspan="5" style="padding:8px 14px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">Accès aux annonces</td>
+          <tr class="sr"><td colspan="5">Alertes & accès annonces</td></tr>
+          <tr>
+            <td>Alertes nouvelles annonces</td>
+            <td><span class="dim">Aucune</span></td>
+            <td>H+12</td><td>H+4</td>
+            <td class="hi prem-col">H+0</td>
           </tr>
-          <tr style="background:var(--warm)">
-            <td style="padding:9px 14px;color:var(--ink)">Alertes nouvelles annonces</td>
-            <td style="padding:9px 14px;text-align:center;color:#C0392B;font-size:11px">❌ Aucune</td>
-            <td style="padding:9px 14px;text-align:center;font-weight:500">H+12</td>
-            <td style="padding:9px 14px;text-align:center;font-weight:500;background:rgba(30,122,98,.05)">H+4</td>
-            <td style="padding:9px 14px;text-align:center;font-weight:600;color:#1E7A62">H+0</td>
+          <tr>
+            <td>Analyse Hanaé IA (sans prix)</td>
+            <td><span class="dim">—</span></td>
+            <td class="hi">✓</td><td class="hi">✓</td>
+            <td class="hi prem-col">✓</td>
           </tr>
-          <tr style="background:var(--bg)">
-            <td style="padding:9px 14px;color:var(--ink)">Niveau dossier (Silver/Gold/Platinium)</td>
-            <td style="padding:9px 14px;text-align:center;color:#C0392B;font-size:11px">❌ Masqué</td>
-            <td style="padding:9px 14px;text-align:center;color:#1E7A62">✓</td>
-            <td style="padding:9px 14px;text-align:center;background:rgba(30,122,98,.05);color:#1E7A62">✓</td>
-            <td style="padding:9px 14px;text-align:center;color:#1E7A62">✓</td>
+          <tr class="sr"><td colspan="5">Candidatures (mise en concurrence)</td></tr>
+          <tr>
+            <td>Candidatures incluses/mois</td>
+            <td><span class="ppu-pill">9,99€/unité</span></td>
+            <td>5</td><td>20</td>
+            <td class="hi prem-col">Illimitées</td>
           </tr>
-          <tr style="background:var(--warm)">
-            <td style="padding:9px 14px;color:var(--ink)">Adresse du bien</td>
-            <td style="padding:9px 14px;text-align:center;color:#1E7A62;font-size:11px">✓</td>
-            <td style="padding:9px 14px;text-align:center;color:#1E7A62">✓</td>
-            <td style="padding:9px 14px;text-align:center;background:rgba(30,122,98,.05);color:#1E7A62">✓</td>
-            <td style="padding:9px 14px;text-align:center;color:#1E7A62">✓</td>
+          <tr>
+            <td>Bonus score IA</td>
+            <td><span class="dim">—</span></td><td><span class="dim">—</span></td><td><span class="dim">—</span></td>
+            <td class="hi prem-col">+10 pts</td>
           </tr>
-          <tr style="background:var(--bg)">
-            <td style="padding:9px 14px;color:var(--ink)">Dossier complet (documents vendeur)</td>
-            <td style="padding:9px 14px;text-align:center;color:#1E7A62;font-size:11px">✓</td>
-            <td style="padding:9px 14px;text-align:center;color:#1E7A62">✓</td>
-            <td style="padding:9px 14px;text-align:center;background:rgba(30,122,98,.05);color:#1E7A62">✓</td>
-            <td style="padding:9px 14px;text-align:center;color:#1E7A62">✓</td>
+          <tr class="sr"><td colspan="5">Contact vendeur (mode "je choisis mon agent")</td></tr>
+          <tr>
+            <td>Contacts vendeur/semaine inclus</td>
+            <td><span class="ppu-pill">4,99€/contact</span></td>
+            <td>5</td><td>15</td>
+            <td class="hi prem-col">Illimité</td>
           </tr>
-          <tr style="background:var(--warm)">
-            <td style="padding:9px 14px;color:var(--ink)">Analyse de marché Hanaé (sans prix)</td>
-            <td style="padding:9px 14px;text-align:center;color:#C0392B;font-size:11px">❌ Abonnés uniquement</td>
-            <td style="padding:9px 14px;text-align:center;color:#1E7A62">✓</td>
-            <td style="padding:9px 14px;text-align:center;background:rgba(30,122,98,.05);color:#1E7A62">✓</td>
-            <td style="padding:9px 14px;text-align:center;color:#1E7A62">✓</td>
+          <tr>
+            <td>Contact vendeur supplémentaire</td>
+            <td style="font-size:11px;color:var(--amber)">4,99€</td>
+            <td style="font-size:11px;color:var(--amber)">4,99€</td>
+            <td style="font-size:11px;color:var(--amber)">4,99€</td>
+            <td class="hi prem-col">Inclus</td>
           </tr>
-
-          <!-- CANDIDATURES -->
-          <tr style="background:#F5F2EC">
-            <td colspan="5" style="padding:8px 14px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">Candidatures mise en concurrence</td>
+          <tr class="sr"><td colspan="5">Publication de mandats</td></tr>
+          <tr>
+            <td>Mandats vendeurs publiables</td>
+            <td>2</td><td>5</td><td>20</td>
+            <td class="hi prem-col">Illimité</td>
           </tr>
-          <tr style="background:var(--warm)">
-            <td style="padding:9px 14px;color:var(--ink)">Prix par candidature</td>
-            <td style="padding:9px 14px;text-align:center;font-weight:600;color:#854F0B">9,99 €/unité</td>
-            <td style="padding:9px 14px;text-align:center;font-size:11px">9,99€ si dépassé</td>
-            <td style="padding:9px 14px;text-align:center;background:rgba(30,122,98,.05);font-size:11px">9,99€ si dépassé</td>
-            <td style="padding:9px 14px;text-align:center;color:#1E7A62;font-weight:600">Incluses</td>
+          <tr>
+            <td>Mandats acheteurs déclarés</td>
+            <td>3</td><td>10</td><td>30</td>
+            <td class="hi prem-col">Illimité</td>
           </tr>
-          <tr style="background:var(--bg)">
-            <td style="padding:9px 14px;color:var(--ink)">Candidatures incluses/mois</td>
-            <td style="padding:9px 14px;text-align:center;color:var(--muted)">—</td>
-            <td style="padding:9px 14px;text-align:center;font-weight:600">5</td>
-            <td style="padding:9px 14px;text-align:center;background:rgba(30,122,98,.05);font-weight:600">20</td>
-            <td style="padding:9px 14px;text-align:center;font-weight:600;color:#1E7A62">Illimitées</td>
-          </tr>
-          <tr style="background:var(--warm)">
-            <td style="padding:9px 14px;color:var(--ink)">Bonus score Premium</td>
-            <td style="padding:9px 14px;text-align:center;color:var(--muted)">—</td>
-            <td style="padding:9px 14px;text-align:center;color:var(--muted)">—</td>
-            <td style="padding:9px 14px;text-align:center;background:rgba(30,122,98,.05);color:var(--muted)">—</td>
-            <td style="padding:9px 14px;text-align:center;font-weight:700;color:#1E7A62">+10 pts</td>
-          </tr>
-
-          <!-- LEADS MODE B -->
-          <tr style="background:#F5F2EC">
-            <td colspan="5" style="padding:8px 14px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">Leads vendeurs (mode agents)</td>
-          </tr>
-          <tr style="background:var(--warm)">
-            <td style="padding:9px 14px;color:var(--ink)">Leads vendeurs/semaine</td>
-            <td style="padding:9px 14px;text-align:center;color:#1E7A62;font-weight:500">2 gratuits</td>
-            <td style="padding:9px 14px;text-align:center;font-weight:600">5</td>
-            <td style="padding:9px 14px;text-align:center;background:rgba(30,122,98,.05);font-weight:600">15</td>
-            <td style="padding:9px 14px;text-align:center;font-weight:600;color:#1E7A62">Illimité</td>
-          </tr>
-          <tr style="background:var(--bg)">
-            <td style="padding:9px 14px;color:var(--ink)">Contact vendeur supplémentaire (au-delà du quota)</td>
-            <td style="padding:9px 14px;text-align:center;font-weight:600;color:#1E7A62">2 gratuits/sem<br><span style="font-size:10px;color:#854F0B;font-weight:600">puis 4,99€/contact</span></td>
-            <td style="padding:9px 14px;text-align:center;font-weight:600;color:#854F0B">4,99 €/contact<br><span style="font-size:10px;color:var(--muted);font-weight:400">au-delà de 5/sem</span></td>
-            <td style="padding:9px 14px;text-align:center;background:rgba(30,122,98,.05);font-weight:600;color:#854F0B">4,99 €/contact<br><span style="font-size:10px;color:var(--muted);font-weight:400">au-delà de 15/sem</span></td>
-            <td style="padding:9px 14px;text-align:center;color:#1E7A62;font-weight:600">Illimité inclus</td>
-          </tr>
-
-          <!-- MANDATS -->
-          <tr style="background:#F5F2EC">
-            <td colspan="5" style="padding:8px 14px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">Publication de mandats</td>
-          </tr>
-          <tr style="background:var(--warm)">
-            <td style="padding:9px 14px;color:var(--ink)">Mandats vendeurs publiables</td>
-            <td style="padding:9px 14px;text-align:center">2 max</td>
-            <td style="padding:9px 14px;text-align:center;font-weight:600">5 max</td>
-            <td style="padding:9px 14px;text-align:center;background:rgba(30,122,98,.05);font-weight:600">20 max</td>
-            <td style="padding:9px 14px;text-align:center;font-weight:600;color:#1E7A62">Illimité</td>
-          </tr>
-          <tr style="background:var(--bg)">
-            <td style="padding:9px 14px;color:var(--ink)">Mandats acheteurs déclarés</td>
-            <td style="padding:9px 14px;text-align:center">3 max</td>
-            <td style="padding:9px 14px;text-align:center;font-weight:600">10 max</td>
-            <td style="padding:9px 14px;text-align:center;background:rgba(30,122,98,.05);font-weight:600">30 max</td>
-            <td style="padding:9px 14px;text-align:center;font-weight:600;color:#1E7A62">Illimité</td>
-          </tr>
-          <tr style="background:var(--warm)">
-            <td style="padding:9px 14px;color:var(--ink)">Matching automatique gratuit</td>
-            <td style="padding:9px 14px;text-align:center;color:#1E7A62">✓</td>
-            <td style="padding:9px 14px;text-align:center;color:#1E7A62">✓</td>
-            <td style="padding:9px 14px;text-align:center;background:rgba(30,122,98,.05);color:#1E7A62">✓</td>
-            <td style="padding:9px 14px;text-align:center;color:#1E7A62">✓</td>
-          </tr>
-
-          <!-- TARIF -->
-          <tr style="background:#F5F2EC">
-            <td colspan="5" style="padding:8px 14px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">Tarification</td>
-          </tr>
-          <tr style="background:var(--warm)">
-            <td style="padding:9px 14px;font-weight:600;color:var(--ink)">Abonnement mensuel</td>
-            <td style="padding:9px 14px;text-align:center;font-weight:700;color:#1E7A62">0 €</td>
-            <td style="padding:9px 14px;text-align:center;font-weight:700;color:#854F0B;font-size:15px">49 €</td>
-            <td style="padding:9px 14px;text-align:center;background:rgba(30,122,98,.05);font-weight:700;color:#1E7A62;font-size:15px">99 €</td>
-            <td style="padding:9px 14px;text-align:center;font-weight:700;color:#0F0F0E;font-size:15px">199 €</td>
+          <tr>
+            <td>Matching automatique</td>
+            <td class="hi">✓</td><td class="hi">✓</td><td class="hi">✓</td>
+            <td class="hi prem-col">✓</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- COMMENT CA MARCHE -->
-    <div style="background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:20px 24px;margin-bottom:16px">
-      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px">Comment ca marche</div>
-
-      <!-- MODE JE CHOISIS MON AGENT -->
-      <div style="margin-bottom:16px">
-        <div style="display:inline-flex;align-items:center;gap:6px;background:#E6F1FB;border-radius:20px;padding:3px 12px;font-size:10px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">🤝 Je choisis mon agent</div>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <div style="display:flex;align-items:flex-start;gap:12px">
-            <div style="width:22px;height:22px;border-radius:50%;background:#E6F1FB;color:#185FA5;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">1</div>
-            <div style="font-size:12px;padding-top:2px;color:var(--ink)">Le vendeur choisit ce mode — <strong>seuls les agents abonnés</strong> recoivent une alerte selon leur forfait : H+0 (Premium), H+4 (Pro), H+12 (Starter)</div>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:12px">
-            <div style="width:22px;height:22px;border-radius:50%;background:#E6F1FB;color:#185FA5;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">2</div>
-            <div style="font-size:12px;padding-top:2px;color:var(--ink)">Les agents abonnés consultent le dossier complet + analyse Hanaé et contactent le vendeur selon leur quota de leads</div>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:12px">
-            <div style="width:22px;height:22px;border-radius:50%;background:#E6F1FB;color:#185FA5;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">3</div>
-            <div style="font-size:12px;padding-top:2px;color:var(--ink)">Le vendeur choisit librement l'agent qui lui convient → mandat simple signé via Docage</div>
-          </div>
-        </div>
+    <div class="cta-row">
+      <div class="cta-box" style="background:#FAECE7;border:1px solid #F5C4B3">
+        <div class="cta-title" style="color:#712B13">Carte T obligatoire — Loi Hoguet</div>
+        <div class="cta-desc">Seuls les agents titulaires d'une carte professionnelle valide peuvent s'inscrire. Vérifiée par OCR à l'inscription. Compte suspendu automatiquement en cas d'expiration.</div>
       </div>
-
-      <div style="height:1px;background:var(--line);margin-bottom:16px"></div>
-
-      <!-- MODE SÉLECTION 3 MEILLEURS -->
-      <div>
-        <div style="display:inline-flex;align-items:center;gap:6px;background:#E1F5EE;border-radius:20px;padding:3px 12px;font-size:10px;font-weight:700;color:#1E7A62;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">📊 ImmoConnect sélectionne les 3 meilleurs</div>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <div style="display:flex;align-items:flex-start;gap:12px">
-            <div style="width:22px;height:22px;border-radius:50%;background:#E1F5EE;color:#1E7A62;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">1</div>
-            <div style="font-size:12px;padding-top:2px;color:var(--ink)">Le vendeur choisit ce mode — <strong>tous les agents sans exception</strong> recoivent une alerte immédiate (H+0), abonnés comme pay per use</div>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:12px">
-            <div style="width:22px;height:22px;border-radius:50%;background:#E1F5EE;color:#1E7A62;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">2</div>
-            <div style="font-size:12px;padding-top:2px;color:var(--ink)">Chaque agent peut candidater en <strong>Flux A</strong> (je veux le mandat) ou <strong>Flux B</strong> (j'ai un acheteur) — 9,99€ par candidature</div>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:12px">
-            <div style="width:22px;height:22px;border-radius:50%;background:#E1F5EE;color:#1E7A62;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">3</div>
-            <div style="font-size:12px;padding-top:2px;color:var(--ink)">L'algorithme Hanaé calcule le score de chaque candidat (expérience locale, avis, cohérence d'estimation) et sélectionne les <strong>3 meilleurs profils</strong></div>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:12px">
-            <div style="width:22px;height:22px;border-radius:50%;background:#0F0F0E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">4</div>
-            <div style="font-size:12px;padding-top:2px;color:var(--ink)">Le vendeur reçoit le comparatif des 3 agents + choisit → mandat simple automatique (Docage) + calendrier visites</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CARTE T + CTA -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-      <div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:10px;padding:16px 20px">
-        <div style="font-size:12px;font-weight:600;color:#712B13;margin-bottom:6px">Carte T obligatoire — Loi Hoguet</div>
-        <div style="font-size:12px;color:#712B13;line-height:1.7">Seuls les agents titulaires d'une carte professionnelle valide peuvent s'inscrire. Vérifiée par OCR à l'inscription. Compte suspendu automatiquement en cas d'expiration.</div>
-      </div>
-      <div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:10px;padding:16px 20px;display:flex;flex-direction:column;justify-content:space-between">
-        <div>
-          <div style="font-size:12px;font-weight:600;color:#085041;margin-bottom:6px">Inscription gratuite</div>
-          <div style="font-size:12px;color:#1E7A62;line-height:1.7">Commencez sans abonnement. Candidatez à 9,99€/unité. Passez à un forfait quand vous êtes prêt.</div>
-        </div>
-        <a href="questionnaire-agent.html" style="display:block;text-align:center;background:#1E7A62;color:#fff;padding:10px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:500;margin-top:12px">S'inscrire gratuitement →</a>
-      </div>
-    </div>
-
-    <!-- EARLY ADOPTER -->
-    <div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:14px">
-      <div style="font-size:22px;flex-shrink:0">🎁</div>
-      <div>
-        <div style="font-size:13px;font-weight:600;color:#085041;margin-bottom:3px">Tarif early adopter garanti</div>
-        <div style="font-size:12px;color:#1E7A62;line-height:1.6">Les agents inscrits aujourd'hui en pay-per-use bénéficieront d'un tarif préférentiel lors du lancement des abonnements. Les abonnements Starter/Pro/Premium seront disponibles prochainement.</div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ══ ACHETEURS ══ -->
-  <!-- ══ ACHETEURS ══ -->
-  <div id="panel-acheteurs" class="panel">
-    <div class="sec-eye">2 plans · Freemium</div>
-    <div class="sec-title">Plans acheteurs</div>
-    <div class="sec-sub">Gratuit pour explorer. Acheteur à 19,99€ avec infos complètes et rapport Hanaé. Pour investir, voir l'onglet Investisseur.</div>
-    <div class="grid2" id="ac-cards"></div>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Critère</th><th>Gratuit</th><th style="background:rgba(24,95,165,.05)">Acheteur</th></tr></thead>
-      <tbody>
-        <tr><td>Accès annonces</td><td style="font-size:11px">Ville · surface · 3 photos</td><td><span class="td-yes">Infos complètes</span></td></tr>
-        <tr><td>Adresse exacte</td><td><span class="td-no">—</span></td><td><span class="td-yes">Oui</span></td></tr>
-        <tr><td>Rapport Hanaé IA</td><td><span class="td-no">—</span></td><td><span class="td-yes">Inclus</span></td></tr>
-        <tr><td>Contact vendeur/semaine</td><td style="color:#854F0B;font-size:11px">19,99 €/contact</td><td style="color:#185FA5;font-size:11px;font-weight:600">1 illimité</td></tr>
-        <tr><td>Contact supplémentaire</td><td><span class="td-no">—</span></td><td style="font-size:11px">9,99 €/contact</td></tr>
-        <tr><td>Matching automatique</td><td><span class="td-no">—</span></td><td><span class="td-no">—</span></td></tr>
-        <tr><td>Alertes</td><td>Quotidien</td><td>Temps réel</td></tr>
-        <tr class="td-price"><td>Tarif</td><td>0 €</td><td style="color:#185FA5;font-weight:600">19,99 €/mois</td></tr>
-      </tbody>
-    </table></div>
-  </div>
-
-  <!-- ══ INVESTISSEUR ══ -->
-  <div id="panel-investisseur" class="panel">
-    <div class="sec-eye">Forfait investisseur</div>
-    <div class="sec-title">Investisseur</div>
-    <div class="sec-sub">39€/mois — 5 contacts vendeurs/semaine · matching automatique sur rendement · contacté par les vendeurs Platinium · contact supp. à 1,99€.</div>
-    <div class="grid2">
-      <div class="card featured">
-        <div class="card-bar bar-coral"></div>
-        <div class="card-head bg-coral"><div class="badge badge-right badge-amber">39 €/mois</div></div>
-        <div class="card-body">
-          <div class="plan-name">Investisseur</div>
-          <div class="price-wrap"><div class="price-main price-green">39 €</div></div>
-          <div class="price-sub">/mois</div>
-          <div class="plan-tag">5 contacts/semaine · matching rendement · vendeurs Platinium</div>
-          <div class="pay-box">Contact supp. : 1,99 €/contact</div>
-          <hr class="divider">
-          <div class="feats">
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Infos complètes — adresse exacte + toutes données</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Rapport Hanaé IA inclus</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">5 contacts vendeurs offerts par semaine</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Contact supplementaire : 1,99 euros/contact</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Matching auto sur filtres (rendement, prix/m²)</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span class="feat-txt bold">Contacté directement par vendeurs Platinium</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span>Alertes temps réel sur vos critères</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span>Simulateur rendement net</span></div>
-            <div class="feat"><div class="feat-dot y">✓</div><span>Calcul capacité d'emprunt intégré</span></div>
-          </div>
-          <a href="questionnaire-acheteur.html" class="btn btn-amber">Choisir Investisseur</a>
-        </div>
-      </div>
-      <div class="castorus">
-        <div class="castorus-title">Comparaison prix/m² <span class="castorus-pill">Inclus</span></div>
-        <div class="castorus-median">Médiane DVF 2024 — Lons (64) : <strong>2 750 €/m²</strong></div>
-        <div class="bien"><div class="bien-info"><div class="bien-addr">T2 · 45 m² — Allée du Pic d'Anie</div><div class="bien-meta">Lons · 12 jours · 89 000 €</div></div><div class="bien-bar-wrap"><div class="bien-bar-bg"><div class="bien-bar-fill fill-ok" style="width:72%"></div></div></div><div class="bien-price"><div class="bien-pm2 ok">1 978 €/m²</div><div class="bien-lbl">−28 % vs marché</div></div></div>
-        <div class="bien"><div class="bien-info"><div class="bien-addr">T3 · 62 m² — Av. de Santona</div><div class="bien-meta">Lons · 45 jours · 167 000 €</div></div><div class="bien-bar-wrap"><div class="bien-bar-bg"><div class="bien-bar-fill fill-warn" style="width:90%"></div></div></div><div class="bien-price"><div class="bien-pm2 warn">2 694 €/m²</div><div class="bien-lbl">−2 % vs marché</div></div></div>
-        <div class="bien"><div class="bien-info"><div class="bien-addr">T2 · 41 m² — Rue des Chênes</div><div class="bien-meta">Lons · 91 jours · 175 000 €</div></div><div class="bien-bar-wrap"><div class="bien-bar-bg"><div class="bien-bar-fill fill-bad" style="width:100%"></div></div></div><div class="bien-price"><div class="bien-pm2 bad">4 268 €/m²</div><div class="bien-lbl">+55 % vs marché</div></div></div>
-        <div class="castorus-note">Vert = sous-évalué · Orange = prix marché · Rouge = surévalué. Données DVF.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ AGENTS ══ -->
-  <div id="panel-agents" class="panel">
-    <div class="sec-eye">Offre de lancement · Agents immobiliers</div>
-    <div class="sec-title">Candidatez sur les biens qui vous correspondent</div>
-    <div class="sec-sub">Un nouveau concept : vous candidatez uniquement sur les biens qui vous intéressent. Payez à la candidature, pas à l'abonnement. Carte T obligatoire.</div>
-
-    <!-- OFFRE PRINCIPALE -->
-    <div style="background:linear-gradient(135deg,#E1F5EE,#E6F1FB);border:1px solid #9FE1CB;border-radius:12px;padding:28px;margin-bottom:20px;text-align:center">
-      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(30,122,98,.15);border-radius:20px;padding:4px 14px;font-size:10px;font-weight:700;color:#1E7A62;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px">Offre de lancement</div>
-      <div style="font-size:48px;font-weight:300;color:#0F0F0E;line-height:1">9,99 <span style="font-size:20px;font-weight:500">€</span></div>
-      <div style="font-size:14px;color:#888780;margin-top:6px;margin-bottom:20px">par candidature · sans abonnement · sans engagement</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:480px;margin:0 auto 24px;text-align:left">
-        <div style="background:rgba(255,255,255,.7);border-radius:8px;padding:12px">
-          <div style="font-size:20px;margin-bottom:4px">🎯</div>
-          <div style="font-size:12px;font-weight:600;color:#0F0F0E;margin-bottom:2px">Flux A</div>
-          <div style="font-size:11px;color:#888780;line-height:1.5">Je veux le mandat de vente</div>
-        </div>
-        <div style="background:rgba(255,255,255,.7);border-radius:8px;padding:12px">
-          <div style="font-size:20px;margin-bottom:4px">👥</div>
-          <div style="font-size:12px;font-weight:600;color:#0F0F0E;margin-bottom:2px">Flux B</div>
-          <div style="font-size:11px;color:#888780;line-height:1.5">J'ai un acheteur pour ce bien</div>
-        </div>
-        <div style="background:rgba(255,255,255,.7);border-radius:8px;padding:12px">
-          <div style="font-size:20px;margin-bottom:4px">🤖</div>
-          <div style="font-size:12px;font-weight:600;color:#0F0F0E;margin-bottom:2px">Scoring IA</div>
-          <div style="font-size:11px;color:#888780;line-height:1.5">Les 3 meilleurs passent au vendeur</div>
-        </div>
-      </div>
-      <a href="questionnaire-agent.html" style="display:inline-block;background:#0F0F0E;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:500">S'inscrire gratuitement</a>
-      <div style="font-size:11px;color:#888780;margin-top:10px">Inscription gratuite · Paiement uniquement à la candidature</div>
-    </div>
-
-    <!-- CE QUI EST INCLUS -->
-    <div style="background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:20px 24px;margin-bottom:16px">
-      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px">Ce qui est inclus dans chaque candidature à 9,99 €</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
-          <span style="color:#1E7A62;flex-shrink:0;font-weight:600">✓</span>
-          <span>Accès complet au dossier vendeur (photos, documents, taxe foncière, DPE)</span>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
-          <span style="color:#1E7A62;flex-shrink:0;font-weight:600">✓</span>
-          <span>Rapport Hanaé IA — estimation DVF + Notaires-INSEE</span>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
-          <span style="color:#1E7A62;flex-shrink:0;font-weight:600">✓</span>
-          <span>Score de sélection calculé automatiquement (algo invisible)</span>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
-          <span style="color:#1E7A62;flex-shrink:0;font-weight:600">✓</span>
-          <span>Si sélectionné : contact direct avec le vendeur + messagerie</span>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
-          <span style="color:#1E7A62;flex-shrink:0;font-weight:600">✓</span>
-          <span>Si sélectionné : génération automatique du mandat simple via Docage</span>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
-          <span style="color:#1E7A62;flex-shrink:0;font-weight:600">✓</span>
-          <span>Calendrier de visites + rapport de visite Hanaé IA</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- COMMENT CA MARCHE -->
-    <div style="background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:20px 24px;margin-bottom:16px">
-      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px">Comment ca marche</div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="display:flex;align-items:flex-start;gap:14px">
-          <div style="width:26px;height:26px;border-radius:50%;background:#E1F5EE;color:#1E7A62;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">1</div>
-          <div style="font-size:13px;padding-top:3px">Un vendeur publie son bien — vous recevez une alerte immediat</div>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:14px">
-          <div style="width:26px;height:26px;border-radius:50%;background:#E6F1FB;color:#185FA5;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">2</div>
-          <div style="font-size:13px;padding-top:3px">Vous choisissez Flux A (je veux le mandat) ou Flux B (j'ai un acheteur) — vous payez 9,99 €</div>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:14px">
-          <div style="width:26px;height:26px;border-radius:50%;background:#FAEEDA;color:#854F0B;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">3</div>
-          <div style="font-size:13px;padding-top:3px">L'algorithme ImmoConnect calcule votre score (experience locale, avis, coherence estimation) — les 3 meilleurs agents sont presentes au vendeur</div>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:14px">
-          <div style="width:26px;height:26px;border-radius:50%;background:#0F0F0E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">4</div>
-          <div style="font-size:13px;padding-top:3px">Si vous etes selectionne : contact vendeur + mandat simple automatique + calendrier visites</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CARTE T OBLIGATOIRE -->
-    <div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:10px;padding:16px 20px;margin-bottom:16px">
-      <div style="font-size:12px;font-weight:600;color:#712B13;margin-bottom:6px">Carte T obligatoire — Loi Hoguet</div>
-      <div style="font-size:12px;color:#712B13;line-height:1.7">Seuls les agents titulaires d'une carte professionnelle valide delivree par la CCI peuvent s'inscrire sur ImmoConnect. Votre Carte T est verifiee par OCR automatique a l'inscription. Votre compte est suspendu automatiquement en cas d'expiration non renouvelee.</div>
-    </div>
-
-    <!-- FORFAITS ABONNEMENT A VENIR -->
-    <div style="margin-top:8px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
-        <div style="flex:1;height:1px;background:var(--line)"></div>
-        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">Forfaits abonnement</div>
-          <div style="font-size:10px;padding:2px 10px;background:#FAEEDA;color:#854F0B;border-radius:20px;font-weight:600">Bientot disponibles</div>
-        </div>
-        <div style="flex:1;height:1px;background:var(--line)"></div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
-
-        <!-- STARTER -->
-        <div style="background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:20px;opacity:.8;position:relative;overflow:hidden">
-          <div style="position:absolute;top:10px;right:10px;font-size:9px;font-weight:700;background:#FAEEDA;color:#854F0B;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.8px">Bientot</div>
-          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Starter</div>
-          <div style="font-size:30px;font-weight:300;color:var(--ink);line-height:1;margin-bottom:2px">49 <span style="font-size:14px;font-weight:500">€</span></div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:16px">/mois</div>
-          <div style="display:flex;flex-direction:column;gap:7px">
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> 5 candidatures/mois</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> 5 leads/semaine</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> 5 mandats publiables</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> 10 mandats acheteurs</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> Alerte H+12</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> Matching gratuit</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> Rapport Hanaé IA</div>
-          </div>
-        </div>
-
-        <!-- PRO -->
-        <div style="background:linear-gradient(135deg,rgba(30,122,98,.04),rgba(30,122,98,.09));border:2px solid rgba(30,122,98,.35);border-radius:12px;padding:20px;position:relative;overflow:hidden">
-          <div style="position:absolute;top:10px;right:10px;font-size:9px;font-weight:700;background:#E1F5EE;color:#1E7A62;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.8px">Populaire</div>
-          <div style="font-size:10px;font-weight:700;color:#1E7A62;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Pro</div>
-          <div style="font-size:30px;font-weight:300;color:var(--ink);line-height:1;margin-bottom:2px">99 <span style="font-size:14px;font-weight:500">€</span></div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:16px">/mois</div>
-          <div style="display:flex;flex-direction:column;gap:7px">
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> <strong>20 candidatures/mois</strong></div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> <strong>15 leads/semaine</strong></div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> 20 mandats publiables</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> 30 mandats acheteurs</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> <strong>Alerte H+4</strong></div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> Matching gratuit</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> Rapport Hanaé IA</div>
-          </div>
-        </div>
-
-        <!-- PREMIUM -->
-        <div style="background:linear-gradient(135deg,rgba(15,15,14,.03),rgba(15,15,14,.08));border:2px solid rgba(15,15,14,.18);border-radius:12px;padding:20px;position:relative;overflow:hidden">
-          <div style="position:absolute;top:10px;right:10px;font-size:9px;font-weight:700;background:#0F0F0E;color:#FAFAF7;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.8px">Premium</div>
-          <div style="font-size:10px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Premium</div>
-          <div style="font-size:30px;font-weight:300;color:var(--ink);line-height:1;margin-bottom:2px">199 <span style="font-size:14px;font-weight:500">€</span></div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:16px">/mois</div>
-          <div style="display:flex;flex-direction:column;gap:7px">
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> <strong>Candidatures illimitees</strong></div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> <strong>Leads illimites</strong></div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> <strong>Mandats illimites</strong></div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> <strong>Acheteurs illimites</strong></div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> <strong>Alerte H+0</strong></div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> <strong>+10 pts score IA</strong></div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:#1E7A62;font-weight:700">✓</span> Rapport Hanaé IA</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- EARLY ADOPTER -->
-      <div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:14px">
-        <div style="font-size:22px;flex-shrink:0">🎁</div>
-        <div>
-          <div style="font-size:13px;font-weight:600;color:#085041;margin-bottom:3px">Tarif early adopter garanti</div>
-          <div style="font-size:12px;color:#1E7A62;line-height:1.6">Les agents inscrits aujourd'hui en pay-per-use beneficieront d'un tarif preferentiel lors du lancement des abonnements. Les candidatures non utilisees ne se reportent pas d'un mois a l'autre.</div>
-        </div>
+      <div class="cta-box" style="background:#E1F5EE;border:1px solid #9FE1CB">
+        <div class="cta-title" style="color:#085041">Inscription gratuite · paiement à la candidature</div>
+        <div class="cta-desc" style="color:var(--teal)">Commencez sans abonnement. Candidatez à 9,99€/unité. Passez à un forfait quand vous êtes prêt.</div>
+        <a href="questionnaire-agent.html" class="cta-btn">S'inscrire gratuitement →</a>
       </div>
     </div>
   </div>
@@ -817,171 +478,16 @@ tr:hover td{background:#F9F7F2}
 </div>
 
 <script>
-// ONGLETS — simple et direct
-var tabs = {
-  'tab-vendeurs':    'panel-vendeurs',
-  'tab-acheteurs':   'panel-acheteurs',
-  'tab-investisseur':'panel-investisseur',
-  'tab-agents':      'panel-agents'
-};
-
-Object.keys(tabs).forEach(function(tabId) {
-  document.getElementById(tabId).addEventListener('click', function() {
-    // Désactiver tout
-    Object.keys(tabs).forEach(function(t) {
-      document.getElementById(t).classList.remove('active');
-      document.getElementById(tabs[t]).classList.remove('active');
-    });
-    // Activer le bon
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+    document.querySelectorAll('.panel').forEach(function(x){ x.classList.remove('active'); });
     this.classList.add('active');
-    document.getElementById(tabs[tabId]).classList.add('active');
+    document.getElementById('panel-' + this.dataset.panel).classList.add('active');
   });
 });
-
-var annuel = false;
-
-// VENDEURS
-var VE = [
-  { n:'Standard', bar:'bar-gray', bg:'bg-gray', tag:'Ville uniquement · 3 photos · contactable via forfait acheteur', badge:null, docs:null,
-    feats:[{y:1,t:'1 annonce active'},{y:1,t:'3 photos maximum'},{y:1,t:'Ville uniquement (adresse masquee)'},{y:0,t:'Photos illimitees'},{y:0,t:'Matching investisseurs'},{y:0,t:'Mise en avant prioritaire'}],
-    contact:'Contact inclus dans le forfait acheteur · 19,99€ pour acheteurs gratuits', btn:'btn-out', ct:'Publier gratuitement' },
-  { n:'Silver', bar:'bar-blue', bg:'bg-blue', tag:'Photos illimitees · adresse visible acheteurs eligibles', badge:{t:'Silver',c:'badge-blue'},
-    docs:'Valeur locative (justificatif papier) OU bail en cours',
-    feats:[{y:1,b:1,t:'Photos illimitees'},{y:1,b:1,t:'Adresse visible (acheteurs eligibles)'},{y:1,b:1,t:'Contact gratuit acheteurs eligibles'},{y:1,b:1,t:'Matching investisseurs'},{y:1,t:'Badge Silver'},{y:0,t:'Mise en avant prioritaire'}],
-    contact:null, btn:'btn-out', ct:'Passer Silver' },
-  { n:'Gold', bar:'bar-amber', bg:'bg-amber', tag:'Adresse visible · contact direct gratuit', badge:{t:'Gold',c:'badge-amber'}, feat:true,
-    docs:'Silver + Compte rendu copro (si applicable) + Taxe fonciere',
-    feats:[{y:1,b:1,t:'Photos illimitees'},{y:1,b:1,t:'Adresse exacte visible'},{y:1,b:1,t:'Contact direct gratuit'},{y:1,b:1,t:'Matching investisseurs'},{y:1,t:'Badge Gold'},{y:0,t:'Mise en avant prioritaire'}],
-    contact:null, btn:'btn-amber', ct:'Passer Gold' },
-  { n:'Platinium', bar:'bar-teal', bg:'bg-teal', tag:'Visibilite maximale · contact libre · agents immo', badge:{t:'Platinium',c:'badge-dark'},
-    docs:'Gold + DPE (Diagnostic de Performance Energetique)',
-    feats:[{y:1,b:1,t:'Photos illimitees'},{y:1,b:1,t:'Adresse visible tous acheteurs'},{y:1,b:1,t:'Contact direct tous acheteurs'},{y:1,b:1,t:'Contact direct agents immobiliers'},{y:1,b:1,t:'Matching investisseurs + acheteurs'},{y:1,b:1,t:'Mise en avant prioritaire'}],
-    contact:null, btn:'btn-dark', ct:'Passer Platinium' }
-];
-
-// ACHETEURS
-var AC = [
-  { n:'Gratuit', bar:'bar-gray', bg:'bg-gray', tag:'Ville · surface · 3 photos · 19,99€/contact', badge:null,
-    feats:[{y:1,t:'Annonces : ville, surface, 3 photos'},{y:1,t:'Alertes quotidiennes'},{y:0,t:'Adresse et infos completes'},{y:0,t:'Rapport Hanae IA'},{y:0,t:'Contact vendeur inclus'}],
-    contact:'Chaque contact vendeur : 19,99 euros', price:'0', priceGreen:true, priceSub:'pour toujours', btn:'btn-out', ct:'Commencer gratuitement' },
-  { n:'Acheteur', bar:'bar-blue', bg:'bg-blue', tag:'Infos completes · rapport Hanae · 1 contact offert/semaine · matching automatique', badge:{t:'Populaire',c:'badge-blue'}, feat:true,
-    feats:[{y:1,b:1,t:'Adresse exacte + toutes infos vendeur'},{y:1,b:1,t:'Rapport Hanae IA inclus'},{y:1,b:1,t:'1 contact vendeur offert par semaine'},{y:1,b:1,t:'Alerte automatique : biens compatibles budget + criteres'},{y:1,b:1,t:'Contacte par vendeurs Platinium'},{y:1,t:'Acces prioritaire biens Silver et Gold'}],
-    contact:'Contact supplementaire : 9,99 euros/contact', price:'19,99', priceSub:'/mois', btn:'btn-dark', ct:'Choisir Acheteur' }
-];
-
-// AGENTS
-var AG = [
-  { n:'Starter', bar:'bar-gray', bg:'bg-gray', p:49, promo:24.50, pa:41,
-    tag:'10 contacts vendeurs/semaine · 5 annonces · alerte J+4',
-    feats:[{y:1,b:1,t:'5 annonces maximum'},{y:1,b:1,t:'10 contacts vendeurs/semaine'},{y:1,b:1,t:'Rapport Hanae IA inclus'},{y:1,b:1,t:'Alerte J+4 dossiers Gold & Platinium'},{y:1,t:'Matching auto rendement'},{y:0,t:'Contacts acheteurs'},{y:0,t:'Exclusivite vendeur'}],
-    contact:'Contact supp. : 1,99 euros/contact', btn:'btn-out', ct:'Choisir Starter' },
-  { n:'Pro', bar:'bar-blue', bg:'bg-blue', p:99, promo:49.50, pa:82,
-    tag:'15 contacts vendeurs/semaine · 20 annonces · alerte J+2', feat:true, badge:{t:'Populaire',c:'badge-blue'},
-    feats:[{y:1,b:1,t:'20 annonces maximum'},{y:1,b:1,t:'15 contacts vendeurs/semaine'},{y:1,b:1,t:'Rapport Hanae IA inclus'},{y:1,b:1,t:'Alerte J+2 dossiers Gold & Platinium'},{y:1,t:'Matching auto rendement'},{y:0,t:'Contacts acheteurs'},{y:0,t:'Exclusivite vendeur'}],
-    contact:'Contact supp. : 1,99 euros/contact', btn:'btn-dark', ct:'Choisir Pro' },
-  { n:'Expert', bar:'bar-teal', bg:'bg-teal', p:149, promo:74.50, pa:124,
-    tag:'30 vendeurs + 15 acheteurs · 50 annonces · exclusivite 48h · alerte J+1',
-    feats:[{y:1,b:1,t:'50 annonces maximum'},{y:1,b:1,t:'30 contacts vendeurs/semaine'},{y:1,b:1,t:'15 contacts acheteurs/semaine'},{y:1,b:1,t:'Alerte J+1 biens Silver, Gold & Platinium'},{y:1,b:1,t:'Exclusivite vendeur 48h — 99 euros'},{y:1,b:1,t:'Mandat exclusif vendeur Silver, Gold & Platinium'},{y:1,t:'Rapport Hanae IA inclus'},{y:1,t:'Matching auto rendement'}],
-    contact:'Contact supp. : 1,99 euros/contact', btn:'btn-dark', ct:'Choisir Expert' },
-  { n:'Platinium', bar:'bar-amber', bg:'bg-amber', p:199, promo:99.50, pa:166,
-    tag:'Annonces & contacts illimites · alerte H+0 · exclusivite 48h ou 96h', badge:{t:'Premium',c:'badge-dark'},
-    feats:[{y:1,b:1,t:'Annonces illimitees'},{y:1,b:1,t:'Contacts vendeurs illimites'},{y:1,b:1,t:'Contacts acheteurs illimites'},{y:1,b:1,t:'Alerte H+0 biens Silver, Gold & Platinium'},{y:1,b:1,t:'Exclusivite vendeur 48h — 49 euros'},{y:1,b:1,t:'Exclusivite vendeur 96h — 99 euros'},{y:1,b:1,t:'Mandat exclusif vendeur Silver, Gold & Platinium'},{y:1,t:'Rapport Hanae IA inclus'}],
-    contact:'Contact supp. : inclus illimite', btn:'btn-amber', ct:'Choisir Platinium' }
-];
-
-// RENDU VENDEURS
-function renderVendeurs() {
-  var h = '';
-  VE.forEach(function(p) {
-    h += '<div class="card' + (p.feat ? ' featured' : '') + '">';
-    h += '<div class="card-bar ' + p.bar + '"></div>';
-    h += '<div class="card-head ' + p.bg + '">';
-    if (p.badge) h += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
-    h += '</div><div class="card-body">';
-    h += '<div class="plan-name">' + p.n + '</div>';
-    h += '<div class="price-wrap"><div class="price-main price-green">0 &euro;</div></div>';
-    h += '<div class="price-sub">gratuit &mdash; toujours</div>';
-    h += '<div class="plan-tag">' + p.tag + '</div>';
-    if (p.docs) h += '<div class="gold-box"><div class="gold-box-title">Documents requis</div><div class="gold-box-docs">' + p.docs + '</div></div>';
-    if (p.contact) h += '<div class="pay-box">' + p.contact + '</div>';
-    h += '<hr class="divider"><div class="feats">';
-    p.feats.forEach(function(f) {
-      h += '<div class="feat' + (!f.y ? ' dim' : '') + '"><div class="feat-dot ' + (f.y?'y':'n') + '">' + (f.y?'✓':'✗') + '</div>';
-      h += '<span class="feat-txt' + (f.b?' bold':'') + '">' + f.t + '</span></div>';
-    });
-    h += '</div><a href="questionnaire-vendeur.html" class="btn ' + p.btn + '">' + p.ct + '</a></div></div>';
-  });
-  document.getElementById('ve-cards').innerHTML = h;
-}
-
-// RENDU ACHETEURS
-function renderAcheteurs() {
-  var h = '';
-  AC.forEach(function(p) {
-    h += '<div class="card' + (p.feat ? ' featured' : '') + '">';
-    h += '<div class="card-bar ' + p.bar + '"></div>';
-    h += '<div class="card-head ' + p.bg + '">';
-    if (p.badge) h += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
-    h += '</div><div class="card-body">';
-    h += '<div class="plan-name">' + p.n + '</div>';
-    h += '<div class="price-wrap"><div class="price-main' + (p.priceGreen?' price-green':'') + '">' + p.price + ' &euro;</div></div>';
-    h += '<div class="price-sub">' + (p.priceSub||'') + '</div>';
-    h += '<div class="plan-tag">' + p.tag + '</div>';
-    if (p.contact) h += '<div class="pay-box">' + p.contact + '</div>';
-    h += '<hr class="divider"><div class="feats">';
-    p.feats.forEach(function(f) {
-      h += '<div class="feat' + (!f.y ? ' dim' : '') + '"><div class="feat-dot ' + (f.y?'y':'n') + '">' + (f.y?'✓':'✗') + '</div>';
-      h += '<span class="feat-txt' + (f.b?' bold':'') + '">' + f.t + '</span></div>';
-    });
-    h += '</div><a href="questionnaire-acheteur.html" class="btn ' + p.btn + '">' + p.ct + '</a></div></div>';
-  });
-  document.getElementById('ac-cards').innerHTML = h;
-}
-
-// RENDU AGENTS
-function renderAgents() {
-  var h = '';
-  AG.forEach(function(p) {
-    var prix = annuel ? p.pa : p.promo;
-    var sub = annuel ? '/mois · annuel' : '/mois · promo -50%';
-    h += '<div class="card' + (p.feat ? ' featured' : '') + '">';
-    h += '<div class="card-bar ' + p.bar + '"></div>';
-    h += '<div class="card-head ' + p.bg + '">';
-    if (p.badge) h += '<div class="badge badge-right ' + p.badge.c + '">' + p.badge.t + '</div>';
-    h += '</div><div class="card-body">';
-    h += '<div class="plan-name">' + p.n + '</div>';
-    h += '<div class="price-wrap">';
-    h += '<div class="price-main price-green">' + prix + ' &euro;</div>';
-    h += '<div class="price-normal">' + p.p + ' &euro;</div>';
-    h += '</div>';
-    h += '<div class="price-sub">' + sub + '</div>';
-    h += '<div class="plan-tag">' + p.tag + '</div>';
-    if (p.contact) h += '<div class="pay-box">' + p.contact + '</div>';
-    h += '<hr class="divider"><div class="feats">';
-    p.feats.forEach(function(f) {
-      h += '<div class="feat' + (!f.y ? ' dim' : '') + '"><div class="feat-dot ' + (f.y?'y':'n') + '">' + (f.y?'✓':'✗') + '</div>';
-      h += '<span class="feat-txt' + (f.b?' bold':'') + '">' + f.t + '</span></div>';
-    });
-    var lienForfait = 'questionnaire-agent.html?forfait=' + p.n.toLowerCase();
-    h += '</div><a href="' + lienForfait + '" class="btn ' + p.btn + '" style="text-align:center;text-decoration:none">' + p.ct + '</a></div></div>';
-  });
-  document.getElementById('ag-cards').innerHTML = h;
-}
-
-// TOGGLE ANNUEL
-document.getElementById('ag-toggle').addEventListener('click', function() {
-  annuel = !annuel;
-  this.classList.toggle('on', annuel);
-  document.getElementById('lbl-m').classList.toggle('active', !annuel);
-  document.getElementById('lbl-a').classList.toggle('active', annuel);
-  renderAgents();
-});
-
-// INIT
-renderVendeurs();
-renderAcheteurs();
-renderAgents();
 </script>
+
 <script>
 (function() {
   var consent = localStorage.getItem('ic_cookie_consent');
@@ -989,12 +495,13 @@ renderAgents();
     var b = document.createElement('div');
     b.id = 'cookie-banner';
     b.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1C1C1A;border-top:1px solid rgba(255,255,255,.1);padding:16px 32px;font-family:Outfit,sans-serif';
-    b.innerHTML = '<div style="max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;font-weight:500;color:#FAFAF7;margin-bottom:4px">🍪 Cookies & confidentialité</div><div style="font-size:12px;color:rgba(250,250,247,.6);line-height:1.6">ImmoConnect utilise des cookies strictement nécessaires. Aucun cookie publicitaire. <a href=\"mentions-legales.html\" style=\"color:#C09B5A\">En savoir plus</a></div></div><div style="display:flex;gap:10px;flex-shrink:0"><button onclick=\"icRefuser()\" style=\"padding:9px 20px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(250,250,247,.7);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer\">Refuser</button><button onclick=\"icAccepter()\" style=\"padding:9px 20px;border-radius:8px;border:none;background:#C09B5A;color:#1C1C1A;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer\">Accepter</button></div></div>';
+    b.innerHTML = '<div style="max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;font-weight:500;color:#FAFAF7;margin-bottom:4px">🍪 Cookies & confidentialité</div><div style="font-size:12px;color:rgba(250,250,247,.6);line-height:1.6">ImmoConnect utilise des cookies strictement nécessaires. Aucun cookie publicitaire. <a href="mentions-legales.html" style="color:#C09B5A">En savoir plus</a></div></div><div style="display:flex;gap:10px;flex-shrink:0"><button onclick="icRefuser()" style="padding:9px 20px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(250,250,247,.7);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer">Refuser</button><button onclick="icAccepter()" style="padding:9px 20px;border-radius:8px;border:none;background:#C09B5A;color:#1C1C1A;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer">Accepter</button></div></div>';
     document.body.appendChild(b);
   }
 })();
-function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
-function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
+function icAccepter(){ localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
+function icRefuser(){ localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
 </script>
+
 </body>
 </html>
