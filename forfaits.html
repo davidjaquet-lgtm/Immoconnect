@@ -150,8 +150,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 
   <div class="tabs">
     <button class="tab active" data-panel="vendeurs">Vendeurs</button>
-    <button class="tab" data-panel="acheteurs">Acheteurs</button>
-    <button class="tab" data-panel="investisseur">Investisseurs</button>
+    <button class="tab" data-panel="acheteurs">Acheteurs & Investisseurs</button>
     <button class="tab" data-panel="agents">Agents immo</button>
   </div>
 
@@ -269,84 +268,117 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
     </table></div>
   </div>
 
-  <!-- ══ ACHETEURS ══ -->
+  <!-- ══ ACHETEURS & INVESTISSEURS ══ -->
   <div id="panel-acheteurs" class="panel">
-    <div class="eyebrow">2 plans · freemium</div>
-    <div class="sec-title">Trouvez votre bien</div>
-    <div class="subtitle">Gratuit pour explorer, payant pour accéder aux infos complètes et contacter les vendeurs directement.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="eyebrow">2 niveaux progressifs · un seul onglet</div>
+    <div class="sec-title">Accédez aux biens qui vous correspondent</div>
+    <div class="subtitle">Les informations essentielles sont visibles gratuitement. Débloquez le dossier complet ou contactez directement le vendeur selon vos besoins. Passez Investisseur pour un accès total et un matching automatique sur le rendement.</div>
+
+    <!-- PLANS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px">
+
+      <!-- ACHETEUR -->
       <div class="aplan">
-        <div class="plan-label">Gratuit</div>
-        <div class="plan-price">0 €</div>
-        <div class="plan-period">pour toujours</div>
-        <hr class="plan-sep">
-        <div class="plan-feats">
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Annonces : ville, surface, 3 photos</div>
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Alertes quotidiennes</div>
-          <div class="plan-feat" style="color:var(--amber);margin-top:4px"><span style="flex-shrink:0">→</span> Contact vendeur : 19,99€/contact</div>
-        </div>
-      </div>
-      <div class="aplan featured">
-        <div class="plan-badge">Recommandé</div>
         <div class="plan-label">Acheteur</div>
-        <div class="plan-price">19,99 €</div>
-        <div class="plan-period">/mois</div>
+        <div class="plan-price">Gratuit</div>
+        <div class="plan-period">1 contact vendeur offert par semaine</div>
         <hr class="plan-sep">
+
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Visible gratuitement sur chaque annonce</div>
+        <div class="plan-feats" style="margin-bottom:16px">
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Ville, surface, type de bien, nombre de pièces</div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Prix affiché en clair</strong></div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Alertes email quotidiennes</div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>1 contact vendeur offert/semaine</strong> — débloque le dossier complet</div>
+        </div>
+
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Options pay per use sur chaque bien</div>
+        <div style="border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--warm)">
+          <div style="display:grid;grid-template-columns:1fr 64px 64px;background:var(--bg);border-bottom:1px solid var(--line)">
+            <div style="padding:7px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Option</div>
+            <div style="padding:7px 8px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);text-align:center;border-left:1px solid var(--line)">Tarif</div>
+            <div style="padding:7px 8px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--teal);text-align:center;border-left:1px solid var(--line)">Gratuit</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 64px 64px;border-bottom:1px solid var(--line)">
+            <div style="padding:9px 10px">
+              <div style="font-size:12px;color:var(--ink);font-weight:500">Dossier complet</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;line-height:1.5">Adresse exacte · toutes photos · rapport Hanaé IA</div>
+            </div>
+            <div style="padding:9px 8px;font-size:12px;font-weight:600;color:var(--amber);text-align:center;border-left:1px solid var(--line);display:flex;align-items:center;justify-content:center">4,99€</div>
+            <div style="padding:9px 8px;text-align:center;border-left:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);opacity:.3">—</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 64px 64px">
+            <div style="padding:9px 10px">
+              <div style="font-size:12px;color:var(--ink);font-weight:500">Contact vendeur</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;line-height:1.5">Dossier complet inclus + coordonnées vendeur</div>
+            </div>
+            <div style="padding:9px 8px;font-size:12px;font-weight:600;color:var(--amber);text-align:center;border-left:1px solid var(--line);display:flex;align-items:center;justify-content:center">9,99€</div>
+            <div style="padding:9px 8px;text-align:center;border-left:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--teal);font-weight:600">✓</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:var(--muted);background:var(--bg);border-radius:6px;padding:8px 10px;line-height:1.6">Le contact à 9,99€ inclut automatiquement le dossier complet. Le contact hebdomadaire gratuit fonctionne de la même façon.</div>
+      </div>
+
+      <!-- INVESTISSEUR -->
+      <div class="aplan featured">
+        <div class="plan-badge">Niveau supérieur</div>
+        <div class="plan-label">Investisseur</div>
+        <div class="plan-price">29,99 €</div>
+        <div class="plan-period">/mois · contact supp. 1,99€</div>
+        <hr class="plan-sep">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:10px">Tout inclus d'emblée sur tous les biens</div>
         <div class="plan-feats">
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Adresse exacte + toutes infos</strong></div>
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Rapport Hanaé IA inclus</strong></div>
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>1 contact vendeur offert/semaine</strong></div>
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Alertes temps réel</div>
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Contacté par vendeurs Platinium</div>
-          <div class="plan-feat" style="color:var(--muted);margin-top:4px"><span style="flex-shrink:0">→</span> Contact supp. : 9,99€/contact</div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Dossier complet accessible sur tous les biens</strong> — adresse exacte, rapport Hanaé IA, toutes photos</div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>5 contacts vendeurs offerts/semaine</strong></div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Matching auto sur rendement net et prix/m²</strong></div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Contacté directement par vendeurs Platinium</div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Alertes temps réel sur vos critères</div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Simulateur rendement net intégré</div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Calcul capacité d'emprunt</div>
+          <div class="plan-feat" style="color:var(--amber);margin-top:4px"><span style="flex-shrink:0">→</span> Contact vendeur supplémentaire : <strong>1,99€</strong></div>
+        </div>
+
+        <hr class="plan-sep">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:10px">Comparaison prix/m² incluse</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Médiane DVF 2024 — Lons (64) : <strong style="color:var(--ink)">2 750 €/m²</strong></div>
+        <div class="castorus" style="padding:0;background:transparent">
+          <div class="bien">
+            <div><div class="bien-addr">T2 · 45m² — Allée du Pic d'Anie</div><div class="bien-meta">Lons · 12j · 89 000€</div></div>
+            <div><div class="bien-pm2" style="color:var(--teal)">1 978€/m²</div><div class="bien-lbl" style="color:var(--teal)">−28% vs marché</div></div>
+          </div>
+          <div class="bien">
+            <div><div class="bien-addr">T3 · 62m² — Av. de Santona</div><div class="bien-meta">Lons · 45j · 167 000€</div></div>
+            <div><div class="bien-pm2" style="color:var(--amber)">2 694€/m²</div><div class="bien-lbl" style="color:var(--amber)">−2% vs marché</div></div>
+          </div>
+          <div class="bien" style="margin-bottom:0">
+            <div><div class="bien-addr">T2 · 41m² — Rue des Chênes</div><div class="bien-meta">Lons · 91j · 175 000€</div></div>
+            <div><div class="bien-pm2" style="color:var(--coral)">4 268€/m²</div><div class="bien-lbl" style="color:var(--coral)">+55% vs marché</div></div>
+          </div>
+          <div style="margin-top:8px;font-size:10px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px">Vert = sous-évalué · Orange = prix marché · Rouge = surévalué · Données DVF</div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ══ INVESTISSEUR ══ -->
-  <div id="panel-investisseur" class="panel">
-    <div class="eyebrow">Forfait unique</div>
-    <div class="sec-title">Investisseur — 39€/mois</div>
-    <div class="subtitle">Matching automatique sur rendement et budget. Contacté directement par les vendeurs Platinium. 5 contacts vendeurs offerts par semaine.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="aplan featured">
-        <div class="plan-label">Investisseur</div>
-        <div class="plan-price">39 €</div>
-        <div class="plan-period">/mois · contact supp. 1,99€</div>
-        <hr class="plan-sep">
-        <div class="plan-feats">
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>5 contacts vendeurs offerts/semaine</strong></div>
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Adresse exacte + toutes données</strong></div>
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Rapport Hanaé IA inclus</strong></div>
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Matching auto rendement et prix/m²</strong></div>
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Contacté par vendeurs Platinium</strong></div>
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Alertes temps réel sur vos critères</div>
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Simulateur rendement net</div>
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Calcul capacité d'emprunt intégré</div>
+    <!-- PROGRESSION -->
+    <div style="background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:16px 20px">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:12px">Progression naturelle</div>
+      <div style="display:flex;align-items:stretch;gap:0">
+        <div style="flex:1;background:var(--bg);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px">Acheteur</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.5">Gratuit · 1 contact/sem<br>Dossier 4,99€ · Contact 9,99€</div>
+        </div>
+        <div style="padding:0 14px;font-size:20px;color:var(--gold);display:flex;align-items:center">→</div>
+        <div style="flex:1;background:#E1F5EE;border-radius:8px;padding:12px;text-align:center;border:1px solid #9FE1CB">
+          <div style="font-size:12px;font-weight:600;color:#085041;margin-bottom:4px">Investisseur</div>
+          <div style="font-size:11px;color:#1E7A62;line-height:1.5">29,99€/mois · tout inclus<br>5 contacts/sem · matching auto rendement</div>
         </div>
       </div>
-      <div class="castorus">
-        <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--ink)">Comparaison prix/m² incluse</div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Médiane DVF 2024 — Lons (64) : <strong style="color:var(--ink)">2 750 €/m²</strong></div>
-        <div class="bien">
-          <div><div class="bien-addr">T2 · 45m² — Allée du Pic d'Anie</div><div class="bien-meta">Lons · 12j · 89 000€</div></div>
-          <div><div class="bien-pm2" style="color:var(--teal)">1 978€/m²</div><div class="bien-lbl" style="color:var(--teal)">−28% vs marché</div></div>
-        </div>
-        <div class="bien">
-          <div><div class="bien-addr">T3 · 62m² — Av. de Santona</div><div class="bien-meta">Lons · 45j · 167 000€</div></div>
-          <div><div class="bien-pm2" style="color:var(--amber)">2 694€/m²</div><div class="bien-lbl" style="color:var(--amber)">−2% vs marché</div></div>
-        </div>
-        <div class="bien" style="margin-bottom:0">
-          <div><div class="bien-addr">T2 · 41m² — Rue des Chênes</div><div class="bien-meta">Lons · 91j · 175 000€</div></div>
-          <div><div class="bien-pm2" style="color:var(--coral)">4 268€/m²</div><div class="bien-lbl" style="color:var(--coral)">+55% vs marché</div></div>
-        </div>
-        <div style="margin-top:10px;font-size:10px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px">Vert = sous-évalué · Orange = prix marché · Rouge = surévalué · Données DVF</div>
-      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">Le passage Investisseur se justifie dès que vous consultez régulièrement plusieurs biens ou que le rendement locatif est un critère de sélection.</div>
     </div>
   </div>
 
   <!-- ══ AGENTS ══ -->
+    <!-- ══ AGENTS ══ -->
   <div id="panel-agents" class="panel">
     <div class="eyebrow">Agents immobiliers · carte T obligatoire</div>
     <div class="sec-title">Accédez aux meilleurs dossiers vendeurs</div>
