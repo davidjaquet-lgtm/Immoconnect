@@ -522,6 +522,33 @@ document.querySelectorAll('.tab').forEach(function(t){
     document.getElementById('panel-' + this.dataset.panel).classList.add('active');
   });
 });
+
+// Auto-sélection onglet depuis localStorage (ex: clic "Agents immo" dans nav)
+(function(){
+  var tab = localStorage.getItem('ic_tab');
+  if (tab) {
+    localStorage.removeItem('ic_tab');
+    var btn = document.querySelector('[data-panel="' + tab + '"]');
+    if (btn) btn.click();
+  }
+})();
+
+// Activation automatique via ?tab=
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var tab = params.get('tab');
+  if (tab) {
+    var btn = document.querySelector('[data-panel="' + tab + '"]');
+    var panel = document.getElementById('panel-' + tab);
+    if (btn && panel) {
+      document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+      document.querySelectorAll('.panel').forEach(function(x){ x.classList.remove('active'); });
+      btn.classList.add('active');
+      panel.classList.add('active');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+})();
 </script>
 
 <script>

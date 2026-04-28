@@ -600,11 +600,27 @@ function buildContactButtons(b, niv) {
   }
   html += '<div class="mode-badge ' + (modeClasses[modeContact] || 'mode-acheteurs') + '">' + (modeLabels[modeContact] || '') + '</div>'
 
-  // BLOCAGE AGENT si mode acheteurs uniquement
+  // MODE ACHETEURS UNIQUEMENT — agents : lecture seule du dossier, pas de contact
   if (isAgent && modeContact === 'acheteurs') {
-    html += '<div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:14px;text-align:center;margin-bottom:8px">'
-    html += '<div style="font-size:13px;font-weight:500;color:#712B13;margin-bottom:4px">Ce vendeur n\'accepte pas les contacts agents</div>'
-    html += '<div style="font-size:11px;color:#712B13;line-height:1.6">Tout contact de votre part entraîne une pénalité de -5 points sur votre score de sélection.</div>'
+    var forfaitAgent = currentUser ? (currentUser.user_metadata?.forfait_agent || 'pay_per_use') : 'pay_per_use'
+    var isAbonne = forfaitAgent !== 'pay_per_use'
+
+    // Bandeau informatif
+    html += '<div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:14px;margin-bottom:12px">'
+    html += '<div style="font-size:13px;font-weight:600;color:#712B13;margin-bottom:4px">🚫 Ce vendeur n\'accepte pas les contacts agents</div>'
+    html += '<div style="font-size:11px;color:#712B13;line-height:1.7">Vous pouvez consulter le dossier ci-dessous à titre informatif. Tout contact direct avec ce vendeur constitue une infraction au règlement ImmoConnect et entraîne :<br><strong>① Un message d\'avertissement · ② −10 points sur votre score pendant 6 mois</strong></div>'
+    html += '</div>'
+
+    // Accès dossier pour abonnés uniquement
+    if (isAbonne) {
+      html += '<a href="rapport-hanae.html?annonce=' + b.id + '&mode=agent" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;padding:12px;border-radius:8px;font-weight:500;margin-bottom:8px">📊 Consulter le dossier (lecture seule)</a>'
+    } else {
+      html += '<div style="font-size:11px;color:var(--muted);text-align:center;padding:10px;background:var(--bg);border-radius:8px;margin-bottom:8px">Accès au dossier réservé aux agents abonnés (Starter, Pro, Premium)</div>'
+    }
+
+    // Bouton signaler un agent qui aurait quand même contacté
+    html += '<div style="text-align:center;margin-top:4px">'
+    html += '<button onclick="ouvrirSignalement(\'' + b.id + '\', \'' + (b.email_contact || '') + '\')" style="font-size:11px;color:var(--muted);background:transparent;border:none;cursor:pointer;text-decoration:underline;font-family:Outfit,sans-serif">⚠️ Signaler un contact agent non sollicité</button>'
     html += '</div>'
     return html
   }
@@ -644,6 +660,13 @@ function buildContactButtons(b, niv) {
     html += '<a href="candidature-agent.html?annonce=' + b.id + '" class="btn-contact" style="display:block;text-align:center;text-decoration:none;padding:12px;margin-top:4px;border-radius:8px;background:#E1F5EE;color:#1E7A62;font-weight:500">🏆 Candidater — Sélection top 3 — 9,99 €</a>'
   }
 
+  // BOUTON SIGNALER pour vendeurs — si l'agent a contacté hors mode autorisé
+  if (!isAgent && currentUser && modeContact === 'acheteurs') {
+    html += '<div style="margin-top:8px;text-align:center">'
+    html += '<button onclick="ouvrirSignalement(\'' + b.id + '\', \'\')" style="font-size:11px;color:var(--muted);background:transparent;border:none;cursor:pointer;text-decoration:underline;font-family:Outfit,sans-serif">⚠️ Signaler un contact agent non sollicité</button>'
+    html += '</div>'
+  }
+
   // BOUTON SUIVI BAISSES DE PRIX pour acheteurs connectés
   if (currentUser && !isAgent) {
     html += '<div style="margin-top:8px" id="suivi-wrap-' + b.id + '">';
@@ -663,6 +686,67 @@ function buildContactButtons(b, niv) {
   }
 
   return html;
+}
+
+// ── SIGNALEMENT AGENT ──
+function ouvrirSignalement(annonceId, emailAgent) {
+  var modal = document.createElement('div');
+  modal.id = 'modal-signalement';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML = '<div style="background:var(--warm);border-radius:12px;padding:28px;max-width:440px;width:100%">'
+    + '<div style="font-size:16px;font-weight:500;color:var(--ink);margin-bottom:8px">⚠️ Signaler un contact non sollicité</div>'
+    + '<div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:16px">Un agent vous a contacté alors que vous n\'acceptez pas les contacts agents ? Signalez-le. ImmoConnect vérifiera et appliquera une pénalité de −10 points pendant 6 mois si le signalement est confirmé.</div>'
+    + '<div style="margin-bottom:12px">'
+    + '<label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Email de l\'agent (si connu)</label>'
+    + '<input id="sig-email" type="email" value="' + (emailAgent || '') + '" placeholder="agent@exemple.fr" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:Outfit,sans-serif;font-size:13px;color:var(--ink)">'
+    + '</div>'
+    + '<div style="margin-bottom:16px">'
+    + '<label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Décrivez le contact non sollicité</label>'
+    + '<textarea id="sig-desc" rows="3" placeholder="Par quel canal l\'agent vous a contacté, quand, etc." style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:Outfit,sans-serif;font-size:13px;color:var(--ink);resize:vertical"></textarea>'
+    + '</div>'
+    + '<div style="display:flex;gap:10px">'
+    + '<button onclick="envoyerSignalement(\'' + annonceId + '\')" style="flex:1;padding:11px;border-radius:8px;border:none;background:#C0392B;color:#fff;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer">Envoyer le signalement</button>'
+    + '<button onclick="document.getElementById(\'modal-signalement\').remove()" style="padding:11px 18px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;color:var(--muted)">Annuler</button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(modal);
+  modal.addEventListener('click', function(e){ if(e.target === modal) modal.remove(); });
+}
+
+async function envoyerSignalement(annonceId) {
+  var emailAgent = document.getElementById('sig-email').value.trim();
+  var description = document.getElementById('sig-desc').value.trim();
+  if (!description) { alert('Décrivez le contact non sollicité.'); return; }
+
+  try {
+    // 1. Enregistrer le signalement en base
+    await db.from('signalements_agents').insert({
+      annonce_id: annonceId,
+      email_signalant: currentUser ? currentUser.email : null,
+      email_signale: emailAgent || null,
+      raison: description,
+      statut: 'en_attente'
+    });
+
+    // 2. Alerter l'admin par email
+    await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'signalement_agent',
+        to: 'contact@immoconnect-agence.fr',
+        subject: 'Signalement agent — bien ' + annonceId,
+        email_signale: emailAgent || 'inconnu',
+        email_signalant: currentUser ? currentUser.email : 'inconnu',
+        conversation_id: annonceId,
+        raison: description,
+        lien: 'https://immoconnect-agence.fr/admin-agents.html'
+      }
+    }).catch(function(){});
+
+    document.getElementById('modal-signalement').remove();
+    alert('Signalement envoyé. ImmoConnect va vérifier et vous informer de la suite.');
+  } catch(e) {
+    alert('Erreur : ' + (e.message || 'Réessayez.'));
+  }
 }
 
 // ── SUIVI BAISSES DE PRIX ──
@@ -906,6 +990,36 @@ async function confirmerVisite(dispoId) {
 function changePhoto(src) {
   var el = document.getElementById('main-photo');
   if (el) el.src = src;
+}
+
+// ── SIGNALEMENT AGENT CONTACT ABUSIF ──
+async function ouvrirSignalement() {
+  var raison = prompt('Décrivez brièvement le problème (ex: contact non sollicité, pression commerciale, message inapproprié) :');
+  if (!raison) return;
+  var { data: { user } } = await db.auth.getUser();
+  if (!user) { alert('Connectez-vous pour signaler.'); return; }
+  var params = new URLSearchParams(window.location.search);
+  var annonceId = params.get('id');
+  await db.from('signalements_agents').insert({
+    annonce_id: annonceId,
+    signale_par: user.email,
+    raison: raison,
+    statut: 'en_attente',
+    created_at: new Date().toISOString()
+  }).catch(function(){});
+  await db.functions.invoke('envoyer-email', {
+    body: {
+      type: 'signalement_agent',
+      to: 'contact@immoconnect-agence.fr',
+      subject: 'Signalement contact agent abusif — ' + annonceId,
+      email_signale: 'inconnu',
+      email_signalant: user.email,
+      conversation_id: annonceId,
+      raison: raison,
+      lien: 'https://immoconnect-agence.fr/admin-agents.html'
+    }
+  }).catch(function(){});
+  alert('Signalement envoyé. Nous traitons votre demande sous 48h.');
 }
 
 // ── ERREUR ──
