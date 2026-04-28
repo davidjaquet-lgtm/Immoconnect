@@ -167,7 +167,7 @@ const FORFAITS = {
   pro:{contacts_semaine:15,label:'Pro',prix_supp:1.99},
   expert:{contacts_semaine:30,label:'Expert',prix_supp:1.99},
   platinium:{contacts_semaine:999,label:'Platinium',prix_supp:0},
-  acheteur_gratuit:{contacts_semaine:0,prix_contact:19.99},
+  gratuit:{contacts_semaine:1,prix_contact:9.99,prix_dossier:4.99},
   acheteur:{contacts_semaine:1,prix_supp:9.99},
   investisseur:{contacts_semaine:5,prix_supp:1.99}
 };
@@ -190,7 +190,8 @@ var convPourNotation = null;
   var meta = currentUser.user_metadata || {};
   var profils = meta.profils || ['vendeur'];
   if (profils.includes('agent')) currentRole = 'agent';
-  else if (profils.includes('acheteur') || profils.includes('investisseur')) currentRole = 'acheteur';
+  else if (profils.includes('investisseur')) currentRole = 'investisseur';
+  else if (profils.includes('gratuit') || profils.includes('acheteur')) currentRole = 'gratuit';
   else currentRole = 'vendeur';
   currentForfait = meta.forfait_agent || 'starter';
 
@@ -203,7 +204,7 @@ var convPourNotation = null;
 // ── CHARGER CONVERSATIONS ──
 async function chargerConversations() {
   var field = currentRole === 'agent' ? 'email_agent' : 'email_vendeur';
-  if (currentRole === 'acheteur') field = 'email_vendeur'; // acheteurs dans email_vendeur
+  if (currentRole === 'gratuit' || currentRole === 'investisseur') field = 'email_vendeur';
   
   var { data: convs } = await db.from('conversations')
     .select('*, annonces_vendeurs(titre,type_bien,ville,surface,prix)')

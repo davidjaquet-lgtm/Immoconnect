@@ -613,7 +613,7 @@ function buildContactButtons(b, niv) {
   if (niv === 'standard') {
     html += '<div class="lock-info">📍 <strong>Ville : ' + (b.ville||'—') + '</strong><br>Connectez-vous pour voir l\'adresse complète</div>';
     html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">Contacter le vendeur</button>';
-    html += '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px">19,99 € — accès direct au vendeur</div>';
+    html += '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px">Dossier complet : 4,99 € · Contact vendeur : 9,99 €</div>';
   } else if (niv === 'silver') {
     html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">💬 Contacter le vendeur</button>';
     html += '<button class="btn-contact bc-out" onclick="ouvrirVisite()">📅 Réserver une visite</button>';
@@ -654,7 +654,7 @@ function buildContactButtons(b, niv) {
   // BOUTON EXCLUSIVITÉ pour agents Expert et Platinium
   if (isAgent && (userForfait === 'expert' || userForfait === 'platinium') && !exclusiviteActive) {
     var duree = userForfait === 'platinium' ? 96 : 48;
-    var prix = userForfait === 'platinium' ? '19,99' : '9,99';
+    var prix = '9,99'; // contact vendeur = 9,99€ (dossier complet inclus)
     html += '<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">';
     html += '<button class="btn-excl" onclick="acheterExclusivite(' + duree + ',' + prix.replace(',','.') + ')">';
     html += '🔒 Exclusivité ' + duree + 'h — ' + prix + ' €</button>';
@@ -694,7 +694,7 @@ function majBtnSuivi(bienId) {
 async function toggleSuivi(bienId) {
   if (!currentUser) { alert('Connectez-vous pour activer les alertes.'); return; }
   var profils = currentUser.user_metadata?.profils || [];
-  var profil = profils.includes('agent') ? 'agent' : profils.includes('investisseur') ? 'investisseur' : 'acheteur';
+  var profil = profils.includes('agent') ? 'agent' : profils.includes('investisseur') ? 'investisseur' : 'gratuit';
   if (isSuivant) {
     await db.from('suivi_biens').delete().eq('annonce_id', bienId).eq('email', currentUser.email);
     isSuivant = false;

@@ -739,7 +739,7 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
       <div class="sn-icon" id="sn-icon">🏠</div>
       <div class="sn-info">
         <div class="sn-label" id="sn-label">Niveau Standard</div>
-        <div class="sn-desc" id="sn-desc">3 photos · Ville uniquement · Contact acheteur payant (19,99 €)</div>
+        <div class="sn-desc" id="sn-desc">3 photos · Ville uniquement · Dossier 4,99 € · Contact vendeur 9,99 €</div>
       </div>
     </div>
     <!-- CONSENTEMENT RGPD OBLIGATOIRE -->
@@ -820,7 +820,7 @@ async function envoyerAlertesBaissePrix(annonceId, ancienPrix, nouveauPrix, bais
     for (var entry of emails) {
       var parts = entry.split('|');
       var emailDest = parts[0];
-      var profil = parts[1] || 'acheteur';
+      var profil = parts[1] || 'gratuit';
       if (!emailDest) continue;
 
       await db.functions.invoke('envoyer-email', {
@@ -1134,7 +1134,7 @@ function calcNiveau(){
 }
 
 var NIV={
-  standard:{prog:10,pb:'pb-standard',icon:'🏠',label:'Niveau Standard',desc:'3 photos · Ville uniquement · Contact acheteur payant (19,99 €)',sn:'sn-standard'},
+  standard:{prog:10,pb:'pb-standard',icon:'🏠',label:'Niveau Standard',desc:'3 photos · Ville uniquement · Dossier 4,99 € · Contact vendeur 9,99 €',sn:'sn-standard'},
   silver:{prog:40,pb:'pb-silver',icon:'🏅',label:'Niveau Silver',desc:'Photos illimitées · Matching investisseurs · Contact payant',sn:'sn-silver'},
   gold:{prog:72,pb:'pb-gold',icon:'🥇',label:'Niveau Gold',desc:'Photos illimitées · Adresse exacte visible · Contact gratuit',sn:'sn-gold'},
   platinium:{prog:100,pb:'pb-platinium',icon:'💎',label:'Niveau Platinium',desc:'Mise en avant · Contact libre acheteurs + agents immobiliers',sn:'sn-platinium'}

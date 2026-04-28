@@ -394,7 +394,7 @@ function toggleProfil(p) {
   var idx = selectedProfils.indexOf(p);
   if (idx === -1) selectedProfils.push(p);
   else if (selectedProfils.length > 1) selectedProfils.splice(idx, 1);
-  ['vendeur','acheteur','investisseur','agent'].forEach(function(k) {
+  ['vendeur','acheteur','investisseur','agent'].forEach(function(k) { // acheteur = forfait 'gratuit' en base
     var el = document.getElementById('pc-' + k);
     el.classList.toggle('checked', selectedProfils.indexOf(k) !== -1);
   });
@@ -561,7 +561,7 @@ async function afficherDashboard(user) {
   profils.forEach(function(p, i) {
     html += '<div class="dash-panel' + (i===0?' active':'') + '" id="dpanel-'+p+'">';
     if (p === 'vendeur') html += buildVendeurPanel(annonces, messages);
-    if (p === 'acheteur') html += buildAcheteurPanel(projets, false);
+    if (p === 'acheteur') html += buildAcheteurPanel(projets, false); // forfait 'gratuit' en base
     if (p === 'investisseur') html += buildAcheteurPanel(projets, true);
     if (p === 'agent') html += buildAgentPanel(leads, meta);
     html += '</div>';
@@ -1372,7 +1372,7 @@ function togglePopupProfil(p) {
   var idx = popupProfils.indexOf(p);
   if (idx === -1) popupProfils.push(p);
   else if (popupProfils.length > 1) popupProfils.splice(idx, 1);
-  ['vendeur','acheteur','investisseur','agent'].forEach(function(k) {
+  ['vendeur','acheteur','investisseur','agent'].forEach(function(k) { // acheteur = forfait 'gratuit' en base
     var el = document.getElementById('pp-' + k);
     if (!el) return;
     el.classList.toggle('checked', popupProfils.indexOf(k) !== -1);
