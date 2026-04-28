@@ -758,102 +758,138 @@
 
   <div style="display:flex;justify-content:center;gap:8px;margin-bottom:40px;flex-wrap:wrap">
     <button id="btn-vendeurs" onclick="switchTab('vendeurs')" style="padding:10px 24px;border-radius:40px;background:#B89A5E;border:none;color:#1C1C1A;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">🏠 Vendeurs</button>
-    <button id="btn-agents" onclick="switchTab('agents')" style="padding:10px 24px;border-radius:40px;background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(250,250,247,.6);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">🤝 Agents immo</button>
+    <button id="btn-acheteurs" onclick="switchTab('acheteurs')" style="padding:10px 24px;border-radius:40px;background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(250,250,247,.6);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">🔍 Acheteurs</button>
     <button id="btn-investisseurs" onclick="switchTab('investisseurs')" style="padding:10px 24px;border-radius:40px;background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(250,250,247,.6);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">📈 Investisseurs</button>
+    <button id="btn-agents" onclick="switchTab('agents')" style="padding:10px 24px;border-radius:40px;background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(250,250,247,.6);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">🤝 Agents immo</button>
   </div>
 
   <div style="max-width:900px;margin:0 auto">
 
+    <!-- VENDEURS -->
     <div id="tab-vendeurs" class="hw-tab visible">
       <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">01</div>
         <div style="font-size:28px;margin-bottom:10px">⚡</div>
         <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Publiez gratuitement en 10 minutes</div>
-        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Un dossier, une fois. Hanaé IA rédige votre annonce automatiquement. Ajoutez vos photos, une visite virtuelle et vos documents. Pas de mandat, pas de commission.</div>
-        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">100% gratuit</span>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Un dossier, une fois. Hanaé IA rédige votre annonce automatiquement. Ajoutez vos photos et documents. Pas de mandat, pas de commission d'avance. 4 niveaux de dossier — tous gratuits.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(30,122,98,.2);color:#5DCAA5">100% gratuit</span>
       </div>
       <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">02</div>
-        <div style="font-size:28px;margin-bottom:10px">🎯</div>
-        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Deux marchés en même temps</div>
-        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Les acheteurs vous contactent directement. Les agents vous contactent pour obtenir un mandat simple en 5 minutes, puis présentent votre bien à leurs acheteurs — dossier déjà prêt, action immédiate. Zéro commission d'avance.</div>
-        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Acheteurs + Agents</span>
+        <div style="font-size:28px;margin-bottom:10px">🎛️</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Vous choisissez qui peut vous contacter</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">3 modes dès le niveau Silver : acheteurs & investisseurs uniquement, acheteurs + agents libres, ou ImmoConnect sélectionne les 3 meilleurs agents via l'algorithme Hanaé. Vous restez maître.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">3 options de contact</span>
       </div>
       <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">03</div>
-        <div style="font-size:28px;margin-bottom:10px">📊</div>
-        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Tableau de bord + alertes intelligentes</div>
-        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Suivez vos vues, contacts et visites en temps réel. Recevez une alerte dès qu'un agent active une exclusivité. Générez un rapport de visite IA en un clic. Baisse de prix ? Tous vos suiveurs sont notifiés automatiquement.</div>
-        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Tableau de bord vendeur</span>
+        <div style="font-size:28px;margin-bottom:10px">🏆</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Hanaé IA sélectionne les 3 meilleurs agents</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Tous les agents candidatent sur 100 points : expérience locale, réputation, cohérence d'estimation, stratégie. Seuil qualité 60/100. Seuls les meilleurs vous sont présentés avec un comparatif automatique.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Scoring IA · seuil 60/100</span>
       </div>
       <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">04</div>
         <div style="font-size:28px;margin-bottom:10px">🚀</div>
         <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Plus complet = plus visible = plus rapide</div>
-        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Standard : ville + 3 photos. Platinium : adresse exacte, DPE, rapport Hanaé IA, mise en avant prioritaire, alerté H+0 par les agents. Score dossier affiché aux agents pour booster votre crédibilité.</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Standard : ville + 3 photos + prix. Platinium : adresse exacte, DPE, rapport Hanaé IA, mise en avant prioritaire, alertes agents dès H+0. Plus votre dossier est complet, plus vous attirez les bons profils.</div>
         <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">4 niveaux gratuits</span>
       </div>
     </div>
 
-    <div id="tab-agents" class="hw-tab">
+    <!-- ACHETEURS -->
+    <div id="tab-acheteurs" class="hw-tab">
       <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">01</div>
-        <div style="font-size:28px;margin-bottom:10px">📁</div>
-        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Dossiers vendeurs déjà prêts</div>
-        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Photos, documents légaux, DPE, taxe foncière, rapport d'estimation — tout est constitué avant que vous contactiez. Obtenez un mandat simple en 5 minutes, présentez le bien à vos acheteurs immédiatement.</div>
-        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Mandat simple en 5 min</span>
+        <div style="font-size:28px;margin-bottom:10px">👁️</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Prix, ville, surface, pièces — visibles gratuitement</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Toutes les annonces sont accessibles sans inscription : prix affiché en clair, ville, surface, type de bien, nombre de pièces. Alertes email quotidiennes incluses. Cherchez sans rien payer.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(30,122,98,.2);color:#5DCAA5">Accès gratuit</span>
       </div>
       <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">02</div>
-        <div style="font-size:28px;margin-bottom:10px">🔔</div>
-        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Alertes prioritaires selon votre forfait</div>
-        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Gold et Platinium signalés à H+0 (Platinium) · J+1 (Expert) · J+2 (Pro) · J+4 (Starter). Agissez avant vos concurrents.</div>
-        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Alerte temps réel</span>
+        <div style="font-size:28px;margin-bottom:10px">📂</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Dossier complet à 4,99€ — sans contacter le vendeur</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Adresse exacte, toutes les photos, rapport Hanaé IA complet (DVF, prix/m², analyse de marché). Analysez un bien en profondeur avant de décider de contacter — sans engagement.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(212,115,42,.15);color:#F0A060">Dossier · 4,99€</span>
       </div>
       <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">03</div>
-        <div style="font-size:28px;margin-bottom:10px">🔒</div>
-        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Exclusivité de contact 48h ou 96h</div>
-        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Contactez un vendeur, obtenez votre mandat simple, puis bloquez la concurrence le temps de travailler le dossier. 49€ pour 48h (Expert) · 99€ pour 96h (Platinium). Le vendeur est notifié immédiatement.</div>
-        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Expert &amp; Platinium</span>
+        <div style="font-size:28px;margin-bottom:10px">💬</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Contact vendeur à 9,99€ — dossier complet inclus</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Le contact à 9,99€ débloque automatiquement le dossier complet ET vous met en relation directe avec le vendeur. 1 contact offert gratuitement chaque semaine — équivalent à cette option.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(212,115,42,.15);color:#F0A060">Contact · 9,99€ · 1/sem offert</span>
       </div>
       <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">04</div>
-        <div style="font-size:28px;margin-bottom:10px">🎁</div>
-        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">-50% jusqu'au 01/09/2026</div>
-        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Starter à 24,50€/mois · Pro à 49,50€ · Expert à 74,50€ · Platinium à 99,50€. Offre de lancement.</div>
-        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Offre de lancement</span>
+        <div style="font-size:28px;margin-bottom:10px">🔔</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Alertes en temps réel sur vos critères</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Dès qu'un bien compatible avec votre projet est publié, vous êtes alerté immédiatement. Les vendeurs Platinium peuvent aussi vous contacter directement si votre profil correspond à leur bien.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(30,122,98,.2);color:#5DCAA5">Matching automatique</span>
       </div>
     </div>
 
+    <!-- INVESTISSEURS -->
     <div id="tab-investisseurs" class="hw-tab">
       <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">01</div>
         <div style="font-size:28px;margin-bottom:10px">🎯</div>
-        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Filtrez sur la rentabilité</div>
-        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Rendement minimum, budget, stratégie (LMNP, location nue, colocation…) — matching automatique. Vous ne voyez que les biens rentables.</div>
-        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Matching automatique</span>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Matching automatique sur le rendement net</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Définissez votre rendement minimum, votre budget et votre stratégie (LMNP, nu, colocation…). ImmoConnect vous alerte uniquement sur les biens compatibles. Vous ne voyez que les opportunités rentables.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Matching rendement · 29,99€/mois</span>
       </div>
       <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">02</div>
         <div style="font-size:28px;margin-bottom:10px">📊</div>
-        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Rapport Hanaé IA — données officielles</div>
-        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Prix marché DVF · indice Notaires-INSEE · carte des loyers · rendement brut et net · frais de notaire. Des chiffres, pas du marketing.</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Dossier complet accessible sur tous les biens</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Adresse exacte, photos, rapport Hanaé IA inclus d'emblée sur tous les biens. Prix DVF, indice Notaires-INSEE, carte des loyers, rendement brut et net. Des chiffres officiels, pas du marketing.</div>
         <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">DVF + INSEE + Loyers</span>
       </div>
       <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">03</div>
         <div style="font-size:28px;margin-bottom:10px">🧮</div>
-        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Capacité d'emprunt en temps réel</div>
-        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Revenus, charges, apport → mensualité max à 35%. Loyers perçus pris à 90% comme les banques. Budget total affiché instantanément.</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Simulateur financier complet intégré</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Capacité d'emprunt en temps réel (loyers à 90% comme les banques), cashflow après crédit, fiscalité LMNP ou micro-foncier, TRI sur 10-20 ans, comparaison location vide vs meublé vs courte durée.</div>
         <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Calcul bancaire réel</span>
       </div>
       <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">04</div>
         <div style="font-size:28px;margin-bottom:10px">📩</div>
-        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Simulation financière complète</div>
-        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Cashflow après crédit, fiscalité LMNP ou micro-foncier, TRI sur 10-20 ans, comparaison location vide vs meublé vs courte durée. Toutes les données pour décider vite et bien.</div>
-        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Simulateur complet</span>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">5 contacts vendeurs offerts par semaine</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Contactez directement jusqu'à 5 vendeurs par semaine inclus dans l'abonnement. Les vendeurs Platinium peuvent aussi vous contacter en priorité. Contact supplémentaire à seulement 1,99€.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(30,122,98,.2);color:#5DCAA5">5 contacts/sem · supp. 1,99€</span>
+      </div>
+    </div>
+
+    <!-- AGENTS -->
+    <div id="tab-agents" class="hw-tab">
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">01</div>
+        <div style="font-size:28px;margin-bottom:10px">📁</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Dossiers vendeurs complets dès la publication</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Photos, DPE, taxe foncière, rapport Hanaé IA — tout est constitué avant que vous contactiez. Mandat simple signé via Docage en 5 minutes. Présentez le bien à vos acheteurs immédiatement.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Mandat simple en 5 min</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">02</div>
+        <div style="font-size:28px;margin-bottom:10px">🔔</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Alertes selon votre forfait — agissez en premier</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Premium alerté H+0 dès la publication. Pro à H+4. Starter à H+12. Pay per use sans alerte. Agissez avant vos concurrents sur les meilleurs dossiers Silver, Gold et Platinium.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(24,95,165,.2);color:#7EB8FF">H+0 · H+4 · H+12</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">03</div>
+        <div style="font-size:28px;margin-bottom:10px">🏆</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Candidatez — prouvez votre valeur avant le mandat</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Mode comparatif : candidatez à 9,99€ (mandat de vente ou acheteur en portefeuille). Hanaé score chaque candidat sur 100 points. Seuil qualité 60/100. Les 3 meilleurs présentés au vendeur.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Candidature · 9,99€</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">04</div>
+        <div style="font-size:28px;margin-bottom:10px">📈</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Publiez vos mandats — matching automatique gratuit</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Déclarez vos mandats vendeurs et vos acheteurs en portefeuille. ImmoConnect croise automatiquement avec les annonces compatibles et vous alerte dès qu'un bien correspond. Zéro prospection à froid.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(30,122,98,.2);color:#5DCAA5">Matching mandats gratuit</span>
       </div>
     </div>
 
@@ -861,7 +897,7 @@
 
   <script>
   function switchTab(t) {
-    var ids = ['vendeurs','agents','investisseurs'];
+    var ids = ['vendeurs','acheteurs','investisseurs','agents'];
     ids.forEach(function(id) {
       var tab = document.getElementById('tab-' + id);
       var btn = document.getElementById('btn-' + id);
@@ -879,7 +915,6 @@
     });
   }
   </script>
-
 </section>
 
 
