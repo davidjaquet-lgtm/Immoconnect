@@ -215,7 +215,11 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
         </div>
       </div>
       <div class="card" style="margin-top:0">
-        <div class="card-title"><span>Mes acheteurs en portefeuille</span><button class="btn-sm btn-sm-primary" onclick="ajouterAcheteur()">+ Ajouter</button></div>
+        <div class="card-title">
+          <span>Mandats de recherche</span>
+          <button class="btn-sm btn-sm-primary" onclick="ouvrirFormulaireRecherche()">+ Déclarer un acheteur</button>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">Déclarez les critères de vos acheteurs — ImmoConnect les croise automatiquement avec les annonces vendeurs compatibles et vous alerte dès qu'un bien correspond.</div>
         <div id="acheteurs-list">
           <div style="text-align:center;padding:20px;color:var(--muted)">Chargement...</div>
         </div>
@@ -271,7 +275,7 @@ const QUOTAS_MAX = { pay_per_use: { cands: 0, leads: 2, mandats: 2, acheteurs: 3
   if (!user) { window.location.href = 'connexion.html'; return; }
   currentUser = user;
   meta = user.user_metadata || {};
-  await Promise.all([chargerProfil(), chargerCandidatures(), chargerMandats()]);
+  await Promise.all([chargerProfil(), chargerCandidatures(), chargerMandats(), chargerMandatsRecherche()]);
 })();
 
 // ── PROFIL ──
@@ -524,8 +528,197 @@ function ajouterMandat() {
   showToast('Fonctionnalite en cours de developpement.', 'ok');
 }
 
+// ── MANDATS DE RECHERCHE ──
+
+var mandatsRecherche = [];
+
+async function chargerMandatsRecherche() {
+  if (!currentUser) return;
+  var { data } = await db.from('mandats_recherche')
+    .select('*')
+    .eq('agent_email', currentUser.email)
+    .eq('statut', 'actif')
+    .order('created_at', { ascending: false });
+  mandatsRecherche = data || [];
+  afficherMandatsRecherche();
+}
+
+function afficherMandatsRecherche() {
+  var el = document.getElementById('acheteurs-list');
+  if (!mandatsRecherche.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div style="font-size:13px">Aucun mandat de recherche déclaré</div><div style="font-size:12px;margin-top:4px;color:var(--muted)">Déclarez vos acheteurs pour le matching automatique gratuit</div></div>';
+    return;
+  }
+  el.innerHTML = mandatsRecherche.map(function(m) {
+    var tags = [];
+    if (m.type_bien) tags.push(m.type_bien);
+    if (m.surface_min) tags.push('≥ ' + m.surface_min + ' m²');
+    if (m.nb_pieces_min) tags.push('≥ ' + m.nb_pieces_min + ' pièces');
+    if (m.rendement_min) tags.push('Rdmt ≥ ' + m.rendement_min + '%');
+    return '<div style="background:var(--bg);border-radius:8px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--line)">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">'
+      + '<div style="font-size:13px;font-weight:500;color:var(--ink)">' + (m.label || 'Acheteur ' + new Date(m.created_at).toLocaleDateString('fr-FR')) + '</div>'
+      + '<div style="display:flex;gap:6px;align-items:center">'
+      + '<span style="font-size:11px;background:#E1F5EE;color:#085041;padding:2px 8px;border-radius:20px">Actif</span>'
+      + '<button onclick="supprimerMandatRecherche('' + m.id + '')" style="font-size:10px;color:var(--muted);background:transparent;border:none;cursor:pointer;text-decoration:underline">Supprimer</button>'
+      + '</div></div>'
+      + '<div style="font-size:12px;color:var(--muted);margin-bottom:6px">📍 ' + (m.secteur || m.ville || 'Non précisé') + ' · Budget max : <strong style="color:var(--ink)">' + (m.budget_max ? parseInt(m.budget_max).toLocaleString('fr-FR') + ' €' : 'Non précisé') + '</strong></div>'
+      + '<div style="display:flex;gap:6px;flex-wrap:wrap">'
+      + tags.map(function(t){ return '<span style="font-size:10px;background:var(--line);color:var(--muted);padding:2px 8px;border-radius:20px">' + t + '</span>'; }).join('')
+      + '</div>'
+      + (m.nb_matchs_total ? '<div style="font-size:11px;color:var(--teal);margin-top:6px">✓ ' + m.nb_matchs_total + ' bien(s) compatible(s) trouvé(s)</div>' : '')
+      + '</div>';
+  }).join('');
+}
+
+function ouvrirFormulaireRecherche() {
+  var forfait = meta.forfait_agent || 'pay_per_use';
+  if (forfait === 'pay_per_use') {
+    showToast('Le matching automatique est réservé aux agents abonnés (Starter, Pro, Premium). Passez à un forfait pour déclarer vos acheteurs.', 'error');
+    return;
+  }
+  var overlay = document.createElement('div');
+  overlay.id = 'modal-recherche';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto';
+  overlay.innerHTML = `
+    <div style="background:var(--warm);border-radius:12px;padding:28px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto">
+      <div style="font-size:16px;font-weight:600;color:var(--ink);margin-bottom:4px">🔍 Déclarer un mandat de recherche</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.6">ImmoConnect croisera automatiquement ces critères avec les annonces vendeurs et vous alertera dès qu'un bien correspond.</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px">Libellé acheteur</label>
+          <input id="mr-label" type="text" placeholder="Ex: Famille Dupont" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-family:Outfit,sans-serif;font-size:13px;color:var(--ink)">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px">Type de bien</label>
+          <select id="mr-type" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-family:Outfit,sans-serif;font-size:13px;color:var(--ink)">
+            <option value="">Indifférent</option>
+            <option>Appartement</option>
+            <option>Maison</option>
+            <option>Villa</option>
+            <option>Terrain</option>
+            <option>Local commercial</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px">Secteur / Ville</label>
+          <input id="mr-secteur" type="text" placeholder="Ex: Pau, Tarbes, 64..." style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-family:Outfit,sans-serif;font-size:13px;color:var(--ink)">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px">Budget maximum</label>
+          <input id="mr-budget" type="number" placeholder="Ex: 250000" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-family:Outfit,sans-serif;font-size:13px;color:var(--ink)">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px">Surface min (m²)</label>
+          <input id="mr-surface" type="number" placeholder="Ex: 60" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-family:Outfit,sans-serif;font-size:13px;color:var(--ink)">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px">Pièces min</label>
+          <select id="mr-pieces" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-family:Outfit,sans-serif;font-size:13px;color:var(--ink)">
+            <option value="">Indifférent</option>
+            <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px">Rendement min %</label>
+          <input id="mr-rendement" type="number" step="0.1" placeholder="Ex: 5" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-family:Outfit,sans-serif;font-size:13px;color:var(--ink)">
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px">
+        <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px">Commentaire (optionnel)</label>
+        <textarea id="mr-comment" rows="2" placeholder="Précisions supplémentaires sur le projet de votre acheteur..." style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-family:Outfit,sans-serif;font-size:13px;color:var(--ink);resize:vertical"></textarea>
+      </div>
+
+      <div style="background:var(--bg);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.6">
+        Le matching est <strong style="color:var(--ink)">gratuit</strong>. Dès qu'une annonce compatible est publiée, vous recevez une alerte email + une notification dans votre dashboard. Vous pouvez alors candidater à 9,99€ selon le mode choisi par le vendeur.
+      </div>
+
+      <div style="display:flex;gap:10px">
+        <button onclick="sauvegarderMandatRecherche()" style="flex:1;padding:11px;border-radius:8px;border:none;background:var(--ink);color:#fff;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer">Déclarer ce mandat</button>
+        <button onclick="document.getElementById('modal-recherche').remove()" style="padding:11px 18px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;color:var(--muted)">Annuler</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target === overlay) overlay.remove(); });
+}
+
+async function sauvegarderMandatRecherche() {
+  if (!currentUser) return;
+  var label = document.getElementById('mr-label').value.trim();
+  var type_bien = document.getElementById('mr-type').value;
+  var secteur = document.getElementById('mr-secteur').value.trim();
+  var budget_max = document.getElementById('mr-budget').value;
+  var surface_min = document.getElementById('mr-surface').value;
+  var nb_pieces_min = document.getElementById('mr-pieces').value;
+  var rendement_min = document.getElementById('mr-rendement').value;
+  var commentaire = document.getElementById('mr-comment').value.trim();
+
+  if (!secteur || !budget_max) {
+    showToast('Secteur et budget sont obligatoires.', 'error');
+    return;
+  }
+
+  var forfait = meta.forfait_agent || 'pay_per_use';
+  var QUOTAS_ACHETEURS = { pay_per_use: 3, starter: 10, pro: 30, premium: 999 };
+  if (mandatsRecherche.length >= QUOTAS_ACHETEURS[forfait]) {
+    showToast('Quota de mandats de recherche atteint pour votre forfait.', 'error');
+    return;
+  }
+
+  var { error } = await db.from('mandats_recherche').insert({
+    agent_email: currentUser.email,
+    label: label || null,
+    type_bien: type_bien || null,
+    secteur: secteur,
+    budget_max: parseFloat(budget_max),
+    surface_min: surface_min ? parseFloat(surface_min) : null,
+    nb_pieces_min: nb_pieces_min ? parseInt(nb_pieces_min) : null,
+    rendement_min: rendement_min ? parseFloat(rendement_min) : null,
+    commentaire: commentaire || null,
+    statut: 'actif',
+    nb_matchs_total: 0
+  });
+
+  if (error) { showToast('Erreur : ' + error.message, 'error'); return; }
+
+  document.getElementById('modal-recherche').remove();
+  showToast('Mandat de recherche déclaré. Matching en cours...', 'ok');
+  await chargerMandatsRecherche();
+
+  // Déclencher matching immédiat sur les annonces existantes
+  await db.functions.invoke('matcher-mandats', {
+    body: {
+      type: 'nouveau_mandat_recherche',
+      data: {
+        agent_email: currentUser.email,
+        type_bien: type_bien || null,
+        secteur: secteur,
+        budget_max: parseFloat(budget_max),
+        surface_min: surface_min ? parseFloat(surface_min) : null,
+        nb_pieces_min: nb_pieces_min ? parseInt(nb_pieces_min) : null,
+        rendement_min: rendement_min ? parseFloat(rendement_min) : null
+      }
+    }
+  }).catch(function(){});
+}
+
+async function supprimerMandatRecherche(id) {
+  if (!confirm('Supprimer ce mandat de recherche ?')) return;
+  await db.from('mandats_recherche').update({ statut: 'archive' }).eq('id', id);
+  await chargerMandatsRecherche();
+  showToast('Mandat de recherche supprimé.', 'ok');
+}
+
 function ajouterAcheteur() {
-  showToast('Fonctionnalite en cours de developpement.', 'ok');
+  ouvrirFormulaireRecherche();
 }
 
 async function supprimerMandat(id) {

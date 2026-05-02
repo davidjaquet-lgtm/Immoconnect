@@ -15,11 +15,11 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 .page{max-width:780px;margin:0 auto;padding:36px 24px 80px}
 
 /* FORFAIT SELECTOR */
-.forfait-selector{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:28px}
+.forfait-selector{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
 .forfait-card{background:var(--warm);border:2px solid var(--line);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;text-align:center}
 .forfait-card:hover{border-color:var(--muted)}
 .forfait-card.selected-gratuit{border-color:var(--muted);background:#F1EFE8}
-.forfait-card.selected-acheteur{border-color:var(--blue);background:#E6F1FB}
+
 .forfait-card.selected-investisseur{border-color:var(--coral);background:#FAECE7}
 .fc-icon{font-size:24px;margin-bottom:8px}
 .fc-name{font-size:13px;font-weight:600;margin-bottom:4px}
@@ -132,25 +132,19 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
   <div class="forfait-selector">
     <div class="forfait-card selected-gratuit" id="fc-gratuit" onclick="setForfait('gratuit')">
       <div class="fc-icon">🏠</div>
-      <div class="fc-name">Gratuit</div>
+      <div class="fc-name">Acheteur gratuit</div>
       <div class="fc-price">0 € / toujours</div>
-      <div class="fc-desc">Explorer les annonces · Contact vendeur 19,99€</div>
-    </div>
-    <div class="forfait-card" id="fc-acheteur" onclick="setForfait('acheteur')">
-      <div class="fc-icon">🔑</div>
-      <div class="fc-name">Acheteur</div>
-      <div class="fc-price">19,99 € / mois</div>
-      <div class="fc-desc">Infos complètes · Rapport Hanaé · 1 contact/semaine</div>
+      <div class="fc-desc">Prix · ville · surface · pièces visibles · 1 contact/semaine offert · Dossier 4,99€ · Contact 9,99€</div>
     </div>
     <div class="forfait-card" id="fc-investisseur" onclick="setForfait('investisseur')">
       <div class="fc-icon">📈</div>
       <div class="fc-name">Investisseur</div>
-      <div class="fc-price">39 € / mois</div>
-      <div class="fc-desc">Matching rendement · 5 contacts/semaine · Vendeurs Platinium</div>
+      <div class="fc-price">29,99 € / mois</div>
+      <div class="fc-desc">Dossiers complets inclus · Matching rendement · 5 contacts/semaine · Vendeurs Platinium · Simulateur financier</div>
     </div>
   </div>
 
-  <div class="prog-bar-wrap"><div class="prog-bar pb-gratuit" id="prog" style="width:20%"></div></div>
+  <div class="prog-bar-wrap"><div class="prog-bar pb-gratuit" id="prog" id="prog" style="width:20%"></div></div>
 
   <!-- CAPACITE D'EMPRUNT LIVE (investisseur uniquement) -->
   <div class="capacite-box" id="capacite-box">

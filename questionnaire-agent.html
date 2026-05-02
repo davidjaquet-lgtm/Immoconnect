@@ -69,6 +69,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--ink)}
 .plan-price{font-size:18px;font-weight:500;color:var(--ink)}
 .plan-cadid{font-size:10px;color:var(--muted);margin-top:2px}
 .plan-rec{font-size:9px;font-weight:700;color:var(--teal);margin-top:4px;text-transform:uppercase}
+.tarif-plan.selected-plan{border:2px solid var(--ink);background:var(--bg)}
+.tarif-plan{cursor:pointer;transition:all .2s}
+.tarif-plan:hover{border-color:var(--muted)}
 
 /* CANDIDATS ACHETEURS */
 .acheteur-card{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:10px;position:relative}
@@ -158,28 +161,38 @@ input:focus,select:focus,textarea:focus{border-color:var(--ink)}
   <!-- ÉTAPE 1 — PROFIL -->
   <div id="step1">
     <div class="tarif-info">
-      <div class="tarif-badge">🚀 Lancement</div>
-      <div style="font-size:14px;font-weight:500;margin-bottom:4px">Candidatez à 9,99€ par annonce</div>
-      <div style="font-size:12px;color:#085041;line-height:1.6">Payez uniquement quand vous candidatez sur un bien. Pas d'abonnement, pas de risque. Bientôt disponibles : forfaits illimités.</div>
-      <div class="tarif-plans">
-        <div class="tarif-plan">
-          <div class="plan-name">Lancement</div>
-          <div class="plan-price">9,99€</div>
-          <div class="plan-cadid">par candidature</div>
+      <div class="tarif-badge">🤝 Choisissez votre forfait</div>
+      <div style="font-size:14px;font-weight:500;margin-bottom:4px;color:var(--ink)">Commencez gratuitement ou choisissez un forfait</div>
+      <div style="font-size:12px;color:#085041;line-height:1.6;margin-bottom:14px">Inscription gratuite. Candidatez à 9,99€/unité en pay per use ou choisissez un forfait pour accéder aux alertes et augmenter votre volume.</div>
+      <input type="hidden" id="forfait_agent" value="pay_per_use">
+      <div class="tarif-plans" style="grid-template-columns:repeat(4,1fr)">
+        <div class="tarif-plan selected-plan" id="fp-pay_per_use" onclick="selectForfaitAgent('pay_per_use')">
+          <div class="plan-name">Pay per use</div>
+          <div class="plan-price" style="font-size:14px">Gratuit</div>
+          <div class="plan-cadid">9,99€/candidature</div>
+          <div class="plan-cadid" style="margin-top:3px">Alerte mode top 3</div>
         </div>
-        <div class="tarif-plan recommended">
+        <div class="tarif-plan" id="fp-starter" onclick="selectForfaitAgent('starter')">
           <div class="plan-name">Starter</div>
           <div class="plan-price">49€</div>
-          <div class="plan-cadid">5 candidatures/mois</div>
-          <div class="plan-rec">Bientôt</div>
+          <div class="plan-cadid">/mois · H+12</div>
+          <div class="plan-cadid" style="margin-top:3px">5 candidatures/mois</div>
         </div>
-        <div class="tarif-plan">
+        <div class="tarif-plan recommended" id="fp-pro" onclick="selectForfaitAgent('pro')">
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">99€</div>
+          <div class="plan-cadid">/mois · H+4</div>
+          <div class="plan-cadid" style="margin-top:3px">20 candidatures/mois</div>
+          <div class="plan-rec">Recommandé</div>
+        </div>
+        <div class="tarif-plan" id="fp-premium" onclick="selectForfaitAgent('premium')">
           <div class="plan-name">Premium</div>
           <div class="plan-price">199€</div>
-          <div class="plan-cadid">Illimité</div>
-          <div class="plan-rec">Bientôt</div>
+          <div class="plan-cadid">/mois · H+0</div>
+          <div class="plan-cadid" style="margin-top:3px">Illimité · +10 pts</div>
         </div>
       </div>
+      <div id="forfait-detail" style="margin-top:10px;font-size:11px;color:var(--muted);background:var(--bg);border-radius:6px;padding:8px 10px;line-height:1.6"></div>
     </div>
 
     <div class="section">
@@ -692,6 +705,24 @@ function checkPassword() {
 }
 
 // ── SOUMETTRE ──
+function selectForfaitAgent(forfait) {
+  document.getElementById('forfait_agent').value = forfait;
+  ['pay_per_use','starter','pro','premium'].forEach(function(f) {
+    var el = document.getElementById('fp-' + f);
+    if (el) el.classList.remove('selected-plan');
+  });
+  var sel = document.getElementById('fp-' + forfait);
+  if (sel) sel.classList.add('selected-plan');
+  var details = {
+    pay_per_use: 'Inscription gratuite. Alertes uniquement en mode comparatif top 3. Candidatures à 9,99€/unité. Accès dossier uniquement sur les biens en mode top 3.',
+    starter: 'Alertes H+12 sur nouveaux biens. 5 candidatures/mois incluses. 5 contacts vendeur/semaine. Matching mandats de recherche actif.',
+    pro: 'Alertes H+4 sur nouveaux biens. 20 candidatures/mois incluses. 15 contacts vendeur/semaine. Matching mandats de recherche actif.',
+    premium: 'Alertes H+0 dès la publication. Candidatures illimitées. Contacts illimités. +10 pts bonus score Hanaé. Matching mandats de recherche actif.'
+  };
+  var detail = document.getElementById('forfait-detail');
+  if (detail) detail.textContent = details[forfait] || '';
+}
+
 async function soumettre() {
   if (!validerEtape(4)) return;
   var btn = document.getElementById('btn-submit');
@@ -742,7 +773,7 @@ async function soumettre() {
           honoraires_fourchette: honoraires,
           acheteurs_portefeuille: JSON.stringify(acheteurs),
           compte_agent_valide: false,
-          forfait_agent: 'pay_per_use'
+          forfait_agent: document.getElementById('forfait_agent').value || 'pay_per_use'
         }
       }
     });
