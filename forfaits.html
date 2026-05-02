@@ -141,7 +141,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
     <a href="forfaits.html">Forfaits</a>
     <a href="questionnaire-vendeur.html" class="nav-gold">Vendre</a>
     <a href="questionnaire-acheteur.html">Acheter</a>
-    <a href="index.html#agents">Agents immo</a>
+    <a href="forfaits.html" onclick="setTimeout(function(){document.querySelector('[data-panel=agents]').click();},50)">Agents immo</a>
   </div>
   <a href="index.html" class="nav-out">Accueil</a>
 </nav>
@@ -400,7 +400,6 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
   </div>
 
   <!-- ══ AGENTS ══ -->
-    <!-- ══ AGENTS ══ -->
   <div id="panel-agents" class="panel">
     <div class="eyebrow">Agents immobiliers · carte T obligatoire</div>
     <div class="sec-title">Accédez aux meilleurs dossiers vendeurs</div>
@@ -414,37 +413,63 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
       <div class="pitch-steps">
         <div class="pitch-step">
           <div class="pitch-num" style="background:#E6F1FB;color:#0C447C">1</div>
-          <div class="pitch-txt">Le vendeur active ce mode — <strong>seuls les agents abonnés</strong> reçoivent une alerte selon leur forfait : H+0 (Premium), H+4 (Pro), H+12 (Starter)</div>
+          <div class="pitch-txt">Le vendeur active ce mode. Les agents abonnés reçoivent une alerte selon leur forfait : H+0 (Premium), H+4 (Pro), H+12 (Starter). Les pay per use n'ont pas d'alerte dans ce mode.</div>
         </div>
         <div class="pitch-step">
           <div class="pitch-num" style="background:#E6F1FB;color:#0C447C">2</div>
-          <div class="pitch-txt">Les agents consultent le dossier complet + analyse Hanaé et contactent le vendeur selon leur quota de contacts vendeur</div>
+          <div class="pitch-txt">Les agents abonnés consultent le dossier complet et contactent le vendeur selon leur quota hebdomadaire.</div>
         </div>
         <div class="pitch-step">
           <div class="pitch-num" style="background:#E6F1FB;color:#0C447C">3</div>
-          <div class="pitch-txt">Le vendeur choisit librement l'agent qui lui convient → <strong>mandat simple signé via Docage</strong></div>
+          <div class="pitch-txt">Le vendeur choisit librement l'agent qui lui convient parmi ceux qui l'ont contacté. Mandat simple signé via Docage.</div>
         </div>
       </div>
 
       <hr class="pitch-sep">
 
-      <div class="pitch-mode-badge" style="background:#E1F5EE;color:#085041">Mode — ImmoConnect sélectionne les 3 meilleurs</div>
+      <div class="pitch-mode-badge" style="background:#E1F5EE;color:#085041">Mode — Sélection par Hanaé IA</div>
       <div class="pitch-steps">
         <div class="pitch-step">
           <div class="pitch-num" style="background:#E1F5EE;color:#085041">1</div>
-          <div class="pitch-txt"><strong>Tous les agents</strong> reçoivent une alerte immédiate (H+0), abonnés comme pay per use</div>
+          <div class="pitch-txt">Tous les agents reçoivent une alerte immédiate — abonnés et pay per use. Le dossier complet est accessible à tous.</div>
         </div>
         <div class="pitch-step">
           <div class="pitch-num" style="background:#E1F5EE;color:#085041">2</div>
-          <div class="pitch-txt">Chaque agent candidate : <strong>Je veux ce mandat</strong> (mandat de vente) ou <strong>J'ai l'acheteur</strong> (acheteur en portefeuille) — 9,99€ par candidature</div>
+          <div class="pitch-txt">Chaque agent intéressé candidate à 9,99€. Il soumet son estimation du bien, sa stratégie marketing (honoraires, plan de diffusion, méthodes de vente) et ses éventuels mandats acheteurs correspondants.</div>
         </div>
         <div class="pitch-step">
           <div class="pitch-num" style="background:#E1F5EE;color:#085041">3</div>
-          <div class="pitch-txt">L'algorithme Hanaé calcule le score de chaque candidat (expérience locale, avis, cohérence d'estimation) et sélectionne les <strong>3 meilleurs profils</strong></div>
+          <div class="pitch-txt">Hanaé IA analyse chaque candidature et attribue un score. Les 3 meilleurs sont mis en avant dans le tableau comparatif du vendeur. Tous les candidats ayant obtenu au moins 60 points restent visibles.</div>
         </div>
         <div class="pitch-step">
           <div class="pitch-num" style="background:#E1F5EE;color:#085041">4</div>
-          <div class="pitch-txt">Le vendeur reçoit le comparatif des 3 agents, choisit → <strong>mandat simple automatique (Docage)</strong> + calendrier de visites</div>
+          <div class="pitch-txt">Le vendeur consulte le tableau, filtre, compare et choisit librement 1 ou 2 agents. Les agents sélectionnés sont notifiés. Mandat simple signé via Docage.</div>
+        </div>
+      </div>
+
+      <hr class="pitch-sep">
+
+      <div class="pitch-mode-badge" style="background:#F5F2EC;color:#444">Ce que Hanaé évalue</div>
+      <div class="pitch-steps">
+        <div class="pitch-step">
+          <div class="pitch-num" style="background:#F5F2EC;color:#444">→</div>
+          <div class="pitch-txt"><strong>Stratégie marketing</strong> — plan de diffusion, outils proposés (photographe, visite virtuelle), méthodes de vente, suivi vendeur. Transmise au vendeur. Engage l'agent.</div>
+        </div>
+        <div class="pitch-step">
+          <div class="pitch-num" style="background:#F5F2EC;color:#444">→</div>
+          <div class="pitch-txt"><strong>Expérience locale</strong> — ventes réalisées dans le secteur du bien. Preuve obligatoire à uploader dans votre dashboard avant de candidater.</div>
+        </div>
+        <div class="pitch-step">
+          <div class="pitch-num" style="background:#F5F2EC;color:#444">→</div>
+          <div class="pitch-txt"><strong>Cohérence d'estimation</strong> — écart entre votre estimation et l'évaluation Hanaé du bien. Automatique et confidentiel.</div>
+        </div>
+        <div class="pitch-step">
+          <div class="pitch-num" style="background:#F5F2EC;color:#444">→</div>
+          <div class="pitch-txt"><strong>Historique ImmoConnect</strong> — mandats signés via Docage sur la plateforme. Calculé automatiquement.</div>
+        </div>
+        <div class="pitch-step">
+          <div class="pitch-num" style="background:#FAEEDA;color:#633806">+</div>
+          <div class="pitch-txt"><strong>Bonus mandat de recherche</strong> — si vous avez déclaré un acheteur correspondant à ce bien avant sa publication, votre score est bonifié.</div>
         </div>
       </div>
     </div>
