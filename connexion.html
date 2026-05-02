@@ -560,7 +560,17 @@ async function afficherDashboard(user) {
   // Panneaux
   profils.forEach(function(p, i) {
     html += '<div class="dash-panel' + (i===0?' active':'') + '" id="dpanel-'+p+'">';
-    if (p === 'vendeur') html += buildVendeurPanel(annonces, messages);
+    if (p === 'vendeur') {
+      html += buildVendeurPanel(annonces, messages);
+      // Charger candidatures après render
+      setTimeout(function() {
+        annonces.forEach(function(a) {
+          if (a.mode_contact === 'comparatif' || a.mode_contact === 'acheteurs_agents') {
+            chargerCandidaturesAnnonce(a.id, a);
+          }
+        });
+      }, 200);
+    }
     if (p === 'acheteur') html += buildAcheteurPanel(projets, false); // forfait 'gratuit' en base
     if (p === 'investisseur') html += buildAcheteurPanel(projets, true);
     if (p === 'agent') html += buildAgentPanel(leads, meta);
@@ -632,8 +642,23 @@ function buildVendeurPanel(annonces, messages) {
     h += '</div></div>';
   }
 
+  // ── TABLEAU CANDIDATURES PAR ANNONCE ──
+  h += '<div class="sec-head"><div class="sec-ttl">Candidatures agents</div></div>';
+  if (annonces.length) {
+    annonces.forEach(function(a) {
+      if (a.mode_contact === 'comparatif' || a.mode_contact === 'acheteurs_agents') {
+        h += '<div id="cand-section-' + a.id + '" style="margin-bottom:24px">';
+        h += '<div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:10px">'
+          + (a.titre || a.type_bien + ' · ' + a.ville)
+          + '<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:8px">Chargement...</span></div>';
+        h += '<div id="tableau-cand-' + a.id + '"></div>';
+        h += '</div>';
+      }
+    });
+  }
+
   // Annonces
-  h += '<div class="sec-head"><div class="sec-ttl">Mes annonces</div><a href="questionnaire-vendeur.html" class="btn-add ba-teal">+ Nouvelle annonce</a></div>';
+  h += '<div class="sec-head" style="margin-top:8px"><div class="sec-ttl">Mes annonces</div><a href="questionnaire-vendeur.html" class="btn-add ba-teal">+ Nouvelle annonce</a></div>';
   if (!annonces.length) {
     h += '<div class="empty"><div class="empty-ico">🏠</div>Aucune annonce.<br><br><a href="questionnaire-vendeur.html" class="btn-add ba-teal">Déposer mon bien</a></div>';
   } else {
@@ -675,6 +700,261 @@ function buildVendeurPanel(annonces, messages) {
     });
   }
   return h;
+}
+
+// ══ TABLEAU CANDIDATURES VENDEUR ══
+
+var agentsMasques = {};
+var agentsSelectionnes = {};
+var detailOuvert = {};
+
+async function chargerCandidaturesAnnonce(annonceId, annonce) {
+  var el = document.getElementById('tableau-cand-' + annonceId);
+  if (!el) return;
+  var { data: cands } = await db.from('candidatures_agents')
+    .select('*')
+    .eq('annonce_id', annonceId)
+    .gte('score_total', 60)
+    .order('score_brut', { ascending: false });
+  var hdr = document.querySelector('#cand-section-' + annonceId + ' span');
+  if (hdr) hdr.textContent = cands && cands.length ? cands.length + ' candidat(s)' : 'Aucune candidature';
+  if (!cands || !cands.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:12px;background:var(--bg);border-radius:8px">Aucune candidature reçue pour le moment.</div>';
+    return;
+  }
+  agentsMasques[annonceId] = agentsMasques[annonceId] || {};
+  agentsSelectionnes[annonceId] = agentsSelectionnes[annonceId] || {};
+  renderTableauCandidatures(annonceId, cands, annonce);
+}
+
+function renderTableauCandidatures(annonceId, cands, annonce) {
+  var el = document.getElementById('tableau-cand-' + annonceId);
+  if (!el) return;
+  var nbSel = Object.keys(agentsSelectionnes[annonceId] || {}).filter(function(k){ return agentsSelectionnes[annonceId][k]; }).length;
+  var hasMasques = Object.values(agentsMasques[annonceId] || {}).some(function(v){ return v; });
+
+  var h = '<div style="margin-bottom:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">';
+  if (nbSel > 0) {
+    h += '<button onclick="confirmerChoix('' + annonceId + '')" style="background:var(--ink);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif">'
+      + 'Choisir ' + nbSel + ' agent(s) sélectionné(s)</button>';
+  }
+  if (hasMasques) {
+    h += '<button onclick="reafficherTous('' + annonceId + '')" style="background:transparent;border:1px solid var(--line);color:var(--muted);padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Outfit,sans-serif">Réafficher tous</button>';
+  }
+  if (nbSel >= 1) {
+    h += '<button onclick="comparerAgents('' + annonceId + '')" style="background:transparent;border:1px solid var(--line);color:var(--ink);padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Outfit,sans-serif">Comparer sélectionnés</button>';
+  }
+  h += '</div>';
+
+  // Question multi-agents
+  h += '<div style="margin-bottom:10px;display:flex;gap:8px;align-items:center">';
+  h += '<input id="q-' + annonceId + '" type="text" placeholder="Poser une question aux agents sélectionnés..." style="flex:1;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-family:Outfit,sans-serif;font-size:12px;color:var(--ink)">';
+  h += '<button onclick="envoyerQuestion('' + annonceId + '')" style="background:var(--ink);color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:Outfit,sans-serif">Envoyer</button>';
+  h += '</div>';
+
+  h += '<div style="border:1px solid var(--line);border-radius:10px;overflow:hidden">';
+  h += '<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
+  h += '<thead style="background:var(--bg)">';
+  h += '<tr>';
+  h += '<th style="width:28px;padding:8px 10px"></th>';
+  h += '<th style="font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;text-align:left;width:160px">Agent</th>';
+  h += '<th style="font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;text-align:left;width:110px">Score Hanaé</th>';
+  h += '<th style="font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;text-align:left;width:80px">Honoraires</th>';
+  h += '<th style="font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;text-align:left;width:90px">Expérience</th>';
+  h += '<th style="font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;text-align:left;width:60px">Outils</th>';
+  h += '<th style="font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;text-align:left;width:70px">Estimation</th>';
+  h += '<th style="font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;text-align:left">Mandat</th>';
+  h += '<th style="width:120px;padding:8px 10px"></th>';
+  h += '</tr></thead><tbody>';
+
+  cands.forEach(function(cand, idx) {
+    var estMasque = (agentsMasques[annonceId] || {})[cand.id];
+    var estSel = (agentsSelectionnes[annonceId] || {})[cand.id];
+    var estTop3 = idx < 3;
+    var estDetail = (detailOuvert[annonceId] || {}) === cand.id || (detailOuvert[annonceId] || {})[cand.id];
+    var rowStyle = 'border-top:1px solid var(--line);' + (estSel ? 'background:#E1F5EE;' : '') + (estMasque ? 'opacity:.35;' : '');
+    var initiales = (cand.nom_agent || 'A').split(' ').map(function(w){ return w[0]; }).join('').substring(0,2).toUpperCase();
+    var ecartEstim = annonce && annonce.estimation_hanae ? Math.round((parseFloat(cand.estimation_agent||0) - annonce.estimation_hanae) / annonce.estimation_hanae * 100) : null;
+    var ecartStr = ecartEstim !== null ? (ecartEstim > 0 ? '+' : '') + ecartEstim + '%' : '—';
+    var ecartColor = ecartEstim !== null ? (Math.abs(ecartEstim) < 5 ? 'var(--teal)' : Math.abs(ecartEstim) < 10 ? 'var(--amber)' : 'var(--coral)') : 'var(--muted)';
+    var mandatHtml = cand.bonus_mandat === 20 ? '<span style="font-size:10px;padding:2px 7px;border-radius:20px;background:#E1F5EE;color:#085041;font-weight:500">+20 pts</span>'
+      : cand.bonus_mandat === 10 ? '<span style="font-size:10px;padding:2px 7px;border-radius:20px;background:#FAEEDA;color:#633806;font-weight:500">+10 pts</span>'
+      : '<span style="font-size:11px;color:var(--muted)">—</span>';
+    var outilsHtml = '<div style="display:flex;gap:3px">'
+      + '<div style="width:18px;height:18px;border-radius:4px;background:' + (cand.outil_photographe ? '#E1F5EE' : 'var(--bg)') + ';display:flex;align-items:center;justify-content:center;font-size:9px;color:' + (cand.outil_photographe ? '#085041' : 'var(--muted)') + '" title="Photographe pro">P</div>'
+      + '<div style="width:18px;height:18px;border-radius:4px;background:' + (cand.outil_visite_virtuelle ? '#E1F5EE' : 'var(--bg)') + ';display:flex;align-items:center;justify-content:center;font-size:9px;color:' + (cand.outil_visite_virtuelle ? '#085041' : 'var(--muted)') + '" title="Visite virtuelle">V</div>'
+      + '</div>';
+
+    h += '<tr style="' + rowStyle + '">';
+    h += '<td style="padding:8px 10px"><input type="checkbox" ' + (estSel ? 'checked' : '') + ' ' + (estMasque ? 'disabled' : '') + ' onchange="toggleSelection('' + annonceId + '','' + cand.id + '',this.checked,event)" style="cursor:pointer"></td>';
+    h += '<td style="padding:8px 10px"><div style="display:flex;align-items:center;gap:6px">'
+      + '<div style="width:28px;height:28px;border-radius:50%;background:var(--bg);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:var(--muted);flex-shrink:0">' + initiales + '</div>'
+      + '<div><div style="font-size:12px;font-weight:500;color:var(--ink)">' + (cand.nom_agent || cand.agent_email || 'Agent') + (estTop3 ? '<span style="font-size:9px;background:#E6F1FB;color:#0C447C;padding:1px 6px;border-radius:20px;margin-left:4px;font-weight:500">top 3</span>' : '') + '</div>'
+      + '<div style="font-size:10px;color:var(--muted)">' + (cand.agence_agent || '') + '</div>'
+      + (estTop3 && idx === 0 ? '<div style="font-size:9px;background:#E1F5EE;color:#085041;padding:1px 6px;border-radius:20px;display:inline-block;margin-top:2px;font-weight:500">Recommandé Hanaé</div>' : '')
+      + '</div></div></td>';
+    h += '<td style="padding:8px 10px"><div style="display:flex;align-items:center;gap:5px">'
+      + '<div style="flex:1;height:4px;background:var(--line);border-radius:2px;overflow:hidden"><div style="height:100%;width:' + cand.score_total + '%;background:var(--ink);border-radius:2px"></div></div>'
+      + '<span style="font-size:12px;font-weight:500;min-width:26px;text-align:right">' + cand.score_total + '</span>'
+      + '</div></td>';
+    h += '<td style="padding:8px 10px;font-size:12px;font-weight:500">' + (cand.honoraires ? cand.honoraires + '%' : '—') + '</td>';
+    h += '<td style="padding:8px 10px;font-size:12px">' + (cand.nb_preuves_vente > 0 ? cand.nb_preuves_vente + ' vente(s)' : '<span style="color:var(--muted)">—</span>') + '</td>';
+    h += '<td style="padding:8px 10px">' + outilsHtml + '</td>';
+    h += '<td style="padding:8px 10px;font-size:12px;color:' + ecartColor + '">' + ecartStr + '</td>';
+    h += '<td style="padding:8px 10px">' + mandatHtml + '</td>';
+    h += '<td style="padding:8px 10px"><div style="display:flex;gap:4px">'
+      + '<button onclick="toggleDetailCand('' + annonceId + '','' + cand.id + '')" style="font-size:10px;padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:transparent;cursor:pointer;font-family:Outfit,sans-serif;color:var(--ink)">Stratégie</button>'
+      + '<button onclick="masquerAgent('' + annonceId + '','' + cand.id + '')" style="font-size:10px;padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:transparent;cursor:pointer;font-family:Outfit,sans-serif;color:var(--muted)">' + (estMasque ? 'Afficher' : 'Masquer') + '</button>'
+      + '</div></td>';
+    h += '</tr>';
+
+    if (estDetail) {
+      h += '<tr><td colspan="9" style="padding:14px 16px;background:var(--bg);border-top:1px solid var(--line)">'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">'
+        + '<div><div style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px">Connaissance secteur & outils</div>'
+        + '<div style="font-size:12px;color:var(--ink);line-height:1.6">' + (cand.strategie_marketing || '—') + '</div>'
+        + '<div style="margin-top:10px"><div style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:5px">Engagements</div>'
+        + (cand.outil_photographe ? '<div style="font-size:11px;color:var(--teal);margin-bottom:3px">✓ Photographe professionnel inclus</div>' : '')
+        + (cand.outil_visite_virtuelle ? '<div style="font-size:11px;color:var(--teal);margin-bottom:3px">✓ Visite virtuelle 3D incluse</div>' : '')
+        + (cand.outil_home_staging ? '<div style="font-size:11px;color:var(--teal);margin-bottom:3px">✓ Home staging conseillé</div>' : '')
+        + (cand.outil_notaire ? '<div style="font-size:11px;color:var(--teal);margin-bottom:3px">✓ Partenaire notaire : ' + (cand.nom_notaire||'—') + '</div>' : '')
+        + (cand.outil_courtier ? '<div style="font-size:11px;color:var(--teal);margin-bottom:3px">✓ Partenaire courtier : ' + (cand.nom_courtier||'—') + '</div>' : '')
+        + '</div></div>'
+        + '<div><div style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px">Méthodes de vente — engagement transmis</div>'
+        + '<div style="font-size:12px;color:var(--ink);line-height:1.6">' + (cand.methode_vente || '—') + '</div>'
+        + '</div>'
+        + '</div></td></tr>';
+    }
+  });
+
+  h += '</tbody></table></div>';
+  el.innerHTML = h;
+}
+
+function toggleSelection(annonceId, candId, val, e) {
+  e.stopPropagation();
+  if (!agentsSelectionnes[annonceId]) agentsSelectionnes[annonceId] = {};
+  var nbSel = Object.keys(agentsSelectionnes[annonceId]).filter(function(k){ return agentsSelectionnes[annonceId][k]; }).length;
+  if (val && nbSel >= 2) {
+    showToast('Maximum 2 agents sélectionnables.', 'error');
+    e.target.checked = false;
+    return;
+  }
+  agentsSelectionnes[annonceId][candId] = val;
+  var el = document.getElementById('tableau-cand-' + annonceId);
+  if (el) {
+    var cands = el._cands || [];
+    renderTableauCandidatures(annonceId, cands, el._annonce);
+    chargerCandidaturesAnnonce(annonceId, el._annonce);
+  }
+  chargerCandidaturesAnnonce(annonceId, null);
+}
+
+function masquerAgent(annonceId, candId) {
+  if (!agentsMasques[annonceId]) agentsMasques[annonceId] = {};
+  agentsMasques[annonceId][candId] = !agentsMasques[annonceId][candId];
+  chargerCandidaturesAnnonce(annonceId, null);
+}
+
+function reafficherTous(annonceId) {
+  agentsMasques[annonceId] = {};
+  chargerCandidaturesAnnonce(annonceId, null);
+}
+
+function toggleDetailCand(annonceId, candId) {
+  if (!detailOuvert[annonceId]) detailOuvert[annonceId] = {};
+  detailOuvert[annonceId][candId] = !detailOuvert[annonceId][candId];
+  chargerCandidaturesAnnonce(annonceId, null);
+}
+
+async function envoyerQuestion(annonceId) {
+  var input = document.getElementById('q-' + annonceId);
+  var question = input ? input.value.trim() : '';
+  if (!question) { showToast('Rédigez votre question.', 'error'); return; }
+  var selIds = Object.keys(agentsSelectionnes[annonceId] || {}).filter(function(k){ return agentsSelectionnes[annonceId][k]; });
+  if (!selIds.length) { showToast('Sélectionnez au moins un agent pour envoyer la question.', 'error'); return; }
+
+  var { data: cands } = await db.from('candidatures_agents').select('agent_email, nom_agent').in('id', selIds);
+  for (var cc of (cands || [])) {
+    await db.from('messages').insert({
+      expediteur_email: currentUser.email,
+      destinataire_email: cc.agent_email,
+      annonce_id: annonceId,
+      message: question,
+      type: 'question_vendeur',
+      lu: false
+    }).catch(function(){});
+    await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'question_vendeur_agent',
+        to: cc.agent_email,
+        subject: 'Question du vendeur sur votre candidature · ImmoConnect',
+        nom_agent: cc.nom_agent || cc.agent_email,
+        question: question,
+        lien: 'https://immoconnect-agence.fr/messagerie.html?annonce=' + annonceId
+      }
+    }).catch(function(){});
+  }
+  if (input) input.value = '';
+  showToast('Question envoyée à ' + (cands||[]).length + ' agent(s).', 'ok');
+}
+
+function comparerAgents(annonceId) {
+  var selIds = Object.keys(agentsSelectionnes[annonceId] || {}).filter(function(k){ return agentsSelectionnes[annonceId][k]; });
+  if (selIds.length < 2) { showToast('Sélectionnez 2 agents pour comparer.', 'error'); return; }
+  showToast('Comparaison de ' + selIds.length + ' agents — disponible prochainement.', 'ok');
+}
+
+async function confirmerChoix(annonceId) {
+  var selIds = Object.keys(agentsSelectionnes[annonceId] || {}).filter(function(k){ return agentsSelectionnes[annonceId][k]; });
+  if (!selIds.length) return;
+  if (!confirm('Confirmer le choix de ' + selIds.length + ' agent(s) pour ce bien ?')) return;
+
+  var { data: choisis } = await db.from('candidatures_agents').select('agent_email, nom_agent').in('id', selIds);
+  var { data: annonce } = await db.from('annonces_vendeurs').select('titre, type_bien, ville').eq('id', annonceId).single().catch(function(){ return { data: null }; });
+  var bienTitre = annonce ? (annonce.titre || annonce.type_bien + ' ' + annonce.ville) : 'votre bien';
+
+  // Notifier les agents retenus
+  for (var ch of (choisis || [])) {
+    await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'agent_retenu',
+        to: ch.agent_email,
+        subject: 'Félicitations — Vous avez été sélectionné · ImmoConnect',
+        nom_agent: ch.nom_agent || ch.agent_email,
+        bien_titre: bienTitre,
+        nb_agents: (choisis||[]).length,
+        lien: 'https://immoconnect-agence.fr/connexion.html'
+      }
+    }).catch(function(){});
+  }
+
+  // Notifier les autres agents non retenus
+  var { data: nonChoisis } = await db.from('candidatures_agents')
+    .select('agent_email, nom_agent')
+    .eq('annonce_id', annonceId)
+    .not('id', 'in', '(' + selIds.join(',') + ')');
+  for (var nc of (nonChoisis || [])) {
+    await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'agent_non_retenu',
+        to: nc.agent_email,
+        subject: 'Un agent a été retenu sur ce bien · ImmoConnect',
+        nom_agent: nc.nom_agent || nc.agent_email,
+        bien_titre: bienTitre,
+        lien: 'https://immoconnect-agence.fr/connexion.html'
+      }
+    }).catch(function(){});
+  }
+
+  // Mettre à jour statuts en base
+  await db.from('candidatures_agents').update({ statut: 'selectionne' }).in('id', selIds);
+  await db.from('candidatures_agents').update({ statut: 'non_retenu' })
+    .eq('annonce_id', annonceId)
+    .not('id', 'in', '(' + selIds.join(',') + ')');
+
+  showToast('Votre choix a été confirmé. Les agents ont été notifiés.', 'ok');
+  setTimeout(function(){ chargerCandidaturesAnnonce(annonceId, null); }, 500);
 }
 
 // ══ PANNEAU ACHETEUR / INVESTISSEUR ══

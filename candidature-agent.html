@@ -172,13 +172,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--ink)}
     <div class="flux-wrap" id="flux-cards">
       <div class="flux-card" id="flux-A" onclick="selectFlux('A')">
         <div class="flux-icon">🎯</div>
-        <div class="flux-name" style="color:#185FA5">Flux A — Je veux le mandat</div>
+        <div class="flux-name" style="color:#185FA5">Mandat — Je veux le mandat</div>
         <div class="flux-desc">Vous pensez pouvoir vendre ce bien. Vous proposez votre strategie, vos honoraires et votre estimation du marche.</div>
         <div class="flux-badge" style="background:#E6F1FB;color:#185FA5">Mandat de vente</div>
       </div>
       <div class="flux-card" id="flux-B" onclick="selectFlux('B')">
         <div class="flux-icon">👥</div>
-        <div class="flux-name" style="color:#1E7A62">Flux B — J'ai un acheteur</div>
+        <div class="flux-name" style="color:#1E7A62">Portefeuille — J'ai un acheteur</div>
         <div class="flux-desc">Vous avez un acheteur en portefeuille compatible. Vous declarez son profil pour prouver la pertinence de votre candidature.</div>
         <div class="flux-badge" style="background:#E1F5EE;color:#1E7A62">Acheteur en portefeuille</div>
       </div>
@@ -467,9 +467,9 @@ function goStep(n) {
   }
 
   if (n === 3) {
-    document.getElementById('recap-flux').textContent = flux === 'A' ? 'Flux A — Mandat de vente' : 'Flux B — Acheteur en portefeuille';
+    document.getElementById('recap-flux').textContent = flux === 'mandat' ? 'Mandat de vente' : 'Acheteur en portefeuille';
     document.getElementById('recap-score').textContent = scoreEstime + '/100';
-    document.getElementById('conf-flux').textContent = flux === 'A' ? 'Flux A — Mandat de vente' : 'Flux B — Acheteur en portefeuille';
+    document.getElementById('conf-flux').textContent = flux === 'mandat' ? 'Mandat de vente' : 'Acheteur en portefeuille';
     document.getElementById('conf-score').textContent = scoreEstime + '/100';
   }
 
@@ -493,7 +493,7 @@ function validerStep1() {
 }
 
 function validerStep2() {
-  if (flux === 'A') {
+  if (flux === 'mandat') {
     var estimation = document.getElementById('estimation-agent').value;
     var honoraires = document.getElementById('honoraires-A').value;
     var strategie = document.getElementById('strategie-A').value;
@@ -539,7 +539,7 @@ function majScorePreview() {
   ];
   var total = scoreExp + scoreEst + scoreRep + scoreProfil;
 
-  if (flux === 'A') {
+  if (flux === 'mandat') {
     var strategie = document.getElementById('strategie-A').value || '';
     var honoraires = document.getElementById('honoraires-A').value || '';
     var marketing = 0;
@@ -636,7 +636,7 @@ async function payer() {
       score_total: scoreEstime
     };
 
-    if (flux === 'A') {
+    if (flux === 'mandat') {
       payload.honoraires_proposes = document.getElementById('honoraires-A').value;
       payload.message_vendeur = document.getElementById('message-vendeur-A').value;
       payload.estimation_agent = parseFloat(document.getElementById('estimation-agent').value) || null;

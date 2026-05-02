@@ -275,7 +275,7 @@ const QUOTAS_MAX = { pay_per_use: { cands: 0, leads: 2, mandats: 2, acheteurs: 3
   if (!user) { window.location.href = 'connexion.html'; return; }
   currentUser = user;
   meta = user.user_metadata || {};
-  await Promise.all([chargerProfil(), chargerCandidatures(), chargerMandats(), chargerMandatsRecherche()]);
+  await Promise.all([chargerProfil(), chargerCandidatures(), chargerMandats(), chargerMandatsRecherche(), chargerPreuves()]);
 })();
 
 // ── PROFIL ──
@@ -526,6 +526,87 @@ function ajouterMandat() {
   var maxMandats = QUOTAS_MAX[forfait]?.mandats || 2;
   if (mandats.length >= maxMandats) { showToast('Quota de mandats atteint (' + maxMandats + ' max pour votre forfait).', 'err'); return; }
   showToast('Fonctionnalite en cours de developpement.', 'ok');
+}
+
+// ── PREUVES DE VENTE LOCALES ──
+
+async function chargerPreuves() {
+  if (!currentUser) return;
+  var { data: agentData } = await db.from('agents_validation')
+    .select('preuve_vente_url, nb_ventes_locales_prouvees')
+    .eq('email', currentUser.email)
+    .single().catch(function(){ return { data: null }; });
+  var el = document.getElementById('preuves-list');
+  if (!el) return;
+  var preuves = agentData?.preuve_vente_url || [];
+  if (!preuves.length) {
+    el.innerHTML = '<div style="text-align:center;padding:14px;font-size:12px"><div style="font-size:24px;margin-bottom:8px">📄</div><div style="color:var(--muted)">Aucune preuve uploadée</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Uploadez des compromis ou actes de vente (anonymisés) pour scorer sur l'expérience locale.</div></div>';
+    return;
+  }
+  var nbPts = preuves.length >= 6 ? 20 : preuves.length === 5 ? 18 : preuves.length === 4 ? 17 : preuves.length === 3 ? 16 : preuves.length === 2 ? 15 : 10;
+  el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+    + '<div style="font-size:12px;color:var(--ink);font-weight:500">' + preuves.length + ' preuve(s) uploadée(s)</div>'
+    + '<span style="font-size:11px;background:#E1F5EE;color:#085041;padding:2px 8px;border-radius:20px;font-weight:500">' + nbPts + ' pts expérience</span>'
+    + '</div>'
+    + preuves.map(function(url, i) {
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--bg);border-radius:6px;margin-bottom:4px">'
+          + '<div style="font-size:12px;color:var(--ink)">📄 Preuve de vente ' + (i+1) + '</div>'
+          + '<div style="display:flex;gap:6px">'
+          + '<a href="' + url + '" target="_blank" style="font-size:11px;color:var(--muted);text-decoration:underline">Voir</a>'
+          + '<button onclick="supprimerPreuve(' + i + ')" style="font-size:11px;color:var(--muted);background:transparent;border:none;cursor:pointer;text-decoration:underline;font-family:Outfit,sans-serif">Supprimer</button>'
+          + '</div></div>';
+      }).join('');
+}
+
+function ouvrirUploadPreuves() {
+  var overlay = document.createElement('div');
+  overlay.id = 'modal-preuves';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML = '<div style="background:var(--warm);border-radius:12px;padding:28px;max-width:440px;width:100%">'
+    + '<div style="font-size:16px;font-weight:600;color:var(--ink);margin-bottom:8px">📄 Ajouter des preuves de vente</div>'
+    + '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:16px">Uploadez vos compromis de vente ou actes (pages anonymisées). Date visible obligatoire. Ventes des 12 derniers mois dans un rayon de 20km uniquement.</div>'
+    + '<input type="file" id="preuve-upload-input" multiple accept=".pdf,.jpg,.jpeg,.png" style="font-size:12px;color:var(--muted);margin-bottom:16px;width:100%">'
+    + '<div style="display:flex;gap:10px">'
+    + '<button onclick="uploadPreuves()" style="flex:1;padding:11px;border-radius:8px;border:none;background:var(--ink);color:#fff;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer">Uploader</button>'
+    + '<button onclick="document.getElementById('modal-preuves').remove()" style="padding:11px 18px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;color:var(--muted)">Annuler</button>'
+    + '</div></div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target === overlay) overlay.remove(); });
+}
+
+async function uploadPreuves() {
+  var input = document.getElementById('preuve-upload-input');
+  if (!input || !input.files.length) { showToast('Sélectionnez au moins un fichier.', 'error'); return; }
+  var { data: agentData } = await db.from('agents_validation').select('preuve_vente_url').eq('email', currentUser.email).single().catch(function(){ return { data: null }; });
+  var existantes = agentData?.preuve_vente_url || [];
+  var urls = [...existantes];
+
+  for (var file of Array.from(input.files)) {
+    var path = 'preuves/' + currentUser.id + '/' + Date.now() + '_' + file.name;
+    var { data: uploaded } = await db.storage.from('documents-agents').upload(path, file, { upsert: true });
+    if (uploaded) {
+      var { data: urlData } = db.storage.from('documents-agents').getPublicUrl(path);
+      if (urlData?.publicUrl) urls.push(urlData.publicUrl);
+    }
+  }
+
+  await db.from('agents_validation').update({
+    preuve_vente_url: urls,
+    nb_ventes_locales_prouvees: urls.length
+  }).eq('email', currentUser.email);
+
+  document.getElementById('modal-preuves').remove();
+  showToast(input.files.length + ' preuve(s) uploadée(s).', 'ok');
+  await chargerPreuves();
+}
+
+async function supprimerPreuve(index) {
+  if (!confirm('Supprimer cette preuve ?')) return;
+  var { data: agentData } = await db.from('agents_validation').select('preuve_vente_url').eq('email', currentUser.email).single().catch(function(){ return { data: null }; });
+  var urls = (agentData?.preuve_vente_url || []).filter(function(_, i){ return i !== index; });
+  await db.from('agents_validation').update({ preuve_vente_url: urls, nb_ventes_locales_prouvees: urls.length }).eq('email', currentUser.email);
+  await chargerPreuves();
+  showToast('Preuve supprimée.', 'ok');
 }
 
 // ── MANDATS DE RECHERCHE ──
