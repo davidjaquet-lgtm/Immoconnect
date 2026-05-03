@@ -170,13 +170,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--ink)}
     <!-- CHOIX DU FLUX -->
     <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Choisissez votre type de candidature</div>
     <div class="flux-wrap" id="flux-cards">
-      <div class="flux-card" id="flux-A" onclick="selectFlux('A')">
+      <div class="flux-card" id="flux-mandat" onclick="selectFlux('mandat')">
         <div class="flux-icon">🎯</div>
         <div class="flux-name" style="color:#185FA5">Mandat — Je veux le mandat</div>
         <div class="flux-desc">Vous pensez pouvoir vendre ce bien. Vous proposez votre strategie, vos honoraires et votre estimation du marche.</div>
         <div class="flux-badge" style="background:#E6F1FB;color:#185FA5">Mandat de vente</div>
       </div>
-      <div class="flux-card" id="flux-B" onclick="selectFlux('B')">
+      <div class="flux-card" id="flux-portefeuille" onclick="selectFlux('portefeuille')">
         <div class="flux-icon">👥</div>
         <div class="flux-name" style="color:#1E7A62">Portefeuille — J'ai un acheteur</div>
         <div class="flux-desc">Vous avez un acheteur en portefeuille compatible. Vous declarez son profil pour prouver la pertinence de votre candidature.</div>
@@ -205,7 +205,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--ink)}
   <div id="step2" style="display:none">
 
     <!-- FLUX A -->
-    <div id="form-flux-A" style="display:none">
+    <div id="form-flux-mandat" style="display:none">
       <div class="section">
         <div class="section-title"><div class="section-icon">📊</div>Votre strategie de vente</div>
         <div class="field">
@@ -247,7 +247,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--ink)}
     </div>
 
     <!-- FLUX B -->
-    <div id="form-flux-B" style="display:none">
+    <div id="form-flux-portefeuille" style="display:none">
       <div class="section">
         <div class="section-title"><div class="section-icon">👤</div>Profil de votre acheteur</div>
         <div class="info-box">Votre acheteur reste anonyme. Seuls son budget, type de bien et secteur sont utilises pour evaluer la pertinence de votre candidature.</div>
@@ -479,11 +479,11 @@ function goStep(n) {
 // ── CHOIX FLUX ──
 function selectFlux(f) {
   flux = f;
-  document.getElementById('flux-A').className = 'flux-card' + (f === 'A' ? ' selected-A' : '');
-  document.getElementById('flux-B').className = 'flux-card' + (f === 'B' ? ' selected-B' : '');
+  document.getElementById('flux-A').className = 'flux-card' + (f === 'mandat' ? ' selected-A' : '');
+  document.getElementById('flux-B').className = 'flux-card' + (f === 'portefeuille' ? ' selected-B' : '');
   document.getElementById('btn-next-1').disabled = false;
-  document.getElementById('form-flux-A').style.display = f === 'A' ? 'block' : 'none';
-  document.getElementById('form-flux-B').style.display = f === 'B' ? 'block' : 'none';
+  document.getElementById('form-flux-A').style.display = f === 'mandat' ? 'block' : 'none';
+  document.getElementById('form-flux-B').style.display = f === 'portefeuille' ? 'block' : 'none';
 }
 
 // ── VALIDATIONS ──

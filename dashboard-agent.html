@@ -380,13 +380,13 @@ async function chargerCandidatures() {
     var statut = c.statut;
     var statutLabel = { en_attente: 'En attente', selectionne: 'Selectionne', non_retenu: 'Non retenu', gagnant: 'Mandat obtenu' }[statut] || statut;
     var statutClass = { en_attente: 's-attente', selectionne: 's-selectionne', non_retenu: 's-non-retenu', gagnant: 's-gagnant' }[statut] || '';
-    var fluxBg = c.flux === 'A' ? '#E6F1FB' : '#E1F5EE';
-    var fluxColor = c.flux === 'A' ? '#185FA5' : '#1E7A62';
+    var fluxBg = c.flux === 'mandat' ? '#E6F1FB' : '#E1F5EE';
+    var fluxColor = c.flux === 'mandat' ? '#185FA5' : '#1E7A62';
     var scoreColor = (c.score_total || 0) >= 70 ? 'var(--teal)' : (c.score_total || 0) >= 50 ? 'var(--amber)' : 'var(--muted)';
     var dateStr = c.created_at ? new Date(c.created_at).toLocaleDateString('fr-FR') : '';
 
     return '<div class="cand-item">'
-      + '<div class="cand-flux" style="background:' + fluxBg + ';color:' + fluxColor + '">' + (c.flux === 'A' ? '🎯' : '👥') + '</div>'
+      + '<div class="cand-flux" style="background:' + fluxBg + ';color:' + fluxColor + '">' + (c.flux === 'mandat' ? '🎯' : '👥') + '</div>'
       + '<div class="cand-info">'
       + '<div class="cand-bien">' + titre + '</div>'
       + '<div class="cand-meta">' + prix + ' · ' + dateStr + ' · Flux ' + c.flux + '</div>'

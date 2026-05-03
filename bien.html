@@ -701,6 +701,73 @@ function buildContactButtons(b, niv) {
   return html;
 }
 
+// ── DÉCLARER ACHETEUR POTENTIEL (mode acheteurs_agents) ──
+async function declarerAcheteur(annonceId, mandatId, forfait) {
+  if (!currentUser) { window.location.href = 'connexion.html'; return; }
+
+  // Vérifier le quota via matcher-mandats
+  var res = await db.functions.invoke('matcher-mandats', {
+    body: {
+      type: 'verifier_quota_lead',
+      data: { agent_email: currentUser.email, annonce_id: annonceId, forfait: forfait }
+    }
+  }).catch(function(){ return { data: { autorise: false, message: 'Erreur réseau' } }; })
+
+  var result = res.data || {}
+  if (!result.autorise) {
+    if (result.raison === 'quota_epuise') {
+      showToast('Quota de contacts vendeur atteint cette semaine.', 'error')
+    } else {
+      showToast(result.message || 'Contact non autorisé.', 'error')
+    }
+    return
+  }
+
+  // Ouvrir la messagerie avec pré-remplissage "J'ai un acheteur potentiel"
+  var { data: annonce } = await db.from('annonces_vendeurs').select('email_contact, titre, type_bien, ville').eq('id', annonceId).single().catch(function(){ return { data: null } })
+  var { data: mandat } = await db.from('mandats_recherche').select('label, budget_max, type_bien, secteur').eq('id', mandatId).single().catch(function(){ return { data: null } })
+
+  var message = 'Bonjour,
+
+J'ai un acheteur potentiel pour votre bien.'
+    + (mandat ? '
+
+Profil acheteur : ' + (mandat.label || 'Acheteur qualifié') + ' — budget jusqu'à ' + Math.round(parseFloat(mandat.budget_max || 0)).toLocaleString('fr-FR') + ' €.' : '')
+    + '
+
+Je souhaite vous contacter pour vous présenter ce profil et discuter d'un mandat simple.'
+
+  // Insérer le message en base
+  await db.from('messages').insert({
+    expediteur_email: currentUser.email,
+    destinataire_email: annonce?.email_contact,
+    annonce_id: annonceId,
+    message: message,
+    type: 'acheteur_potentiel',
+    mandat_recherche_id: mandatId,
+    lu: false
+  }).catch(function(){})
+
+  // Envoyer email au vendeur
+  await db.functions.invoke('envoyer-email', {
+    body: {
+      type: 'acheteur_potentiel_vendeur',
+      to: annonce?.email_contact,
+      subject: 'Un agent a un acheteur potentiel pour votre bien · ImmoConnect',
+      bien_titre: annonce?.titre || (annonce?.type_bien + ' ' + annonce?.ville),
+      agent_email: currentUser.email,
+      agent_nom: currentUser.user_metadata?.prenom + ' ' + currentUser.user_metadata?.nom,
+      mandat_label: mandat?.label || 'Acheteur qualifié',
+      budget_max: mandat?.budget_max,
+      lien: 'https://immoconnect-agence.fr/messagerie.html?annonce=' + annonceId
+    }
+  }).catch(function(){})
+
+  showToast('Votre message a été envoyé au vendeur.', 'ok')
+  // Rediriger vers la messagerie
+  setTimeout(function(){ window.location.href = 'messagerie.html?annonce=' + annonceId }, 1500)
+}
+
 // ── SIGNALEMENT AGENT ──
 function ouvrirSignalement(annonceId, emailAgent) {
   var modal = document.createElement('div');
