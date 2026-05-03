@@ -611,158 +611,190 @@
       <button class="btn-outline" onclick="window.location.href='questionnaire-vendeur.html'">Vendre mon bien</button>
     </div>
   </div>
-  <div class="hero-right" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:#1C1C1A;position:relative;overflow:hidden;gap:16px;">
+  <div class="hero-right" style="background:#1C1C1A;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;">
     <!-- Fond subtil -->
     <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 60% 40%, rgba(184,154,94,0.08) 0%, transparent 65%);pointer-events:none"></div>
 
-    <!-- Vidéo Hanaé (en haut) -->
-    <div data-video-wrap style="position:relative;width:100%;max-width:260px;border-radius:10px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.5);">
-      <video
-        id="hanae-hero-video"
-        src="https://zxxhyefajfwqcxcfxpmg.supabase.co/storage/v1/object/public/videos/videoagents.mp4"
-        playsinline
-        preload="metadata"
-        style="width:100%;display:block;cursor:pointer;opacity:0.92;background:#1C1C1A"
-        onclick="toggleHanaeVideo(this)"
-      ></video>
-      <div id="hanae-play-overlay" class="video-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(28,28,26,0.25);cursor:pointer;transition:background .3s" onclick="toggleHanaeVideo(document.getElementById('hanae-hero-video'))">
-        <div style="width:44px;height:44px;border-radius:50%;background:rgba(184,154,94,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.5);transition:transform .2s" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="#1C1C1A"><polygon points="6,3 20,12 6,21"/></svg>
-        </div>
-      </div>
-      <!-- Badge Hanaé -->
-      <div style="position:absolute;bottom:8px;left:10px;background:rgba(28,28,26,0.85);backdrop-filter:blur(8px);border:1px solid rgba(184,154,94,0.35);border-radius:6px;padding:5px 12px;display:flex;align-items:center;gap:6px;z-index:2">
-        <div style="width:6px;height:6px;border-radius:50%;background:#B89A5E;animation:pulseDot 2s infinite"></div>
-        <span style="font-size:11px;color:#FAFAF7;font-family:'DM Sans',sans-serif">Hanaé — Conseillère ImmoConnect</span>
-      </div>
-    </div>
+    <!-- CAROUSEL -->
+    <div id="video-carousel" style="position:relative;width:100%;overflow:hidden;">
 
-    <!-- Vidéo Mewen (3ème) -->
-    <div data-video-wrap style="position:relative;width:100%;max-width:420px;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
-      <video
-        id="mewen-hero-video"
-        src="https://zxxhyefajfwqcxcfxpmg.supabase.co/storage/v1/object/public/videos/INVESTISSEURS.mp4"
-        playsinline
-        preload="metadata"
-        style="width:100%;display:block;cursor:pointer;opacity:0.95;background:#1C1C1A"
-        onclick="toggleHanaeVideo(this)"
-      ></video>
-      <div id="mewen-play-overlay" class="video-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(28,28,26,0.25);cursor:pointer;transition:background .3s" onclick="toggleHanaeVideo(document.getElementById('mewen-hero-video'))">
-        <div style="width:56px;height:56px;border-radius:50%;background:rgba(184,154,94,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 30px rgba(0,0,0,0.5);transition:transform .2s" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#1C1C1A"><polygon points="6,3 20,12 6,21"/></svg>
-        </div>
-      </div>
-      <div style="position:absolute;bottom:10px;left:12px;background:rgba(28,28,26,0.85);backdrop-filter:blur(8px);border:1px solid rgba(184,154,94,0.3);border-radius:6px;padding:5px 12px;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif">
-        <div style="width:6px;height:6px;border-radius:50%;background:#B89A5E;animation:pulseDot 2s infinite"></div>
-        <div style="display:flex;flex-direction:column;gap:1px">
-          <span style="font-size:12px;color:#FAFAF7;font-weight:500">Mewen</span>
-          <span style="font-size:10px;color:rgba(250,250,247,.55)">Agent immobilier ImmoConnect</span>
-        </div>
-      </div>
-    </div>
+      <!-- Track glissant -->
+      <div id="carousel-track" style="display:flex;transition:transform .4s cubic-bezier(.4,0,.2,1);will-change:transform;">
 
-    <!-- Vidéo Thao (en bas, plus grande) -->
-    <div data-video-wrap style="position:relative;width:100%;max-width:420px;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
-      <video
-        id="vendeur-hero-video"
-        src="https://zxxhyefajfwqcxcfxpmg.supabase.co/storage/v1/object/public/videos/video%20vendeur.mp4"
-        playsinline
-        preload="metadata"
-        style="width:100%;display:block;cursor:pointer;opacity:0.95;background:#1C1C1A"
-        onclick="toggleHanaeVideo(this)"
-      ></video>
-      <div id="vendeur-play-overlay" class="video-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(28,28,26,0.25);cursor:pointer;transition:background .3s" onclick="toggleHanaeVideo(document.getElementById('vendeur-hero-video'))">
-        <div style="width:56px;height:56px;border-radius:50%;background:rgba(184,154,94,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 30px rgba(0,0,0,0.5);transition:transform .2s" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#1C1C1A"><polygon points="6,3 20,12 6,21"/></svg>
+        <!-- Slide 1 — Thao -->
+        <div class="carousel-slide" data-video-wrap style="flex:0 0 100%;position:relative;padding:24px;">
+          <div style="position:relative;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+            <video id="vendeur-hero-video" src="https://zxxhyefajfwqcxcfxpmg.supabase.co/storage/v1/object/public/videos/video%20vendeur.mp4" playsinline preload="metadata" style="width:100%;display:block;cursor:pointer;opacity:0.95;background:#1C1C1A" onclick="playCarouselVideo(this)"></video>
+            <div class="video-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(28,28,26,0.2);cursor:pointer" onclick="playCarouselVideo(document.getElementById('vendeur-hero-video'))">
+              <div style="width:60px;height:60px;border-radius:50%;background:rgba(184,154,94,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 30px rgba(0,0,0,0.5)">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="#1C1C1A"><polygon points="6,3 20,12 6,21"/></svg>
+              </div>
+            </div>
+            <div style="position:absolute;bottom:12px;left:14px;background:rgba(28,28,26,0.85);backdrop-filter:blur(8px);border:1px solid rgba(184,154,94,0.3);border-radius:6px;padding:5px 12px;font-family:'DM Sans',sans-serif">
+              <div style="font-size:12px;color:#FAFAF7;font-weight:500">Thao — Conseiller IA</div>
+              <div style="font-size:10px;color:rgba(250,250,247,.55)">Comment vendre sur ImmoConnect</div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div style="position:absolute;bottom:10px;left:12px;background:rgba(28,28,26,0.85);backdrop-filter:blur(8px);border:1px solid rgba(184,154,94,0.3);border-radius:6px;padding:5px 12px;display:flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif">
-        <div style="display:flex;flex-direction:column;gap:1px">
-          <span style="font-size:11px;color:#FAFAF7">Comment vendre sur ImmoConnect</span>
-          <span style="font-size:10px;color:rgba(250,250,247,.55)">Avec Thao — Conseiller IA</span>
+
+        <!-- Slide 2 — Hanaé (centre / défaut) -->
+        <div class="carousel-slide" data-video-wrap style="flex:0 0 100%;position:relative;padding:24px;">
+          <div style="position:relative;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+            <video id="hanae-hero-video" src="https://zxxhyefajfwqcxcfxpmg.supabase.co/storage/v1/object/public/videos/videoagents.mp4" playsinline preload="metadata" style="width:100%;display:block;cursor:pointer;opacity:0.95;background:#1C1C1A" onclick="playCarouselVideo(this)"></video>
+            <div class="video-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(28,28,26,0.2);cursor:pointer" onclick="playCarouselVideo(document.getElementById('hanae-hero-video'))">
+              <div style="width:60px;height:60px;border-radius:50%;background:rgba(184,154,94,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 30px rgba(0,0,0,0.5)">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="#1C1C1A"><polygon points="6,3 20,12 6,21"/></svg>
+              </div>
+            </div>
+            <div style="position:absolute;bottom:12px;left:14px;background:rgba(28,28,26,0.85);backdrop-filter:blur(8px);border:1px solid rgba(184,154,94,0.35);border-radius:6px;padding:5px 12px;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif">
+              <div style="width:6px;height:6px;border-radius:50%;background:#B89A5E;animation:pulseDot 2s infinite"></div>
+              <span style="font-size:12px;color:#FAFAF7">Hanaé — Conseillère ImmoConnect</span>
+            </div>
+          </div>
         </div>
+
+        <!-- Slide 3 — Mewen -->
+        <div class="carousel-slide" data-video-wrap style="flex:0 0 100%;position:relative;padding:24px;">
+          <div style="position:relative;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+            <video id="mewen-hero-video" src="https://zxxhyefajfwqcxcfxpmg.supabase.co/storage/v1/object/public/videos/INVESTISSEURS.mp4" playsinline preload="metadata" style="width:100%;display:block;cursor:pointer;opacity:0.95;background:#1C1C1A" onclick="playCarouselVideo(this)"></video>
+            <!-- Bouton play positionné en haut à gauche sur le visage -->
+            <div class="video-overlay" style="position:absolute;inset:0;background:rgba(28,28,26,0.15);cursor:pointer" onclick="playCarouselVideo(document.getElementById('mewen-hero-video'))">
+              <div style="position:absolute;top:18%;left:22%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;background:rgba(184,154,94,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 30px rgba(0,0,0,0.6)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#1C1C1A"><polygon points="6,3 20,12 6,21"/></svg>
+              </div>
+            </div>
+            <div style="position:absolute;bottom:12px;left:14px;background:rgba(28,28,26,0.85);backdrop-filter:blur(8px);border:1px solid rgba(184,154,94,0.3);border-radius:6px;padding:5px 12px;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif">
+              <div style="width:6px;height:6px;border-radius:50%;background:#B89A5E;animation:pulseDot 2s infinite"></div>
+              <div>
+                <div style="font-size:12px;color:#FAFAF7;font-weight:500">Mewen</div>
+                <div style="font-size:10px;color:rgba(250,250,247,.55)">Agent immobilier ImmoConnect</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /track -->
+
+      <!-- Flèches navigation -->
+      <button id="carousel-prev" onclick="carouselNav(-1)" style="position:absolute;left:6px;top:50%;transform:translateY(-50%);z-index:10;width:34px;height:34px;border-radius:50%;background:rgba(28,28,26,0.8);border:1px solid rgba(184,154,94,0.4);color:#FAFAF7;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)">‹</button>
+      <button id="carousel-next" onclick="carouselNav(1)" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);z-index:10;width:34px;height:34px;border-radius:50%;background:rgba(28,28,26,0.8);border:1px solid rgba(184,154,94,0.4);color:#FAFAF7;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)">›</button>
+
+      <!-- Indicateurs -->
+      <div id="carousel-dots" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:10">
+        <div class="cdot" onclick="carouselGo(0)" style="width:6px;height:6px;border-radius:50%;background:rgba(184,154,94,0.4);cursor:pointer;transition:all .2s"></div>
+        <div class="cdot active-dot" onclick="carouselGo(1)" style="width:18px;height:6px;border-radius:3px;background:#B89A5E;cursor:pointer;transition:all .2s"></div>
+        <div class="cdot" onclick="carouselGo(2)" style="width:6px;height:6px;border-radius:50%;background:rgba(184,154,94,0.4);cursor:pointer;transition:all .2s"></div>
       </div>
-    </div>
+
+    </div><!-- /carousel -->
   </div>
 </section>
 <style>
   @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(0.8)} }
 </style>
 <script>
-  // Lecteur vidéo plein écran dans le bloc noir
-  var videoExpanded = null;
+  // ── CAROUSEL ──
+  var carouselIndex = 1; // Hanaé au centre par défaut
+  var carouselTotal = 3;
+  var carouselDragging = false;
+  var carouselStartX = 0;
 
-  function toggleHanaeVideo(vid) {
-    if (videoExpanded && videoExpanded !== vid) return;
-    if (vid.paused) {
-      expandVideo(vid);
-    } else {
-      collapseVideo(vid);
-    }
+  function carouselRender() {
+    var track = document.getElementById('carousel-track');
+    if (track) track.style.transform = 'translateX(-' + (carouselIndex * 100) + '%)';
+    var dots = document.querySelectorAll('.cdot');
+    dots.forEach(function(d, i) {
+      if (i === carouselIndex) {
+        d.style.width = '18px'; d.style.height = '6px'; d.style.borderRadius = '3px'; d.style.background = '#B89A5E';
+      } else {
+        d.style.width = '6px'; d.style.height = '6px'; d.style.borderRadius = '50%'; d.style.background = 'rgba(184,154,94,0.4)';
+      }
+    });
   }
 
+  function carouselNav(dir) {
+    // Stopper toutes les vidéos en cours
+    document.querySelectorAll('#carousel-track video').forEach(function(v) {
+      v.pause(); v.currentTime = 0;
+      var wrap = v.closest('[data-video-wrap]');
+      if (wrap) { var ov = wrap.querySelector('.video-overlay'); if (ov) ov.style.display = ''; }
+    });
+    carouselIndex = Math.max(0, Math.min(carouselTotal - 1, carouselIndex + dir));
+    carouselRender();
+    collapseAllVideos();
+  }
+
+  function carouselGo(idx) {
+    document.querySelectorAll('#carousel-track video').forEach(function(v) {
+      v.pause(); v.currentTime = 0;
+    });
+    carouselIndex = idx;
+    carouselRender();
+    collapseAllVideos();
+  }
+
+  // Swipe tactile
+  var carouselTrackEl = document.getElementById('carousel-track');
+  if (carouselTrackEl) {
+    carouselTrackEl.addEventListener('touchstart', function(e) { carouselStartX = e.touches[0].clientX; });
+    carouselTrackEl.addEventListener('touchend', function(e) {
+      var diff = carouselStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 40) carouselNav(diff > 0 ? 1 : -1);
+    });
+  }
+
+  // ── LECTEUR PLEIN ÉCRAN ──
+  var videoExpanded = null;
+
+  function playCarouselVideo(vid) {
+    if (vid.paused) { expandVideo(vid); } else { collapseVideo(vid); }
+  }
+
+  function toggleHanaeVideo(vid) { playCarouselVideo(vid); }
+
   function expandVideo(vid) {
-    var heroRight = document.querySelector('.hero-right');
-    var allWrappers = heroRight.querySelectorAll('[data-video-wrap]');
+    var carousel = document.getElementById('video-carousel');
     var myWrap = vid.closest('[data-video-wrap]');
     var myOverlay = myWrap ? myWrap.querySelector('.video-overlay') : null;
 
-    // Cacher les autres vidéos
-    allWrappers.forEach(function(w) {
-      if (w !== myWrap) w.style.display = 'none';
-    });
-
-    // Agrandir le wrapper actif
-    if (myWrap) {
-      myWrap.style.maxWidth = '100%';
-      myWrap.style.transition = 'max-width .3s ease';
-    }
+    // Masquer les flèches et dots
+    var prev = document.getElementById('carousel-prev');
+    var next = document.getElementById('carousel-next');
+    var dotsEl = document.getElementById('carousel-dots');
+    if (prev) prev.style.display = 'none';
+    if (next) next.style.display = 'none';
+    if (dotsEl) dotsEl.style.display = 'none';
 
     // Masquer l'overlay play
-    if (myOverlay) {
-      myOverlay.style.display = 'none';
-    }
+    if (myOverlay) myOverlay.style.display = 'none';
 
-    // Ajouter bouton retour
+    // Bouton retour
     if (!document.getElementById('btn-retour-video')) {
       var btn = document.createElement('button');
       btn.id = 'btn-retour-video';
       btn.innerHTML = '← Retour';
       btn.style.cssText = 'position:absolute;top:12px;left:12px;z-index:99;background:rgba(28,28,26,0.85);color:#FAFAF7;border:1px solid rgba(184,154,94,0.4);border-radius:6px;padding:6px 14px;font-size:12px;font-family:DM Sans,sans-serif;cursor:pointer;backdrop-filter:blur(8px)';
       btn.onclick = function() { collapseVideo(vid); };
-      heroRight.style.position = 'relative';
-      heroRight.appendChild(btn);
+      carousel.appendChild(btn);
     }
 
     vid.play();
     videoExpanded = vid;
-
-    // Collapse automatique à la fin
     vid.onended = function() { collapseVideo(vid); };
   }
 
   function collapseVideo(vid) {
-    var heroRight = document.querySelector('.hero-right');
-    var allWrappers = heroRight.querySelectorAll('[data-video-wrap]');
+    var prev = document.getElementById('carousel-prev');
+    var next = document.getElementById('carousel-next');
+    var dotsEl = document.getElementById('carousel-dots');
+    if (prev) prev.style.display = '';
+    if (next) next.style.display = '';
+    if (dotsEl) dotsEl.style.display = '';
 
-    // Réafficher toutes les vidéos
-    allWrappers.forEach(function(w) {
-      w.style.display = '';
-    });
-
-    // Remettre la taille d'origine
     var myWrap = vid.closest('[data-video-wrap]');
-    if (myWrap) {
-      myWrap.style.maxWidth = '';
-    }
-
-    // Réafficher l'overlay play
     var myOverlay = myWrap ? myWrap.querySelector('.video-overlay') : null;
-    if (myOverlay) {
-      myOverlay.style.display = '';
-    }
+    if (myOverlay) myOverlay.style.display = '';
 
-    // Supprimer le bouton retour
     var btn = document.getElementById('btn-retour-video');
     if (btn) btn.remove();
 
@@ -770,6 +802,15 @@
     vid.currentTime = 0;
     videoExpanded = null;
   }
+
+  function collapseAllVideos() {
+    document.querySelectorAll('#carousel-track video').forEach(function(v) {
+      if (!v.paused) collapseVideo(v);
+    });
+  }
+
+  // Init carousel sur Hanaé (slide 1)
+  carouselRender();
 </script>
 
 <!-- SEARCH -->
