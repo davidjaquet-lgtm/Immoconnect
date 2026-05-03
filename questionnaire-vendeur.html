@@ -1109,6 +1109,11 @@ function setModeContactSilent(mode) {
 }
 
 function setModeContact(mode) {
+  // Vérifier si le mode est verrouillé (sélection Hanaé en cours)
+  if (window._modeVerrouille) {
+    alert('Le mode de contact est verrouillé car une sélection Hanaé est en cours. Il sera déverrouillé après la signature du mandat ou la clôture de l\'annonce.');
+    return;
+  }
   document.getElementById('mode_contact').value = mode;
   var cards = ['acheteurs', 'acheteurs_agents', 'comparatif'];
   cards.forEach(function(m) {
@@ -1116,6 +1121,65 @@ function setModeContact(mode) {
     if (!card) return;
     card.className = 'mode-card' + (m === mode ? ' selected-' + m : '');
   });
+}
+
+// Vérification bannissement vendeur au chargement
+async function verifierBannissementVendeur(email) {
+  if (!email || !supabase) return;
+  try {
+    const { data } = await supabase
+      .from('sanctions_vendeurs')
+      .select('type_sanction, fin_sanction, nb_infraction')
+      .eq('vendeur_email', email)
+      .gt('fin_sanction', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1);
+    if (data && data.length > 0) {
+      const sanction = data[0];
+      const fin = sanction.fin_sanction ? new Date(sanction.fin_sanction).toLocaleDateString('fr-FR') : null;
+      const msg = sanction.type_sanction === 'admin_review'
+        ? 'Votre compte est en cours d\'examen par notre équipe suite à plusieurs non-respects des engagements. Contactez-nous.'
+        : 'Vous ne pouvez pas poster de nouvelle annonce avant le ' + fin + ' (sanction suite à non-signature de mandat).';
+      var banner = document.getElementById('bannissement-banner');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'bannissement-banner';
+        banner.style.cssText = 'background:#FAECE7;border:1px solid #F0997B;color:#712B13;padding:16px 20px;border-radius:8px;font-size:13px;margin-bottom:20px;line-height:1.6';
+        document.querySelector('.form-container, form, .container, body').prepend(banner);
+      }
+      banner.innerHTML = '<strong>Publication impossible</strong><br>' + msg;
+      // Désactiver le bouton de publication
+      var btnPublier = document.getElementById('btn-publier') || document.querySelector('button[type=submit]');
+      if (btnPublier) { btnPublier.disabled = true; btnPublier.style.opacity = '0.5'; }
+    }
+  } catch(e) {}
+}
+
+// Verrouillage mode si sélection Hanaé en cours
+async function verifierModeLock(annonce_id) {
+  if (!annonce_id || !supabase) return;
+  try {
+    const { data } = await supabase
+      .from('annonces_vendeurs')
+      .select('mode_contact_verrouille, statut_selection')
+      .eq('id', annonce_id)
+      .single();
+    if (data?.mode_contact_verrouille || data?.statut_selection === 'agent_choisi') {
+      window._modeVerrouille = true;
+      var info = document.getElementById('mode-niveau-info');
+      if (info) {
+        info.style.display = 'block';
+        info.style.background = '#FAEEDA';
+        info.style.color = '#854F0B';
+        info.textContent = 'Mode verrouille : une selection Hanaé est en cours. Vous pourrez modifier le mode après la signature du mandat.';
+      }
+      // Griser toutes les cartes mode
+      ['acheteurs', 'acheteurs_agents', 'comparatif'].forEach(function(m) {
+        var card = document.getElementById('mc-' + m);
+        if (card) { card.style.opacity = '0.5'; card.style.pointerEvents = 'none'; }
+      });
+    }
+  } catch(e) {}
 }
 
 function toggleTravaux(v){document.getElementById('bloc-travaux').style.display=v?'block':'none';}
