@@ -60,9 +60,19 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const { createClient } = supabase;
 const db = createClient(SB_URL, SB_KEY);
 
+// ── SÉCURITÉ ADMIN ──
+const ADMIN_EMAILS = ['davidjaquet@live.fr']; // à compléter si plusieurs admins
+
 var agents = [];
 
 (async function() {
+  // Vérification session admin
+  var { data: { session } } = await db.auth.getSession();
+  if (!session || !ADMIN_EMAILS.includes(session.user.email)) {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;flex-direction:column;gap:16px"><div style="font-size:48px">🔒</div><div style="font-size:18px;font-weight:500">Accès réservé</div><div style="font-size:13px;color:#888">Connectez-vous avec un compte administrateur</div><a href="connexion.html" style="margin-top:8px;padding:10px 24px;background:#0F0F0E;color:#fff;border-radius:8px;text-decoration:none;font-size:14px">Se connecter →</a></div>';
+    return;
+  }
+
   // Charger les agents en attente depuis la table agents_validation
   var { data } = await db.from('agents_validation')
     .select('*').order('created_at', { ascending: false });
