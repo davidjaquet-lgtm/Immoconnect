@@ -178,16 +178,16 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
         <div class="etape">
           <div class="etape-num" style="background:#E6F1FB;color:#185FA5">2</div>
           <div class="etape-body">
-            <div class="etape-title">Vous candidatez — Flux A ou Flux B</div>
-            <div class="etape-desc">Vous avez <strong>48 heures</strong> pour candidater. Deux options selon votre situation :</div>
+            <div class="etape-title">Vous candidatez en 48 heures</div>
+            <div class="etape-desc">Vous avez <strong>48 heures</strong> pour soumettre votre candidature (9,99€). Deux situations possibles :</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
               <div class="etape-detail">
-                <div style="font-weight:600;margin-bottom:4px">🎯 Flux A — Je veux le mandat</div>
-                <div style="color:var(--muted)">Vous pensez pouvoir vendre ce bien. Vous proposez votre stratégie marketing, vos honoraires et votre délai estimé.</div>
+                <div style="font-weight:600;margin-bottom:4px">🎯 Je veux accompagner la vente</div>
+                <div style="color:var(--muted)">Vous proposez vos honoraires, votre approche pour ce bien et votre estimation du prix de marché.</div>
               </div>
               <div class="etape-detail">
-                <div style="font-weight:600;margin-bottom:4px">👥 Flux B — J'ai un acheteur</div>
-                <div style="color:var(--muted)">Vous avez un acheteur en portefeuille compatible avec ce bien. Vous déclarez son budget, type et surface recherchés.</div>
+                <div style="font-weight:600;margin-bottom:4px">👥 J'ai un acheteur en portefeuille</div>
+                <div style="color:var(--muted)">Vous avez un acheteur compatible. Déclarez son profil pour valoriser la double opportunité vendeur + acheteur.</div>
               </div>
             </div>
           </div>
@@ -225,89 +225,58 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
   <div style="margin-bottom:60px">
     <div class="section-eyebrow">L'algorithme</div>
     <div class="section-title">Comment votre score est calculé</div>
-    <div class="section-sub">Un score sur 100, calculé de façon objective et transparente. Vous savez exactement sur quoi vous êtes évalué.</div>
+    <div class="section-sub">Un score sur 100, calculé de façon objective et automatique. Chaque critère est vérifiable — aucun déclaratif non contrôlable.</div>
 
-    <div style="background:#FAEEDA;border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:12px;color:#633806;line-height:1.7">
-      ℹ️ <strong>Score commun (50 pts)</strong> appliqué à tous les agents + <strong>bonus selon votre flux (50 pts)</strong> selon que vous candidatez en Flux A ou Flux B.
+    <div style="background:#E1F5EE;border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:#085041;line-height:1.7">
+      🔒 <strong>Le score est confidentiel dans son détail.</strong> Vous recevez votre score total et vos axes d'amélioration après chaque candidature. Les critères exacts et leur pondération restent confidentiels pour garantir l'intégrité du classement.
     </div>
 
-    <div style="margin-bottom:16px">
-      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Score commun — 50 points</div>
-      <div class="score-grid">
-        <div class="score-item">
-          <div class="score-item-head">
-            <span class="score-label">Expérience locale</span>
-            <span class="score-pts" style="background:#E1F5EE;color:#1E7A62">20 pts max</span>
-          </div>
-          <div class="score-bar"><div class="score-bar-fill" style="width:100%;background:#1E7A62"></div></div>
-          <div class="score-desc">Nombre de ventes réalisées dans un rayon de 20km sur les 12 derniers mois. 10+ ventes = score maximum.</div>
+    <div class="score-grid">
+      <div class="score-item">
+        <div class="score-item-head">
+          <span class="score-label">📍 Expérience locale</span>
+          <span class="score-pts" style="background:#E1F5EE;color:#1E7A62">Critère principal</span>
         </div>
-        <div class="score-item">
-          <div class="score-item-head">
-            <span class="score-label">Cohérence estimation</span>
-            <span class="score-pts" style="background:#FAEEDA;color:#854F0B">15 pts max</span>
-          </div>
-          <div class="score-bar"><div class="score-bar-fill" style="width:75%;background:#854F0B"></div></div>
-          <div class="score-desc">Écart entre votre estimation et l'évaluation DVF du marché. Plus vous êtes proche, plus vous scorez. Confidentiel.</div>
+        <div class="score-bar"><div class="score-bar-fill" style="width:100%;background:#1E7A62"></div></div>
+        <div class="score-desc">Ventes réalisées et prouvées dans un rayon de 20km. Plus vous êtes actif sur le secteur du bien, plus votre score est élevé. Chaque vente prouvée compte.</div>
+      </div>
+      <div class="score-item">
+        <div class="score-item-head">
+          <span class="score-label">🎯 Cohérence de votre estimation</span>
+          <span class="score-pts" style="background:#FAEEDA;color:#854F0B">Critère fort</span>
         </div>
-        <div class="score-item">
-          <div class="score-item-head">
-            <span class="score-label">Réputation & avis</span>
-            <span class="score-pts" style="background:#E6F1FB;color:#185FA5">10 pts max</span>
-          </div>
-          <div class="score-bar"><div class="score-bar-fill" style="width:50%;background:#185FA5"></div></div>
-          <div class="score-desc">Moyenne de vos avis clients sur ImmoConnect. 4,8/5 ou plus = score maximum. Nouveau agent = score neutre 5/10.</div>
+        <div class="score-bar"><div class="score-bar-fill" style="width:80%;background:#854F0B"></div></div>
+        <div class="score-desc">L'algorithme compare votre estimation de prix avec une évaluation de marché confidentielle basée sur les données DVF officielles. Plus vous êtes précis, plus vous scorez. L'évaluation de référence n'est jamais communiquée aux agents.</div>
+      </div>
+      <div class="score-item">
+        <div class="score-item-head">
+          <span class="score-label">⭐ Réputation sur ImmoConnect</span>
+          <span class="score-pts" style="background:#E6F1FB;color:#185FA5">Important</span>
         </div>
-        <div class="score-item">
-          <div class="score-item-head">
-            <span class="score-label">Profil complet</span>
-            <span class="score-pts" style="background:#F1EFE8;color:#555">5 pts max</span>
-          </div>
-          <div class="score-bar"><div class="score-bar-fill" style="width:25%;background:#888780"></div></div>
-          <div class="score-desc">Photo pro + présentation + honoraires + ventes renseignées + Carte T vérifiée. Chaque élément compte.</div>
+        <div class="score-bar"><div class="score-bar-fill" style="width:65%;background:#185FA5"></div></div>
+        <div class="score-desc">Notes laissées par les vendeurs après chaque transaction. Activé dès votre premier avis reçu. Les nouveaux agents ne sont pas pénalisés — ce critère s'enrichit avec le temps.</div>
+      </div>
+      <div class="score-item">
+        <div class="score-item-head">
+          <span class="score-label">📋 Historique sur la plateforme</span>
+          <span class="score-pts" style="background:#F1EFE8;color:#555">Compte</span>
         </div>
+        <div class="score-bar"><div class="score-bar-fill" style="width:45%;background:#888780"></div></div>
+        <div class="score-desc">Mandats signés via ImmoConnect. Chaque mandat finalisé renforce votre profil et votre score futur.</div>
+      </div>
+      <div class="score-item">
+        <div class="score-item-head">
+          <span class="score-label">👤 Qualité de votre profil</span>
+          <span class="score-pts" style="background:#F1EFE8;color:#555">Bonus</span>
+        </div>
+        <div class="score-bar"><div class="score-bar-fill" style="width:30%;background:#888780"></div></div>
+        <div class="score-desc">Photo professionnelle, description complète, Carte T valide à jour, forfait actif. Des signaux concrets de sérieux professionnel.</div>
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div>
-        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Bonus Flux A — 50 points</div>
-        <div class="card" style="padding:16px">
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500">Stratégie marketing</span><span style="color:var(--teal);font-weight:600">20 pts</span></div>
-              <div style="font-size:11px;color:var(--muted)">Qualité de votre présentation, honoraires définis, volume de ventes annuel</div>
-            </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500">Délai moyen de vente</span><span style="color:var(--teal);font-weight:600">15 pts</span></div>
-              <div style="font-size:11px;color:var(--muted)">≤30j=15pts · ≤45j=12pts · ≤60j=8pts · ≤90j=4pts</div>
-            </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500">Taux de vente au prix</span><span style="color:var(--teal);font-weight:600">15 pts</span></div>
-              <div style="font-size:11px;color:var(--muted)">≥98%=15pts · ≥95%=10pts · ≥90%=6pts</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div>
-        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Bonus Flux B — 50 points</div>
-        <div class="card" style="padding:16px">
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500">Pertinence acheteur</span><span style="color:var(--teal);font-weight:600">25 pts</span></div>
-              <div style="font-size:11px;color:var(--muted)">Budget, type de bien et surface de votre acheteur vs le bien proposé</div>
-            </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500">Mandat de recherche signé</span><span style="color:var(--teal);font-weight:600">15 pts</span></div>
-              <div style="font-size:11px;color:var(--muted)">Document uploadé = 15 pts automatiques. Forte preuve de sérieux.</div>
-            </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500">Historique ventes similaires</span><span style="color:var(--teal);font-weight:600">10 pts</span></div>
-              <div style="font-size:11px;color:var(--muted)">Avez-vous déjà vendu ce type de bien dans ce secteur ?</div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div style="background:var(--bg);border-radius:10px;padding:16px 18px;margin-top:16px;border:1px solid var(--line)">
+      <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:8px">👥 Bonus acheteur en portefeuille</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7">Si vous avez un acheteur compatible avec ce bien, vous pouvez le déclarer dans votre candidature. Un mandat de recherche lié et déclaré avant la publication du bien vous apporte un bonus significatif.</div>
     </div>
   </div>
 
