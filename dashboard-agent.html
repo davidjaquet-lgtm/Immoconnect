@@ -173,6 +173,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
       <button class="tab" onclick="showTab('performance',this)">📊 Performance</button>
       <button class="tab" onclick="showTab('quotas',this)">Quotas & forfait</button>
       <button class="tab" onclick="showTab('mandats',this)">Mes mandats</button>
+      <button class="tab" onclick="showTab('cr',this)">Compte rendu</button>
       <button class="tab" onclick="showTab('conseils',this)">Conseils Hanaé</button>
     </div>
 
@@ -294,6 +295,29 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
     </div>
 
     <!-- CONSEILS HANAE -->
+    <div id="tab-cr" style="display:none">
+      <div style="background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:6px">Envoyer un compte rendu au vendeur</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6">Un CR est généré automatiquement chaque lundi (forfaits Pro & Premium). Vous pouvez également en envoyer un manuellement à tout moment.</div>
+        <div class="field" style="margin-bottom:10px">
+          <label class="lbl" style="font-size:11px">Sélectionner le bien</label>
+          <select id="cr-mandat-select" style="font-size:13px">
+            <option value="">-- Choisir un mandat actif --</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label class="lbl" style="font-size:11px">Votre commentaire (retours de visites, recommandations...)</label>
+          <textarea id="cr-commentaire" rows="4" placeholder="Ex : Nous avons effectué 2 visites cette semaine. Les retours sont positifs sur le luminosité mais des questions sur l'état de la toiture. Je recommande de faire réaliser un devis pour anticiper les questions des acquéreurs..." style="font-size:12px;resize:vertical"></textarea>
+        </div>
+        <button onclick="envoyerCR()" style="background:var(--teal);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;width:100%">Envoyer le compte rendu au vendeur</button>
+        <div id="cr-status" style="margin-top:10px;font-size:12px;text-align:center;display:none"></div>
+      </div>
+      <div style="background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">CR récents envoyés</div>
+        <div id="cr-historique" style="font-size:12px;color:var(--muted)">Chargement...</div>
+      </div>
+    </div>
+
     <div id="tab-conseils" style="display:none">
       <div class="card">
         <div class="card-title"><span>Conseils Hanae pour ameliorer votre score</span></div>
