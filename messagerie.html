@@ -380,10 +380,40 @@ async function afficherChat(conv) {
 
   var html = '';
   // Header
+  // Badge financement acheteur — visible par le vendeur
+  var financementHtml = '';
+  if (!isAgent && conv.email_acheteur) {
+    // Récupérer attestation financement de l'acheteur
+    var { data: projetAcheteur } = await db.from('projets_acheteurs')
+      .select('attestation_financement_url, attestation_financement_type, attestation_financement_at')
+      .eq('email', conv.email_acheteur || emailInterlocuteur)
+      .single().catch(function(){ return { data: null }; });
+    if (projetAcheteur?.attestation_financement_url) {
+      var typeLabels = {
+        simulation: 'Simulation bancaire',
+        accord_principe: 'Accord de principe',
+        offre_pret: 'Offre de prêt',
+        achat_comptant: 'Achat comptant'
+      };
+      var typeLabel = typeLabels[projetAcheteur.attestation_financement_type] || 'Financement vérifié';
+      var dateAttestation = projetAcheteur.attestation_financement_at
+        ? new Date(projetAcheteur.attestation_financement_at).toLocaleDateString('fr-FR', {day:'2-digit', month:'short', year:'numeric'})
+        : '';
+      financementHtml = '<a href="' + projetAcheteur.attestation_financement_url + '" target="_blank" '
+        + 'style="display:inline-flex;align-items:center;gap:5px;background:#E1F5EE;border:1px solid #9FE1CB;'
+        + 'border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;color:#085041;text-decoration:none;margin-top:4px" '
+        + 'title="Voir le document de financement">'
+        + '✅ ' + typeLabel + (dateAttestation ? ' · ' + dateAttestation : '')
+        + ' <span style=\"font-size:10px;opacity:.7\">↗</span></a>';
+    }
+  }
+
   html += '<div class="chat-header">';
   html += '<div class="chat-avatar '+(isAgent?'av-vendeur':'av-agent')+'">'+nomInterlocuteur.charAt(0).toUpperCase()+'</div>';
   html += '<div class="chat-info"><div class="chat-name">'+nomInterlocuteur+'</div>';
-  html += '<div class="chat-detail">'+(bien?(bien.type_bien||'Bien')+' · '+(bien.ville||''):'Conversation')+' '+noteMoyenneHtml+'</div></div>';
+  html += '<div class="chat-detail">'+(bien?(bien.type_bien||'Bien')+' · '+(bien.ville||''):'Conversation')+' '+noteMoyenneHtml+'</div>';
+  if (financementHtml) html += '<div>' + financementHtml + '</div>';
+  html += '</div>';
   html += '<div class="chat-actions">';
   html += notationHtml;
   // Bouton signalement visible uniquement par le vendeur
