@@ -660,7 +660,7 @@ async function chargerMandats() {
   var { data: mands } = await db.from('mandats_agents').select('*').eq('agent_email', currentUser.email).eq('statut', 'actif');
   mandats = mands || [];
   afficherMandats();
-  afficherAcheteurs();
+  afficherAcheteurs().catch(function(){});
 }
 
 function afficherMandats() {
@@ -679,8 +679,94 @@ function afficherMandats() {
   document.getElementById('mandats-list').innerHTML = html;
 }
 
-function afficherAcheteurs() {
-  document.getElementById('acheteurs-list').innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div style="font-size:13px">Aucun acheteur declare</div><div style="font-size:12px;margin-top:4px;color:var(--muted)">Declarex vos acheteurs pour le matching automatique gratuit</div></div>';
+async function afficherAcheteurs() {
+  // Charger les mandats de recherche depuis Supabase
+  var { data: mandatsRech } = await db.from('mandats_recherche')
+    .select('*').eq('agent_email', currentUser.email).order('created_at', { ascending: false });
+
+  var liste = mandatsRech || [];
+  var el = document.getElementById('acheteurs-list');
+  if (!el) return;
+
+  var formHtml = '<div style="background:var(--bg);border-radius:8px;padding:14px;margin-bottom:12px">'
+    + '<div style="font-size:12px;font-weight:500;color:var(--ink);margin-bottom:10px">Déclarer un acheteur en portefeuille</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+    + '<div><label style="font-size:11px;color:var(--muted)">Type recherché</label>'
+    + '<select id="ach-type" style="width:100%;padding:6px;border:1px solid var(--line);border-radius:6px;font-size:12px;background:var(--warm)">'
+    + '<option value="">Tous types</option><option value="appartement">Appartement</option><option value="maison">Maison</option><option value="terrain">Terrain</option>'
+    + '</select></div>'
+    + '<div><label style="font-size:11px;color:var(--muted)">Budget max (€)</label>'
+    + '<input type="number" id="ach-budget" placeholder="Ex : 350000" style="width:100%;padding:6px;border:1px solid var(--line);border-radius:6px;font-size:12px;background:var(--warm)"></div>'
+    + '<div><label style="font-size:11px;color:var(--muted)">Surface min (m²)</label>'
+    + '<input type="number" id="ach-surface" placeholder="Ex : 60" style="width:100%;padding:6px;border:1px solid var(--line);border-radius:6px;font-size:12px;background:var(--warm)"></div>'
+    + '<div><label style="font-size:11px;color:var(--muted)">Secteur(s)</label>'
+    + '<input type="text" id="ach-secteurs" placeholder="Ex : Bordeaux, Mérignac" style="width:100%;padding:6px;border:1px solid var(--line);border-radius:6px;font-size:12px;background:var(--warm)"></div>'
+    + '</div>'
+    + '<div style="margin-bottom:8px"><label style="font-size:11px;color:var(--muted)">Label interne</label>'
+    + '<input type="text" id="ach-label" placeholder="Ex : Famille Martin — T4 Bordeaux Nord" style="width:100%;padding:6px;border:1px solid var(--line);border-radius:6px;font-size:12px;background:var(--warm)"></div>'
+    + '<button onclick="declarerAcheteurPortefeuille()" style="width:100%;padding:9px;background:var(--teal);color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif">+ Ajouter cet acheteur</button>'
+    + '</div>';
+
+  if (!liste.length) {
+    el.innerHTML = formHtml + '<div class="empty"><div class="empty-icon">👥</div><div style="font-size:13px">Aucun acheteur déclaré</div><div style="font-size:12px;margin-top:4px;color:var(--muted)">Déclarez vos acheteurs pour le matching automatique</div></div>';
+    return;
+  }
+
+  var listHtml = liste.map(function(mr) {
+    var sects = Array.isArray(mr.secteurs) ? mr.secteurs.join(', ') : (mr.secteurs || '—');
+    return '<div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px">'
+      + '<div style="flex:1">'
+      + '<div style="font-size:12px;font-weight:500;color:var(--ink)">' + (mr.label || 'Acheteur sans label') + '</div>'
+      + '<div style="font-size:11px;color:var(--muted);margin-top:2px">'
+      + (mr.type_bien || 'Tous types') + ' · '
+      + (mr.budget_max ? Math.round(mr.budget_max).toLocaleString('fr-FR') + ' €' : 'Budget nc.') + ' · '
+      + (mr.surface_min ? mr.surface_min + ' m² min' : '') + ' · '
+      + sects
+      + '</div>'
+      + '</div>'
+      + '<div style="display:flex;gap:4px">'
+      + '<span style="font-size:10px;padding:2px 8px;border-radius:10px;background:' + (mr.statut === 'actif' ? '#E1F5EE' : '#F1EFE8') + ';color:' + (mr.statut === 'actif' ? '#085041' : '#888780') + '">' + (mr.statut || 'actif') + '</span>'
+      + '<span style="font-size:11px;color:var(--muted)">' + (mr.nb_matchs_total || 0) + ' matchs</span>'
+      + '<button onclick="supprimerMandatRecherche('' + mr.id + '')" style="font-size:10px;padding:2px 8px;border:1px solid #F5C4B3;background:#FAECE7;color:#712B13;border-radius:6px;cursor:pointer">✕</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+
+  el.innerHTML = formHtml + listHtml;
+}
+
+async function declarerAcheteurPortefeuille() {
+  var label = document.getElementById('ach-label')?.value?.trim();
+  var type = document.getElementById('ach-type')?.value;
+  var budget = parseFloat(document.getElementById('ach-budget')?.value) || null;
+  var surface = parseFloat(document.getElementById('ach-surface')?.value) || null;
+  var secteursRaw = document.getElementById('ach-secteurs')?.value || '';
+  var secteurs = secteursRaw.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+
+  if (!label) { alert('Donnez un label à cet acheteur'); return; }
+
+  var { error } = await db.from('mandats_recherche').insert({
+    agent_email: currentUser.email,
+    label, type_bien: type || null, budget_max: budget, surface_min: surface,
+    secteurs: secteurs.length ? secteurs : null, statut: 'actif'
+  });
+
+  if (!error) {
+    // Réinitialiser le formulaire
+    ['ach-label','ach-budget','ach-surface','ach-secteurs'].forEach(function(id){
+      var el = document.getElementById(id); if (el) el.value = '';
+    });
+    document.getElementById('ach-type').value = '';
+    await afficherAcheteurs().catch(function(){});
+  } else {
+    alert('Erreur lors de l'enregistrement');
+  }
+}
+
+async function supprimerMandatRecherche(id) {
+  if (!confirm('Retirer cet acheteur du portefeuille ?')) return;
+  await db.from('mandats_recherche').delete().eq('id', id);
+  await afficherAcheteurs().catch(function(){});
 }
 
 // ── CONSEILS HANAE ──
