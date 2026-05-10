@@ -215,6 +215,8 @@ function render() {
     var scoreColor = ag.score_total >= 70 ? '#1E7A62' : ag.score_total >= 50 ? '#854F0B' : '#888780';
     var initiales = (ag.agent_email || 'A').substring(0, 2).toUpperCase();
     var badges = ag.badges || [];
+    if (ag.badge_vente_prouvee) badges = ['🏆 Vente prouvée'].concat(badges);
+    if (ag.badge_certifie || (ag.score_total >= 75 && ag.nb_ventes_prouvees >= 3)) badges = ['⭐ Certifié'].concat(badges);
     var strategie = ag.strategie_hanae || 'Analyse en cours...';
     var honoraires = ag.honoraires_proposes || '—';
     var delai = ag.delai_moyen || null;

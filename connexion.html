@@ -678,9 +678,14 @@ function buildVendeurPanel(annonces, messages) {
       h += '<div class="kpi"><div class="kpi-val">'+(a.statut_annonce==='publiee'?'✅':'⏳')+'</div><div class="kpi-lbl">'+(a.statut_annonce==='publiee'?'En ligne':'En attente')+'</div></div>';
       h += '</div><div class="ann-acts">';
       h += '<button class="btn-a" onclick="editAnnonce(\''+a.id+'\')">✏️ Modifier</button>';
-      h += '<button class="btn-a" onclick="">💬 Messages</button>';
-      h += '<button class="btn-a" onclick="">📊 Stats</button>';
-      h += '<button class="btn-a red" onclick="supprimerAnnonce(\''+a.id+'\')">🗑 Supprimer</button>';
+      h += '<a class="btn-a" href="messagerie.html?annonce='+a.id+'" style="text-decoration:none">💬 Messages</a>';
+      var statutAnn = a.statut_annonce || 'publiee';
+      if (statutAnn === 'vendu') {
+        h += '<span class="btn-a" style="background:#E1F5EE;color:#085041;cursor:default">✅ Vendu</span>';
+      } else {
+        h += '<button class="btn-a" style="background:#1E7A62;color:#fff" onclick="ouvrirModalVente(\''+a.id+'\',\''+encodeURIComponent(a.titre||a.type_bien+' '+a.ville)+'\','+a.prix+')">🏆 Bien vendu</button>';
+        h += '<button class="btn-a red" onclick="supprimerAnnonce(\''+a.id+'\')">🗑 Retirer</button>';
+      }
       h += '</div></div>';
     });
   }
@@ -1064,6 +1069,113 @@ function buildAgentPanel(leads, meta) {
 
 // ── ACTIONS ──
 async function editAnnonce(id) { window.location.href = 'questionnaire-vendeur.html?edit=' + id; }
+// ── MODAL DÉCLARATION VENTE ──
+function ouvrirModalVente(annonceId, titre, prix) {
+  var titreDecode = decodeURIComponent(titre);
+  var modal = document.createElement('div');
+  modal.id = 'modal-vente';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML = '<div style="background:#FEFDFB;border-radius:12px;padding:24px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto">'
+    + '<div style="font-size:16px;font-weight:500;color:#0F0F0E;margin-bottom:4px">Déclarer la vente</div>'
+    + '<div style="font-size:12px;color:#888780;margin-bottom:16px">' + titreDecode + '</div>'
+
+    + '<div style="margin-bottom:12px">'
+    + '<label style="font-size:12px;font-weight:500;color:#0F0F0E;display:block;margin-bottom:6px">Qui a réalisé la vente ? *</label>'
+    + '<div style="display:flex;flex-direction:column;gap:6px">'
+    + '<label style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid #E8E6E0;border-radius:8px;cursor:pointer;font-size:13px"><input type="radio" name="qui-vendu" value="agent_immoconnect" style="accent-color:#1E7A62"> Agent ImmoConnect (mandat signé sur la plateforme)</label>'
+    + '<label style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid #E8E6E0;border-radius:8px;cursor:pointer;font-size:13px"><input type="radio" name="qui-vendu" value="autre_agent"> Autre agent immobilier (hors ImmoConnect)</label>'
+    + '<label style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid #E8E6E0;border-radius:8px;cursor:pointer;font-size:13px"><input type="radio" name="qui-vendu" value="pap"> Particulier à particulier (sans agent)</label>'
+    + '</div></div>'
+
+    + '<div style="margin-bottom:12px">'
+    + '<label style="font-size:12px;font-weight:500;color:#0F0F0E;display:block;margin-bottom:6px">Prix de vente réel (€) *</label>'
+    + '<input type="number" id="vente-prix" value="' + (prix || '') + '" placeholder="Ex : 285000" style="width:100%;padding:9px 12px;border:1px solid #E8E6E0;border-radius:8px;font-size:13px;background:#FEFDFB">'
+    + '</div>'
+
+    + '<div style="margin-bottom:16px">'
+    + '<label style="font-size:12px;font-weight:500;color:#0F0F0E;display:block;margin-bottom:6px">Date du compromis</label>'
+    + '<input type="date" id="vente-date" style="width:100%;padding:9px 12px;border:1px solid #E8E6E0;border-radius:8px;font-size:13px;background:#FEFDFB">'
+    + '</div>'
+
+    + '<div style="background:#E6F1FB;border-radius:8px;padding:10px 12px;font-size:11px;color:#185FA5;line-height:1.6;margin-bottom:16px">'
+    + 'ℹ️ Cette déclaration sera croisée avec les données notariales DVF. Toute fausse déclaration engage votre responsabilité selon les CGU ImmoConnect.'
+    + '</div>'
+
+    + '<div style="display:flex;gap:8px">'
+    + '<button onclick="fermerModalVente()" style="flex:1;padding:10px;border:1px solid #E8E6E0;background:transparent;border-radius:8px;font-size:13px;cursor:pointer;font-family:Outfit,sans-serif;color:#888780">Annuler</button>'
+    + '<button onclick="confirmerVente('' + annonceId + '')" style="flex:2;padding:10px;background:#1E7A62;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif">Confirmer la vente</button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(modal);
+  modal.addEventListener('click', function(e){ if (e.target === modal) fermerModalVente(); });
+}
+
+function fermerModalVente() {
+  var m = document.getElementById('modal-vente');
+  if (m) m.remove();
+}
+
+async function confirmerVente(annonceId) {
+  var quiVendu = document.querySelector('input[name="qui-vendu"]:checked')?.value;
+  var prixVente = parseFloat(document.getElementById('vente-prix')?.value);
+  var dateCompromis = document.getElementById('vente-date')?.value;
+
+  if (!quiVendu) { alert('Veuillez indiquer qui a réalisé la vente.'); return; }
+  if (!prixVente || prixVente < 1000) { alert('Veuillez renseigner le prix de vente réel.'); return; }
+
+  // Déterminer si commission ImmoConnect est due
+  var commissionDue = false;
+  var { data: mandat } = await db.from('mandats_agents')
+    .select('statut, type_mandat').eq('annonce_id', annonceId).single()
+    .catch(function(){ return { data: null }; });
+
+  if (quiVendu === 'agent_immoconnect') {
+    commissionDue = true;
+  } else if (mandat && mandat.type_mandat === 'exclusif') {
+    commissionDue = true; // Mandat exclusif = commission due même si autre agent
+  }
+
+  // Enregistrer la vente
+  var { error } = await db.from('ventes_conclues').insert({
+    annonce_id: annonceId,
+    vendeur_email: currentUser?.email,
+    qui_a_vendu: quiVendu,
+    prix_declare: prixVente,
+    date_compromis: dateCompromis || null,
+    commission_due: commissionDue,
+    statut: 'en_attente_confirmation',
+    created_at: new Date().toISOString()
+  });
+
+  if (error) { alert('Erreur lors de l'enregistrement. Veuillez réessayer.'); return; }
+
+  // Mettre à jour le statut de l'annonce
+  await db.from('annonces_vendeurs').update({
+    statut_annonce: 'vendu',
+    statut: 'vendu',
+    prix_vente_final: prixVente,
+    date_vente: dateCompromis || new Date().toISOString()
+  }).eq('id', annonceId);
+
+  // Envoyer email de confirmation au vendeur
+  await fetch(SB_URL + '/functions/v1/envoyer-email', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      type: 'vente_declaree_confirmation',
+      to: currentUser?.email,
+      subject: 'Vente déclarée — en attente de vérification · ImmoConnect',
+      prix_vente: prixVente.toLocaleString('fr-FR'),
+      qui_vendu: quiVendu,
+      commission_due: commissionDue
+    })
+  }).catch(function(){});
+
+  fermerModalVente();
+  alert('Vente enregistrée avec succès. Elle sera vérifiée et l'annonce est maintenant marquée comme vendue.');
+  location.reload();
+}
+
 async function supprimerAnnonce(id) {
   if (!confirm('Supprimer cette annonce définitivement ?')) return;
   await db.from('annonces_vendeurs').delete().eq('id', id);
