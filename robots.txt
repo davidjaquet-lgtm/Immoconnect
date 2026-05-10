@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+# Pages privées — exclues du crawl
+Disallow: /admin-agents.html
+Disallow: /dashboard-agent.html
+Disallow: /dashboard.html
+Disallow: /messagerie.html
+Disallow: /calendrier.html
+Disallow: /stripe-paiements.html
+Disallow: /email-templates.html
+Disallow: /todo.html
+
+# Sitemaps
+Sitemap: https://immoconnect-agence.fr/sitemap.xml
+Sitemap: https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/sitemap-annonces
