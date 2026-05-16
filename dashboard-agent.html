@@ -174,6 +174,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
       <button class="tab" onclick="showTab('quotas',this)">Quotas & forfait</button>
       <button class="tab" onclick="showTab('mandats',this)">Mes mandats</button>
       <button class="tab" onclick="showTab('cr',this)">Compte rendu</button>
+      <button class="tab" onclick="showTab('rapports',this)">Rapports visite</button>
       <button class="tab" onclick="showTab('conseils',this)">Conseils Hanaé</button>
     </div>
 
@@ -317,6 +318,145 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
         <div id="cr-historique" style="font-size:12px;color:var(--muted)">Chargement...</div>
       </div>
     </div>
+
+    <div id="tab-rapports" style="display:none">
+
+      <!-- Formulaire nouveau rapport de visite -->
+      <div style="background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:4px">Rédiger un rapport de visite</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6">Transmis automatiquement au vendeur par email avec mise en forme professionnelle.</div>
+
+        <!-- Sélection du bien -->
+        <div class="field" style="margin-bottom:10px">
+          <label class="lbl" style="font-size:11px">Bien concerné</label>
+          <select id="rv-annonce-select" style="font-size:13px" onchange="chargerVisitesAnnonce(this.value)">
+            <option value="">-- Choisir un bien --</option>
+          </select>
+        </div>
+
+        <!-- Date de la visite -->
+        <div class="field" style="margin-bottom:10px">
+          <label class="lbl" style="font-size:11px">Date de la visite</label>
+          <input type="date" id="rv-date" style="font-size:13px">
+        </div>
+
+        <!-- SECTION : Profil acquéreur -->
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding-top:12px;border-top:1px solid var(--line)">Profil acquéreur</div>
+
+        <div class="field" style="margin-bottom:10px">
+          <label class="lbl" style="font-size:11px">Description de l'acquéreur</label>
+          <input type="text" id="rv-profil" placeholder="Ex : Couple 35-40 ans, CDI, primo-accédants" style="font-size:13px">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label class="lbl" style="font-size:11px">Financement</label>
+            <select id="rv-financement" style="font-size:13px">
+              <option value="non_precise">Non précisé</option>
+              <option value="comptant">Achat comptant</option>
+              <option value="credit_obtenu">Crédit obtenu</option>
+              <option value="credit_en_cours">Crédit en cours</option>
+            </select>
+          </div>
+          <div>
+            <label class="lbl" style="font-size:11px">Délai d'achat</label>
+            <select id="rv-delai" style="font-size:13px">
+              <option value="non_precise">Non précisé</option>
+              <option value="urgent">Urgent (< 1 mois)</option>
+              <option value="3_mois">2-3 mois</option>
+              <option value="6_mois">4-6 mois</option>
+              <option value="plus">6 mois +</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label class="lbl" style="font-size:11px">Budget envisagé (fourchette)</label>
+            <input type="text" id="rv-budget" placeholder="Ex : 220 000 - 240 000 €" style="font-size:13px">
+          </div>
+          <div>
+            <label class="lbl" style="font-size:11px">Offre potentielle (montant €)</label>
+            <input type="number" id="rv-offre" placeholder="Ex : 225000" style="font-size:13px">
+          </div>
+        </div>
+
+        <!-- SECTION : Intérêt & ressenti -->
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding-top:12px;border-top:1px solid var(--line)">Ressenti de la visite</div>
+
+        <div class="field" style="margin-bottom:10px">
+          <label class="lbl" style="font-size:11px">Niveau d'intérêt</label>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+            <label style="cursor:pointer"><input type="radio" name="rv-interet" value="tres_interesse" style="display:none" onchange="majInteretStyle()"><div class="interet-btn" data-val="tres_interesse" style="text-align:center;padding:8px 4px;border-radius:8px;border:1px solid var(--line);font-size:11px;background:var(--bg)">🔥 Très intéressé</div></label>
+            <label style="cursor:pointer"><input type="radio" name="rv-interet" value="interesse" style="display:none" onchange="majInteretStyle()"><div class="interet-btn" data-val="interesse" style="text-align:center;padding:8px 4px;border-radius:8px;border:1px solid var(--line);font-size:11px;background:var(--bg)">👍 Intéressé</div></label>
+            <label style="cursor:pointer"><input type="radio" name="rv-interet" value="mitige" style="display:none" onchange="majInteretStyle()"><div class="interet-btn" data-val="mitige" style="text-align:center;padding:8px 4px;border-radius:8px;border:1px solid var(--line);font-size:11px;background:var(--bg)">😐 Mitigé</div></label>
+            <label style="cursor:pointer"><input type="radio" name="rv-interet" value="non_interesse" style="display:none" onchange="majInteretStyle()"><div class="interet-btn" data-val="non_interesse" style="text-align:center;padding:8px 4px;border-radius:8px;border:1px solid var(--line);font-size:11px;background:var(--bg)">👎 Non intéressé</div></label>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label class="lbl" style="font-size:11px">Points forts relevés</label>
+            <textarea id="rv-points-forts" rows="3" placeholder="Ex : Belle luminosité, quartier calme, cuisine refaite" style="font-size:12px;resize:vertical"></textarea>
+          </div>
+          <div>
+            <label class="lbl" style="font-size:11px">Points faibles / objections</label>
+            <textarea id="rv-points-faibles" rows="3" placeholder="Ex : Pas de garage, état de la toiture à vérifier" style="font-size:12px;resize:vertical"></textarea>
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom:10px">
+          <label class="lbl" style="font-size:11px">Objections spécifiques</label>
+          <div id="objections-tags" style="display:flex;flex-wrap:wrap;gap:6px">
+            <label style="cursor:pointer"><input type="checkbox" value="prix" style="display:none" class="obj-cb"><span class="obj-tag" style="display:inline-block;padding:4px 10px;border-radius:20px;border:1px solid var(--line);font-size:11px;background:var(--bg)">Prix trop élevé</span></label>
+            <label style="cursor:pointer"><input type="checkbox" value="travaux" style="display:none" class="obj-cb"><span class="obj-tag" style="display:inline-block;padding:4px 10px;border-radius:20px;border:1px solid var(--line);font-size:11px;background:var(--bg)">Travaux à prévoir</span></label>
+            <label style="cursor:pointer"><input type="checkbox" value="surface" style="display:none" class="obj-cb"><span class="obj-tag" style="display:inline-block;padding:4px 10px;border-radius:20px;border:1px solid var(--line);font-size:11px;background:var(--bg)">Surface trop petite</span></label>
+            <label style="cursor:pointer"><input type="checkbox" value="orientation" style="display:none" class="obj-cb"><span class="obj-tag" style="display:inline-block;padding:4px 10px;border-radius:20px;border:1px solid var(--line);font-size:11px;background:var(--bg)">Orientation</span></label>
+            <label style="cursor:pointer"><input type="checkbox" value="bruit" style="display:none" class="obj-cb"><span class="obj-tag" style="display:inline-block;padding:4px 10px;border-radius:20px;border:1px solid var(--line);font-size:11px;background:var(--bg)">Bruit / nuisances</span></label>
+            <label style="cursor:pointer"><input type="checkbox" value="parking" style="display:none" class="obj-cb"><span class="obj-tag" style="display:inline-block;padding:4px 10px;border-radius:20px;border:1px solid var(--line);font-size:11px;background:var(--bg)">Parking / garage</span></label>
+            <label style="cursor:pointer"><input type="checkbox" value="etage" style="display:none" class="obj-cb"><span class="obj-tag" style="display:inline-block;padding:4px 10px;border-radius:20px;border:1px solid var(--line);font-size:11px;background:var(--bg)">Étage trop haut/bas</span></label>
+          </div>
+        </div>
+
+        <!-- SECTION : Analyse agent -->
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;padding-top:12px;border-top:1px solid var(--line)">Analyse et recommandation</div>
+
+        <div class="field" style="margin-bottom:10px">
+          <label class="lbl" style="font-size:11px">Votre synthèse (visible par le vendeur)</label>
+          <textarea id="rv-commentaire" rows="4" placeholder="Ex : Visite très positive. Le couple a été séduit par la luminosité et le jardin. Leur principale interrogation porte sur l'état de la toiture. Je recommande de prévoir un devis pour les rassurer lors d'une éventuelle négociation." style="font-size:12px;resize:vertical"></textarea>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <div>
+            <label class="lbl" style="font-size:11px">Recommandation</label>
+            <select id="rv-recommandation" style="font-size:13px">
+              <option value="">-- Sélectionner --</option>
+              <option value="maintenir_prix">Maintenir le prix</option>
+              <option value="baisser_prix">Envisager une baisse de prix</option>
+              <option value="valorisation">Mise en valeur recommandée</option>
+              <option value="negociation_possible">Négociation possible</option>
+              <option value="visite_supplémentaire">Nouvelles visites à programmer</option>
+              <option value="retrait_temporaire">Retrait temporaire suggéré</option>
+            </select>
+          </div>
+          <div>
+            <label class="lbl" style="font-size:11px">Actions suivantes (optionnel)</label>
+            <input type="text" id="rv-actions" placeholder="Ex : Envoyer devis toiture sous 48h" style="font-size:13px">
+          </div>
+        </div>
+
+        <button onclick="envoyerRapportVisite()" style="background:var(--teal);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;width:100%">Envoyer le rapport au vendeur</button>
+        <div id="rv-status" style="margin-top:10px;font-size:12px;text-align:center;display:none"></div>
+      </div>
+
+      <!-- Historique rapports -->
+      <div style="background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Rapports envoyés</div>
+        <div id="rv-historique" style="font-size:12px;color:var(--muted)">Chargement...</div>
+      </div>
+
+    </div>
+
 
     <div id="tab-conseils" style="display:none">
       <div class="card">
@@ -824,7 +964,8 @@ async function genererConseils() {
 // ── TABS ──
 function showTab(tab, btn) {
   var tabs = ['candidatures', 'quotas', 'mandats', 'conseils'];
-  tabs.forEach(function(t){ document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none'; });
+  var allTabs = ['candidatures','performance','quotas','mandats','cr','rapports','conseils'];
+  allTabs.forEach(function(t){ var el = document.getElementById('tab-' + t); if(el) el.style.display = t === tab ? 'block' : 'none'; });
   document.querySelectorAll('.tab').forEach(function(b){ b.classList.remove('active'); });
   btn.classList.add('active');
   if (tab === 'quotas') afficherQuotas();
@@ -1117,8 +1258,240 @@ async function supprimerMandat(id) {
   if (!confirm('Retirer ce mandat de ImmoConnect ?')) return;
   await db.from('mandats_agents').update({ statut: 'suspendu' }).eq('id', id);
   await chargerMandats();
+  await chargerMandatsPourRV();
+  await chargerHistoriqueRapports();
   showToast('Mandat retire.', 'ok');
 }
+
+// ─── RAPPORTS DE VISITE ──────────────────────────────────────
+
+var mandatsActifsPourRV = [];
+
+async function chargerMandatsPourRV() {
+  var { data } = await db.from('mandats_agents')
+    .select('id,type_bien,ville,annonce_id')
+    .eq('agent_email', currentUser.email)
+    .eq('statut', 'actif');
+  
+  mandatsActifsPourRV = data || [];
+  var sel = document.getElementById('rv-annonce-select');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">-- Choisir un bien --</option>';
+  
+  (data || []).forEach(function(m) {
+    var opt = document.createElement('option');
+    opt.value = m.annonce_id || m.id;
+    opt.textContent = (m.type_bien || 'Bien') + ' · ' + (m.ville || '');
+    opt.dataset.agentEmail = currentUser.email;
+    sel.appendChild(opt);
+  });
+
+  // Charger aussi depuis annonces liées via candidatures sélectionnées
+  var { data: cands } = await db.from('candidatures_agents')
+    .select('annonce_id, annonces_vendeurs(type_bien, ville, email_contact)')
+    .eq('agent_email', currentUser.email)
+    .eq('dans_top3', true);
+
+  (cands || []).forEach(function(c) {
+    if (!c.annonce_id) return;
+    var already = Array.from(sel.options).some(function(o){ return o.value === c.annonce_id; });
+    if (already) return;
+    var opt = document.createElement('option');
+    opt.value = c.annonce_id;
+    var av = c.annonces_vendeurs;
+    opt.textContent = ((av && av.type_bien) || 'Bien') + ' · ' + ((av && av.ville) || '') + ' (candidature)';
+    sel.appendChild(opt);
+  });
+}
+
+function chargerVisitesAnnonce(annonceId) {
+  // Optionnel : pré-remplir la date si une réservation confirmée existe
+  if (!annonceId) return;
+  db.from('reservations_visites')
+    .select('id, created_at, statut_visite')
+    .eq('annonce_id', annonceId)
+    .eq('agent_email', currentUser.email)
+    .eq('statut_visite', 'effectuee')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .then(function(res) {
+      if (res.data && res.data.length > 0) {
+        var d = new Date(res.data[0].created_at);
+        document.getElementById('rv-date').value = d.toISOString().split('T')[0];
+      }
+    });
+}
+
+function majInteretStyle() {
+  document.querySelectorAll('.interet-btn').forEach(function(btn) {
+    var radio = btn.parentElement.querySelector('input[type=radio]');
+    if (radio && radio.checked) {
+      var colors = { tres_interesse: '#E1F5EE', interesse: '#E6F1FB', mitige: '#FAEEDA', non_interesse: '#FCEBEB' };
+      btn.style.background = colors[radio.value] || 'var(--bg)';
+      btn.style.borderColor = '#aaa';
+      btn.style.fontWeight = '500';
+    } else {
+      btn.style.background = 'var(--bg)';
+      btn.style.borderColor = 'var(--line)';
+      btn.style.fontWeight = '400';
+    }
+  });
+  // Style tags objections
+  document.querySelectorAll('.obj-cb').forEach(function(cb) {
+    var tag = cb.nextElementSibling;
+    if (!tag) return;
+    tag.style.background = cb.checked ? '#E6F1FB' : 'var(--bg)';
+    tag.style.borderColor = cb.checked ? '#185FA5' : 'var(--line)';
+    tag.style.color = cb.checked ? '#185FA5' : 'var(--ink)';
+    tag.style.fontWeight = cb.checked ? '500' : '400';
+  });
+}
+
+// Activer le style des tags objection au clic
+document.addEventListener('change', function(e) {
+  if (e.target && e.target.classList.contains('obj-cb')) majInteretStyle();
+});
+
+async function envoyerRapportVisite() {
+  var annonceId = document.getElementById('rv-annonce-select').value;
+  var interet = document.querySelector('input[name="rv-interet"]:checked');
+  var commentaire = (document.getElementById('rv-commentaire').value || '').trim();
+
+  if (!annonceId) { showToast('Sélectionnez un bien.', 'error'); return; }
+  if (!interet) { showToast('Sélectionnez un niveau d\'intérêt.', 'error'); return; }
+  if (!commentaire) { showToast('La synthèse est obligatoire.', 'error'); return; }
+
+  var btn = document.querySelector('#tab-rapports button[onclick="envoyerRapportVisite()"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'Envoi en cours...'; }
+
+  var objections = Array.from(document.querySelectorAll('.obj-cb:checked')).map(function(cb){ return cb.value; });
+
+  // Récupérer le vendeur email
+  var { data: annonce } = await db.from('annonces_vendeurs')
+    .select('email_contact, titre, type_bien, ville')
+    .eq('id', annonceId).single();
+
+  if (!annonce) { showToast('Annonce introuvable.', 'error'); if(btn){ btn.disabled=false; btn.textContent='Envoyer le rapport au vendeur'; } return; }
+
+  // Récupérer infos agent
+  var { data: agent } = await db.from('agents_validation')
+    .select('nom, prenom, agence').eq('email', currentUser.email).single();
+
+  var agentNom = ((agent && agent.prenom) || '') + ' ' + ((agent && agent.nom) || '');
+  var agentAgence = (agent && agent.agence) || '';
+  var bienTitre = (annonce.titre || annonce.type_bien + ' · ' + annonce.ville);
+
+  var payload = {
+    annonce_id: annonceId,
+    agent_email: currentUser.email,
+    vendeur_email: annonce.email_contact,
+    visite_date: document.getElementById('rv-date').value || new Date().toLocaleDateString('fr-FR'),
+    acheteur_profil: document.getElementById('rv-profil').value || null,
+    acheteur_financement: document.getElementById('rv-financement').value,
+    acheteur_budget_fourchette: document.getElementById('rv-budget').value || null,
+    acheteur_delai: document.getElementById('rv-delai').value,
+    interet: interet.value,
+    points_forts: document.getElementById('rv-points-forts').value || null,
+    points_faibles: document.getElementById('rv-points-faibles').value || null,
+    objections: objections,
+    offre_potentielle: document.getElementById('rv-offre').value ? parseFloat(document.getElementById('rv-offre').value) : null,
+    offre_potentielle_note: null,
+    recommandation: document.getElementById('rv-recommandation').value || null,
+    commentaire_agent: commentaire,
+    actions_suivantes: document.getElementById('rv-actions').value || null,
+    email_envoye: false
+  };
+
+  // Sauvegarder en base
+  var { data: rapport, error } = await db.from('rapports_visites').insert(payload).select().single();
+  if (error) { showToast('Erreur sauvegarde : ' + error.message, 'error'); if(btn){ btn.disabled=false; btn.textContent='Envoyer le rapport au vendeur'; } return; }
+
+  // Envoyer l'email via la edge function envoyer-email
+  try {
+    var res = await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'rapport_visite',
+        to: annonce.email_contact,
+        subject: 'Rapport de visite — ' + bienTitre + ' · ImmoConnect',
+        bien_titre: bienTitre,
+        agent_nom: agentNom.trim(),
+        agent_agence: agentAgence,
+        visite_date: payload.visite_date,
+        acheteur_profil: payload.acheteur_profil,
+        acheteur_financement: payload.acheteur_financement,
+        acheteur_budget_fourchette: payload.acheteur_budget_fourchette,
+        acheteur_delai: payload.acheteur_delai,
+        interet: payload.interet,
+        points_forts: payload.points_forts,
+        points_faibles: payload.points_faibles,
+        objections: payload.objections,
+        offre_potentielle: payload.offre_potentielle,
+        commentaire_agent: payload.commentaire_agent,
+        recommandation: payload.recommandation,
+        actions_suivantes: payload.actions_suivantes,
+        lien: 'https://immoconnect-agence.fr/connexion.html'
+      }
+    });
+
+    // Marquer email envoyé
+    if (!res.error) {
+      await db.from('rapports_visites').update({ email_envoye: true, email_envoye_le: new Date().toISOString() }).eq('id', rapport.id);
+    }
+  } catch(e) { console.warn('Email non envoyé', e); }
+
+  // Reset formulaire
+  document.getElementById('rv-profil').value = '';
+  document.getElementById('rv-financement').value = 'non_precise';
+  document.getElementById('rv-delai').value = 'non_precise';
+  document.getElementById('rv-budget').value = '';
+  document.getElementById('rv-offre').value = '';
+  document.getElementById('rv-points-forts').value = '';
+  document.getElementById('rv-points-faibles').value = '';
+  document.getElementById('rv-commentaire').value = '';
+  document.getElementById('rv-recommandation').value = '';
+  document.getElementById('rv-actions').value = '';
+  document.querySelectorAll('input[name="rv-interet"]').forEach(function(r){ r.checked = false; });
+  document.querySelectorAll('.obj-cb').forEach(function(cb){ cb.checked = false; });
+  majInteretStyle();
+
+  showToast('Rapport envoyé au vendeur !', 'ok');
+  if(btn){ btn.disabled=false; btn.textContent='Envoyer le rapport au vendeur'; }
+  await chargerHistoriqueRapports();
+}
+
+async function chargerHistoriqueRapports() {
+  var el = document.getElementById('rv-historique');
+  if (!el) return;
+
+  var { data } = await db.from('rapports_visites')
+    .select('id, annonce_id, visite_date, interet, commentaire_agent, email_envoye, created_at, annonces_vendeurs(type_bien, ville)')
+    .eq('agent_email', currentUser.email)
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  if (!data || data.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Aucun rapport envoyé pour l\'instant.</div>';
+    return;
+  }
+
+  var interetColors = { tres_interesse: { bg: '#E1F5EE', c: '#085041', label: 'Très intéressé' }, interesse: { bg: '#E6F1FB', c: '#185FA5', label: 'Intéressé' }, mitige: { bg: '#FAEEDA', c: '#633806', label: 'Mitigé' }, non_interesse: { bg: '#FCEBEB', c: '#791F1F', label: 'Non intéressé' } };
+
+  el.innerHTML = data.map(function(r) {
+    var av = r.annonces_vendeurs;
+    var titre = ((av && av.type_bien) || 'Bien') + ' · ' + ((av && av.ville) || '');
+    var ic = interetColors[r.interet] || interetColors['interesse'];
+    var dateStr = r.visite_date ? new Date(r.visite_date).toLocaleDateString('fr-FR') : new Date(r.created_at).toLocaleDateString('fr-FR');
+    return '<div style="padding:10px 0;border-bottom:1px solid var(--line)">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
+      + '<span style="font-size:13px;font-weight:500">' + titre + '</span>'
+      + '<span style="font-size:10px;background:' + ic.bg + ';color:' + ic.c + ';padding:2px 8px;border-radius:20px">' + ic.label + '</span>'
+      + '</div>'
+      + '<div style="font-size:11px;color:var(--muted)">' + dateStr + ' · ' + (r.email_envoye ? '✅ Email envoyé' : '⏳ En attente') + '</div>'
+      + '<div style="font-size:12px;color:var(--ink);margin-top:3px;line-height:1.5">' + (r.commentaire_agent || '').substring(0, 100) + (r.commentaire_agent && r.commentaire_agent.length > 100 ? '…' : '') + '</div>'
+      + '</div>';
+  }).join('');
+}
+
 
 async function deconnexion() {
   await db.auth.signOut();
