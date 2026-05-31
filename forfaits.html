@@ -132,6 +132,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 @media(max-width:860px){.levels-grid,.flux-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:580px){.levels-grid,.flux-grid,.cta-row{grid-template-columns:1fr}.tabs{flex-wrap:wrap}}
 </style>
+<script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
@@ -373,11 +374,13 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
         <div style="font-size:13px;font-weight:600;color:#0C447C;margin-bottom:4px">Acheteur — Gratuit</div>
         <div style="font-size:12px;color:#185FA5;line-height:1.6;margin-bottom:10px">Explorez les annonces gratuitement. Dossier 4,99€ · Contact vendeur 9,99€ · 1 contact/sem offert</div>
         <a href="questionnaire-acheteur.html" style="display:block;text-align:center;background:#185FA5;color:#fff;padding:9px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:500">Déposer mon projet →</a>
+        <button onclick="payerDossier('price_1TdFJmRWjX9H4QylhXCGndPu')" style="display:block;text-align:center;background:transparent;color:#185FA5;padding:9px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid #185FA5;width:100%;font-family:'Outfit',sans-serif;margin-top:6px">Accès dossier complet 4,99€ →</button>
+        <button onclick="payerContact('price_1TdFKKRWjX9H4QylHGG1ymnK')" style="display:block;text-align:center;background:transparent;color:#185FA5;padding:9px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid #185FA5;width:100%;font-family:'Outfit',sans-serif;margin-top:6px">Contacter un vendeur 9,99€ →</button>
       </div>
       <div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:var(--r);padding:14px 16px">
         <div style="font-size:13px;font-weight:600;color:#085041;margin-bottom:4px">Investisseur — 29,99€/mois</div>
         <div style="font-size:12px;color:#1E7A62;line-height:1.6;margin-bottom:10px">Dossiers complets · Matching rendement · 5 contacts/sem · Simulateur financier · contact supp. 1,99€</div>
-        <a href="questionnaire-acheteur.html?forfait=investisseur" style="display:block;text-align:center;background:#085041;color:#fff;padding:9px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:500">S'inscrire Investisseur →</a>
+        <button onclick="souscrire('price_1TdFIGRWjX9H4QylcuF948q2','investisseur')" style="display:block;text-align:center;background:#085041;color:#fff;padding:9px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:none;width:100%;font-family:'Outfit',sans-serif">S'inscrire Investisseur →</button>
       </div>
     </div>
 
@@ -474,6 +477,60 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
       </div>
     </div>
 
+    <!-- CARTES FORFAITS AGENTS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:28px">
+
+      <!-- STARTER -->
+      <div style="background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:20px;position:relative">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">Starter</div>
+        <div style="font-size:28px;font-weight:600;color:var(--ink);margin-bottom:2px">49€<span style="font-size:14px;font-weight:400;color:var(--muted)">/mois</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:16px">Sans engagement · résiliable à tout moment</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px;font-size:12px">
+          <div>⏰ Alertes H+12</div>
+          <div>📋 5 candidatures/mois</div>
+          <div>👥 5 contacts vendeur/semaine</div>
+          <div>🤖 Analyse Hanaé incluse</div>
+        </div>
+        <button onclick="souscrire('price_1TdEauRWjX9H4QylxnyRrSIY','starter')" class="stripe-btn" style="width:100%;padding:11px;background:var(--ink);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif">
+          Choisir Starter →
+        </button>
+      </div>
+
+      <!-- PRO -->
+      <div style="background:var(--warm);border:2px solid var(--blue);border-radius:var(--r);padding:20px;position:relative">
+        <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:3px 12px;border-radius:20px;white-space:nowrap">LE PLUS CHOISI</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#185FA5;margin-bottom:8px">Pro</div>
+        <div style="font-size:28px;font-weight:600;color:var(--ink);margin-bottom:2px">99€<span style="font-size:14px;font-weight:400;color:var(--muted)">/mois</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:16px">Sans engagement · résiliable à tout moment</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px;font-size:12px">
+          <div>⚡ Alertes H+4</div>
+          <div>📋 20 candidatures/mois</div>
+          <div>👥 15 contacts vendeur/semaine</div>
+          <div>📊 CR hebdo automatique au vendeur</div>
+        </div>
+        <button onclick="souscrire('price_1TdEocRWjX9H4Qyln94Dw9MU','pro')" class="stripe-btn" style="width:100%;padding:11px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif">
+          Choisir Pro →
+        </button>
+      </div>
+
+      <!-- PREMIUM -->
+      <div style="background:#0F1F19;border:1px solid #1E7A62;border-radius:var(--r);padding:20px;position:relative">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#5FC9A0;margin-bottom:8px">Premium</div>
+        <div style="font-size:28px;font-weight:600;color:#fff;margin-bottom:2px">199€<span style="font-size:14px;font-weight:400;color:#5FC9A0">/mois</span></div>
+        <div style="font-size:11px;color:#5FC9A0;margin-bottom:16px">Sans engagement · résiliable à tout moment</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px;font-size:12px;color:#ccc">
+          <div>🚀 Alertes H+0 — temps réel</div>
+          <div>📋 Candidatures illimitées</div>
+          <div>👥 Contacts illimités</div>
+          <div>⭐ +10 pts score IA</div>
+        </div>
+        <button onclick="souscrire('price_1TdEtdRWjX9H4Qylu19umO0c','premium')" class="stripe-btn" style="width:100%;padding:11px;background:#1E7A62;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif">
+          Choisir Premium →
+        </button>
+      </div>
+
+    </div>
+
     <!-- TABLEAU FORFAITS -->
     <div class="cmp-title">Comparer les forfaits</div>
     <div class="at-wrap">
@@ -520,9 +577,9 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
           </tr>
           <tr>
             <td>Contact vendeur supplémentaire</td>
-            <td style="font-size:11px;color:var(--amber)">4,99€</td>
-            <td style="font-size:11px;color:var(--amber)">4,99€</td>
-            <td style="font-size:11px;color:var(--amber)">4,99€</td>
+            <td><button onclick="payerPPU('price_1TdFQoRWjX9H4QylKiSmlAMM','contact_supp')" style="font-size:11px;color:var(--amber);background:transparent;border:none;cursor:pointer;font-family:'Outfit',sans-serif;padding:0;text-decoration:underline">4,99€</button></td>
+            <td><button onclick="payerPPU('price_1TdFQoRWjX9H4QylKiSmlAMM','contact_supp')" style="font-size:11px;color:var(--amber);background:transparent;border:none;cursor:pointer;font-family:'Outfit',sans-serif;padding:0;text-decoration:underline">4,99€</button></td>
+            <td><button onclick="payerPPU('price_1TdFQoRWjX9H4QylKiSmlAMM','contact_supp')" style="font-size:11px;color:var(--amber);background:transparent;border:none;cursor:pointer;font-family:'Outfit',sans-serif;padding:0;text-decoration:underline">4,99€</button></td>
             <td class="hi prem-col">Inclus</td>
           </tr>
           <tr class="sr"><td colspan="5">Publication de mandats</td></tr>
@@ -581,6 +638,10 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
         <div class="cta-title" style="color:#085041">Inscription gratuite · paiement à la candidature</div>
         <div class="cta-desc" style="color:var(--teal)">Commencez sans abonnement. Candidatez à 9,99€/unité. Passez à un forfait quand vous êtes prêt.</div>
         <a href="questionnaire-agent.html" class="cta-btn">S'inscrire gratuitement →</a>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px">
+          <button onclick="payerPPU('price_1TdFLERWjX9H4QylRNaXofVc','candidature_ppu')" style="padding:8px;background:transparent;color:var(--teal);border:1px solid var(--teal);border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif">Candidater 9,99€</button>
+          <button onclick="payerPPU('price_1TdFOERWjX9H4QylMeOASel8','contact_ppu')" style="padding:8px;background:transparent;color:var(--teal);border:1px solid var(--teal);border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif">Contact vendeur 4,99€</button>
+        </div>
       </div>
     </div>
   </div>
@@ -588,6 +649,144 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 </div>
 
 <script>
+// ── STRIPE ──────────────────────────────────────────────────
+var STRIPE_PK = 'pk_live_51TdCafRWjX9H4Qylw3v8ecstlJddsgFDrfsVRtQEoTp6puTzpBYasNUmGQzhBqaTr0HI5edhhn3EfO7JECYanKTh000HXK6dw7';
+var stripe = null;
+
+function initStripe() {
+  if (typeof Stripe !== 'undefined' && !stripe) {
+    stripe = Stripe(STRIPE_PK);
+  }
+}
+
+async function payerPPU(priceId, type) {
+  initStripe();
+  if (!stripe) { alert('Stripe non chargé, rechargez la page.'); return; }
+  var btn = event.currentTarget;
+  var origText = btn.textContent;
+  btn.textContent = 'Redirection...';
+  btn.disabled = true;
+  try {
+    var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/creer-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        price_id: priceId,
+        forfait: type,
+        mode: 'payment',
+        success_url: 'https://immoconnect-agence.fr/dashboard-agent.html?stripe=success&type=' + type,
+        cancel_url: 'https://immoconnect-agence.fr/forfaits.html#agents'
+      })
+    });
+    var data = await res.json();
+    if (data.url) { window.location.href = data.url; }
+    else { throw new Error(data.error || 'Erreur Stripe'); }
+  } catch(e) {
+    alert('Erreur : ' + e.message);
+    btn.textContent = origText;
+    btn.disabled = false;
+  }
+}
+
+async function payerContact(priceId) {
+  initStripe();
+  if (!stripe) { alert('Stripe non chargé, rechargez la page.'); return; }
+  var btn = event.currentTarget;
+  var origText = btn.textContent;
+  btn.textContent = 'Redirection...';
+  btn.disabled = true;
+  try {
+    var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/creer-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        price_id: priceId,
+        forfait: 'contact_vendeur',
+        mode: 'payment',
+        success_url: 'https://immoconnect-agence.fr/questionnaire-acheteur.html?stripe=success&type=contact',
+        cancel_url: 'https://immoconnect-agence.fr/forfaits.html#acheteurs'
+      })
+    });
+    var data = await res.json();
+    if (data.url) { window.location.href = data.url; }
+    else { throw new Error(data.error || 'Erreur Stripe'); }
+  } catch(e) {
+    alert('Erreur : ' + e.message);
+    btn.textContent = origText;
+    btn.disabled = false;
+  }
+}
+
+async function payerDossier(priceId) {
+  initStripe();
+  if (!stripe) { alert('Stripe non chargé, rechargez la page.'); return; }
+
+  var btn = event.currentTarget;
+  var origText = btn.textContent;
+  btn.textContent = 'Redirection...';
+  btn.disabled = true;
+
+  try {
+    var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/creer-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        price_id: priceId,
+        forfait: 'dossier_complet',
+        mode: 'payment',
+        success_url: 'https://immoconnect-agence.fr/questionnaire-acheteur.html?stripe=success',
+        cancel_url: 'https://immoconnect-agence.fr/forfaits.html#acheteurs'
+      })
+    });
+    var data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || 'Erreur Stripe');
+    }
+  } catch(e) {
+    alert('Erreur : ' + e.message);
+    btn.textContent = origText;
+    btn.disabled = false;
+  }
+}
+
+async function souscrire(priceId, forfait) {
+  initStripe();
+  if (!stripe) { alert('Stripe non chargé, rechargez la page.'); return; }
+
+  var btn = event.currentTarget;
+  var origText = btn.textContent;
+  btn.textContent = 'Redirection...';
+  btn.disabled = true;
+
+  try {
+    // Appel à votre edge function Stripe (à créer) ou Stripe Checkout direct
+    var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/creer-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        price_id: priceId,
+        forfait: forfait,
+        success_url: 'https://immoconnect-agence.fr/dashboard-agent.html?stripe=success&forfait=' + forfait,
+        cancel_url: 'https://immoconnect-agence.fr/forfaits.html#agents'
+      })
+    });
+
+    var data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || 'Erreur Stripe');
+    }
+  } catch(e) {
+    alert('Erreur : ' + e.message);
+    btn.textContent = origText;
+    btn.disabled = false;
+  }
+}
+
 document.querySelectorAll('.tab').forEach(function(t){
   t.addEventListener('click', function(){
     document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
