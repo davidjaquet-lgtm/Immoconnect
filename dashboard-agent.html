@@ -120,6 +120,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 @keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:760px){.layout{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}}
 </style>
+<script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
@@ -1260,6 +1261,7 @@ async function supprimerMandat(id) {
   await chargerMandats();
   await chargerMandatsPourRV();
   await chargerHistoriqueRapports();
+  verifierRetourStripe();
   showToast('Mandat retire.', 'ok');
 }
 
@@ -1492,6 +1494,83 @@ async function chargerHistoriqueRapports() {
   }).join('');
 }
 
+
+// ─── STRIPE QUOTA DÉPASSÉ ────────────────────────────────────
+
+var STRIPE_PK_AGENT = 'pk_live_51TdCafRWjX9H4Qylw3v8ecstlJddsgFDrfsVRtQEoTp6puTzpBYasNUmGQzhBqaTr0HI5edhhn3EfO7JECYanKTh000HXK6dw7'
+var stripeAgent = null
+
+function initStripeAgent() {
+  if (typeof Stripe !== 'undefined' && !stripeAgent) {
+    stripeAgent = Stripe(STRIPE_PK_AGENT)
+  }
+}
+
+// Appelée depuis n'importe quelle action qui consomme un lead/contact
+async function verifierEtPayerContact(annonceId, vendeurEmail) {
+  // Récupérer les quotas actuels de l'agent
+  var { data: meta } = await db.from('agents_validation')
+    .select('leads_semaine_utilises, forfait_agent')
+    .eq('email', currentUser.email).single()
+
+  if (!meta) { showToast('Impossible de vérifier votre forfait.', 'error'); return false }
+
+  var forfait = meta.forfait_agent || 'pay_per_use'
+  var utilises = parseInt(meta.leads_semaine_utilises || 0)
+  var limites = { pay_per_use: 0, starter: 5, pro: 15, premium: 999 }
+  var limite = limites[forfait] || 0
+
+  // PPU ou quota dépassé → paiement Stripe
+  if (forfait === 'pay_per_use' || utilises >= limite) {
+    var priceId = 'price_1TdFQoRWjX9H4QylKiSmlAMM' // contact supplémentaire 4,99€
+    var label = forfait === 'pay_per_use' ? 'Contact vendeur — 4,99€' : 'Quota dépassé — contact supplémentaire 4,99€'
+
+    var confirm = window.confirm(label + '\n\nVoulez-vous procéder au paiement Stripe ?')
+    if (!confirm) return false
+
+    initStripeAgent()
+    try {
+      var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/creer-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          price_id: priceId,
+          forfait: 'contact_supp',
+          mode: 'payment',
+          success_url: 'https://immoconnect-agence.fr/dashboard-agent.html?stripe=success&type=contact_supp&annonce=' + (annonceId || ''),
+          cancel_url: 'https://immoconnect-agence.fr/dashboard-agent.html'
+        })
+      })
+      var data = await res.json()
+      if (data.url) { window.location.href = data.url; return false }
+      else { showToast('Erreur paiement : ' + (data.error || ''), 'error'); return false }
+    } catch(e) {
+      showToast('Erreur Stripe : ' + e.message, 'error'); return false
+    }
+  }
+
+  // Quota disponible → incrémenter et continuer
+  await db.from('agents_validation')
+    .update({ leads_semaine_utilises: utilises + 1 })
+    .eq('email', currentUser.email)
+  return true
+}
+
+// Vérifier au chargement si retour Stripe success
+async function verifierRetourStripe() {
+  var params = new URLSearchParams(window.location.search)
+  if (params.get('stripe') === 'success') {
+    var type = params.get('type') || ''
+    var annonceId = params.get('annonce') || ''
+    if (type === 'contact_supp' && annonceId) {
+      showToast('Paiement validé — vous pouvez contacter ce vendeur.', 'ok')
+    } else if (type === 'contact_supp') {
+      showToast('Paiement validé — votre contact a été débloqué.', 'ok')
+    }
+    // Nettoyer l'URL
+    window.history.replaceState({}, '', '/dashboard-agent.html')
+  }
+}
 
 async function deconnexion() {
   await db.auth.signOut();
