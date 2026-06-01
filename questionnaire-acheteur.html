@@ -438,6 +438,45 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
   </div>
 
   <!-- ══ S6 : CRITÈRES INVESTISSEMENT (investisseur uniquement) ══ -->
+  <!-- SECTION ATTESTATION FINANCEMENT -->
+  <div class="section" id="section-attestation">
+    <div class="sec-title" style="font-size:14px;margin-bottom:4px">📄 Attestation de financement <span style="font-size:11px;font-weight:400;color:var(--muted)">(optionnel mais recommandé)</span></div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6">Uploadez une simulation bancaire ou un accord de principe de financement. Ce document est visible par le vendeur lorsque vous le contactez — il renforce votre crédibilité et vous différencie des acheteurs sans justificatif.</p>
+
+    <div style="background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px">
+      <div class="field" style="margin-bottom:12px">
+        <label class="lbl">Type de document</label>
+        <select id="attestation-type">
+          <option value="simulation">Simulation bancaire</option>
+          <option value="accord_principe">Accord de principe bancaire</option>
+          <option value="offre_pret">Offre de prêt</option>
+          <option value="achat_comptant">Attestation achat comptant</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label class="lbl">Document (PDF ou image)</label>
+        <div id="attestation-drop-zone" style="border:2px dashed var(--line);border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg)" onclick="document.getElementById('attestation-file').click()" ondragover="event.preventDefault();this.style.borderColor='var(--teal)'" ondragleave="this.style.borderColor='var(--line)'" ondrop="handleAttestationDrop(event)">
+          <div style="font-size:28px;margin-bottom:8px">📎</div>
+          <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:4px">Glissez votre document ici</div>
+          <div style="font-size:11px;color:var(--muted)">ou cliquez pour parcourir · PDF, JPG, PNG · max 5 Mo</div>
+          <input type="file" id="attestation-file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="previewAttestation(this)">
+        </div>
+        <div id="attestation-preview" style="display:none;margin-top:10px;background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:10px 14px;display:none;align-items:center;gap:10px">
+          <span style="font-size:20px">✅</span>
+          <div>
+            <div id="attestation-name" style="font-size:12px;font-weight:500;color:#085041"></div>
+            <div style="font-size:11px;color:#1E7A62">Document prêt à être envoyé</div>
+          </div>
+          <button onclick="clearAttestation()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:#888;font-size:16px">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#E6F1FB;border-radius:8px;padding:10px 14px;font-size:11px;color:#185FA5;line-height:1.6">
+      🔒 <strong>Confidentialité :</strong> Votre attestation n'est visible que par le vendeur que vous contactez. Elle n'est jamais partagée avec des tiers ni utilisée à d'autres fins.
+    </div>
+  </div>
+
   <div class="section" id="section-invest" style="display:none">
     <div class="section-head" onclick="toggle('s6')">
       <div class="sec-num inv">6</div>
@@ -778,6 +817,36 @@ async function soumettre() {
     created_at:            new Date().toISOString()
   };
 
+  // Upload attestation financement si présente
+  var attestationUrl = null;
+  var attestationFile = document.getElementById('attestation-file')?.files[0];
+  if (attestationFile) {
+    var ext = attestationFile.name.split('.').pop();
+    var fileName = 'attestations/' + Date.now() + '_' + Math.random().toString(36).substr(2,8) + '.' + ext;
+    var { data: uploadData, error: uploadError } = await db.storage
+      .from('documents')
+      .upload(fileName, attestationFile, { contentType: attestationFile.type });
+    if (!uploadError) {
+      var { data: urlData } = db.storage.from('documents').getPublicUrl(fileName);
+      attestationUrl = urlData.publicUrl;
+      payload.attestation_financement_url = attestationUrl;
+      payload.attestation_financement_type = document.getElementById('attestation-type')?.value || 'simulation';
+      payload.attestation_financement_at = new Date().toISOString();
+    }
+  }
+
+  // Vérification croisée : cet email est-il déjà un agent ImmoConnect ?
+  var { data: agentExistant } = await db.from('agents_validation')
+    .select('email').eq('email', payload.email).single()
+    .catch(function(){ return { data: null }; });
+
+  if (agentExistant) {
+    alert('⚠️ Cette adresse email est associée à un compte agent ImmoConnect.\n\nSi vous êtes un agent, vous devez utiliser votre espace agent. Si vous avez un doute, contactez-nous à support@immoconnect-agence.fr');
+    document.getElementById('btn-submit').disabled = false;
+    document.getElementById('btn-submit').textContent = 'Créer mon espace';
+    return;
+  }
+
   var { error } = await db.from('projets_acheteurs').insert([payload]);
   if (error) {
     showToast('Erreur : ' + error.message, 'err');
@@ -786,6 +855,21 @@ async function soumettre() {
   }
   showToast('✅ Projet déposé avec succès !', 'ok');
   btn.textContent = '✓ Projet déposé';
+
+  // Afficher le widget d'alerte
+  var alerteBox = document.getElementById('alerte-acheteur-box');
+  if (alerteBox) {
+    alerteBox.style.display = 'block';
+    alerteBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Pré-remplir l'email
+    var emailInput = document.getElementById('alerte-email');
+    if (emailInput && payload.email) emailInput.value = payload.email;
+    // Pré-remplir les critères depuis le formulaire
+    document.getElementById('alerte-type-bien').value = payload.type_bien || 'tous';
+    if (payload.prix_max) document.getElementById('alerte-prix-max').value = payload.prix_max;
+    if (payload.surface_min) document.getElementById('alerte-surface-min').value = payload.surface_min;
+    if (payload.ville) document.getElementById('alerte-villes').value = payload.ville;
+  }
 }
 
 function showToast(msg, type) {
@@ -797,6 +881,98 @@ function showToast(msg, type) {
 /* INIT */
 updateRecap();
 </script>
+
+<!-- WIDGET ALERTE ACHETEUR -->
+<div id="alerte-acheteur-box" style="display:none;position:fixed;bottom:24px;right:24px;width:340px;background:#FEFDFB;border:1px solid #E8E6E0;border-radius:12px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:1000;font-family:'Outfit',sans-serif">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div>
+      <div style="font-size:13px;font-weight:500;color:#0F0F0E">🔔 Activer les alertes</div>
+      <div style="font-size:11px;color:#888780;margin-top:2px">Recevez un email dès qu'un bien correspond</div>
+    </div>
+    <button onclick="document.getElementById('alerte-acheteur-box').style.display='none'" style="background:none;border:none;font-size:18px;cursor:pointer;color:#888780;padding:0 4px">×</button>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div>
+      <label style="font-size:11px;color:#888780;display:block;margin-bottom:3px">Email</label>
+      <input id="alerte-email" type="email" placeholder="votre@email.fr" style="width:100%;padding:8px 10px;border:1px solid #E8E6E0;border-radius:8px;font-size:12px;font-family:'Outfit',sans-serif;box-sizing:border-box">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div>
+        <label style="font-size:11px;color:#888780;display:block;margin-bottom:3px">Type de bien</label>
+        <select id="alerte-type-bien" style="width:100%;padding:8px 10px;border:1px solid #E8E6E0;border-radius:8px;font-size:12px;font-family:'Outfit',sans-serif">
+          <option value="tous">Tous</option>
+          <option value="appartement">Appartement</option>
+          <option value="maison">Maison</option>
+          <option value="terrain">Terrain</option>
+          <option value="local">Local</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888780;display:block;margin-bottom:3px">Budget max (€)</label>
+        <input id="alerte-prix-max" type="number" placeholder="300000" style="width:100%;padding:8px 10px;border:1px solid #E8E6E0;border-radius:8px;font-size:12px;font-family:'Outfit',sans-serif;box-sizing:border-box">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div>
+        <label style="font-size:11px;color:#888780;display:block;margin-bottom:3px">Surface min (m²)</label>
+        <input id="alerte-surface-min" type="number" placeholder="40" style="width:100%;padding:8px 10px;border:1px solid #E8E6E0;border-radius:8px;font-size:12px;font-family:'Outfit',sans-serif;box-sizing:border-box">
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888780;display:block;margin-bottom:3px">Ville(s)</label>
+        <input id="alerte-villes" type="text" placeholder="Toulouse, Montpellier" style="width:100%;padding:8px 10px;border:1px solid #E8E6E0;border-radius:8px;font-size:12px;font-family:'Outfit',sans-serif;box-sizing:border-box">
+      </div>
+    </div>
+    <button onclick="activerAlerte()" id="btn-alerte" style="width:100%;padding:10px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;margin-top:4px">
+      Activer l'alerte →
+    </button>
+    <div id="alerte-status" style="font-size:11px;text-align:center;display:none"></div>
+  </div>
+</div>
+
+<script>
+async function activerAlerte() {
+  var email = document.getElementById('alerte-email').value.trim();
+  if (!email) { alert('Entrez votre email.'); return; }
+
+  var btn = document.getElementById('btn-alerte');
+  btn.textContent = 'Activation...';
+  btn.disabled = true;
+
+  var villesRaw = document.getElementById('alerte-villes').value;
+  var villes = villesRaw ? villesRaw.split(',').map(function(v){ return v.trim(); }).filter(Boolean) : [];
+
+  try {
+    var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/alerter-acheteurs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'creer_alerte',
+        email: email,
+        type_bien: document.getElementById('alerte-type-bien').value,
+        prix_max: parseFloat(document.getElementById('alerte-prix-max').value) || null,
+        surface_min: parseFloat(document.getElementById('alerte-surface-min').value) || null,
+        villes: villes
+      })
+    });
+    var data = await res.json();
+    if (data.success) {
+      var st = document.getElementById('alerte-status');
+      st.textContent = '✅ Alerte activée ! Vous recevrez un email de confirmation.';
+      st.style.color = '#1D9E75';
+      st.style.display = 'block';
+      btn.textContent = '✓ Alerte active';
+      btn.style.background = '#1D9E75';
+    } else {
+      throw new Error(data.error || 'Erreur');
+    }
+  } catch(e) {
+    btn.textContent = 'Activer l'alerte →';
+    btn.disabled = false;
+    alert('Erreur : ' + e.message);
+  }
+}
+</script>
+
 <script>
 (function() {
   var consent = localStorage.getItem('ic_cookie_consent');
@@ -808,6 +984,38 @@ updateRecap();
     document.body.appendChild(b);
   }
 })();
+function previewAttestation(input) {
+  var file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    alert('Fichier trop volumineux (max 5 Mo)');
+    input.value = '';
+    return;
+  }
+  document.getElementById('attestation-name').textContent = file.name + ' (' + (file.size/1024).toFixed(0) + ' Ko)';
+  var preview = document.getElementById('attestation-preview');
+  preview.style.display = 'flex';
+  document.getElementById('attestation-drop-zone').style.display = 'none';
+}
+
+function handleAttestationDrop(e) {
+  e.preventDefault();
+  document.getElementById('attestation-drop-zone').style.borderColor = 'var(--line)';
+  var file = e.dataTransfer.files[0];
+  if (!file) return;
+  var input = document.getElementById('attestation-file');
+  var dt = new DataTransfer();
+  dt.items.add(file);
+  input.files = dt.files;
+  previewAttestation(input);
+}
+
+function clearAttestation() {
+  document.getElementById('attestation-file').value = '';
+  document.getElementById('attestation-preview').style.display = 'none';
+  document.getElementById('attestation-drop-zone').style.display = 'block';
+}
+
 function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
 function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
 </script>
