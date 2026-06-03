@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Votre avis sur la visite — ImmoConnect</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:#F5F2EC;color:#0F0F0E;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.card{background:#FEFDFB;border:1px solid #E8E6E0;border-radius:14px;padding:32px;max-width:480px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.06)}
+.logo{font-size:20px;font-weight:600;text-align:center;margin-bottom:24px}
+.logo span{color:#C09B5A}
+.bien-info{background:#F5F2EC;border-radius:10px;padding:14px 16px;margin-bottom:24px;font-size:13px}
+.bien-titre{font-weight:500;margin-bottom:4px}
+.bien-sub{color:#888780;font-size:12px}
+h2{font-size:18px;font-weight:500;margin-bottom:6px;text-align:center}
+.sous-titre{font-size:13px;color:#888780;text-align:center;margin-bottom:28px;line-height:1.6}
+/* ÉTOILES */
+.etoiles{display:flex;justify-content:center;gap:10px;margin-bottom:28px}
+.etoile{font-size:40px;cursor:pointer;transition:transform .15s;line-height:1;opacity:.3;user-select:none}
+.etoile:hover,.etoile.active{opacity:1;transform:scale(1.15)}
+.etoile.active{filter:drop-shadow(0 0 6px rgba(192,155,90,.5))}
+.note-lbl{text-align:center;font-size:14px;font-weight:500;margin-bottom:20px;height:20px;color:#C09B5A;transition:all .2s}
+/* QUALIFICATIFS */
+.qualif-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+.qualif-btn{padding:9px 12px;border:1px solid #E8E6E0;border-radius:8px;font-size:12px;cursor:pointer;background:transparent;font-family:'Outfit',sans-serif;text-align:center;transition:all .15s}
+.qualif-btn:hover{border-color:#C09B5A;background:#FEF8EE}
+.qualif-btn.selected{border-color:#1E7A62;background:#E1F5EE;color:#085041;font-weight:500}
+/* AVIS */
+label{font-size:12px;color:#888780;display:block;margin-bottom:6px}
+textarea{width:100%;padding:12px;border:1px solid #E8E6E0;border-radius:8px;font-size:13px;font-family:'Outfit',sans-serif;resize:vertical;min-height:90px;background:#F5F2EC;outline:none;transition:border .2s}
+textarea:focus{border-color:#1E7A62}
+.btn-submit{width:100%;margin-top:16px;padding:13px;background:#1E7A62;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;transition:background .2s}
+.btn-submit:hover{background:#085041}
+.btn-submit:disabled{background:#ccc;cursor:not-allowed}
+/* SUCCÈS */
+.success-screen{display:none;text-align:center;padding:10px 0}
+.success-icon{font-size:56px;margin-bottom:16px}
+.success-titre{font-size:20px;font-weight:500;margin-bottom:8px}
+.success-sub{font-size:13px;color:#888780;line-height:1.7;max-width:320px;margin:0 auto}
+/* ERREUR */
+.error-screen{display:none;text-align:center;padding:20px 0}
+/* NOTE ANONYME */
+.anon-note{font-size:11px;color:#888780;text-align:center;margin-top:16px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">Immo<span>Connect</span></div>
+
+  <!-- FORMULAIRE -->
+  <div id="form-screen">
+    <div class="bien-info">
+      <div class="bien-titre" id="bien-titre">Chargement…</div>
+      <div class="bien-sub" id="bien-sub"></div>
+    </div>
+
+    <h2>Comment s'est passée la visite ?</h2>
+    <p class="sous-titre">Votre avis aide à améliorer la qualité des agents sur ImmoConnect. Il ne sera pas transmis au vendeur.</p>
+
+    <!-- ÉTOILES -->
+    <div class="etoiles" id="etoiles">
+      <span class="etoile" data-note="1" onclick="setNote(1)">⭐</span>
+      <span class="etoile" data-note="2" onclick="setNote(2)">⭐</span>
+      <span class="etoile" data-note="3" onclick="setNote(3)">⭐</span>
+      <span class="etoile" data-note="4" onclick="setNote(4)">⭐</span>
+      <span class="etoile" data-note="5" onclick="setNote(5)">⭐</span>
+    </div>
+    <div class="note-lbl" id="note-lbl"></div>
+
+    <!-- QUALIFICATIFS -->
+    <div id="qualif-section" style="display:none;margin-bottom:20px">
+      <label style="text-align:center;display:block;margin-bottom:10px">Ce qui a le mieux correspondu à votre visite :</label>
+      <div class="qualif-grid" id="qualif-grid">
+        <button class="qualif-btn" data-q="ponctuel" onclick="toggleQualif(this)">⏰ Agent ponctuel</button>
+        <button class="qualif-btn" data-q="connaisseur" onclick="toggleQualif(this)">🧠 Très connaisseur</button>
+        <button class="qualif-btn" data-q="ecoute" onclick="toggleQualif(this)">👂 À l'écoute</button>
+        <button class="qualif-btn" data-q="bien_presente" onclick="toggleQualif(this)">🏠 Bien bien présenté</button>
+        <button class="qualif-btn" data-q="transparent" onclick="toggleQualif(this)">✅ Transparent</button>
+        <button class="qualif-btn" data-q="pro" onclick="toggleQualif(this)">💼 Très professionnel</button>
+        <button class="qualif-btn neg" data-q="en_retard" onclick="toggleQualif(this)">⏰ En retard</button>
+        <button class="qualif-btn neg" data-q="peu_informatif" onclick="toggleQualif(this)">🤷 Peu informatif</button>
+      </div>
+    </div>
+
+    <!-- COMMENTAIRE -->
+    <div id="avis-section" style="display:none">
+      <label>Votre commentaire (optionnel)</label>
+      <textarea id="avis-texte" placeholder="Décrivez votre expérience de la visite…"></textarea>
+    </div>
+
+    <button class="btn-submit" id="btn-submit" onclick="soumettre()" disabled>
+      Choisissez une note pour continuer
+    </button>
+
+    <div class="anon-note">🔒 Votre avis est anonyme et ne sera pas transmis au vendeur.<br>Il sert uniquement à évaluer la qualité de l'agent.</div>
+  </div>
+
+  <!-- SUCCÈS -->
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon">🙏</div>
+    <div class="success-titre">Merci pour votre avis !</div>
+    <div class="success-sub">Votre notation aide à améliorer la qualité des agents sur ImmoConnect. Votre avis a bien été enregistré.</div>
+    <div style="margin-top:24px">
+      <a href="index.html" style="padding:11px 24px;background:#0F0F0E;color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:500">Retour à l'accueil</a>
+    </div>
+  </div>
+
+  <!-- ERREUR -->
+  <div class="error-screen" id="error-screen">
+    <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+    <div style="font-size:16px;font-weight:500;margin-bottom:8px" id="error-titre">Lien invalide</div>
+    <div style="font-size:13px;color:#888780" id="error-msg">Ce lien de notation est invalide ou a déjà été utilisé.</div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGh5ZWZhamZ3cWN4Y2Z4cG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjYwNDAsImV4cCI6MjA5MTUwMjA0MH0.jB8Z_9eT9lYkqxUUD0G001Y87iSAv94fSu_gVOdqa-A';
+const { createClient } = supabase;
+const db = createClient(SB_URL, SB_KEY);
+
+var noteSelectionnee = 0;
+var qualifSelectionnees = [];
+var reservationId = null;
+var agentEmail = null;
+
+var notesLabels = {
+  1: '😞 Décevant',
+  2: '😐 Moyen',
+  3: '🙂 Bien',
+  4: '😊 Très bien',
+  5: '🤩 Excellent !'
+};
+
+// ── INIT ─────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async function() {
+  var params = new URLSearchParams(window.location.search);
+  var token = params.get('token');
+  reservationId = params.get('r');
+
+  if (!token && !reservationId) {
+    afficherErreur('Lien invalide', 'Ce lien de notation est invalide ou incomplet.');
+    return;
+  }
+
+  // Charger la réservation
+  var query = db.from('reservations_visites').select('*, annonces_vendeurs(titre, type_bien, surface, ville)');
+  if (reservationId) query = query.eq('id', reservationId);
+
+  var { data, error } = await query.single();
+
+  if (error || !data) {
+    afficherErreur('Visite introuvable', 'Impossible de trouver cette visite dans notre système.');
+    return;
+  }
+
+  // Vérifier si déjà noté
+  if (data.note_acheteur) {
+    afficherErreur('Déjà noté', 'Vous avez déjà soumis un avis pour cette visite. Merci !');
+    return;
+  }
+
+  agentEmail = data.agent_email;
+
+  // Afficher les infos du bien
+  var ann = data.annonces_vendeurs;
+  if (ann) {
+    var titre = ann.titre || ((ann.type_bien || 'Bien') + (ann.surface ? ' ' + ann.surface + 'm²' : '') + ' — ' + (ann.ville || ''));
+    document.getElementById('bien-titre').textContent = titre;
+    document.getElementById('bien-sub').textContent = 'Visite du ' + new Date(data.created_at).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+});
+
+// ── ÉTOILES ───────────────────────────────────────────────────────────
+function setNote(n) {
+  noteSelectionnee = n;
+  document.querySelectorAll('.etoile').forEach(function(el, i) {
+    if (i < n) { el.classList.add('active'); }
+    else { el.classList.remove('active'); }
+  });
+  document.getElementById('note-lbl').textContent = notesLabels[n] || '';
+
+  // Afficher les qualificatifs et le commentaire
+  document.getElementById('qualif-section').style.display = 'block';
+  document.getElementById('avis-section').style.display = 'block';
+
+  // Activer le bouton
+  var btn = document.getElementById('btn-submit');
+  btn.disabled = false;
+  btn.textContent = 'Envoyer mon avis';
+}
+
+function toggleQualif(btn) {
+  btn.classList.toggle('selected');
+  var q = btn.dataset.q;
+  var idx = qualifSelectionnees.indexOf(q);
+  if (idx === -1) qualifSelectionnees.push(q);
+  else qualifSelectionnees.splice(idx, 1);
+}
+
+// ── SOUMETTRE ─────────────────────────────────────────────────────────
+async function soumettre() {
+  if (!noteSelectionnee) return;
+
+  var btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours…';
+
+  var avisTexte = document.getElementById('avis-texte').value.trim();
+
+  // Enregistrer la note
+  var { error } = await db.from('reservations_visites').update({
+    note_acheteur: noteSelectionnee,
+    avis_acheteur: avisTexte || null,
+    note_demandee_le: new Date().toISOString()
+  }).eq('id', reservationId);
+
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = 'Envoyer mon avis';
+    alert('Erreur : ' + error.message);
+    return;
+  }
+
+  // Mettre à jour la note moyenne de l'agent
+  if (agentEmail) {
+    var { data: notations } = await db.from('reservations_visites')
+      .select('note_acheteur')
+      .eq('agent_email', agentEmail)
+      .not('note_acheteur', 'is', null);
+
+    if (notations && notations.length > 0) {
+      var moyenne = notations.reduce(function(s, r){ return s + r.note_acheteur; }, 0) / notations.length;
+      await db.from('agents_validation').update({
+        note_moyenne: Math.round(moyenne * 10) / 10,
+        nb_notations: notations.length
+      }).eq('email', agentEmail);
+    }
+
+    // Envoyer un email de remerciement à l'agent si très bonne note
+    if (noteSelectionnee >= 4) {
+      await fetch(SB_URL + '/functions/v1/envoyer-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
+        body: JSON.stringify({
+          type: 'bonne_notation_agent',
+          to: agentEmail,
+          note: noteSelectionnee,
+          qualificatifs: qualifSelectionnees,
+          subject: 'Vous avez reçu une excellente notation — ImmoConnect'
+        })
+      }).catch(function(){});
+    }
+  }
+
+  // Afficher le succès
+  document.getElementById('form-screen').style.display = 'none';
+  document.getElementById('success-screen').style.display = 'block';
+}
+
+function afficherErreur(titre, msg) {
+  document.getElementById('form-screen').style.display = 'none';
+  document.getElementById('error-screen').style.display = 'block';
+  document.getElementById('error-titre').textContent = titre;
+  document.getElementById('error-msg').textContent = msg;
+}
+</script>
+
+</body>
+</html>

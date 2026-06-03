@@ -294,6 +294,17 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
           <div style="text-align:center;padding:20px;color:var(--muted)">Chargement...</div>
         </div>
       </div>
+
+      <!-- MES VISITES -->
+      <div class="card" style="margin-top:0">
+        <div class="card-title">
+          <span>Mes visites</span>
+          <button class="btn-sm" onclick="chargerMesVisites()" style="background:var(--bg);border:1px solid var(--line)">🔄 Actualiser</button>
+        </div>
+        <div id="visites-list">
+          <div style="text-align:center;padding:20px;color:var(--muted)">Chargement...</div>
+        </div>
+      </div>
     </div>
 
     <!-- CONSEILS HANAE -->
@@ -1259,10 +1270,74 @@ async function supprimerMandat(id) {
   if (!confirm('Retirer ce mandat de ImmoConnect ?')) return;
   await db.from('mandats_agents').update({ statut: 'suspendu' }).eq('id', id);
   await chargerMandats();
+  await chargerMesVisites();
   await chargerMandatsPourRV();
   await chargerHistoriqueRapports();
   verifierRetourStripe();
   showToast('Mandat retire.', 'ok');
+}
+
+// ─── VISITES & NOTATION ACHETEUR ────────────────────────────────
+
+async function chargerMesVisites() {
+  var el = document.getElementById('visites-list');
+  if (!el) return;
+
+  var { data: visites } = await db.from('reservations_visites')
+    .select('id, created_at, statut_visite, note_acheteur, annonce_id, acheteur_email, annonces_vendeurs(titre, type_bien, surface, ville)')
+    .eq('agent_email', currentUser.email)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  if (!visites || visites.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Aucune visite enregistrée.</div>';
+    return;
+  }
+
+  var statutLabels = { planifiee: '📅 Planifiée', effectuee: '✅ Effectuée', annulee: '❌ Annulée', no_show: '👻 No-show' };
+  var statutColors = { planifiee: 'var(--blue-light)', effectuee: 'var(--teal-light)', annulee: 'var(--red-light)', no_show: '#F1EFE8' };
+  var statutTextColors = { planifiee: 'var(--blue)', effectuee: 'var(--teal)', annulee: 'var(--red)', no_show: 'var(--muted)' };
+
+  el.innerHTML = visites.map(function(v) {
+    var ann = v.annonces_vendeurs;
+    var titre = ann ? (ann.titre || (ann.type_bien + (ann.surface ? ' ' + ann.surface + 'm²' : '') + ' — ' + (ann.ville || ''))) : 'Bien inconnu';
+    var dateStr = new Date(v.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+    var statut = v.statut_visite || 'planifiee';
+
+    return '<div style="padding:10px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px">'
+      + '<div style="flex:1;min-width:0">'
+      + '<div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + titre + '</div>'
+      + '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + dateStr
+      + (v.note_acheteur ? ' · ⭐'.repeat(v.note_acheteur) + ' (' + v.note_acheteur + '/5)' : '') + '</div>'
+      + '</div>'
+      + '<span style="font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px;background:' + (statutColors[statut]||'#F1EFE8') + ';color:' + (statutTextColors[statut]||'var(--muted)') + ';white-space:nowrap">' + (statutLabels[statut]||statut) + '</span>'
+      + (statut === 'planifiee' ? '<button onclick="marquerVisiteEffectuee('' + v.id + '','' + (v.acheteur_email||'') + '','' + titre + '')" style="padding:5px 10px;background:var(--teal);color:#fff;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:Outfit,sans-serif;white-space:nowrap">✓ Effectuée</button>' : '')
+      + '</div>';
+  }).join('');
+}
+
+async function marquerVisiteEffectuee(visiteid, acheteurEmail, titreBien) {
+  // 1. Marquer la visite comme effectuée
+  await db.from('reservations_visites').update({
+    statut_visite: 'effectuee'
+  }).eq('id', visiteid);
+
+  // 2. Envoyer email de notation à l'acheteur si email disponible
+  if (acheteurEmail) {
+    var lienNotation = 'https://immoconnect-agence.fr/notation-visite.html?r=' + visiteid;
+    await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'demande_notation_visite',
+        to: acheteurEmail,
+        subject: 'Comment s'est passée votre visite ? — ImmoConnect',
+        titre_bien: titreBien,
+        lien_notation: lienNotation
+      }
+    }).catch(function(){});
+  }
+
+  showToast('Visite marquée comme effectuée ✅' + (acheteurEmail ? ' · Email de notation envoyé à l'acheteur' : ''));
+  await chargerMesVisites();
 }
 
 // ─── RAPPORTS DE VISITE ──────────────────────────────────────
