@@ -72,6 +72,27 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 .btn-choisir{flex:1;padding:9px;border-radius:7px;border:none;background:var(--teal);color:#fff;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer}
 .btn-question{flex:1;padding:9px;border-radius:7px;border:1px solid var(--line);background:transparent;font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer}
 
+/* COMPTE À REBOURS 48H */
+.countdown-wrapper{background:linear-gradient(135deg,#0F1F19,#1E3D2F);border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:20px;position:relative;overflow:hidden}
+.countdown-wrapper::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 50%,rgba(192,155,90,.08),transparent 60%)}
+.countdown-left{flex:1}
+.countdown-titre{font-size:11px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.countdown-digits{font-size:36px;font-weight:300;color:#fff;font-family:monospace;letter-spacing:4px;line-height:1}
+.countdown-sub{font-size:11px;color:rgba(255,255,255,.4);margin-top:4px}
+.countdown-digits.urgent{color:#E24B4A;animation:urgentPulse 1s infinite}
+@keyframes urgentPulse{0%,100%{opacity:1}50%{opacity:.6}}
+.countdown-right{text-align:right}
+.candidats-count{font-size:32px;font-weight:300;color:var(--gold)}
+.candidats-lbl{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px}
+.candidats-mini-bar{height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:8px;overflow:hidden;width:120px}
+.candidats-mini-fill{height:100%;border-radius:2px;background:var(--gold);transition:width .5s ease}
+.statut-fenetre{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;margin-bottom:16px}
+.sf-ouverte{background:rgba(30,122,98,.3);color:#5FC9A0}
+.sf-cloturee{background:rgba(163,45,45,.3);color:#E24B4A}
+.sf-scored{background:rgba(24,95,165,.3);color:#7EB8F5}
+.realtime-ping{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:ping 1.5s infinite}
+@keyframes ping{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.6}}
+
 /* COMPARATIF HANAE */
 .comparatif-box{background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:20px 24px;margin-bottom:20px}
 .comparatif-title{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
@@ -205,6 +226,35 @@ function render() {
     + '<div style="flex:1"><div class="bien-badge">' + (nivLabel || 'Dossier') + '</div><div class="bien-titre">' + titre + '</div><div class="bien-meta">' + (bien.ville || '') + ' · ' + (bien.surface || '') + 'm2' + (bien.nb_pieces ? ' · ' + bien.nb_pieces + ' pieces' : '') + '</div></div>'
     + '<div class="bien-prix">' + prix + '</div>'
     + '</div>';
+
+  // COMPTE À REBOURS 48H
+  var fenetreStatut = bien.fenetre_statut || 'inactive';
+  var clotureLe = bien.fenetre_candidature_cloture_le || null;
+  var nbCandidats = agents.length || 0;
+
+  if (fenetreStatut === 'ouverte' && clotureLe) {
+    h += '<div class="countdown-wrapper" id="countdown-wrapper">'
+      + '<div class="countdown-left">'
+      + '<div class="countdown-titre"><span class="realtime-ping" style="display:inline-block;margin-right:6px"></span>Fenêtre de candidature</div>'
+      + '<div class="countdown-digits" id="main-countdown">--:--:--</div>'
+      + '<div class="countdown-sub">jusqu'à la clôture automatique</div>'
+      + '</div>'
+      + '<div class="countdown-right">'
+      + '<div class="candidats-count" id="nb-candidats-rt">' + nbCandidats + '</div>'
+      + '<div class="candidats-lbl">candidat(s)</div>'
+      + '<div class="candidats-mini-bar"><div class="candidats-mini-fill" id="candidats-fill" style="width:' + Math.min(nbCandidats/3*100,100) + '%"></div></div>'
+      + '</div>'
+      + '</div>';
+
+    // Démarrer le countdown
+    setTimeout(function() { demarrerCountdown(clotureLe); }, 100);
+  } else if (fenetreStatut === 'scored' || fenetreStatut === 'cloturee') {
+    h += '<div style="background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px">'
+      + '<span style="font-size:20px">✅</span>'
+      + '<div><div style="font-size:13px;font-weight:500">Sélection terminée</div>'
+      + '<div style="font-size:12px;color:var(--muted)">La fenêtre de candidature est clôturée · ' + nbCandidats + ' candidature(s) analysée(s) par Hanaé</div>'
+      + '</div></div>';
+  }
 
   h += '<div class="intro-box"><div class="intro-icon">🤖</div><div><div style="font-size:14px;font-weight:500;margin-bottom:4px">Hanae a selectionne les ' + agents.length + ' meilleurs agents</div><div style="font-size:12px;color:var(--muted);line-height:1.7">Chaque agent a ete note sur 100 points selon son experience locale, sa reputation et la coherence de son estimation. Voici votre comparatif personnalise.</div></div></div>';
 
@@ -535,6 +585,52 @@ function showToast(msg, type) {
   var t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast ' + type; t.style.display = 'block';
   setTimeout(function(){ t.style.display = 'none'; }, 3500);
+}
+
+// ── COUNTDOWN TEMPS REEL ────────────────────────────────────────
+var countdownTimer = null;
+var realtimeChannel = null;
+
+function demarrerCountdown(clotureLe) {
+  var cloture = new Date(clotureLe).getTime();
+  if (countdownTimer) clearInterval(countdownTimer);
+  function maj() {
+    var el = document.getElementById('main-countdown');
+    if (!el) { clearInterval(countdownTimer); return; }
+    var reste = cloture - Date.now();
+    if (reste <= 0) { el.textContent = 'Cloturee'; el.classList.add('urgent'); clearInterval(countdownTimer); return; }
+    var h = Math.floor(reste / 3600000);
+    var m = Math.floor((reste % 3600000) / 60000);
+    var s = Math.floor((reste % 60000) / 1000);
+    el.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    if (reste < 3 * 3600000) el.classList.add('urgent'); else el.classList.remove('urgent');
+  }
+  maj();
+  countdownTimer = setInterval(maj, 1000);
+}
+
+function activerRealtimeCandidats(annonceId) {
+  realtimeChannel = db.channel('selection-' + annonceId)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'candidatures_agents', filter: 'annonce_id=eq.' + annonceId }, function() {
+      db.from('candidatures_agents').select('id', { count: 'exact', head: true }).eq('annonce_id', annonceId).eq('dans_fenetre', true).then(function(res) {
+        var nb = res.count || 0;
+        var nbEl = document.getElementById('nb-candidats-rt');
+        var fillEl = document.getElementById('candidats-fill');
+        if (nbEl) { nbEl.style.transform = 'scale(1.3)'; nbEl.textContent = nb; setTimeout(function(){ nbEl.style.transform = 'scale(1)'; }, 300); }
+        if (fillEl) fillEl.style.width = Math.min(nb/3*100, 100) + '%';
+      });
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'annonces_vendeurs', filter: 'id=eq.' + annonceId }, function(payload) {
+      if (payload.new && payload.new.fenetre_statut === 'scored') {
+        if (countdownTimer) clearInterval(countdownTimer);
+        var wrapper = document.getElementById('countdown-wrapper');
+        if (wrapper) {
+          wrapper.style.background = 'linear-gradient(135deg,#0C1F3D,#1A3160)';
+          wrapper.innerHTML = '<div style="display:flex;align-items:center;gap:12px;width:100%"><span style="font-size:28px">&#127942;</span><div><div style="font-size:14px;font-weight:500;color:#fff">Selection finalisee !</div><div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px">Le top 3 calcule par Hanae</div></div><button onclick="location.reload()" style="margin-left:auto;padding:8px 16px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-size:12px;cursor:pointer;font-family:Outfit,sans-serif">Voir les resultats</button></div>';
+        }
+      }
+    })
+    .subscribe();
 }
 </script>
 </body>
