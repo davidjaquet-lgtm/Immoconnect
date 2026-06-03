@@ -1137,9 +1137,9 @@ async function verifierBannissementVendeur(email) {
     if (data && data.length > 0) {
       const sanction = data[0];
       const fin = sanction.fin_sanction ? new Date(sanction.fin_sanction).toLocaleDateString('fr-FR') : null;
-      const msg = sanction.type_sanction === 'admin_review'
-        ? 'Votre compte est en cours d\'examen par notre équipe suite à plusieurs non-respects des engagements. Contactez-nous.'
-        : 'Vous ne pouvez pas poster de nouvelle annonce avant le ' + fin + ' (sanction suite à non-signature de mandat).';
+      const msg = sanction.type_sanction === 'bannissement_permanent'
+        ? 'Votre compte est definitivement banni de la plateforme suite a plusieurs non-respects des engagements mandat. Contactez support@immoconnect-agence.fr pour contester.'
+        : 'Vous ne pouvez pas poster de nouvelle annonce avant le ' + fin + ' (sanction suite a non-signature de mandat).';
       var banner = document.getElementById('bannissement-banner');
       if (!banner) {
         banner = document.createElement('div');

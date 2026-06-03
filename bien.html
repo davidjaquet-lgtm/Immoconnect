@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ImmoConnect — Fiche bien</title>
 <meta name="description" content="Consultez cette annonce immobilière sur ImmoConnect">
+<!-- Open Graph — aperçu Facebook, WhatsApp, SMS -->
+<meta property="og:site_name" content="ImmoConnect">
+<meta property="og:type" content="website">
+<meta property="og:title" id="og-title" content="Bien immobilier sur ImmoConnect">
+<meta property="og:description" id="og-desc" content="Découvrez ce bien sur ImmoConnect — la plateforme qui met en relation vendeurs, agents et acheteurs.">
+<meta property="og:image" id="og-image" content="https://immoconnect-agence.fr/og-default.jpg">
+<meta property="og:url" id="og-url" content="https://immoconnect-agence.fr/bien.html">
+<meta name="twitter:card" content="summary_large_image">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -436,6 +444,31 @@ function afficherBien(b, similaires) {
   html += '<div class="bien-localisation">' + adresseHtml + '</div>';
   html += '<div class="bien-prix">' + prixFmt + '</div>';
   if (pm2) html += '<div class="bien-pm2">' + pm2 + '</div>';
+
+  // BOUTONS DE PARTAGE
+  var urlBien = 'https://immoconnect-agence.fr/bien.html?id=' + b.id;
+  var titrePartage = (b.type_bien || 'Bien') + ' ' + (b.surface ? b.surface + 'm² ' : '') + 'à ' + (b.ville || '') + (b.prix ? ' — ' + Math.round(b.prix).toLocaleString('fr-FR') + '€' : '');
+  var msgPartage = encodeURIComponent('Je viens de trouver ce bien sur ImmoConnect : ' + titrePartage + '. Regarde ici : ' + urlBien);
+  var msgWhatsapp = encodeURIComponent('🏠 ' + titrePartage + '\n\nVoir le bien : ' + urlBien);
+  var msgSms = encodeURIComponent('Regarde ce bien sur ImmoConnect : ' + titrePartage + ' → ' + urlBien);
+
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;margin-bottom:4px">'
+    + '<a href="https://wa.me/?text=' + msgWhatsapp + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:#25D366;color:#fff;border-radius:8px;text-decoration:none;font-size:12px;font-weight:500">'
+    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.532 5.855L0 24l6.335-1.61A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.017-1.375l-.36-.214-3.727.977.995-3.634-.235-.374A9.818 9.818 0 1121.818 12 9.83 9.83 0 0112 21.818z"/></svg>'
+    + 'WhatsApp</a>'
+    + '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(urlBien) + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:#1877F2;color:#fff;border-radius:8px;text-decoration:none;font-size:12px;font-weight:500">'
+    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>'
+    + 'Facebook</a>'
+    + '<a href="sms:?body=' + msgSms + '" style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:#34C759;color:#fff;border-radius:8px;text-decoration:none;font-size:12px;font-weight:500">'
+    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>'
+    + 'SMS</a>'
+    + '<button onclick="copierLien(\'' + urlBien + '\')" style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--warm);color:var(--ink);border:1px solid var(--line);border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif" id="btn-copier-lien">'
+    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>'
+    + 'Copier le lien</button>'
+    + '</div>';
+
+  // Mettre à jour les meta Open Graph dynamiquement
+  majMetaOG(b, urlBien, titrePartage);
 
   // SIMULATEUR NET VENDEUR — visible par le vendeur connecté
   var userProfils3 = currentUser ? (currentUser.user_metadata?.profils || []) : [];
@@ -1252,6 +1285,45 @@ async function ouvrirSignalement() {
     }
   }).catch(function(){});
   alert('Signalement envoyé. Nous traitons votre demande sous 48h.');
+}
+
+// ── PARTAGE ──
+function copierLien(url) {
+  navigator.clipboard.writeText(url).then(function() {
+    var btn = document.getElementById('btn-copier-lien');
+    if (btn) {
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copié !';
+      btn.style.background = 'var(--teal)';
+      btn.style.color = '#fff';
+      btn.style.borderColor = 'var(--teal)';
+      setTimeout(function() {
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copier le lien';
+        btn.style.background = 'var(--warm)';
+        btn.style.color = 'var(--ink)';
+        btn.style.borderColor = 'var(--line)';
+      }, 2000);
+    }
+  }).catch(function() {
+    var ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
+
+function majMetaOG(b, url, titrePartage) {
+  document.title = 'ImmoConnect — ' + titrePartage;
+  var setMeta = function(id, val) { var el = document.getElementById(id); if (el) el.setAttribute('content', val); };
+  var desc = (b.type_bien||'Bien') + ' de ' + (b.surface||'—') + 'm² à ' + (b.ville||'') + (b.prix ? ' — ' + Math.round(b.prix).toLocaleString('fr-FR') + '€' : '') + '. Découvrez ce bien sur ImmoConnect.';
+  setMeta('og-title', titrePartage + ' · ImmoConnect');
+  setMeta('og-desc', desc);
+  setMeta('og-url', url);
+  var photo = '';
+  if (b.photo_principale) { photo = b.photo_principale; }
+  else if (b.photos_supplementaires) { try { var p = JSON.parse(b.photos_supplementaires); if (p&&p[0]) photo=p[0]; } catch(e){} }
+  if (photo) setMeta('og-image', photo);
 }
 
 // ── ERREUR ──
