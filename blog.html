@@ -20,7 +20,7 @@
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
 nav{background:var(--warm);border-bottom:1px solid var(--line);height:54px;display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:100}
 .nav-logo{text-decoration:none;display:flex;align-items:center;margin-right:auto}
-.nav-links{display:flex;gap:24px;align-items:center;flex:1}
+.nav-links{display:flex;gap:24px;align-items:center;margin-left:auto}
 .nav-links a{text-decoration:none;color:var(--muted);font-size:13px;transition:color .2s}
 .nav-links a:hover{color:var(--ink)}
 .nav-active{color:var(--ink)!important;font-weight:500;border-bottom:2px solid var(--gold);padding-bottom:2px}
@@ -315,7 +315,9 @@ async function genererArticle() {
     });
 
     var data = await res.json();
+    console.log('blog-hanae response:', JSON.stringify(data));
 
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' — ' + (data.error || data.message || JSON.stringify(data)));
     if (data.error) throw new Error(data.error);
 
     // Recharger les articles
@@ -342,7 +344,9 @@ async function genererArticle() {
     document.getElementById('loading-article').classList.remove('visible');
     document.getElementById('articles-grid').style.display = 'grid';
     afficherArticles(articles);
-    alert('Erreur : ' + e.message);
+    // Afficher l'erreur détaillée
+    var msg = e.message || 'Erreur inconnue';
+    document.getElementById('articles-grid').innerHTML = '<div class="empty" style="grid-column:1/-1;color:#E24B4A">❌ ' + msg + '<br><small style="color:#888;margin-top:8px;display:block">Vérifiez que la table blog_articles existe dans Supabase et que la edge function blog-hanae est déployée avec Verify JWT OFF.</small></div>';
     btn.disabled = false;
     btn.textContent = '✨ Générer avec Hanaé';
   }
