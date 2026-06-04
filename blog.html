@@ -91,14 +91,14 @@ nav{background:var(--warm);border-bottom:1px solid var(--line);height:54px;displ
     <img src="logo-immoconnect.png" alt="ImmoConnect" style="height:38px;width:auto;object-fit:contain;vertical-align:middle">
     <span style="font-size:22px;font-weight:600;color:#0F0F0E;margin-left:8px">Immo<span style="color:#C09B5A">Connect</span></span>
   </a>
-  <div class="nav-links">
+  <div class="nav-links" style="margin-left:auto;display:flex;gap:24px;align-items:center">
     <a href="forfaits.html">Forfaits</a>
     <a href="questionnaire-vendeur.html">Vendre</a>
     <a href="questionnaire-acheteur.html">Acheter</a>
     <a href="forfaits.html">Agents immo</a>
     <a href="blog.html" class="nav-active">Blog</a>
+    <a href="connexion.html" class="nav-out">Mon espace</a>
   </div>
-  <a href="connexion.html" class="nav-out">Mon espace</a>
 </nav>
 
 <div class="container">
@@ -306,8 +306,12 @@ async function genererArticle() {
   try {
     var res = await fetch(SB_URL + '/functions/v1/blog-hanae', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
-      body: JSON.stringify({ ville, type })
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY
+      },
+      body: JSON.stringify({ ville: ville, type: type })
     });
 
     var data = await res.json();
