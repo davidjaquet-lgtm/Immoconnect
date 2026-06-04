@@ -2,7 +2,12 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0F0F0E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ImmoConnect">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <title>Mon espace vendeur — ImmoConnect</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -145,7 +150,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 
 <!-- NAV -->
 <nav>
-  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <a href="index.html" class="nav-logo"><img src="/logo-immoconnect.png" alt="ImmoConnect" style="height:36px;width:auto;object-fit:contain"></a>
   <a href="questionnaire-vendeur.html" class="nav-btn nav-secondary">+ Publier un bien</a>
   <button class="nav-btn nav-primary" onclick="deconnexion()">Déconnexion</button>
 </nav>
@@ -678,5 +683,6 @@ document.getElementById('modal-prix').addEventListener('click', function(e) {
   if (e.target === this) fermerModalPrix();
 });
 </script>
+<script src="/pwa.js"></script>
 </body>
 </html>

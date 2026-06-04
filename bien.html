@@ -2,7 +2,12 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0F0F0E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ImmoConnect">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <title>ImmoConnect — Fiche bien</title>
 <meta name="description" content="Consultez cette annonce immobilière sur ImmoConnect">
 <!-- Open Graph — aperçu Facebook, WhatsApp, SMS -->
@@ -169,7 +174,7 @@ input:focus,textarea:focus{border-color:var(--ink)}
 </head>
 <body>
 <nav>
-  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <a href="index.html" class="nav-logo"><img src="/logo-immoconnect.png" alt="ImmoConnect" style="height:36px;width:auto;object-fit:contain"></a>
   <div class="nav-links">
     <a href="index.html">Annonces</a>
     <a href="carte.html">Carte</a>
@@ -1354,5 +1359,6 @@ document.addEventListener('click', function(e) {
 function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
 function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
 </script>
+<script src="/pwa.js"></script>
 </body>
 </html>

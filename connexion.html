@@ -2,7 +2,12 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0F0F0E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ImmoConnect">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <title>ImmoConnect — Mon espace</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -245,7 +250,7 @@ input:focus,select:focus{border-color:var(--ink)}
 </head>
 <body>
 <nav>
-  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <a href="index.html" class="nav-logo"><img src="/logo-immoconnect.png" alt="ImmoConnect" style="height:36px;width:auto;object-fit:contain"></a>
   <div class="nav-links">
     <a href="forfaits.html">Forfaits</a>
     <a href="questionnaire-vendeur.html" class="nav-gold">Vendre</a>
@@ -1849,5 +1854,6 @@ function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); docu
   </div>
 </div>
 
+<script src="/pwa.js"></script>
 </body>
 </html>

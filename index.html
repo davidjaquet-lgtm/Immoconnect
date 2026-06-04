@@ -2,8 +2,15 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ImmoConnect — Acheteurs & Vendeurs</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0F0F0E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ImmoConnect">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -584,7 +591,7 @@
 
 <!-- NAV -->
 <nav>
-  <div class="logo">Immo<span>Connect</span></div>
+  <div class="logo"><img src="/logo-immoconnect.png" alt="ImmoConnect" style="height:44px;width:auto;object-fit:contain"></div>
   <div class="nav-links">
     <a href="forfaits.html">Forfaits</a>
     <a href="questionnaire-vendeur.html" class="btn-nav-gold">Vendre</a>
@@ -1134,7 +1141,7 @@
 
 <footer>
   <div>
-    <div class="footer-logo">Immo<span>Connect</span></div>
+    <div class="footer-logo"><img src="/logo-immoconnect.png" alt="ImmoConnect" style="height:40px;width:auto;object-fit:contain"></div>
     <p class="footer-desc">La plateforme qui redonne le pouvoir au vendeur. Publiez gratuitement, choisissez vos contacts, laissez Hanaé IA sélectionner les meilleurs agents pour vous.</p>
   </div>
   <div class="footer-col">
@@ -1395,5 +1402,6 @@ function refuserCookies() {
 }
 </script>
 
+<script src="/pwa.js"></script>
 </body>
 </html>
