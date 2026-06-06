@@ -153,6 +153,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
   <a href="index.html" class="nav-logo"><img src="logo-immoconnect.png" alt="ImmoConnect" style="height:38px;width:auto;object-fit:contain;vertical-align:middle"><span style="font-size:22px;font-weight:600;color:#0F0F0E;margin-left:8px">Immo<span style="color:#C09B5A">Connect</span></span></a>
   <a href="questionnaire-vendeur.html" class="nav-btn nav-secondary">+ Publier un bien</a>
   <a href="blog.html" class="nav-btn nav-secondary" style="text-decoration:none">Blog</a>
+  <button onclick="toggleNotifications()" title="Notifications" class="nav-btn nav-secondary" style="position:relative;margin-right:4px">🔔<span id="notif-badge" style="display:none;position:absolute;top:-6px;right:-6px;background:#A32D2D;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;line-height:16px;border-radius:8px;padding:0 3px;text-align:center">0</span></button>
   <button class="nav-btn nav-primary" onclick="deconnexion()">Déconnexion</button>
 </nav>
 
@@ -165,6 +166,16 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 </div>
 
 <div class="container" id="main-content" style="display:none">
+
+  <!-- BANNIÈRE NOTIFICATION NIVEAU -->
+  <div id="notif-banner" style="display:none;align-items:center;gap:14px;background:linear-gradient(90deg,#FAEEDA,#FEFDFB);border:1px solid var(--gold);border-radius:12px;padding:16px 18px;margin-bottom:18px">
+    <div style="font-size:26px;flex-shrink:0">🎉</div>
+    <div style="flex:1;min-width:0">
+      <div id="notif-banner-titre" style="font-weight:600;font-size:15px;color:var(--ink)"></div>
+      <div id="notif-banner-msg" style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:2px"></div>
+    </div>
+    <button onclick="fermerBanner()" title="Fermer" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;flex-shrink:0;align-self:flex-start;line-height:1">×</button>
+  </div>
 
   <!-- HEADER VENDEUR -->
   <div class="vendeur-header">
@@ -262,6 +273,7 @@ var currentUser = null;
 var annoncesData = [];
 var realtimeChannel = null;
 var countdownTimers = {};
+var notifications = [];
 
 // ── INIT ──────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async function() {
@@ -284,7 +296,8 @@ window.addEventListener('DOMContentLoaded', async function() {
   // Charger les données
   await Promise.all([
     chargerAnnonces(),
-    chargerRapports()
+    chargerRapports(),
+    chargerNotifications()
   ]);
 
   // Supabase Realtime
@@ -651,6 +664,18 @@ function activerRealtime() {
       chargerRapports();
       showToast('📋 Nouveau rapport de visite reçu !');
     })
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'notifications_vendeur',
+      filter: 'vendeur_email=eq.' + currentUser.email
+    }, function(payload) {
+      console.log('Nouvelle notification:', payload.new);
+      notifications.unshift(payload.new);
+      majBadge();
+      afficherBanner(payload.new);
+      showToast('🎉 ' + (payload.new.titre || 'Nouvelle notification'));
+    })
     .subscribe();
 }
 
@@ -662,6 +687,69 @@ function libellStatut(s) {
 
 function majDerniereMaj() {
   document.getElementById('derniere-maj').textContent = 'Mis à jour à ' + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ── NOTIFICATIONS NIVEAU (bannière + badge) ───────────────────────────
+async function chargerNotifications() {
+  try {
+    var { data, error } = await db.from('notifications_vendeur')
+      .select('*')
+      .eq('vendeur_email', currentUser.email)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    if (error) throw error;
+    notifications = data || [];
+  } catch(e) {
+    console.warn('Erreur chargement notifications:', e);
+    notifications = [];
+  }
+  majBadge();
+  // Affiche automatiquement la dernière notification non lue
+  var derniereNonLue = notifications.find(function(n){ return !n.lu; });
+  if (derniereNonLue) afficherBanner(derniereNonLue);
+}
+
+function majBadge() {
+  var badge = document.getElementById('notif-badge');
+  if (!badge) return;
+  var nb = notifications.filter(function(n){ return !n.lu; }).length;
+  if (nb > 0) { badge.textContent = nb > 9 ? '9+' : String(nb); badge.style.display = 'block'; }
+  else { badge.style.display = 'none'; }
+}
+
+function afficherBanner(notif) {
+  if (!notif) return;
+  document.getElementById('notif-banner-titre').textContent = notif.titre || '';
+  document.getElementById('notif-banner-msg').textContent = notif.message || '';
+  document.getElementById('notif-banner').style.display = 'flex';
+}
+
+function fermerBanner() {
+  document.getElementById('notif-banner').style.display = 'none';
+  marquerNotificationsLues();
+}
+
+// Clic sur la cloche : réaffiche la dernière notif puis marque tout comme lu
+async function toggleNotifications() {
+  var cible = notifications.find(function(n){ return !n.lu; }) || notifications[0];
+  if (cible) { afficherBanner(cible); }
+  else { showToast('Aucune notification pour le moment.'); }
+  await marquerNotificationsLues();
+}
+
+async function marquerNotificationsLues() {
+  var nonLues = notifications.filter(function(n){ return !n.lu; });
+  if (nonLues.length === 0) { majBadge(); return; }
+  try {
+    await db.from('notifications_vendeur')
+      .update({ lu: true })
+      .eq('vendeur_email', currentUser.email)
+      .eq('lu', false);
+    notifications.forEach(function(n){ n.lu = true; });
+  } catch(e) {
+    console.warn('Erreur maj notifications lues:', e);
+  }
+  majBadge();
 }
 
 function showToast(msg) {
