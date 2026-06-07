@@ -505,7 +505,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
         <div style="flex:1">
           <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">
             <span id="ea-dot" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;margin-right:5px;animation:eaPulse 1.5s infinite"></span>
-            Offre early adopter · Tarif fondateur
+            Offre de lancement · 3 mois de forfait Pro offerts
           </div>
           <div style="font-size:22px;font-weight:500;color:#fff;margin-bottom:4px">
             <span id="ea-count">—</span> <span style="color:rgba(255,255,255,.4);font-weight:300">/ <span id="ea-max">50</span> agents</span>
@@ -522,7 +522,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
           <div id="ea-bar" style="height:100%;border-radius:3px;background:linear-gradient(90deg,#1E7A62,#C09B5A);transition:width .8s ease;width:0%"></div>
         </div>
         <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:rgba(255,255,255,.3)">
-          <span>0</span><span id="ea-max-lbl">50 places fondateur</span>
+          <span>0</span><span id="ea-max-lbl">50 places offertes</span>
         </div>
       </div>
     </div>
@@ -709,7 +709,7 @@ var eaChannel = null;
 async function chargerEarlyAdopter() {
   try {
     // Compter les agents avec un abonnement actif (forfait payant)
-    var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/rest/v1/agents_validation?select=id&abonnement_actif=eq.true&forfait_agent=neq.pay_per_use', {
+    var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/rest/v1/agents_validation?select=id&offre_lancement_rang=not.is.null', {
       headers: {
         'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGh5ZWZhamZ3cWN4Y2Z4cG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjYwNDAsImV4cCI6MjA5MTUwMjA0MH0.jB8Z_9eT9lYkqxUUD0G001Y87iSAv94fSu_gVOdqa-A',
         'Prefer': 'count=exact',
@@ -735,15 +735,15 @@ function majAffichageEA(count) {
   document.getElementById('ea-bar').style.width = pct + '%';
 
   if (complet) {
-    document.getElementById('ea-msg').textContent = 'Offre fondateur complète — rejoignez la liste d'attente';
+    document.getElementById('ea-msg').textContent = 'Offre de lancement complète — les 50 places ont été attribuées';
     document.getElementById('ea-bar').style.background = '#C09B5A';
     document.getElementById('ea-dot').style.background = '#C09B5A';
     document.getElementById('ea-dot').style.animation = 'none';
   } else if (restant <= 5) {
-    document.getElementById('ea-msg').textContent = 'Plus que ' + restant + ' place' + (restant > 1 ? 's' : '') + ' — tarif fondateur sans engagement';
+    document.getElementById('ea-msg').textContent = 'Plus que ' + restant + ' place' + (restant > 1 ? 's' : '') + ' — 3 mois de forfait Pro offerts';
     document.getElementById('ea-bar').style.background = 'linear-gradient(90deg,#E24B4A,#C09B5A)';
   } else {
-    document.getElementById('ea-msg').textContent = restant + ' places fondateur encore disponibles — prix bloqué à vie pour les premiers inscrits';
+    document.getElementById('ea-msg').textContent = restant + ' places encore disponibles — 3 mois de forfait Pro offerts pour les 50 premiers agents';
   }
 }
 
