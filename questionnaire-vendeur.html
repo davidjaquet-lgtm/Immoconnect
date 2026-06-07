@@ -827,7 +827,7 @@ async function envoyerAlertesBaissePrix(annonceId, ancienPrix, nouveauPrix, bais
       if (c.email_agent && c.email_agent !== bien.email_contact) emails.add(c.email_agent + '|agent');
     });
 
-    // 3. Envoyer l'alerte à chaque personne
+    // 3. Envoyer l\'alerte à chaque personne
     for (var entry of emails) {
       var parts = entry.split('|');
       var emailDest = parts[0];
@@ -899,56 +899,22 @@ async function genererDescriptionHanae() {
   label.textContent = 'Génération en cours…';
   status.style.display = 'none';
 
-  var prompt = 'Tu es Hanaé, experte immobilière ImmoConnect. Rédige une description d'annonce immobilière professionnelle, accrocheuse et complète en français, en 3-4 paragraphes (150-200 mots). Ton style : élégant, factuel, valorisant sans être excessif. NE commence PAS par "Découvrez" ou "Venez". Commence directement par les atouts du bien.
+  var prompt = `Tu es Hanaé, experte immobilière ImmoConnect. Rédige une description d\'annonce immobilière professionnelle, accrocheuse et complète en français, en 3-4 paragraphes (150-200 mots). Ton style : élégant, factuel, valorisant sans être excessif. NE commence PAS par "Découvrez" ou "Venez". Commence directement par les atouts du bien.
 
-'
-    + 'BIEN :
-'
-    + '- Type : ' + type + '
-'
-    + '- Localisation : ' + ville + (cp ? ' (' + cp + ')' : '') + '
-'
-    + '- Surface : ' + (surface || 'NC') + ' m²
-'
-    + '- Pièces : ' + (nbPieces || 'NC') + (nbChambres ? ' dont ' + nbChambres + ' chambres' : '') + '
-'
-    + (etage ? '- Étage : ' + etage + '
-' : '')
-    + (annee ? '- Année construction : ' + annee + '
-' : '')
-    + (prix ? '- Prix : ' + parseInt(prix).toLocaleString('fr-FR') + ' €' + (negociable === 'Oui' ? ' (négociable)' : '') + '
-' : '')
-    + '- Parking : ' + parking + '
-'
-    + '- Extérieur : ' + exterieur + '
-'
-    + (cave !== 'Non' ? '- Cave : oui
-' : '')
-    + (ascenseur !== 'Non' ? '- Ascenseur : oui
-' : '')
-    + (piscine !== 'Non' ? '- Piscine : oui
-' : '')
-    + (chauffage ? '- Chauffage : ' + chauffage + '
-' : '')
-    + (dpe ? '- DPE : ' + dpe + '
-' : '')
-    + (travaux === 'Oui' && natureTravaux ? '- Travaux réalisés : ' + natureTravaux + (descTravaux ? ' — ' + descTravaux : '') + '
-' : '')
-    + '
-Rédige uniquement la description, sans titre, sans bullet points.';
+BIEN :
+- Type : ${type}
+- Localisation : ${ville}${cp ? ' (' + cp + ')' : ''}
+- Surface : ${surface || 'NC'} m²
+- Pièces : ${nbPieces || 'NC'}${nbChambres ? ' dont ' + nbChambres + ' chambres' : ''}
+${etage ? '- Étage : ' + etage + '\n' : ''}${annee ? '- Année construction : ' + annee + '\n' : ''}${prix ? '- Prix : ' + parseInt(prix).toLocaleString('fr-FR') + ' €' + (negociable === 'Oui' ? ' (négociable)' : '') + '\n' : ''}- Parking : ${parking}
+- Extérieur : ${exterieur}
+${cave !== 'Non' ? '- Cave : oui\n' : ''}${ascenseur !== 'Non' ? '- Ascenseur : oui\n' : ''}${piscine !== 'Non' ? '- Piscine : oui\n' : ''}${chauffage ? '- Chauffage : ' + chauffage + '\n' : ''}${dpe ? '- DPE : ' + dpe + '\n' : ''}${travaux === 'Oui' && natureTravaux ? '- Travaux réalisés : ' + natureTravaux + (descTravaux ? ' — ' + descTravaux : '') + '\n' : ''}
+Rédige uniquement la description, sans titre, sans bullet points.`;
 
   try {
-    var res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 400,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    var data = await res.json();
-    var texte = data.content && data.content[0] ? data.content[0].text : null;
+    var { data, error } = await db.functions.invoke('generer-description', { body: { prompt: prompt } });
+    if (error) throw new Error(error.message);
+    var texte = data && data.description ? data.description : null;
 
     if (texte) {
       textarea.value = texte.trim();
@@ -1017,7 +983,7 @@ async function uploadVideoVisite(input) {
 
   progress.style.display = 'block';
   bar.style.width = '10%';
-  label.textContent = 'Préparation de l'upload…';
+  label.textContent = 'Préparation de l\'upload…';
 
   try {
     var { data: { session } } = await db.auth.getSession();
@@ -1328,7 +1294,7 @@ async function geocoderAdresse(adresse, ville, codePostal) {
     if (data && data[0]) {
       return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
     }
-    // 2e tentative sans l'adresse (juste ville + CP)
+    // 2e tentative sans l\'adresse (juste ville + CP)
     var q2 = [ville, codePostal, 'France'].filter(Boolean).join(' ');
     var res2 = await fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(q2) + '&format=json&limit=1&countrycodes=fr');
     var data2 = await res2.json();
@@ -1339,7 +1305,7 @@ async function geocoderAdresse(adresse, ville, codePostal) {
   return null;
 }
 
-// ── MAJ NOM DÉCLARATION SUR L'HONNEUR ──
+// ── MAJ NOM DÉCLARATION SUR L\'HONNEUR ──
 function majNomDsh() {
   var nom = document.getElementById('nom_vendeur').value.trim();
   var el = document.getElementById('nom-vendeur-dsh');
@@ -1367,7 +1333,9 @@ async function uploadTaxe() {
   ocrResult.style.display = 'block';
   ocrResult.style.background = '#F5F2EC';
   ocrResult.style.border = '1px solid #E8E6E0';
-  ocrResult.innerHTML = '🔍 <strong>Vérification automatique du document en cours…</strong>';
+  ocrResult.innerHTML = '📄 <strong>Document reçu.</strong> La vérification automatique sera effectuée à la publication de l\'annonce.';
+  calcNiveau();
+  return; // vérification désormais côté serveur (ocr-documents) à l\'enregistrement
 
   try {
     // Lire le fichier en base64
@@ -1399,7 +1367,7 @@ async function uploadTaxe() {
             },
             {
               type: 'text',
-              text: 'Tu es un assistant de vérification de documents immobiliers. Analyse cet avis de taxe foncière et réponds UNIQUEMENT en JSON avec ces champs : {"montant_trouve": number|null, "adresse_trouvee": string|null, "proprietaire_trouve": string|null, "annee": string|null, "est_taxe_fonciere": boolean, "concordance_montant": boolean|null, "concordance_adresse": boolean|null, "alerte": string|null}. Montant déclaré par le vendeur: ' + (montantDeclare||'non renseigné') + '€. Ville déclarée: ' + (villeDec||'non renseignée') + '. Nom déclaré: ' + (nomDec||'non renseigné') + '. Ne mets rien d'autre que le JSON.'
+              text: 'Tu es un assistant de vérification de documents immobiliers. Analyse cet avis de taxe foncière et réponds UNIQUEMENT en JSON avec ces champs : {"montant_trouve": number|null, "adresse_trouvee": string|null, "proprietaire_trouve": string|null, "annee": string|null, "est_taxe_fonciere": boolean, "concordance_montant": boolean|null, "concordance_adresse": boolean|null, "alerte": string|null}. Montant déclaré par le vendeur: ' + (montantDeclare||'non renseigné') + '€. Ville déclarée: ' + (villeDec||'non renseignée') + '. Nom déclaré: ' + (nomDec||'non renseigné') + '. Ne mets rien d\'autre que le JSON.'
             }
           ]
         }]
@@ -1421,7 +1389,7 @@ async function uploadTaxe() {
 
     var alertes = [];
     if (ocr.concordance_montant === false) alertes.push('Le montant trouvé (' + ocr.montant_trouve + '€) diffère du montant déclaré (' + montantDeclare + '€)');
-    if (ocr.concordance_adresse === false) alertes.push('L'adresse du document ne correspond pas à la ville déclarée');
+    if (ocr.concordance_adresse === false) alertes.push('L\'adresse du document ne correspond pas à la ville déclarée');
     if (ocr.alerte) alertes.push(ocr.alerte);
 
     if (alertes.length > 0) {
@@ -1466,7 +1434,7 @@ async function uploadDoc(champ,inputId,statusId){
 // ── ALERTES AGENTS NOUVEAU BIEN ──
 async function envoyerAlertesAgents(bien, niveau) {
   try {
-    // Définir quels forfaits reçoivent l'alerte selon le niveau
+    // Définir quels forfaits reçoivent l\'alerte selon le niveau
     // Silver  → tous les forfaits (starter, pro, expert, platinium)
     // Gold    → pro, expert, platinium
     // Platinium → expert, platinium (en premier), puis pro avec délai
@@ -1534,7 +1502,7 @@ async function soumettre(){
   }
   var dsh = document.getElementById('declaration-honneur');
   if (!dsh || !dsh.checked) {
-    showToast('Vous devez signer la déclaration sur l'honneur pour publier.','err');
+    showToast('Vous devez signer la déclaration sur l\'honneur pour publier.','err');
     return;
   }
   var btn=document.getElementById('btn-submit');
@@ -1600,7 +1568,7 @@ async function soumettre(){
     charges_syndic:+document.getElementById('charges_syndic').value||null,
     nb_lots_copro:+document.getElementById('nb_lots_copro').value||null,
     taxe_fonciere_montant:+document.getElementById('taxe_fonciere_montant').value||null,
-    taxe_fonciere_verifie: docs['taxe_verifie'] || false,
+    // taxe_fonciere_verifie : géré côté serveur (ocr-documents) + revue admin — non écrit ici
     // URL du document taxe foncière stockée côté serveur uniquement — non transmise aux acheteurs/agents
     is_copropriete:getRadio('is_copro')==='Oui',
     copro_doc_url:docs['copro_doc']?docs['copro_doc'].url:null,
@@ -1628,7 +1596,7 @@ async function soumettre(){
   }
 
   btn.textContent = '⏳ Publication…';
-  // Vérifier si c'est une mise à jour de prix (mode édition)
+  // Vérifier si c\'est une mise à jour de prix (mode édition)
   var urlParams = new URLSearchParams(window.location.search);
   var editId = urlParams.get('edit');
   var ancienPrix = 0;
@@ -1640,7 +1608,7 @@ async function soumettre(){
     var nouveauPrix = parseFloat(payload.prix) || 0;
     var isPrixInitialSet = ancienBien && ancienBien.prix_initial;
 
-    // Définir le prix initial si c'est la première modification
+    // Définir le prix initial si c\'est la première modification
     if (!isPrixInitialSet && ancienPrix > 0) payload.prix_initial = ancienPrix;
 
     var { data:insertData, error } = await db.from('annonces_vendeurs').update(payload).eq('id', editId).select('id').single();
@@ -1661,13 +1629,73 @@ async function soumettre(){
   showToast('✅ Annonce publiée — '+NIV[niveau].label,'ok');
   btn.textContent='✓ Annonce publiée';
 
-  // Ajouter l'id du bien dans le payload pour les alertes
+  // Ajouter l\'id du bien dans le payload pour les alertes
   if (insertData) payload.id = insertData.id;
+
+  // Validation OCR des documents (serveur) → pose les drapeaux *_verifie → recalcul niveau_valide
+  if (insertData && insertData.id) {
+    btn.textContent = '🔍 Vérification des documents…';
+    await validerDocumentsAnnonce(insertData.id);
+    btn.textContent = '✓ Annonce publiée';
+  }
 
   // Envoyer alertes agents si Silver, Gold ou Platinium
   if (['silver','gold','platinium'].includes(niveau)) {
     await envoyerAlertesAgents(payload, niveau);
   }
+}
+
+// ── VALIDATION OCR DES DOCUMENTS VENDEUR (serveur) ────────────────────
+function fileToB64(file){
+  return new Promise(function(resolve,reject){
+    var r=new FileReader();
+    r.onload=function(e){resolve(e.target.result.split(',')[1]);};
+    r.onerror=reject;
+    r.readAsDataURL(file);
+  });
+}
+
+// Appelle ocr-documents (valider_doc_vendeur) pour chaque document fourni.
+// Pose les drapeaux *_verifie → le trigger SQL recalcule niveau_valide → notif.
+async function validerDocumentsAnnonce(annonceId){
+  if(!annonceId) return;
+  var ville      = (document.getElementById('ville')||{}).value || '';
+  var nom        = (document.getElementById('nom_vendeur')||{}).value || '';
+  var montantTaxe= (document.getElementById('taxe_fonciere_montant')||{}).value || '';
+  var valeurLoc  = (document.getElementById('valeur_locative')||{}).value || '';
+  var classeDpe  = (document.getElementById('classe_dpe')||{}).value || '';
+
+  var aValider = [
+    { input:'file-valeur-loc', doc_type:'valeur_locative', montant:valeurLoc },
+    { input:'file-taxe',       doc_type:'taxe_fonciere',   montant:montantTaxe },
+    { input:'file-copro',      doc_type:'copro',           montant:'' },
+    { input:'file-dpe',        doc_type:'dpe',             montant:'' }
+  ];
+
+  var taches = aValider.map(async function(d){
+    var el = document.getElementById(d.input);
+    var file = el && el.files && el.files[0];
+    if(!file) return null; // pas de nouveau document pour ce type → on ne touche pas son drapeau
+    try{
+      var b64 = await fileToB64(file);
+      var mediaType = file.type === 'application/pdf' ? 'application/pdf' : 'image/jpeg';
+      var res = await db.functions.invoke('ocr-documents', { body: {
+        type: 'valider_doc_vendeur',
+        annonce_id: annonceId,
+        doc_type: d.doc_type,
+        image_base64: b64,
+        media_type: mediaType,
+        ville: ville, nom: nom, montant: d.montant, classe_dpe: classeDpe
+      }});
+      if(res && res.error) console.warn('Validation '+d.doc_type+' :', res.error.message);
+      return res ? res.data : null;
+    }catch(e){
+      console.warn('Validation '+d.doc_type+' :', e && e.message);
+      return null;
+    }
+  });
+
+  await Promise.allSettled(taches);
 }
 
 function showToast(msg,type){
