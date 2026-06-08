@@ -887,11 +887,11 @@ async function genererDescriptionHanae() {
   var natureTravaux = document.getElementById('nature_travaux') ? document.getElementById('nature_travaux').value : '';
   var descTravaux = document.getElementById('description_travaux') ? document.getElementById('description_travaux').value : '';
 
-  if (!type || !ville) {
+  if (!type) {
     status.style.display = 'block';
     status.style.background = '#FAECE7';
     status.style.color = '#712B13';
-    status.textContent = 'Renseignez au minimum le type de bien et la ville pour générer la description.';
+    status.textContent = 'Sélectionnez au minimum le type de bien pour générer la description (renseignez la ville pour un meilleur résultat).';
     return;
   }
 
@@ -903,8 +903,7 @@ async function genererDescriptionHanae() {
 
 BIEN :
 - Type : ${type}
-- Localisation : ${ville}${cp ? ' (' + cp + ')' : ''}
-- Surface : ${surface || 'NC'} m²
+${ville ? '- Localisation : ' + ville + (cp ? ' (' + cp + ')' : '') + '\n' : ''}- Surface : ${surface || 'NC'} m²
 - Pièces : ${nbPieces || 'NC'}${nbChambres ? ' dont ' + nbChambres + ' chambres' : ''}
 ${etage ? '- Étage : ' + etage + '\n' : ''}${annee ? '- Année construction : ' + annee + '\n' : ''}${prix ? '- Prix : ' + parseInt(prix).toLocaleString('fr-FR') + ' €' + (negociable === 'Oui' ? ' (négociable)' : '') + '\n' : ''}- Parking : ${parking}
 - Extérieur : ${exterieur}
