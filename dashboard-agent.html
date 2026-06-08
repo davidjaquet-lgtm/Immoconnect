@@ -698,7 +698,7 @@ async function chargerProfil() {
 
   chargerBadges(score);
   chargerClassement(score);
-  // Préparer données performance (chargées au clic sur l'onglet)
+  // Préparer données performance (chargées au clic sur l\'onglet)
   window._agentFull = agentFull;
   window._scoreData = scoreData;
 }
@@ -1025,7 +1025,7 @@ async function afficherAcheteurs() {
       + '<div style="display:flex;gap:4px">'
       + '<span style="font-size:10px;padding:2px 8px;border-radius:10px;background:' + (mr.statut === 'actif' ? '#E1F5EE' : '#F1EFE8') + ';color:' + (mr.statut === 'actif' ? '#085041' : '#888780') + '">' + (mr.statut || 'actif') + '</span>'
       + '<span style="font-size:11px;color:var(--muted)">' + (mr.nb_matchs_total || 0) + ' matchs</span>'
-      + '<button onclick="supprimerMandatRecherche('' + mr.id + '')" style="font-size:10px;padding:2px 8px;border:1px solid #F5C4B3;background:#FAECE7;color:#712B13;border-radius:6px;cursor:pointer">✕</button>'
+      + '<button onclick="supprimerMandatRecherche(\'' + mr.id + '\')" style="font-size:10px;padding:2px 8px;border:1px solid #F5C4B3;background:#FAECE7;color:#712B13;border-radius:6px;cursor:pointer">✕</button>'
       + '</div>'
       + '</div>';
   }).join('');
@@ -1057,7 +1057,7 @@ async function declarerAcheteurPortefeuille() {
     document.getElementById('ach-type').value = '';
     await afficherAcheteurs().catch(function(){});
   } else {
-    alert('Erreur lors de l'enregistrement');
+    alert('Erreur lors de l\'enregistrement');
   }
 }
 
@@ -1105,7 +1105,7 @@ async function genererConseils() {
   // Alerte seuil qualité
   if (score < 60) {
     html = '<div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#712B13;line-height:1.7">'
-      + '⚠️ <strong>Votre score actuel est en dessous du seuil de 60 pts.</strong> Vos candidatures ne seront pas presentees aux vendeurs tant que vous n'atteignez pas ce seuil. '
+      + '⚠️ <strong>Votre score actuel est en dessous du seuil de 60 pts.</strong> Vos candidatures ne seront pas presentees aux vendeurs tant que vous n\'atteignez pas ce seuil. '
       + 'Completez les elements ci-dessous en priorite pour franchir ce seuil rapidement.'
       + '</div>' + html;
   }
@@ -1150,7 +1150,7 @@ async function chargerPreuves() {
   if (!el) return;
   var preuves = agentData?.preuve_vente_url || [];
   if (!preuves.length) {
-    el.innerHTML = '<div style="text-align:center;padding:14px;font-size:12px"><div style="font-size:24px;margin-bottom:8px">📄</div><div style="color:var(--muted)">Aucune preuve uploadée</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Uploadez des compromis ou actes de vente (anonymisés) pour scorer sur l'expérience locale.</div></div>';
+    el.innerHTML = '<div style="text-align:center;padding:14px;font-size:12px"><div style="font-size:24px;margin-bottom:8px">📄</div><div style="color:var(--muted)">Aucune preuve uploadée</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Uploadez des compromis ou actes de vente (anonymisés) pour scorer sur l\'expérience locale.</div></div>';
     return;
   }
   var nbPts = preuves.length >= 6 ? 20 : preuves.length === 5 ? 18 : preuves.length === 4 ? 17 : preuves.length === 3 ? 16 : preuves.length === 2 ? 15 : 10;
@@ -1178,7 +1178,7 @@ function ouvrirUploadPreuves() {
     + '<input type="file" id="preuve-upload-input" multiple accept=".pdf,.jpg,.jpeg,.png" style="font-size:12px;color:var(--muted);margin-bottom:16px;width:100%">'
     + '<div style="display:flex;gap:10px">'
     + '<button onclick="uploadPreuves()" style="flex:1;padding:11px;border-radius:8px;border:none;background:var(--ink);color:#fff;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer">Uploader</button>'
-    + '<button onclick="document.getElementById('modal-preuves').remove()" style="padding:11px 18px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;color:var(--muted)">Annuler</button>'
+    + '<button onclick="document.getElementById(\'modal-preuves\').remove()" style="padding:11px 18px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;color:var(--muted)">Annuler</button>'
     + '</div></div>';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', function(e){ if(e.target === overlay) overlay.remove(); });
@@ -1251,7 +1251,7 @@ function afficherMandatsRecherche() {
       + '<div style="font-size:13px;font-weight:500;color:var(--ink)">' + (m.label || 'Acheteur ' + new Date(m.created_at).toLocaleDateString('fr-FR')) + '</div>'
       + '<div style="display:flex;gap:6px;align-items:center">'
       + '<span style="font-size:11px;background:#E1F5EE;color:#085041;padding:2px 8px;border-radius:20px">Actif</span>'
-      + '<button onclick="supprimerMandatRecherche('' + m.id + '')" style="font-size:10px;color:var(--muted);background:transparent;border:none;cursor:pointer;text-decoration:underline">Supprimer</button>'
+      + '<button onclick="supprimerMandatRecherche(\'' + m.id + '\')" style="font-size:10px;color:var(--muted);background:transparent;border:none;cursor:pointer;text-decoration:underline">Supprimer</button>'
       + '</div></div>'
       + '<div style="font-size:12px;color:var(--muted);margin-bottom:6px">📍 ' + (m.secteur || m.ville || 'Non précisé') + ' · Budget max : <strong style="color:var(--ink)">' + (m.budget_max ? parseInt(m.budget_max).toLocaleString('fr-FR') + ' €' : 'Non précisé') + '</strong></div>'
       + '<div style="display:flex;gap:6px;flex-wrap:wrap">'
@@ -1274,7 +1274,7 @@ function ouvrirFormulaireRecherche() {
   overlay.innerHTML = `
     <div style="background:var(--warm);border-radius:12px;padding:28px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto">
       <div style="font-size:16px;font-weight:600;color:var(--ink);margin-bottom:4px">🔍 Déclarer un mandat de recherche</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.6">ImmoConnect croisera automatiquement ces critères avec les annonces vendeurs et vous alertera dès qu'un bien correspond.</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.6">ImmoConnect croisera automatiquement ces critères avec les annonces vendeurs et vous alertera dès qu\'un bien correspond.</div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
         <div>
@@ -1329,7 +1329,7 @@ function ouvrirFormulaireRecherche() {
       </div>
 
       <div style="background:var(--bg);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.6">
-        Le matching est <strong style="color:var(--ink)">gratuit</strong>. Dès qu'une annonce compatible est publiée, vous recevez une alerte email + une notification dans votre dashboard. Vous pouvez alors candidater à 9,99€ selon le mode choisi par le vendeur.
+        Le matching est <strong style="color:var(--ink)">gratuit</strong>. Dès qu\'une annonce compatible est publiée, vous recevez une alerte email + une notification dans votre dashboard. Vous pouvez alors candidater à 9,99€ selon le mode choisi par le vendeur.
       </div>
 
       <div style="display:flex;gap:10px">
@@ -1458,7 +1458,7 @@ async function chargerMesVisites() {
       + (v.note_acheteur ? ' · ⭐'.repeat(v.note_acheteur) + ' (' + v.note_acheteur + '/5)' : '') + '</div>'
       + '</div>'
       + '<span style="font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px;background:' + (statutColors[statut]||'#F1EFE8') + ';color:' + (statutTextColors[statut]||'var(--muted)') + ';white-space:nowrap">' + (statutLabels[statut]||statut) + '</span>'
-      + (statut === 'planifiee' ? '<button onclick="marquerVisiteEffectuee('' + v.id + '','' + (v.acheteur_email||'') + '','' + titre + '')" style="padding:5px 10px;background:var(--teal);color:#fff;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:Outfit,sans-serif;white-space:nowrap">✓ Effectuée</button>' : '')
+      + (statut === 'planifiee' ? '<button onclick="marquerVisiteEffectuee(\'' + v.id + '\',\'' + (v.acheteur_email||'') + '\',\'' + titre + '\')" style="padding:5px 10px;background:var(--teal);color:#fff;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:Outfit,sans-serif;white-space:nowrap">✓ Effectuée</button>' : '')
       + '</div>';
   }).join('');
 }
@@ -1469,21 +1469,21 @@ async function marquerVisiteEffectuee(visiteid, acheteurEmail, titreBien) {
     statut_visite: 'effectuee'
   }).eq('id', visiteid);
 
-  // 2. Envoyer email de notation à l'acheteur si email disponible
+  // 2. Envoyer email de notation à l\'acheteur si email disponible
   if (acheteurEmail) {
     var lienNotation = 'https://immoconnect-agence.fr/notation-visite.html?r=' + visiteid;
     await db.functions.invoke('envoyer-email', {
       body: {
         type: 'demande_notation_visite',
         to: acheteurEmail,
-        subject: 'Comment s'est passée votre visite ? — ImmoConnect',
+        subject: 'Comment s\'est passée votre visite ? — ImmoConnect',
         titre_bien: titreBien,
         lien_notation: lienNotation
       }
     }).catch(function(){});
   }
 
-  showToast('Visite marquée comme effectuée ✅' + (acheteurEmail ? ' · Email de notation envoyé à l'acheteur' : ''));
+  showToast('Visite marquée comme effectuée ✅' + (acheteurEmail ? ' · Email de notation envoyé à l\'acheteur' : ''));
   await chargerMesVisites();
 }
 
@@ -1630,7 +1630,7 @@ async function envoyerRapportVisite() {
   var { data: rapport, error } = await db.from('rapports_visites').insert(payload).select().single();
   if (error) { showToast('Erreur sauvegarde : ' + error.message, 'error'); if(btn){ btn.disabled=false; btn.textContent='Envoyer le rapport au vendeur'; } return; }
 
-  // Envoyer l'email via la edge function envoyer-email
+  // Envoyer l\'email via la edge function envoyer-email
   try {
     var res = await db.functions.invoke('envoyer-email', {
       body: {
@@ -1728,9 +1728,9 @@ function initStripeAgent() {
   }
 }
 
-// Appelée depuis n'importe quelle action qui consomme un lead/contact
+// Appelée depuis n\'importe quelle action qui consomme un lead/contact
 async function verifierEtPayerContact(annonceId, vendeurEmail) {
-  // Récupérer les quotas actuels de l'agent
+  // Récupérer les quotas actuels de l\'agent
   var { data: meta } = await db.from('agents_validation')
     .select('leads_semaine_utilises, forfait_agent')
     .eq('email', currentUser.email).single()
@@ -1789,7 +1789,7 @@ async function verifierRetourStripe() {
     } else if (type === 'contact_supp') {
       showToast('Paiement validé — votre contact a été débloqué.', 'ok')
     }
-    // Nettoyer l'URL
+    // Nettoyer l\'URL
     window.history.replaceState({}, '', '/dashboard-agent.html')
   }
 }

@@ -448,9 +448,9 @@ async function handleAuth() {
 
       if (!carteT) { showErr('Renseignez votre numéro de carte T.'); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
       if (!validerFormatCarteT()) { showErr('Format de carte T invalide. Ex: CPI 7501 2024 000 012345'); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
-      if (!expiration) { showErr('Renseignez la date d'expiration de votre carte T.'); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
+      if (!expiration) { showErr('Renseignez la date d\'expiration de votre carte T.'); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
       if (new Date(expiration) < new Date()) { showErr('Votre carte T est expirée. Renouvelez-la avant de vous inscrire.'); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
-      if (!certif) { showErr('Certifiez être titulaire d'une carte T valide.'); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
+      if (!certif) { showErr('Certifiez être titulaire d\'une carte T valide.'); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
     }
     var carteT = selectedProfils.indexOf('agent') !== -1 ? document.getElementById('signup-carte-t').value.trim() : null;
     var cci = selectedProfils.indexOf('agent') !== -1 ? document.getElementById('signup-cci').value.trim() : null;
@@ -471,7 +471,7 @@ async function handleAuth() {
     });
     if (error) { showErr('Erreur : ' + error.message); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
     if (selectedProfils.indexOf('agent') !== -1) {
-      showOk('Compte créé ! Confirmez votre email. Votre carte T sera vérifiée sous 48h maximum — vous recevrez un email de confirmation d'activation de votre espace agent.');
+      showOk('Compte créé ! Confirmez votre email. Votre carte T sera vérifiée sous 48h maximum — vous recevrez un email de confirmation d\'activation de votre espace agent.');
     } else {
       showOk('Compte créé ! Confirmez votre email puis connectez-vous.');
     }
@@ -560,8 +560,7 @@ async function afficherDashboard(user) {
   html += '<div class="dash-avatar">' + nom.charAt(0).toUpperCase() + '</div>';
   html += '<div class="dash-info"><div class="dash-name">Bonjour, ' + nom + ' ' + badgesHtml + '</div>';
   html += '<div class="dash-sub">' + user.email + (meta.agence ? ' · ' + meta.agence : '') + '</div></div>';
-  html += '<a href="calendrier.html" style="padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;color:var(--ink);text-decoration:none;margin-right:8px">📅 Visites</a><a href="messagerie.html" style="padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;color:var(--ink);text-decoration:none;margin-right:8px">💬 Messagerie</a>
-<button class="btn-logout" onclick="logout()">Déconnexion</button></div>';
+  html += '<a href="calendrier.html" style="padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-family:\'Outfit\',sans-serif;font-size:12px;cursor:pointer;color:var(--ink);text-decoration:none;margin-right:8px">📅 Visites</a><a href="messagerie.html" style="padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-family:\'Outfit\',sans-serif;font-size:12px;cursor:pointer;color:var(--ink);text-decoration:none;margin-right:8px">💬 Messagerie</a><button class="btn-logout" onclick="logout()">Déconnexion</button></div>';
 
   // Onglets selon profils
   html += '<div class="dash-tabs">';
@@ -594,7 +593,7 @@ async function afficherDashboard(user) {
   document.getElementById('dash-content').innerHTML = html;
   document.getElementById('dash-loading').style.display  = 'none';
 
-  // Lancer l'onboarding si première visite
+  // Lancer l\'onboarding si première visite
   checkOnboarding(profils);
   document.getElementById('dash-content').style.display  = 'block';
 }
@@ -754,21 +753,21 @@ function renderTableauCandidatures(annonceId, cands, annonce) {
 
   var h = '<div style="margin-bottom:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">';
   if (nbSel > 0) {
-    h += '<button onclick="confirmerChoix('' + annonceId + '')" style="background:var(--ink);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif">'
+    h += '<button onclick="confirmerChoix(\'' + annonceId + '\')" style="background:var(--ink);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif">'
       + 'Choisir ' + nbSel + ' agent(s) sélectionné(s)</button>';
   }
   if (hasMasques) {
-    h += '<button onclick="reafficherTous('' + annonceId + '')" style="background:transparent;border:1px solid var(--line);color:var(--muted);padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Outfit,sans-serif">Réafficher tous</button>';
+    h += '<button onclick="reafficherTous(\'' + annonceId + '\')" style="background:transparent;border:1px solid var(--line);color:var(--muted);padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Outfit,sans-serif">Réafficher tous</button>';
   }
   if (nbSel >= 1) {
-    h += '<button onclick="comparerAgents('' + annonceId + '')" style="background:transparent;border:1px solid var(--line);color:var(--ink);padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Outfit,sans-serif">Comparer sélectionnés</button>';
+    h += '<button onclick="comparerAgents(\'' + annonceId + '\')" style="background:transparent;border:1px solid var(--line);color:var(--ink);padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Outfit,sans-serif">Comparer sélectionnés</button>';
   }
   h += '</div>';
 
   // Question multi-agents
   h += '<div style="margin-bottom:10px;display:flex;gap:8px;align-items:center">';
   h += '<input id="q-' + annonceId + '" type="text" placeholder="Poser une question aux agents sélectionnés..." style="flex:1;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-family:Outfit,sans-serif;font-size:12px;color:var(--ink)">';
-  h += '<button onclick="envoyerQuestion('' + annonceId + '')" style="background:var(--ink);color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:Outfit,sans-serif">Envoyer</button>';
+  h += '<button onclick="envoyerQuestion(\'' + annonceId + '\')" style="background:var(--ink);color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:Outfit,sans-serif">Envoyer</button>';
   h += '</div>';
 
   h += '<div style="border:1px solid var(--line);border-radius:10px;overflow:hidden">';
@@ -805,7 +804,7 @@ function renderTableauCandidatures(annonceId, cands, annonce) {
       + '</div>';
 
     h += '<tr style="' + rowStyle + '">';
-    h += '<td style="padding:8px 10px"><input type="checkbox" ' + (estSel ? 'checked' : '') + ' ' + (estMasque ? 'disabled' : '') + ' onchange="toggleSelection('' + annonceId + '','' + cand.id + '',this.checked,event)" style="cursor:pointer"></td>';
+    h += '<td style="padding:8px 10px"><input type="checkbox" ' + (estSel ? 'checked' : '') + ' ' + (estMasque ? 'disabled' : '') + ' onchange="toggleSelection(\'' + annonceId + '\',\'' + cand.id + '\',this.checked,event)" style="cursor:pointer"></td>';
     h += '<td style="padding:8px 10px"><div style="display:flex;align-items:center;gap:6px">'
       + '<div style="width:28px;height:28px;border-radius:50%;background:var(--bg);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:var(--muted);flex-shrink:0">' + initiales + '</div>'
       + '<div><div style="font-size:12px;font-weight:500;color:var(--ink)">' + (cand.nom_agent || cand.agent_email || 'Agent') + (estTop3 ? '<span style="font-size:9px;background:#E6F1FB;color:#0C447C;padding:1px 6px;border-radius:20px;margin-left:4px;font-weight:500">top 3</span>' : '') + '</div>'
@@ -822,8 +821,8 @@ function renderTableauCandidatures(annonceId, cands, annonce) {
     h += '<td style="padding:8px 10px;font-size:12px;color:' + ecartColor + '">' + ecartStr + '</td>';
     h += '<td style="padding:8px 10px">' + mandatHtml + '</td>';
     h += '<td style="padding:8px 10px"><div style="display:flex;gap:4px">'
-      + '<button onclick="toggleDetailCand('' + annonceId + '','' + cand.id + '')" style="font-size:10px;padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:transparent;cursor:pointer;font-family:Outfit,sans-serif;color:var(--ink)">Stratégie</button>'
-      + '<button onclick="masquerAgent('' + annonceId + '','' + cand.id + '')" style="font-size:10px;padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:transparent;cursor:pointer;font-family:Outfit,sans-serif;color:var(--muted)">' + (estMasque ? 'Afficher' : 'Masquer') + '</button>'
+      + '<button onclick="toggleDetailCand(\'' + annonceId + '\',\'' + cand.id + '\')" style="font-size:10px;padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:transparent;cursor:pointer;font-family:Outfit,sans-serif;color:var(--ink)">Stratégie</button>'
+      + '<button onclick="masquerAgent(\'' + annonceId + '\',\'' + cand.id + '\')" style="font-size:10px;padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:transparent;cursor:pointer;font-family:Outfit,sans-serif;color:var(--muted)">' + (estMasque ? 'Afficher' : 'Masquer') + '</button>'
       + '</div></td>';
     h += '</tr>';
 
@@ -1019,7 +1018,7 @@ function buildAcheteurPanel(projets, isInv) {
 }
 
 // ══ PANNEAU AGENT ══
-function buildAgentPanel(leads, meta) {
+async function buildAgentPanel(leads, meta) {
   var goldPlat = leads.filter(function(l){ return l.niveau_vendeur==='gold'||l.niveau_vendeur==='platinium'; });
   var silver   = leads.filter(function(l){ return l.niveau_vendeur==='silver'; });
 
@@ -1117,7 +1116,7 @@ function ouvrirModalVente(annonceId, titre, prix) {
 
     + '<div style="display:flex;gap:8px">'
     + '<button onclick="fermerModalVente()" style="flex:1;padding:10px;border:1px solid #E8E6E0;background:transparent;border-radius:8px;font-size:13px;cursor:pointer;font-family:Outfit,sans-serif;color:#888780">Annuler</button>'
-    + '<button onclick="confirmerVente('' + annonceId + '')" style="flex:2;padding:10px;background:#1E7A62;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif">Confirmer la vente</button>'
+    + '<button onclick="confirmerVente(\'' + annonceId + '\')" style="flex:2;padding:10px;background:#1E7A62;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif">Confirmer la vente</button>'
     + '</div>'
     + '</div>';
   document.body.appendChild(modal);
@@ -1161,9 +1160,9 @@ async function confirmerVente(annonceId) {
     created_at: new Date().toISOString()
   });
 
-  if (error) { alert('Erreur lors de l'enregistrement. Veuillez réessayer.'); return; }
+  if (error) { alert('Erreur lors de l\'enregistrement. Veuillez réessayer.'); return; }
 
-  // Mettre à jour le statut de l'annonce
+  // Mettre à jour le statut de l\'annonce
   await db.from('annonces_vendeurs').update({
     statut_annonce: 'vendu',
     statut: 'vendu',
@@ -1186,7 +1185,7 @@ async function confirmerVente(annonceId) {
   }).catch(function(){});
 
   fermerModalVente();
-  alert('Vente enregistrée avec succès. Elle sera vérifiée et l'annonce est maintenant marquée comme vendue.');
+  alert('Vente enregistrée avec succès. Elle sera vérifiée et l\'annonce est maintenant marquée comme vendue.');
   location.reload();
 }
 
@@ -1262,7 +1261,7 @@ async function analyserCarteT() {
             },
             {
               type: 'text',
-              text: 'Analyse cette carte professionnelle immobilière française (carte T). Réponds UNIQUEMENT en JSON: {"est_carte_t": boolean, "numero_trouve": string|null, "nom_trouve": string|null, "expiration_trouvee": string|null, "concordance_numero": boolean|null, "concordance_nom": boolean|null, "valide": boolean, "alerte": string|null}. Numéro déclaré: "' + numDeclare + '". Nom déclaré: "' + nomDeclare + '". JSON uniquement, rien d'autre.'
+              text: 'Analyse cette carte professionnelle immobilière française (carte T). Réponds UNIQUEMENT en JSON: {"est_carte_t": boolean, "numero_trouve": string|null, "nom_trouve": string|null, "expiration_trouvee": string|null, "concordance_numero": boolean|null, "concordance_nom": boolean|null, "valide": boolean, "alerte": string|null}. Numéro déclaré: "' + numDeclare + '". Nom déclaré: "' + nomDeclare + '". JSON uniquement, rien d\'autre.'
             }
           ]
         }]
@@ -1362,12 +1361,12 @@ var OB_STEPS = {
       ]
     },
     {
-      title: 'Votre réseau d'agents',
-      sub: 'Des dizaines d'agents avec des acheteurs prêts peuvent vous contacter',
+      title: 'Votre réseau d\'agents',
+      sub: 'Des dizaines d\'agents avec des acheteurs prêts peuvent vous contacter',
       items: [
         { icon:'🤝', title:'Recevez les contacts agents', desc:'Ils ont des clients acheteurs — vous êtes notifié par email', lien:null },
         { icon:'💬', title:'Répondez via la messagerie', desc:'Chat en temps réel avec les agents et acheteurs', lien:'messagerie.html' },
-        { icon:'🔒', title:'Exclusivité de contact', desc:'Accordez jusqu'à 96h d'exclusivité à un agent de confiance', lien:null }
+        { icon:'🔒', title:'Exclusivité de contact', desc:'Accordez jusqu\'à 96h d\'exclusivité à un agent de confiance', lien:null }
       ]
     }
   ],
@@ -1383,9 +1382,9 @@ var OB_STEPS = {
     },
     {
       title: 'Activez vos alertes',
-      sub: 'Soyez le premier averti dès qu'un bien vous correspond',
+      sub: 'Soyez le premier averti dès qu\'un bien vous correspond',
       items: [
-        { icon:'🔔', title:'Alertes nouveaux biens', desc:'Recevez un email dès qu'un bien correspond à votre budget et critères', lien:null },
+        { icon:'🔔', title:'Alertes nouveaux biens', desc:'Recevez un email dès qu\'un bien correspond à votre budget et critères', lien:null },
         { icon:'📉', title:'Alertes baisses de prix', desc:'Suivez les biens qui vous intéressent — notifié à chaque baisse', lien:null },
         { icon:'💬', title:'Contactez les vendeurs', desc:'Message direct ou réservation de visite en ligne', lien:'messagerie.html' }
       ]
@@ -1395,7 +1394,7 @@ var OB_STEPS = {
       sub: 'Tout se passe sur ImmoConnect — simplement',
       items: [
         { icon:'📅', title:'Réservez une visite', desc:'Choisissez un créneau dans le calendrier du vendeur', lien:'calendrier.html' },
-        { icon:'⭐', title:'Notez les agents', desc:'Après un contact, donnez votre avis sur la qualité de l'échange', lien:null },
+        { icon:'⭐', title:'Notez les agents', desc:'Après un contact, donnez votre avis sur la qualité de l\'échange', lien:null },
         { icon:'🤝', title:'Trouvez un agent', desc:'Les agents ImmoConnect peuvent vous accompagner dans votre projet', lien:null }
       ]
     }
@@ -1414,16 +1413,16 @@ var OB_STEPS = {
       title: 'Recevez les alertes matching',
       sub: 'Chaque nouveau bien compatible vous est signalé immédiatement',
       items: [
-        { icon:'🔔', title:'Alertes automatiques', desc:'Dès qu'un bien dépasse votre rendement minimum et est dans votre budget', lien:null },
+        { icon:'🔔', title:'Alertes automatiques', desc:'Dès qu\'un bien dépasse votre rendement minimum et est dans votre budget', lien:null },
         { icon:'📊', title:'Rapport Hanaé IA', desc:'Analyse complète : DVF, loyers, tendances, rendement estimé', lien:null },
         { icon:'📉', title:'Suivre les baisses de prix', desc:'Activez les alertes baisse sur les biens qui vous intéressent', lien:null }
       ]
     },
     {
-      title: 'Passez à l'action',
+      title: 'Passez à l\'action',
       sub: 'Contactez les vendeurs et agents en priorité',
       items: [
-        { icon:'💬', title:'Contacter directement', desc:'Message au vendeur ou à l'agent dès la fiche bien', lien:'messagerie.html' },
+        { icon:'💬', title:'Contacter directement', desc:'Message au vendeur ou à l\'agent dès la fiche bien', lien:'messagerie.html' },
         { icon:'🔒', title:'Exclusivité de contact', desc:'48h ou 96h pour travailler un dossier sans concurrent', lien:null },
         { icon:'📅', title:'Réserver une visite', desc:'Créneau en ligne dans le calendrier du vendeur', lien:'calendrier.html' }
       ]
@@ -1454,7 +1453,7 @@ var OB_STEPS = {
       items: [
         { icon:'📊', title:'Rapport Hanaé IA', desc:'DVF + Notaires-INSEE + loyers — valorisez votre expertise', lien:null },
         { icon:'⭐', title:'Construisez votre réputation', desc:'Chaque avis client renforce votre profil agent', lien:null },
-        { icon:'🎯', title:'Matching acheteurs', desc:'Vos acheteurs sont alertés dès qu'un bien leur correspond', lien:null }
+        { icon:'🎯', title:'Matching acheteurs', desc:'Vos acheteurs sont alertés dès qu\'un bien leur correspond', lien:null }
       ]
     }
   ]
@@ -1488,7 +1487,7 @@ function afficherEtapeOnboarding() {
   var html = '';
   step.items.forEach(function(item) {
     var isLink = !!item.lien;
-    html += '<div class="ob-item" onclick="' + (isLink ? 'window.location.href='' + item.lien + ''' : '') + '">';
+    html += '<div class="ob-item" onclick="' + (isLink ? 'window.location.href=\'' + item.lien + '\'' : '') + '">';
     html += '<div class="ob-icon">' + item.icon + '</div>';
     html += '<div style="flex:1"><div class="ob-title">' + item.title + '</div><div class="ob-desc">' + item.desc + '</div></div>';
     if (isLink) html += '<div class="ob-check">→</div>';
@@ -1515,7 +1514,7 @@ function obFermer() {
 }
 
 function checkOnboarding(profils) {
-  // Ne montrer l'onboarding que si jamais vu pour ce profil
+  // Ne montrer l\'onboarding que si jamais vu pour ce profil
   var profil = profils[0] || 'vendeur';
   var done = localStorage.getItem('ic_onboarding_done_' + profil);
   if (!done) {
@@ -1553,11 +1552,11 @@ async function voirEstimationHanae(annonceId, titreBien) {
   modal.innerHTML = '<div style="background:var(--warm);border-radius:12px;max-width:480px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3)">'
     + '<div style="background:var(--ink);padding:20px 24px;border-radius:12px 12px 0 0;display:flex;align-items:center;justify-content:space-between">'
     + '<div><div style="font-size:14px;font-weight:500;color:#FAFAF7">🤖 Estimation Hanaé — Confidentielle</div><div style="font-size:11px;color:rgba(250,250,247,.5);margin-top:2px">' + decodeURIComponent(titreBien) + '</div></div>'
-    + '<button onclick="this.closest('[style*=fixed]').remove()" style="background:none;border:none;color:#888780;font-size:18px;cursor:pointer">✕</button>'
+    + '<button onclick="this.closest(\'[style*=fixed]\').remove()" style="background:none;border:none;color:#888780;font-size:18px;cursor:pointer">✕</button>'
     + '</div>'
     + '<div style="padding:24px">'
     + '<div style="background:#FAEEDA;border-radius:8px;padding:12px 14px;font-size:11px;color:#633806;line-height:1.6;margin-bottom:20px">'
-    + '⚠️ <strong>Information strictement confidentielle</strong> — Cette estimation est uniquement visible par vous et sert à évaluer la pertinence des agents lors du comparatif. Elle n'est jamais communiquée aux agents.'
+    + '⚠️ <strong>Information strictement confidentielle</strong> — Cette estimation est uniquement visible par vous et sert à évaluer la pertinence des agents lors du comparatif. Elle n\'est jamais communiquée aux agents.'
     + '</div>'
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">'
     + '<div style="background:var(--bg);border-radius:8px;padding:14px;text-align:center"><div style="font-size:11px;color:var(--muted);margin-bottom:6px">Votre prix demandé</div><div style="font-size:20px;font-weight:500">' + prixVendeur + '</div></div>'
@@ -1565,7 +1564,7 @@ async function voirEstimationHanae(annonceId, titreBien) {
     + '</div>'
     + ecartHtml
     + '<div style="margin-top:16px;background:#F5F2EC;border-radius:8px;padding:12px 14px;font-size:12px;color:var(--muted);line-height:1.7">'
-    + 'Cette estimation est calculée à partir des ventes notariales DVF et de l'indice Notaires-INSEE. Elle ne tient pas compte des travaux, de l'état réel du bien, ni des spécificités locales que seul un agent visitant le bien peut évaluer.'
+    + 'Cette estimation est calculée à partir des ventes notariales DVF et de l\'indice Notaires-INSEE. Elle ne tient pas compte des travaux, de l\'état réel du bien, ni des spécificités locales que seul un agent visitant le bien peut évaluer.'
     + '</div>'
     + '</div>'
     + '</div>';
@@ -1658,7 +1657,7 @@ async function voirRapportVisites(annonceId, titreBien) {
         if (v.rapport_visite) {
           visitesHtml += '<div style="background:#E1F5EE;border-radius:6px;padding:10px 12px;font-size:12px;line-height:1.6;color:var(--ink);margin-top:6px">'+v.rapport_visite+'</div>';
         } else {
-          visitesHtml += '<button class="btn-rapport" onclick="genererRapportVisite(''+v.id+'',''+encodeURIComponent(JSON.stringify(v))+'',this)">🤖 Générer rapport Hanaé</button>';
+          visitesHtml += '<button class="btn-rapport" onclick="genererRapportVisite(\''+v.id+'\',\''+encodeURIComponent(JSON.stringify(v))+'\',this)">🤖 Générer rapport Hanaé</button>';
         }
       }
       visitesHtml += '</div>';
@@ -1668,7 +1667,7 @@ async function voirRapportVisites(annonceId, titreBien) {
   modal.innerHTML = '<div style="background:var(--warm);border-radius:12px;max-width:580px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3)">'
     + '<div style="background:var(--ink);padding:20px 24px;border-radius:12px 12px 0 0;display:flex;align-items:center;justify-content:space-between">'
     + '<div><div style="font-size:14px;font-weight:500;color:#FAFAF7">📊 Rapports de visites</div><div style="font-size:11px;color:rgba(250,250,247,.5);margin-top:2px">'+decodeURIComponent(titreBien)+'</div></div>'
-    + '<button onclick="this.closest('[style*=fixed]').remove()" style="background:none;border:none;color:#888780;font-size:18px;cursor:pointer">✕</button>'
+    + '<button onclick="this.closest(\'[style*=fixed]\').remove()" style="background:none;border:none;color:#888780;font-size:18px;cursor:pointer">✕</button>'
     + '</div>'
     + '<div style="padding:16px 20px 6px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border-bottom:1px solid var(--line)">'
     + '<div style="text-align:center;padding:10px"><div style="font-size:20px;font-weight:600;color:var(--teal)">'+nbConfirmees+'</div><div style="font-size:10px;color:var(--muted)">Confirmées</div></div>'
@@ -1689,13 +1688,7 @@ async function genererRapportVisite(visiteId, visiteJson, btn) {
     var visite = JSON.parse(decodeURIComponent(visiteJson));
     var date = visite.date_visite ? new Date(visite.date_visite).toLocaleDateString('fr-FR') : '—';
 
-    var prompt = 'Tu es Hanaé, agent IA ImmoConnect. Génère un compte-rendu de visite immobilière professionnel et concis (100 mots max) pour cette visite confirmée.
-
-Date : '+date+'
-Visiteur : '+(visite.nom_visiteur||visite.email_visiteur||'—')+'
-Bien : '+( visite.annonce_id||'—')+'
-
-Rédige un compte-rendu neutre et professionnel confirmant que la visite a eu lieu, avec les points habituels à vérifier lors d'une visite immobilière. Reste factuel et bienveillant.';
+    var prompt = 'Tu es Hanaé, agent IA ImmoConnect. Génère un compte-rendu de visite immobilière professionnel et concis (100 mots max) pour cette visite confirmée.\n\nDate : '+date+'\nVisiteur : '+(visite.nom_visiteur||visite.email_visiteur||'—')+'\nBien : '+( visite.annonce_id||'—')+'\n\nRédige un compte-rendu neutre et professionnel confirmant que la visite a eu lieu, avec les points habituels à vérifier lors d\'une visite immobilière. Reste factuel et bienveillant.';
 
     var res = await db.functions.invoke('rapport-hanae', { body: { prompt } });
     var rapport = res.data && res.data.synthese ? res.data.synthese : 'Visite effectuée le '+date+' avec le visiteur '+(visite.nom_visiteur||visite.email_visiteur||'inconnu')+'.';
@@ -1703,7 +1696,7 @@ Rédige un compte-rendu neutre et professionnel confirmant que la visite a eu li
     // Sauvegarder dans Supabase
     await db.from('reservations_visites').update({ rapport_visite: rapport }).eq('id', visiteId);
 
-    // Mettre à jour l'affichage
+    // Mettre à jour l\'affichage
     var card = btn.closest('.rapport-visite-card');
     if (card) {
       btn.remove();

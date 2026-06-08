@@ -156,7 +156,7 @@ var rapportData = null;
 /* ══ INCRÉMENTATION VUES ══ */
 async function incrementerVues(annonceId, emailVendeur) {
   try {
-    // Vérifier si c'est le propriétaire qui consulte
+    // Vérifier si c\'est le propriétaire qui consulte
     var { data: { session } } = await db.auth.getSession();
     if (session && session.user && session.user.email === emailVendeur) return;
 
@@ -173,7 +173,7 @@ async function incrementerVues(annonceId, emailVendeur) {
       }
     }
   } catch(e) {
-    // Silencieux — ne pas bloquer l'affichage du rapport
+    // Silencieux — ne pas bloquer l\'affichage du rapport
     console.warn('Vues increment:', e.message);
   }
 }
@@ -187,7 +187,7 @@ async function chargerRapport() {
   document.getElementById('btn-pdf').disabled = true;
 
   try {
-    // 1. Charger l'annonce depuis Supabase
+    // 1. Charger l\'annonce depuis Supabase
     var { data: annonce, error } = await db.from('annonces_vendeurs').select('*').eq('id', id).single();
     if (error || !annonce) {
       // Essai par code postal
@@ -355,7 +355,7 @@ async function chargerDisposVendeur(emailVendeur, annonceId) {
         dateObj.toLocaleDateString('fr-FR', opts) + '</div>';
       html += '<div style="display:flex;flex-wrap:wrap;gap:8px">';
       parDate[date].forEach(function(d) {
-        html += '<button onclick="selectionnerCreneau('' + d.id + '','' + date + '','' + d.heure_debut + '','' + d.heure_fin + '','' + emailVendeur + '')" ' +
+        html += '<button onclick="selectionnerCreneau(\'' + d.id + '\',\'' + date + '\',\'' + d.heure_debut + '\',\'' + d.heure_fin + '\',\'' + emailVendeur + '\')" ' +
           'style="padding:8px 16px;border-radius:8px;border:1px solid #9FE1CB;background:#E1F5EE;color:#1E7A62;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer">' +
           d.heure_debut + ' – ' + d.heure_fin + '</button>';
       });
@@ -381,10 +381,10 @@ function selectionnerCreneau(dispoId, date, debut, fin, emailVendeur) {
     '<div style="margin-bottom:14px">' +
     '<label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#888780;display:block;margin-bottom:6px">Votre message au vendeur (optionnel)</label>' +
     '<textarea id="msg-visite" placeholder="Bonjour, je souhaite visiter votre bien…" style="width:100%;background:#F5F2EC;border:1px solid #E8E6E0;border-radius:8px;padding:10px;font-family:Outfit,sans-serif;font-size:13px;resize:none;min-height:80px;outline:none"></textarea></div>' +
-    '<button onclick="confirmerReservation('' + dispoId + '','' + emailVendeur + '')" ' +
+    '<button onclick="confirmerReservation(\'' + dispoId + '\',\'' + emailVendeur + '\')" ' +
     'style="width:100%;padding:12px;border-radius:8px;border:none;background:#0F0F0E;color:#fff;font-family:Outfit,sans-serif;font-size:14px;font-weight:500;cursor:pointer">' +
     'Envoyer ma demande de visite →</button>' +
-    '<button onclick="chargerDisposVendeur('' + emailVendeur + '','' + (rapportData.annonce.id) + '')" ' +
+    '<button onclick="chargerDisposVendeur(\'' + emailVendeur + '\',\'' + (rapportData.annonce.id) + '\')" ' +
     'style="width:100%;padding:10px;border-radius:8px;border:1px solid #E8E6E0;background:transparent;color:#888780;font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;margin-top:8px">' +
     '← Choisir un autre créneau</button>';
 }
@@ -555,7 +555,7 @@ async function fetchDVFCEREMA(codePostal, typeBien, surface) {
 //     var budgetMin = Math.round((parseFloat(prix) || 0) * 0.6);
 //     var budgetMax = Math.round((parseFloat(prix) || 0) * 1.4);
 //
-//     // Stream Estate API — annonces SeLoger, LeBonCoin, PAP, Bien'ici agrégées
+//     // Stream Estate API — annonces SeLoger, LeBonCoin, PAP, Bien\'ici agrégées
 //     var resp = await fetch('https://api.stream.estate/documents/properties', {
 //       headers: { 'X-API-KEY': '<VOTRE_CLE_STREAM_ESTATE>' },
 //       // ou pour Melo.io :
@@ -693,7 +693,7 @@ async function fetchAnnoncesActives(codePostal, typeBien, surface, prixMax) {
       var res = await fetch('https://api.stream.estate/documents/properties', {
         headers: { 'X-API-KEY': STREAM_ESTATE_KEY, 'Content-Type': 'application/json' },
         method: 'GET',
-        // params encodés dans l'URL
+        // params encodés dans l\'URL
       });
       // Traitement réponse Stream Estate
       // var data = await res.json();
@@ -870,7 +870,7 @@ function calculer(annonce, dvf, loyers, indice, dvfCerema, prixFNAIM, prixImmoCo
   var loyerMarcheMin = Math.round(loyers.loyerM2Min * surface);
   var loyerMarcheMax = Math.round(loyers.loyerM2Max * surface);
 
-  // ── PRIX COMPOSITE — jusqu'à 5 sources pondérées ──
+  // ── PRIX COMPOSITE — jusqu\'à 5 sources pondérées ──
   // Source 1 : DVF corrigé Notaires-INSEE (référence principale)
   // Source 2 : DVF brut
   // Source 3 : DVF+ CEREMA (géolocalisé, si disponible)
@@ -985,7 +985,7 @@ function calculer(annonce, dvf, loyers, indice, dvfCerema, prixFNAIM, prixImmoCo
 /* ══ SYNTHÈSE HANAÉ (Claude API) ══ */
 async function genererSynthese(annonce, dvf, calculs) {
   try {
-    var prompt = `Tu es Hanaé, l'agent IA d'ImmoConnect. Rédige une synthèse professionnelle d'évaluation immobilière en 4 paragraphes (200 mots max) pour ce bien.
+    var prompt = `Tu es Hanaé, l\'agent IA d\'ImmoConnect. Rédige une synthèse professionnelle d\'évaluation immobilière en 4 paragraphes (200 mots max) pour ce bien.
 
 BIEN : ${annonce.type_bien} ${annonce.surface}m² à ${annonce.ville} (${annonce.code_postal})
 Année construction : ${annonce.annee_construction || 'NC'} · DPE : ${annonce.classe_dpe || 'NC'} · État : ${annonce.statut_occupation || 'NC'}

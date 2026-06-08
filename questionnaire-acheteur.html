@@ -594,7 +594,7 @@ function detecterEmailAgent(email) {
   if (!email || !email.includes('@')) { warning.style.display = 'none'; return; }
   var domaine = email.split('@')[1].toLowerCase();
   var estAgence = DOMAINES_AGENCES.some(function(d) { return domaine === d || domaine.endsWith('.' + d); });
-  // Aussi détecter les patterns typiques d'agences
+  // Aussi détecter les patterns typiques d\'agences
   var patternAgence = /immo|agence|immobilier|realty|estate|property|invest/i.test(domaine);
   if (estAgence || patternAgence) {
     warning.style.display = 'block';
@@ -650,7 +650,7 @@ function getRadio(name) {
   return s ? s.value : '';
 }
 
-/* ══ CALCUL CAPACITÉ D'EMPRUNT ══ */
+/* ══ CALCUL CAPACITÉ D\'EMPRUNT ══ */
 function calculerCapacite() {
   var salaire      = +document.getElementById('salaire_net').value || 0;
   var salaireCo    = +document.getElementById('salaire_co').value || 0;
@@ -867,12 +867,12 @@ async function soumettre() {
   showToast('✅ Projet déposé avec succès !', 'ok');
   btn.textContent = '✓ Projet déposé';
 
-  // Afficher le widget d'alerte
+  // Afficher le widget d\'alerte
   var alerteBox = document.getElementById('alerte-acheteur-box');
   if (alerteBox) {
     alerteBox.style.display = 'block';
     alerteBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    // Pré-remplir l'email
+    // Pré-remplir l\'email
     var emailInput = document.getElementById('alerte-email');
     if (emailInput && payload.email) emailInput.value = payload.email;
     // Pré-remplir les critères depuis le formulaire
@@ -977,7 +977,7 @@ async function activerAlerte() {
       throw new Error(data.error || 'Erreur');
     }
   } catch(e) {
-    btn.textContent = 'Activer l'alerte →';
+    btn.textContent = 'Activer l\'alerte →';
     btn.disabled = false;
     alert('Erreur : ' + e.message);
   }

@@ -401,7 +401,7 @@ nav{position:sticky;top:0;z-index:200;background:rgba(15,15,14,.95);backdrop-fil
 const BIENS = [
   { id:1, titre:'Appartement T4 lumineux — Carmes', adresse:'14 rue du Taur, Toulouse', prix:295000, surface:82, pieces:4, chambres:3, dpe:'C', score:97, tier:'or', statut:'libre', exclu:null, iaPrice:287000, iaLow:265000, iaHigh:312000 },
   { id:2, titre:'Maison avec jardin — Saint-Agne', adresse:'7 allée des Pins, Toulouse', prix:485000, surface:145, pieces:6, chambres:4, dpe:'D', score:94, tier:'argent', statut:'libre', exclu:null, iaPrice:471000, iaLow:445000, iaHigh:498000 },
-  { id:3, titre:'Studio rénové — Capitole', adresse:'3 place du Capitole, Toulouse', prix:128000, surface:28, pieces:1, chambres:0, dpe:'E', score:96, tier:'or', statut:'exclu', exclu:'Sophie Martin', iaPrice:124000, iaLow:115000, iaHigh:1—0 },
+  { id:3, titre:'Studio rénové — Capitole', adresse:'3 place du Capitole, Toulouse', prix:128000, surface:28, pieces:1, chambres:0, dpe:'E', score:96, tier:'or', statut:'exclu', exclu:'Sophie Martin', iaPrice:124000, iaLow:115000, iaHigh:132000 },
   { id:4, titre:'T3 vue dégagée — Saint-Cyprien', adresse:'22 quai de la Daurade, Toulouse', prix:245000, surface:68, pieces:3, chambres:2, dpe:'C', score:98, tier:'or', statut:'libre', exclu:null, iaPrice:251000, iaLow:235000, iaHigh:268000 },
   { id:5, titre:'Villa piscine — Tournefeuille', adresse:'15 chemin des Roses, Tournefeuille', prix:620000, surface:210, pieces:8, chambres:5, dpe:'D', score:88, tier:'argent', statut:'libre', exclu:null, iaPrice:598000, iaLow:570000, iaHigh:635000 },
   { id:6, titre:'T2 investissement locatif — Rangueil', adresse:'45 route de Narbonne, Toulouse', prix:165000, surface:42, pieces:2, chambres:1, dpe:'F', score:72, tier:'argent', statut:'simple', exclu:null, iaPrice:158000, iaLow:148000, iaHigh:170000 },
@@ -520,7 +520,7 @@ function selectOpt(type) {
   const roi = document.getElementById('roiBox');
   if (type === 'exclu') {
     const comm = Math.round(selectedBien.prix * 0.05);
-    document.getElementById('roiBox').innerHTML = `<strong>ROI potentiel :</strong> Sur ce bien à ${selectedBien.prix.toLocaleString('fr-FR')}€, votre commission = ~${comm.toLocaleString('fr-FR')}€. L'exclusivité à 149€ représente <strong>${(149/comm*100).toFixed(1)}% de votre commission</strong>.`;
+    document.getElementById('roiBox').innerHTML = `<strong>ROI potentiel :</strong> Sur ce bien à ${selectedBien.prix.toLocaleString('fr-FR')}€, votre commission = ~${comm.toLocaleString('fr-FR')}€. L\'exclusivité à 149€ représente <strong>${(149/comm*100).toFixed(1)}% de votre commission</strong>.`;
     roi.style.display = 'block';
     document.getElementById('btnPayLabel').textContent = '🏆 Payer 149 € — Exclusivité 7 jours';
   } else {
@@ -542,9 +542,9 @@ function openPayment() {
       <div style="font-size:12px;color:var(--muted)">${selectedBien.adresse}</div>
     </div>
     ${isExclu ? `<div style="background:rgba(107,63,160,.06);border:1px solid rgba(107,63,160,.2);border-radius:6px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--purple);line-height:1.6">
-      <strong>Ce que vous obtenez :</strong> Pendant 7 jours, aucun autre agent ImmoConnect ne peut acheter l'accès à ce vendeur. Vous êtes seul à pouvoir le contacter.
+      <strong>Ce que vous obtenez :</strong> Pendant 7 jours, aucun autre agent ImmoConnect ne peut acheter l\'accès à ce vendeur. Vous êtes seul à pouvoir le contacter.
     </div>` : `<div style="background:var(--gold-bg);border:1px solid rgba(192,155,90,.2);border-radius:6px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.6">
-      <strong>Accès partagé :</strong> D'autres agents peuvent également acheter l'accès à ce même vendeur.
+      <strong>Accès partagé :</strong> D\'autres agents peuvent également acheter l\'accès à ce même vendeur.
     </div>`}
     <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:16px">
       <span style="font-size:14px;font-weight:500">Total à payer</span>

@@ -379,7 +379,7 @@ function render() {
       + '<div class="countdown-left">'
       + '<div class="countdown-titre"><span class="realtime-ping" style="display:inline-block;margin-right:6px"></span>Fenêtre de candidature</div>'
       + '<div class="countdown-digits" id="main-countdown">--:--:--</div>'
-      + '<div class="countdown-sub">jusqu'à la clôture automatique</div>'
+      + '<div class="countdown-sub">jusqu\'à la clôture automatique</div>'
       + '</div>'
       + '<div class="countdown-right">'
       + '<div class="candidats-count" id="nb-candidats-rt">' + nbCandidats + '</div>'
@@ -480,7 +480,7 @@ function render() {
     h += '<div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px">'
       + '<div style="font-size:18px;flex-shrink:0">✅</div>'
       + '<div><div style="font-size:13px;font-weight:500;color:#1E7A62;margin-bottom:2px">Selection de qualite confirmee</div>'
-      + '<div style="font-size:12px;color:#1E7A62;line-height:1.6">Les 3 agents proposes ont tous atteint notre seuil de qualite (60/100 minimum). Vous devez choisir l'un d'eux pour avancer.</div></div>'
+      + '<div style="font-size:12px;color:#1E7A62;line-height:1.6">Les 3 agents proposes ont tous atteint notre seuil de qualite (60/100 minimum). Vous devez choisir l\'un d\'eux pour avancer.</div></div>'
       + '</div>';
   }
 
@@ -489,7 +489,7 @@ function render() {
       + '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">'
       + '<div style="font-size:20px;flex-shrink:0">⚠️</div>'
       + '<div><div style="font-size:13px;font-weight:500;color:#712B13;margin-bottom:4px">Scores partiellement insuffisants — seuil 60/100</div>'
-      + '<div style="font-size:12px;color:#712B13;line-height:1.7">Certains agents n'ont pas atteint notre seuil de qualite de 60 points. <strong>Vous n'etes pas oblige de choisir parmi ces profils.</strong> Des agents complementaires ont ete alertes et peuvent encore candidater dans les prochaines heures.</div></div>'
+      + '<div style="font-size:12px;color:#712B13;line-height:1.7">Certains agents n\'ont pas atteint notre seuil de qualite de 60 points. <strong>Vous n\'etes pas oblige de choisir parmi ces profils.</strong> Des agents complementaires ont ete alertes et peuvent encore candidater dans les prochaines heures.</div></div>'
       + '</div>'
       + '<div style="background:rgba(255,255,255,.6);border-radius:8px;padding:10px 14px;font-size:12px;color:#712B13;line-height:1.6">'
       + 'Options : choisir quand meme parmi ces agents · attendre de nouvelles candidatures · passer au choix libre pour elargir votre selection.'
@@ -501,7 +501,7 @@ function render() {
   h += '<div style="background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin-bottom:16px">'
     + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'
     + '<div style="width:36px;height:36px;border-radius:8px;background:#FAEEDA;display:flex;align-items:center;justify-content:center;font-size:16px">🤝</div>'
-    + '<div><div style="font-size:13px;font-weight:500">Vous souhaitez aussi choisir librement ?</div><div style="font-size:11px;color:var(--muted)">En plus du top 3, vous pouvez mandater d'autres agents. Max 3 mandats conseilles.</div></div>'
+    + '<div><div style="font-size:13px;font-weight:500">Vous souhaitez aussi choisir librement ?</div><div style="font-size:11px;color:var(--muted)">En plus du top 3, vous pouvez mandater d\'autres agents. Max 3 mandats conseilles.</div></div>'
     + '</div>'
     + '<button onclick="ouvrirChoixLibre()" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;color:var(--ink)">Voir les agents disponibles pour un mandat libre →</button>'
     + '</div>';
@@ -610,7 +610,7 @@ async function ouvrirChoixLibre() {
     html += '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)">'
       + '<div style="font-size:12px;font-weight:500;flex:1">Agent ' + lettre + ' · ' + fluxLabel + '</div>'
       + '<div style="font-size:14px;font-weight:500;color:' + scoreColor + '">' + c.score_total + ' pts</div>'
-      + '<button onclick="mandaterLibre('' + c.agent_email + '')" style="padding:6px 14px;border-radius:6px;border:none;background:var(--teal);color:#fff;font-family:Outfit,sans-serif;font-size:12px;cursor:pointer">Mandater</button>'
+      + '<button onclick="mandaterLibre(\'' + c.agent_email + '\')" style="padding:6px 14px;border-radius:6px;border:none;background:var(--teal);color:#fff;font-family:Outfit,sans-serif;font-size:12px;cursor:pointer">Mandater</button>'
       + '</div>';
   });
 
@@ -661,13 +661,13 @@ async function confirmerChoix() {
     // 2. Marquer le bien comme vendu/choisi
     await db.from('annonces_vendeurs').update({ statut_selection: 'choisi' }).eq('id', annonceId);
 
-    // 3. Récupérer l'estimation Hanaé pour la transmettre à l'agent retenu
+    // 3. Récupérer l\'estimation Hanaé pour la transmettre à l\'agent retenu
     var estimHanae = null;
     if (bien && bien.estimation_hanae) {
       estimHanae = Math.round(bien.estimation_hanae).toLocaleString('fr-FR') + ' EUR';
     }
 
-    // 4. Notifier l'agent choisi — avec estimation Hanaé confidentielle
+    // 4. Notifier l\'agent choisi — avec estimation Hanaé confidentielle
     var msgAgent = 'Felicitations ! Vous avez ete selectionne par le vendeur pour ce bien.\n\n'
       + 'Le mandat simple va etre genere et envoye pour signature electronique.\n\n';
     if (estimHanae) {

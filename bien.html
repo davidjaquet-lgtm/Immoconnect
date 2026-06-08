@@ -272,7 +272,7 @@ var currentUser = null;
 })();
 
 // ── AFFICHER ──
-function afficherBien(b, similaires) {
+async function afficherBien(b, similaires) {
   var niv = b.niveau_vendeur || 'standard';
   var nivLabel = niv.charAt(0).toUpperCase() + niv.slice(1);
   var pm2 = b.prix && b.surface ? Math.round(b.prix / b.surface).toLocaleString('fr-FR') + ' €/m²' : '';
@@ -388,9 +388,9 @@ function afficherBien(b, similaires) {
         + '<div class="rapport-title">Analyse de marché Hanaé</div>'
         + '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:8px">DVF · Notaires-INSEE · Loyers du secteur</div>'
         + '<div style="background:#FAEEDA;border-radius:6px;padding:8px 10px;font-size:11px;color:#854F0B;line-height:1.6;margin-bottom:10px">'
-        + '💡 L'estimation de prix est confidentielle — elle sert à évaluer la cohérence de votre proposition lors du scoring. L'agent retenu pourra évaluer le bien de manière optimale en le visitant.'
+        + '💡 L\'estimation de prix est confidentielle — elle sert à évaluer la cohérence de votre proposition lors du scoring. L\'agent retenu pourra évaluer le bien de manière optimale en le visitant.'
         + '</div>'
-        + '<a href="rapport-hanae.html?annonce=' + b.id + '&mode=agent" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;padding:10px">📊 Voir l'analyse de marché</a>'
+        + '<a href="rapport-hanae.html?annonce=' + b.id + '&mode=agent" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;padding:10px">📊 Voir l\'analyse de marché</a>'
         + '</div>';
     } else if (isAgentPPU) {
       // Agent pay per use : accès dossier complet MAIS pas analyse Hanaé
@@ -398,7 +398,7 @@ function afficherBien(b, similaires) {
         + '<div class="rapport-title">Dossier complet</div>'
         + '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:8px">Accès aux documents vendeur disponible</div>'
         + '<div style="background:#FAEEDA;border-radius:6px;padding:10px 12px;font-size:11px;color:#633806;line-height:1.6;margin-bottom:10px">'
-        + '📋 Vous avez accès au dossier complet. L'analyse de marché Hanaé est réservée aux agents abonnés (Starter, Pro, Premium).'
+        + '📋 Vous avez accès au dossier complet. L\'analyse de marché Hanaé est réservée aux agents abonnés (Starter, Pro, Premium).'
         + '</div>'
         + '<a href="candidature-agent.html?annonce=' + b.id + '" class="btn-contact bc-teal" style="display:block;text-align:center;text-decoration:none;padding:10px">Candidater sur ce bien →</a>'
         + '</div>';
@@ -442,7 +442,7 @@ function afficherBien(b, similaires) {
       + '<div style="font-size:12px;color:#633806;line-height:1.6">'
       + '<strong>Accès limité — Pay per use</strong><br>'
       + 'Vous voyez ce bien comme un acheteur payant : adresse, photos et prix vendeur. '
-      + 'La qualification du dossier (Silver/Gold/Platinium), les alertes de publication et l'analyse de marché Hanaé sont réservées aux forfaits abonnés.'
+      + 'La qualification du dossier (Silver/Gold/Platinium), les alertes de publication et l\'analyse de marché Hanaé sont réservées aux forfaits abonnés.'
       + ' <a href="forfaits.html" style="color:#854F0B;font-weight:600">Voir les forfaits →</a>'
       + '</div></div>';
   }
@@ -718,7 +718,7 @@ function buildContactButtons(b, niv) {
     var isMonExclusivite = userEmail && exclusiviteActive.agent_email === userEmail;
 
     if (isMonExclusivite) {
-      // L'agent qui a l'exclusivité voit son statut
+      // L\'agent qui a l\'exclusivité voit son statut
       html += '<div class="excl-banner"><strong>✅ Vous avez l\'exclusivité de contact</strong>';
       html += '<div class="excl-timer">⏱ ' + heures + 'h restantes</div>';
       html += 'Vous êtes le seul agent à pouvoir contacter ce vendeur pendant cette période.</div>';
@@ -797,7 +797,7 @@ function buildContactButtons(b, niv) {
     var isAgentPPU = forfaitAgent === 'pay_per_use'
 
     if (isAgentPPU) {
-      // PPU : pas d'accès au dossier, pas de contact en mode acheteurs_agents
+      // PPU : pas d\'accès au dossier, pas de contact en mode acheteurs_agents
       html += '<div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:12px 14px;text-align:center">'
         + '<div style="font-size:13px;font-weight:600;color:#712B13;margin-bottom:4px">Accès non disponible</div>'
         + '<div style="font-size:11px;color:#712B13;line-height:1.6">Ce mode de contact est réservé aux agents abonnés (Starter, Pro, Premium). En pay per use, vous êtes alerté uniquement lorsque le vendeur demande une sélection top 3.</div>'
@@ -864,7 +864,7 @@ function buildContactButtons(b, niv) {
   }
   }
 
-  // BOUTON SIGNALER pour vendeurs — si l'agent a contacté hors mode autorisé
+  // BOUTON SIGNALER pour vendeurs — si l\'agent a contacté hors mode autorisé
   if (!isAgent && currentUser && modeContact === 'acheteurs') {
     html += '<div style="margin-top:8px;text-align:center">'
     html += '<button onclick="ouvrirSignalement(\'' + b.id + '\', \'\')" style="font-size:11px;color:var(--muted);background:transparent;border:none;cursor:pointer;text-decoration:underline;font-family:Outfit,sans-serif">⚠️ Signaler un contact agent non sollicité</button>'
@@ -874,7 +874,7 @@ function buildContactButtons(b, niv) {
   // BOUTON SUIVI BAISSES DE PRIX pour acheteurs connectés
   if (currentUser && !isAgent) {
     html += '<div style="margin-top:8px" id="suivi-wrap-' + b.id + '">';
-    html += '<button id="btn-suivi-' + b.id + '" onclick="toggleSuivi('' + b.id + '')" style="width:100%;padding:9px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:12px;cursor:pointer;color:var(--muted);transition:all .15s" onmouseover="this.style.borderColor='var(--ink)'" onmouseout="this.style.borderColor='var(--line)'">🔔 Alertes baisse de prix</button>';
+    html += '<button id="btn-suivi-' + b.id + '" onclick="toggleSuivi(\'' + b.id + '\')" style="width:100%;padding:9px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:12px;cursor:pointer;color:var(--muted);transition:all .15s" onmouseover="this.style.borderColor=\'var(--ink)\'" onmouseout="this.style.borderColor=\'var(--line)\'">🔔 Alertes baisse de prix</button>';
     html += '</div>';
   }
 
@@ -914,19 +914,13 @@ async function declarerAcheteur(annonceId, mandatId, forfait) {
     return
   }
 
-  // Ouvrir la messagerie avec pré-remplissage "J'ai un acheteur potentiel"
+  // Ouvrir la messagerie avec pré-remplissage "J\'ai un acheteur potentiel"
   var { data: annonce } = await db.from('annonces_vendeurs').select('email_contact, titre, type_bien, ville').eq('id', annonceId).single().catch(function(){ return { data: null } })
   var { data: mandat } = await db.from('mandats_recherche').select('label, budget_max, type_bien, secteur').eq('id', mandatId).single().catch(function(){ return { data: null } })
 
-  var message = 'Bonjour,
-
-J'ai un acheteur potentiel pour votre bien.'
-    + (mandat ? '
-
-Profil acheteur : ' + (mandat.label || 'Acheteur qualifié') + ' — budget jusqu'à ' + Math.round(parseFloat(mandat.budget_max || 0)).toLocaleString('fr-FR') + ' €.' : '')
-    + '
-
-Je souhaite vous contacter pour vous présenter ce profil et discuter d'un mandat simple.'
+  var message = 'Bonjour,\n\nJ\'ai un acheteur potentiel pour votre bien.'
+    + (mandat ? '\n\nProfil acheteur : ' + (mandat.label || 'Acheteur qualifié') + ' — budget jusqu\'à ' + Math.round(parseFloat(mandat.budget_max || 0)).toLocaleString('fr-FR') + ' €.' : '')
+    + '\n\nJe souhaite vous contacter pour vous présenter ce profil et discuter d\'un mandat simple.';
 
   // Insérer le message en base
   await db.from('messages').insert({
@@ -999,7 +993,7 @@ async function envoyerSignalement(annonceId) {
       statut: 'en_attente'
     });
 
-    // 2. Alerter l'admin par email
+    // 2. Alerter l\'admin par email
     await db.functions.invoke('envoyer-email', {
       body: {
         type: 'signalement_agent',
@@ -1071,7 +1065,7 @@ async function acheterExclusivite(dureeHeures, prix) {
 
   try {
     // Note : le paiement Stripe sera intégré ici
-    // Pour l'instant on enregistre directement (à conditionner au paiement)
+    // Pour l\'instant on enregistre directement (à conditionner au paiement)
     var debut = new Date();
     var fin = new Date(debut.getTime() + dureeHeures * 3600000);
 
