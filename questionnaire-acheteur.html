@@ -838,9 +838,10 @@ async function soumettre() {
       .from('documents')
       .upload(fileName, attestationFile, { contentType: attestationFile.type });
     if (!uploadError) {
-      var { data: urlData } = db.storage.from('documents').getPublicUrl(fileName);
-      attestationUrl = urlData.publicUrl;
-      payload.attestation_financement_url = attestationUrl;
+      // SÉCURITÉ : bucket 'documents' privé. On stocke le CHEMIN, pas une URL publique.
+      // L'accès se fait par URL signée à durée courte (voir signedDocUrl) côté vendeur.
+      payload.attestation_financement_path = fileName;
+      payload.attestation_financement_url = null;
       payload.attestation_financement_type = document.getElementById('attestation-type')?.value || 'simulation';
       payload.attestation_financement_at = new Date().toISOString();
     }

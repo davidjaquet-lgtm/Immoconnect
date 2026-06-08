@@ -1319,14 +1319,9 @@ async function uploadTaxe() {
   var ocrResult = document.getElementById('ocr-taxe-result');
   if (!file) return;
 
-  // Upload du fichier
-  st.className = 'file-status fs-loading'; st.textContent = '⏳ Upload en cours…';
-  var ext = file.name.split('.').pop();
-  var path = 'vendeurs/taxe_fonciere_' + Date.now() + '.' + ext;
-  var { error } = await db.storage.from(BUCKET).upload(path, file, { upsert: true });
-  if (error) { st.className = 'file-status fs-none'; st.textContent = '❌ Erreur — ' + error.message; return; }
-  var { data: pub } = db.storage.from(BUCKET).getPublicUrl(path);
-  docs['taxe_fonciere_doc'] = { path: path, url: pub.publicUrl };
+  // SÉCURITÉ : le justificatif n'est PAS stocké. Il est lu à la volée pour l\'OCR
+  // à la publication (validerDocumentsAnnonce → ocr-documents), puis abandonné.
+  docs['taxe_fonciere_doc'] = { local: true };
   st.className = 'file-status fs-ok'; st.textContent = '✅ ' + file.name;
 
   // OCR via Claude API
@@ -1420,13 +1415,8 @@ async function uploadDoc(champ,inputId,statusId){
   var file=document.getElementById(inputId).files[0];
   var st=document.getElementById(statusId);
   if(!file)return;
-  st.className='file-status fs-loading';st.textContent='⏳ Upload en cours…';
-  var ext=file.name.split('.').pop();
-  var path='vendeurs/'+champ+'_'+Date.now()+'.'+ext;
-  var {error}=await db.storage.from(BUCKET).upload(path,file,{upsert:true});
-  if(error){st.className='file-status fs-none';st.textContent='❌ Erreur — '+error.message;return;}
-  var {data:pub}=db.storage.from(BUCKET).getPublicUrl(path);
-  docs[champ]={path:path,url:pub.publicUrl};
+  // SÉCURITÉ : justificatif NON stocké — lu à la volée pour l\'OCR à la publication, puis abandonné.
+  docs[champ]={local:true};
   st.className='file-status fs-ok';st.textContent='✅ '+file.name;
   calcNiveau();
 }
@@ -1564,19 +1554,19 @@ async function soumettre(){
     photo_principale:photoUrls[0]||null,
     valeur_locative:+document.getElementById('valeur_locative').value||null,
     loyer_mensuel:+document.getElementById('loyer_mensuel').value||null,
-    valeur_locative_doc_url:docs['valeur_locative_doc']?docs['valeur_locative_doc'].url:null,
+    valeur_locative_doc_url:null, // justificatif non stocke (securite)
     charges_syndic:+document.getElementById('charges_syndic').value||null,
     nb_lots_copro:+document.getElementById('nb_lots_copro').value||null,
     taxe_fonciere_montant:+document.getElementById('taxe_fonciere_montant').value||null,
     // taxe_fonciere_verifie : géré côté serveur (ocr-documents) + revue admin — non écrit ici
     // URL du document taxe foncière stockée côté serveur uniquement — non transmise aux acheteurs/agents
     is_copropriete:getRadio('is_copro')==='Oui',
-    copro_doc_url:docs['copro_doc']?docs['copro_doc'].url:null,
+    copro_doc_url:null, // justificatif non stocke (securite)
     classe_dpe:document.getElementById('classe_dpe').value,
     conso_energie:+document.getElementById('conso_energie').value||null,
     classe_ges:document.getElementById('classe_ges').value,
     emission_ges:+document.getElementById('emission_ges').value||null,
-    dpe_doc_url:docs['dpe_doc']?docs['dpe_doc'].url:null,
+    dpe_doc_url:null, // justificatif non stocke (securite)
     niveau_vendeur:niveau,
     statut_annonce:'en_attente',
     latitude: null,
