@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Modération des annonces</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--amber:#D4732A;--red:#C0392B;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 24px}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}
+.nav-logo span{color:var(--gold)}
+.badge-admin{font-size:10px;background:var(--red);color:#fff;padding:2px 8px;border-radius:20px;margin-left:10px;font-weight:600}
+.page{max-width:860px;margin:0 auto;padding:32px 24px 80px}
+.page-title{font-size:22px;font-weight:500;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
+.card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;margin-bottom:14px}
+.card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
+.card-title{font-size:15px;font-weight:600}
+.card-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.card-price{font-size:15px;font-weight:600;color:var(--teal);white-space:nowrap}
+.card-desc{font-size:13px;color:#555;line-height:1.7;background:#F7F5F0;border-radius:8px;padding:10px 12px;margin:10px 0;max-height:140px;overflow:auto;white-space:pre-wrap}
+.motif{font-size:12px;line-height:1.6;border-radius:8px;padding:10px 12px;margin:10px 0}
+.motif-revue{background:#FEF6E7;border:1px solid #F0D58A;color:#7A5B12}
+.motif-label{font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:10px;display:block;margin-bottom:3px}
+.actions{display:flex;gap:10px;margin-top:14px}
+.btn{flex:1;padding:10px;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:opacity .15s}
+.btn:hover{opacity:.88}
+.btn-pub{background:var(--teal);color:#fff}
+.btn-ref{background:#fff;color:var(--red);border:1px solid var(--red)}
+.empty{text-align:center;padding:48px;color:var(--muted);background:var(--warm);border:1px solid var(--line);border-radius:var(--r)}
+.spin{width:24px;height:24px;border:3px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin:40px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.count{display:inline-block;background:var(--amber);color:#fff;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;margin-left:8px}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <span class="badge-admin">ADMIN</span>
+</nav>
+<div class="page">
+  <div class="page-title">🛡️ Modération des annonces <span class="count" id="count" style="display:none">0</span></div>
+  <div class="page-sub">Annonces en attente de revue (signalées par l'IA ou en doute). Publiez ou refusez après vérification.</div>
+  <div id="loading"><div class="spin"></div></div>
+  <div id="content" style="display:none"></div>
+</div>
+
+<script>
+const SB_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const { createClient } = supabase;
+const db = createClient(SB_URL, SB_KEY);
+
+const ADMIN_EMAILS = ['davidjaquet.lgtm@gmail.com'];
+var annonces = [];
+
+(async function() {
+  var { data: { session } } = await db.auth.getSession();
+  if (!session || !ADMIN_EMAILS.includes(session.user.email)) {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;flex-direction:column;gap:16px"><div style="font-size:48px">🔒</div><div style="font-size:18px;font-weight:500">Accès réservé</div><div style="font-size:13px;color:#888">Connectez-vous avec un compte administrateur</div><a href="connexion.html" style="margin-top:8px;padding:10px 24px;background:#0F0F0E;color:#fff;border-radius:8px;text-decoration:none;font-size:14px">Se connecter →</a></div>';
+    return;
+  }
+  await charger();
+})();
+
+async function charger() {
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('content').style.display = 'none';
+  var { data } = await db.from('annonces_vendeurs')
+    .select('id,titre,type_bien,ville,code_postal,prix,surface,description,moderation_motif,moderation_statut,email_contact,nom_vendeur,created_at')
+    .eq('statut_annonce', 'en_attente')
+    .order('created_at', { ascending: false });
+  annonces = data || [];
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
+  render();
+}
+
+function esc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function render() {
+  var c = document.getElementById('content');
+  var badge = document.getElementById('count');
+  badge.style.display = 'inline-block';
+  badge.textContent = annonces.length;
+
+  if (annonces.length === 0) {
+    c.innerHTML = '<div class="empty">✅ Aucune annonce en attente. Tout est à jour.</div>';
+    return;
+  }
+
+  c.innerHTML = annonces.map(function(a){
+    var date = a.created_at ? new Date(a.created_at).toLocaleDateString('fr-FR') : '';
+    var prix = a.prix ? Number(a.prix).toLocaleString('fr-FR') + ' €' : 'Prix NC';
+    var motif = a.moderation_motif
+      ? `<div class="motif motif-revue"><span class="motif-label">🤖 Analyse Hanaé</span>${esc(a.moderation_motif)}</div>`
+      : '';
+    return `
+      <div class="card" id="card-${a.id}">
+        <div class="card-head">
+          <div>
+            <div class="card-title">${esc(a.titre || (a.type_bien + ' · ' + a.ville))}</div>
+            <div class="card-meta">${esc(a.type_bien||'')} · ${esc(a.ville||'')} ${esc(a.code_postal||'')} · ${esc(a.surface||'?')} m² · ${esc(a.nom_vendeur||'')} (${esc(a.email_contact||'')}) · ${date}</div>
+          </div>
+          <div class="card-price">${prix}</div>
+        </div>
+        ${a.description ? `<div class="card-desc">${esc(a.description)}</div>` : ''}
+        ${motif}
+        <div class="actions">
+          <button class="btn btn-pub" onclick="publier('${a.id}')">✅ Publier</button>
+          <button class="btn btn-ref" onclick="refuser('${a.id}')">❌ Refuser</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function publier(id) {
+  var { error } = await db.from('annonces_vendeurs')
+    .update({ statut_annonce: 'publiee', moderation_statut: 'approuve_manuel', moderee_le: new Date().toISOString() })
+    .eq('id', id);
+  if (error) { alert('Erreur : ' + error.message); return; }
+  retirerCarte(id);
+}
+
+async function refuser(id) {
+  var raison = prompt('Motif du refus (sera enregistré) :');
+  if (raison === null) return;
+  var { error } = await db.from('annonces_vendeurs')
+    .update({ statut_annonce: 'refuse', moderation_statut: 'refuse_manuel', moderation_motif: raison, moderee_le: new Date().toISOString() })
+    .eq('id', id);
+  if (error) { alert('Erreur : ' + error.message); return; }
+  retirerCarte(id);
+}
+
+function retirerCarte(id) {
+  annonces = annonces.filter(function(a){ return a.id !== id; });
+  var el = document.getElementById('card-' + id);
+  if (el) el.remove();
+  var badge = document.getElementById('count');
+  badge.textContent = annonces.length;
+  if (annonces.length === 0) render();
+}
+</script>
+</body>
+</html>
