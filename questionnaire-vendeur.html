@@ -253,19 +253,6 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
         </div>
       </div>
 
-      <div class="form-grid col1">
-        <div class="field">
-          <label class="lbl">Description *</label>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-            <span style="font-size:10px;color:var(--muted)">Rédigez votre description ou laissez Hanaé le faire pour vous</span>
-            <button type="button" id="btn-hanae-desc" onclick="genererDescriptionHanae()" style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:linear-gradient(135deg,#1E7A62,#185FA5);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:opacity .15s;flex-shrink:0">
-              <span>🤖</span> <span id="btn-hanae-label">Générer avec Hanaé</span>
-            </button>
-          </div>
-          <textarea id="description" placeholder="Décrivez votre bien : état général, atouts, environnement, transports…" oninput="majScoreDossier()"></textarea>
-          <div id="hanae-desc-status" style="display:none;margin-top:6px;font-size:11px;padding:8px 12px;border-radius:6px"></div>
-        </div>
-      </div>
       <div class="form-grid col3">
         <div class="field">
           <label class="lbl">Surface (m²) *</label>
@@ -438,6 +425,19 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
         <div class="field">
           <label class="lbl">Adresse exacte <span style="font-size:10px;color:var(--muted);text-transform:none;font-weight:400;letter-spacing:0">(visible Gold & Platinium uniquement)</span></label>
           <input type="text" id="adresse" placeholder="12 rue des Lilas" oninput="majScoreDossier()">
+        </div>
+      </div>
+      <div class="form-grid col1">
+        <div class="field">
+          <label class="lbl">Description *</label>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:10px;color:var(--muted)">Rédigez votre description ou laissez Hanaé le faire pour vous</span>
+            <button type="button" id="btn-hanae-desc" onclick="genererDescriptionHanae()" style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:linear-gradient(135deg,#1E7A62,#185FA5);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:opacity .15s;flex-shrink:0">
+              <span>🤖</span> <span id="btn-hanae-label">Générer avec Hanaé</span>
+            </button>
+          </div>
+          <textarea id="description" placeholder="Décrivez votre bien : état général, atouts, environnement, transports…" oninput="majScoreDossier()"></textarea>
+          <div id="hanae-desc-status" style="display:none;margin-top:6px;font-size:11px;padding:8px 12px;border-radius:6px"></div>
         </div>
       </div>
     </div>
