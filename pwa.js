@@ -130,7 +130,7 @@
           await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/rest/v1/push_subscriptions', {
             method: 'POST',
             headers: {
-              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGh5ZWZhamZ3cWN4Y2Z4cG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjYwNDAsImV4cCI6MjA5MTUwMjA0MH0.jB8Z_9eT9lYkqxUUD0G001Y87iSAv94fSu_gVOdqa-A',
+              'apikey': 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM',
               'Content-Type': 'application/json',
               'Prefer': 'resolution=merge-duplicates'
             },

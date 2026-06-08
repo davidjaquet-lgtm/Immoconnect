@@ -1,0 +1,54 @@
+================================================================
+ IMMOCONNECT — OÙ METTRE CHAQUE FICHIER (carte de déploiement)
+================================================================
+
+3 destinations possibles :
+  [GITHUB]   → dépôt GitHub davidjaquet-lgtm/Immoconnect (racine).
+               Pousser = redéploiement automatique Vercel.
+  [EDGE]     → Supabase → Edge Functions. Créer/ouvrir la fonction du
+               même nom, coller le contenu de index.ts, Deploy (JWT OFF).
+  [SQL]      → Supabase → SQL Editor → coller → Run.
+
+----------------------------------------------------------------
+ À CHANGER MAINTENANT (sécurisation du stockage)
+----------------------------------------------------------------
+FICHIER (dans l'archive)                  →  DESTINATION
+questionnaire-vendeur.html                →  [GITHUB] racine (remplace)
+questionnaire-acheteur.html               →  [GITHUB] racine (remplace)
+edge-functions/doc-url.ts                 →  [EDGE] fonction "doc-url" (créer)
+edge-functions/purge-docs.ts              →  [EDGE] fonction "purge-docs" (créer)
+sql/sql-securite-storage.sql              →  [SQL] exécuter
+sql/sql-cron-purge.sql                    →  [SQL] exécuter (après avoir
+                                              remplacé PROJECT_REF + clé)
+PUIS : Supabase → Storage → vérifier que "documents" et
+       "documents-agents" sont en PRIVATE.
+PUIS : brancher l'affichage de l'attestation côté vendeur sur doc-url
+       (snippet dans README-SECURITE-STORAGE.txt).
+
+----------------------------------------------------------------
+ DÉJÀ LIVRÉ AVANT (rappel — si pas encore déployé)
+----------------------------------------------------------------
+8 pages réparées (JS)                      →  [GITHUB] racine :
+  index, connexion, exclusivite, selection-agents, rapport-hanae,
+  dashboard-agent, bien, forfaits  (.html)
+
+edge-functions/notif-niveau.ts             →  [EDGE] "notif-niveau" (JWT OFF)
+edge-functions/envoyer-email.ts            →  [EDGE] "envoyer-email" (version
+                                              complète, 50 types)
+edge-functions/ocr-documents.ts            →  [EDGE] "ocr-documents"
+                                              (type valider_doc_vendeur)
+edge-functions/generer-description.ts      →  [EDGE] "generer-description"
+edge-functions/blog-hanae.ts               →  [EDGE] "blog-hanae"
+
+sql/schema-notif-niveau.sql                →  [SQL] (P2 — déjà exécuté)
+sql/schema-validation-niveau.sql           →  [SQL] (P2 — déjà exécuté)
+sql/schema-offre-lancement.sql             →  [SQL] (P3 — à exécuter)
+dashboard-vendeur.html                     →  [GITHUB] racine (P2 bannière)
+
+----------------------------------------------------------------
+ NOTE
+----------------------------------------------------------------
+Le webhook Database UPDATE annonces_vendeurs → notif-niveau se
+configure dans Supabase → Database → Webhooks (déjà fait).
+Tout le reste du dépôt est inclus à l'identique pour référence.
+================================================================

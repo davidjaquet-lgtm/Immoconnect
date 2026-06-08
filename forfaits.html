@@ -711,7 +711,7 @@ async function chargerEarlyAdopter() {
     // Compter les agents avec un abonnement actif (forfait payant)
     var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/rest/v1/agents_validation?select=id&offre_lancement_rang=not.is.null', {
       headers: {
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGh5ZWZhamZ3cWN4Y2Z4cG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjYwNDAsImV4cCI6MjA5MTUwMjA0MH0.jB8Z_9eT9lYkqxUUD0G001Y87iSAv94fSu_gVOdqa-A',
+        'apikey': 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM',
         'Prefer': 'count=exact',
         'Range-Unit': 'items',
         'Range': '0-0'
@@ -749,7 +749,7 @@ function majAffichageEA(count) {
 
 function activerRealtimeEA() {
   var { createClient } = supabase;
-  var db = createClient('https://zxxhyefajfwqcxcfxpmg.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGh5ZWZhamZ3cWN4Y2Z4cG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjYwNDAsImV4cCI6MjA5MTUwMjA0MH0.jB8Z_9eT9lYkqxUUD0G001Y87iSAv94fSu_gVOdqa-A');
+  var db = createClient('https://zxxhyefajfwqcxcfxpmg.supabase.co', 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM');
   eaChannel = db.channel('ea-counter')
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'agents_validation' }, function() {
       chargerEarlyAdopter();

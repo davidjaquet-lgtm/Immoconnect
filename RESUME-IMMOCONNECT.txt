@@ -1,0 +1,50 @@
+═══════════════════════════════════════════════════════════════
+  IMMOCONNECT — ÉTAT DU PROJET (archive complète)
+═══════════════════════════════════════════════════════════════
+
+P1 — Bug blog "Failed to fetch" ............................ RÉGLÉ ✅
+P2 — Notif montée de niveau vendeur + validation OCR ....... CODE COMPLET ✅ (à déployer/tester)
+P3 — Offre de lancement (50 premiers agents, 3 mois Pro) ... CŒUR LIVRÉ ✅ (à déployer)
+AUDIT JS — 8 pages corrompues réparées ..................... FAIT ✅
+
+───────────────────────────────────────────────────────────────
+AUDIT DE SYNTAXE — 8 PAGES RÉPARÉES (node --check OK)
+───────────────────────────────────────────────────────────────
+Cause : apostrophes/quotes non échappées + chaînes multi-lignes
+en quote simple + nombre corrompu + fonctions await non-async.
+
+  • index.html ..................... apostrophes (d'exception, etc.)
+  • connexion.html ................. apostrophes + 'Outfit' + idiomes
+                                     + chaîne 2 lignes + prompt IA
+                                     multi-lignes + 2 fns → async
+  • questionnaire-acheteur.html .... apostrophes (l'alerte, etc.)
+  • exclusivite.html ............... iaHigh:1—0 → 132000  (⚠ VALEUR
+                                     DEVINÉE, à vérifier)
+  • selection-agents.html .......... idiome ('' + … + '')
+  • rapport-hanae.html ............. idiome ('' + … + '')
+  • dashboard-agent.html ........... getElementById('modal-preuves')
+  • bien.html ...................... afficherBien → async + message
+                                     multi-lignes + onmouseover quotes
+
+forfaits.html (P3) : apostrophe d'attente déjà corrigée.
+Les 29 autres pages : JS valide (déjà sain).
+Fonctions edge .ts : structurellement saines.
+
+⚠ À VÉRIFIER : exclusivite.html, annonce id:3 "Studio rénové —
+Capitole", champ iaHigh remis à 132000 (la valeur d'origine était
+illisible : "1—0"). Ajuste si tu connais la bonne estimation haute.
+
+───────────────────────────────────────────────────────────────
+À FAIRE CÔTÉ DAVID (déploiement)
+───────────────────────────────────────────────────────────────
+1. Mettre en ligne les 9 HTML réparés (les 8 + forfaits.html).
+2. P2 : vérifier que ocr-documents (type valider_doc_vendeur) et
+   envoyer-email (type montee_niveau) sont déployés à jour ;
+   déployer generer-description (Verify JWT OFF) ; tester de bout
+   en bout (dépôt annonce avec doc → flag *_verifie → trigger →
+   niveau_valide → webhook notif-niveau → notif + email ;
+   cas litige → revue manuelle).
+3. P3 : exécuter sql/schema-offre-lancement.sql.
+
+Edge functions : /edge-functions/*.ts  (+ racine pour compat)
+SQL            : /sql/*.sql
