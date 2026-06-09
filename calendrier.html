@@ -360,9 +360,9 @@ function buildReservations() {
       h += '<div class="resa-date"><div class="resa-day">' + dateObj.getDate() + '</div><div class="resa-mon">' + mois[dateObj.getMonth()] + '</div></div>';
     }
     h += '<div class="resa-info">';
-    h += '<div class="resa-titre">' + (bien ? (bien.type_bien||'Bien') + ' · ' + (bien.surface||'—') + 'm² · ' + (bien.ville||'') : '—') + '</div>';
-    h += '<div class="resa-meta">⏰ ' + (dispo ? dispo.heure_debut + ' – ' + dispo.heure_fin : '—');
-    h += ' · ' + (currentRole === 'vendeur' ? '👤 ' + (r.email_acheteur||'') : '🏠 ' + (r.email_vendeur||'')) + '</div>';
+    h += '<div class="resa-titre">' + (bien ? (bien.type_bien||'Bien') + ' · ' + (bien.surface||'—') + 'm² · ' + (bien.ville||'') : (r.bien_label || '—')) + '</div>';
+    h += '<div class="resa-meta">⏰ ' + (dispo ? dispo.heure_debut + ' – ' + dispo.heure_fin : (r.creneau_souhaite || 'Créneau à convenir'));
+    h += ' · ' + (currentRole === 'vendeur' ? '👤 ' + (r.nom_acheteur ? r.nom_acheteur + ' · ' : '') + (r.email_acheteur||'') : '🏠 ' + (r.email_vendeur||'')) + '</div>';
     if (r.message) h += '<div class="resa-meta" style="margin-top:4px;font-style:italic">"' + r.message + '"</div>';
     h += '</div>';
 
@@ -478,12 +478,19 @@ async function supprimerCreneau(id) {
 async function confirmerVisite(id) {
   await db.from('reservations_visites').update({ statut: 'confirme' }).eq('id', id);
 
-  // Incrémenter nb_visites sur l'annonce concernée
   var resa = reservations.find(function(r){ return r.id === id; });
-  if (resa && resa.disponibilites_visites && resa.disponibilites_visites.annonce_id) {
-    await db.rpc('incrementer_visites', {
-      annonce_uuid: resa.disponibilites_visites.annonce_id
-    }).then(undefined, function(){});
+  if (resa) {
+    var dispo = resa.disponibilites_visites;
+    var bienA = dispo && dispo.annonces_vendeurs;
+    if (dispo && dispo.annonce_id) {
+      await db.rpc('incrementer_visites', { annonce_uuid: dispo.annonce_id }).then(undefined, function(){});
+    }
+    var bienLabel = bienA ? ((bienA.type_bien||'Bien') + ' · ' + (bienA.ville||'')) : (resa.bien_label || 'votre visite');
+    var creneau = dispo ? (dispo.date + ' · ' + dispo.heure_debut + ' – ' + dispo.heure_fin) : (resa.creneau_souhaite || '');
+    var aid = (dispo && dispo.annonce_id) || resa.annonce_id;
+    if (resa.email_acheteur) {
+      await db.functions.invoke('envoyer-email', { body: { type: 'visite_confirmee', to: resa.email_acheteur, subject: '✅ Visite confirmée — ImmoConnect', bien: bienLabel, creneau: creneau, lien: aid ? ('https://immoconnect-agence.fr/bien.html?id=' + aid) : 'https://immoconnect-agence.fr' } }).then(undefined, function(){});
+    }
   }
 
   await chargerReservations();
@@ -492,6 +499,15 @@ async function confirmerVisite(id) {
 
 async function refuserVisite(id) {
   await db.from('reservations_visites').update({ statut: 'refuse' }).eq('id', id);
+  var resa = reservations.find(function(r){ return r.id === id; });
+  if (resa && resa.email_acheteur) {
+    var dispo = resa.disponibilites_visites;
+    var bienA = dispo && dispo.annonces_vendeurs;
+    var bienLabel = bienA ? ((bienA.type_bien||'Bien') + ' · ' + (bienA.ville||'')) : (resa.bien_label || 'votre visite');
+    var creneau = dispo ? (dispo.date + ' · ' + dispo.heure_debut + ' – ' + dispo.heure_fin) : (resa.creneau_souhaite || '');
+    var aid = (dispo && dispo.annonce_id) || resa.annonce_id;
+    await db.functions.invoke('envoyer-email', { body: { type: 'visite_refusee', to: resa.email_acheteur, subject: 'Votre demande de visite — ImmoConnect', bien: bienLabel, creneau: creneau, lien: aid ? ('https://immoconnect-agence.fr/bien.html?id=' + aid) : 'https://immoconnect-agence.fr' } }).then(undefined, function(){});
+  }
   await chargerReservations();
   afficherContenu();
 }
