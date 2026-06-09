@@ -268,8 +268,37 @@ var currentUser = null;
     .neq('id', bien.id)
     .limit(3);
 
-  afficherBien(bien, similaires || []);
+  try {
+    await afficherBien(bien, similaires || []);
+  } catch (err) {
+    console.error('Erreur affichage bien:', err);
+    var l = document.getElementById('loading'); if (l) l.style.display = 'none';
+    var ct = document.getElementById('content');
+    if (ct) { ct.style.display = 'block';
+      ct.innerHTML = '<div style="max-width:620px;margin:60px auto;padding:24px;text-align:center;color:#712B13;background:#FAECE7;border-radius:10px;font-size:14px">Une erreur est survenue à l\'affichage de cette annonce.<br><span style="font-size:11px;color:#9a6a55">' + ((err && err.message) ? err.message : err) + '</span></div>'; }
+  }
 })();
+
+// ── ACHAT RAPPORT (Stripe) ──
+var REPORT_PRICE_ID = 'price_1TdFJmRWjX9H4QylhXCGndPu'; // dossier complet 4,99€ (prix Stripe existant)
+async function acheterRapport(annonceId) {
+  try {
+    var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/creer-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        price_id: REPORT_PRICE_ID,
+        forfait: 'rapport',
+        mode: 'payment',
+        success_url: 'https://immoconnect-agence.fr/bien.html?id=' + annonceId + '&rapport_achete=1',
+        cancel_url: 'https://immoconnect-agence.fr/bien.html?id=' + annonceId
+      })
+    });
+    var data = await res.json();
+    if (data.url) { window.location.href = data.url; }
+    else { alert('Erreur : ' + (data.error || 'Stripe indisponible')); }
+  } catch (e) { alert('Erreur : ' + e.message); }
+}
 
 // ── AFFICHER ──
 async function afficherBien(b, similaires) {
@@ -374,14 +403,45 @@ async function afficherBien(b, similaires) {
   var isAgentAbonne = isAgentRap && forfaitRap !== 'pay_per_use';
   var isAgentPPU = isAgentRap && forfaitRap === 'pay_per_use';
 
+  // Acces au rapport achete a l unite ?
+  var rapportAchete = false;
+  var _urlB = new URLSearchParams(window.location.search);
+  if (currentUser) {
+    if (_urlB.get('rapport_achete') === '1') {
+      try { await db.from('rapports_achetes').insert({ annonce_id: b.id, user_id: currentUser.id, user_email: currentUser.email }); } catch (e) {}
+      rapportAchete = true;
+    } else {
+      try {
+        var _ach = await db.from('rapports_achetes').select('id').eq('annonce_id', b.id).eq('user_id', currentUser.id).limit(1);
+        rapportAchete = !!(_ach && _ach.data && _ach.data.length);
+      } catch (e) {}
+    }
+  }
+
   if (['silver','gold','platinium'].includes(niv)) {
     if (!isAgentRap) {
-      // Acheteur/investisseur : rapport complet avec estimation
-      rapportHtml = '<div class="rapport-card">'
-        + '<div class="rapport-title">Rapport Hanaé IA</div>'
-        + '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px">Estimation basée sur DVF + Notaires-INSEE + carte des loyers</div>'
-        + '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;padding:10px">📊 Voir le rapport complet</a>'
-        + '</div>';
+      // Acheteur / investisseur - acces reserve aux membres autorises
+      var um = currentUser ? (currentUser.user_metadata || {}) : {};
+      var estProprio = currentUser && currentUser.email === b.email_contact;
+      var profilAcheteur = userProfilsRap.includes('acheteur') || userProfilsRap.includes('investisseur');
+      var estAbonneAcheteur = profilAcheteur && (um.abonnement_actif === true || (um.forfait_acheteur && um.forfait_acheteur !== 'gratuit') || (um.forfait && um.forfait !== 'gratuit'));
+      var aDroitRapport = estProprio || rapportAchete || estAbonneAcheteur;
+      if (aDroitRapport) {
+        rapportHtml = '<div class="rapport-card">'
+          + '<div class="rapport-title">Rapport Hanaé IA</div>'
+          + '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px">Estimation basée sur DVF + Notaires-INSEE + carte des loyers</div>'
+          + '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;padding:10px">📊 Voir le rapport complet</a>'
+          + '</div>';
+      } else {
+        rapportHtml = '<div class="rapport-card" style="border-color:#C09B5A">'
+          + '<div class="rapport-title">🔒 Rapport réservé aux membres</div>'
+          + "<div style='font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px'>Le rapport Hanaé complet (estimation, prix/m², rendement net) est réservé aux acheteurs et investisseurs autorisés. Achetez-le à l'unité, ou abonnez-vous.</div>"
+          + (currentUser
+              ? '<button onclick="acheterRapport(\'' + b.id + '\')" style="width:100%;padding:10px;border:none;cursor:pointer;margin-bottom:8px;background:#C09B5A;color:#0F0F0E;border-radius:8px;font-family:Outfit,sans-serif;font-size:13px;font-weight:500">💳 Acheter le dossier (4,99 €)</button>'
+              : '<a href="connexion.html" style="display:block;text-align:center;text-decoration:none;padding:10px;margin-bottom:8px;background:#C09B5A;color:#0F0F0E;border-radius:8px;font-size:13px;font-weight:500">Se connecter pour y accéder</a>')
+          + '<a href="forfaits.html" class="btn-contact bc-out" style="display:block;text-align:center;text-decoration:none;padding:9px">Voir les abonnements</a>'
+          + '</div>';
+      }
     } else if (isAgentAbonne) {
       // Agent abonné : analyse de marché SANS le prix estimé
       rapportHtml = '<div class="rapport-card">'
