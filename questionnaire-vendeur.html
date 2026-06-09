@@ -850,7 +850,7 @@ async function envoyerAlertesBaissePrix(annonceId, ancienPrix, nouveauPrix, bais
           profil: profil,
           lien: 'https://immoconnect-agence.fr/bien.html?id=' + annonceId
         }
-      }).catch(function(){});
+      }).then(undefined, function(){});
     }
     console.log('Alertes baisse prix envoyées : ' + emails.size);
   } catch(e) {
@@ -1605,7 +1605,7 @@ async function soumettre(){
       // BAISSE DE PRIX DÉTECTÉE
       var baissePct = Math.round((ancienPrix - nouveauPrix) / ancienPrix * 100);
       if (baissePct >= 1) { // Seuil minimum 1%
-        await db.rpc('enregistrer_baisse_prix', { p_annonce_id: editId, p_nouveau_prix: nouveauPrix, p_ancien_prix: ancienPrix }).catch(function(){});
+        await db.rpc('enregistrer_baisse_prix', { p_annonce_id: editId, p_nouveau_prix: nouveauPrix, p_ancien_prix: ancienPrix }).then(undefined, function(){});
         await envoyerAlertesBaissePrix(editId, ancienPrix, nouveauPrix, baissePct, payload);
       }
     }

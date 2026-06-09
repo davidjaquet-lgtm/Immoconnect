@@ -257,7 +257,7 @@ var currentUser = null;
 
   // Incrémenter vues (si pas le propriétaire)
   if (!currentUser || currentUser.email !== bien.email_contact) {
-    await db.rpc('incrementer_vues', { annonce_uuid: bien.id }).catch(function(){});
+    await db.rpc('incrementer_vues', { annonce_uuid: bien.id }).then(undefined, function(){});
   }
 
   // Charger biens similaires
@@ -327,6 +327,53 @@ async function afficherBien(b, similaires) {
       thumbsHtml += '<img class="photo-thumb" src="' + p + '" onclick="changePhoto(\'' + p + '\')" alt="Photo ' + (i+2) + '">';
     });
     thumbsHtml += '</div>';
+  }
+
+  // ── ACCES : teaser (hors forfait) vs dossier complet ──
+  var um = currentUser ? (currentUser.user_metadata || {}) : {};
+  var profilsAcc = um.profils || [];
+  var estProprioAcc = currentUser && currentUser.email === b.email_contact;
+  var isAgentAcc = profilsAcc.includes('agent');
+  var isAgentAbonneAcc = isAgentAcc && um.forfait_agent && um.forfait_agent !== 'pay_per_use';
+  var profilAcheteurAcc = profilsAcc.includes('acheteur') || profilsAcc.includes('investisseur');
+  var estAbonneAcheteurAcc = profilAcheteurAcc && (um.abonnement_actif === true || (um.forfait_acheteur && um.forfait_acheteur !== 'gratuit') || (um.forfait && um.forfait !== 'gratuit'));
+
+  var rapportAchete = false;
+  var _urlB = new URLSearchParams(window.location.search);
+  if (currentUser) {
+    if (_urlB.get('rapport_achete') === '1') {
+      try { await db.from('rapports_achetes').insert({ annonce_id: b.id, user_id: currentUser.id, user_email: currentUser.email }); } catch (e) {}
+      rapportAchete = true;
+    } else {
+      try { var _ach = await db.from('rapports_achetes').select('id').eq('annonce_id', b.id).eq('user_id', currentUser.id).limit(1); rapportAchete = !!(_ach && _ach.data && _ach.data.length); } catch (e) {}
+    }
+  }
+
+  var accesComplet = estProprioAcc || isAgentAbonneAcc || estAbonneAcheteurAcc || rapportAchete;
+
+  if (!accesComplet) {
+    var piecesT = (b.nb_pieces != null && b.nb_pieces !== '') ? (b.nb_pieces + ' pièces') : 'Pièces NC';
+    var teaser = '<div class="breadcrumb"><a href="index.html">Accueil</a><span>\u203A</span>' + (b.ville || 'Bien') + '</div>'
+      + '<div class="bien-layout"><div>'
+      + mainPhoto + thumbsHtml
+      + '<div class="section" style="margin-top:20px">'
+      + '<div style="font-size:24px;font-weight:600;color:var(--teal);margin-bottom:6px">' + prixFmt + '</div>'
+      + '<div style="font-size:15px;font-weight:500;margin-bottom:8px">' + (b.type_bien || 'Bien') + ' \u00B7 ' + piecesT + '</div>'
+      + '<div style="font-size:13px;color:var(--muted)">\uD83D\uDCCD ' + (b.ville || '') + (b.code_postal ? ' (' + b.code_postal + ')' : '') + '</div>'
+      + '</div></div>'
+      + '<div><div class="rapport-card" style="border-color:#C09B5A">'
+      + '<div class="rapport-title">\uD83D\uDD12 Dossier réservé aux membres</div>'
+      + "<div style='font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px'>Pour accéder à la surface, l'adresse exacte, la description complète, les documents vérifiés et le rapport Hanaé, débloquez le dossier complet ou abonnez-vous.</div>"
+      + (currentUser
+          ? '<button onclick="acheterRapport(\'' + b.id + '\')" style="width:100%;padding:11px;border:none;cursor:pointer;margin-bottom:8px;background:#C09B5A;color:#0F0F0E;border-radius:8px;font-family:Outfit,sans-serif;font-size:13px;font-weight:600">\uD83D\uDCB3 Débloquer le dossier (4,99 \u20AC)</button>'
+          : '<a href="connexion.html" style="display:block;text-align:center;text-decoration:none;padding:11px;margin-bottom:8px;background:#C09B5A;color:#0F0F0E;border-radius:8px;font-size:13px;font-weight:600">Se connecter pour y accéder</a>')
+      + '<a href="forfaits.html" class="btn-contact bc-out" style="display:block;text-align:center;text-decoration:none;padding:10px">Voir les abonnements</a>'
+      + (isAgentAcc ? '<a href="candidature-agent.html?annonce=' + b.id + '" class="btn-contact bc-teal" style="display:block;text-align:center;text-decoration:none;padding:10px;margin-top:8px">Candidater sur ce bien \u2192</a>' : '')
+      + '</div></div></div>';
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').innerHTML = teaser;
+    document.getElementById('content').style.display = 'block';
+    return;
   }
 
   // Niveau et mandat
@@ -403,19 +450,41 @@ async function afficherBien(b, similaires) {
   var isAgentAbonne = isAgentRap && forfaitRap !== 'pay_per_use';
   var isAgentPPU = isAgentRap && forfaitRap === 'pay_per_use';
 
-  // Acces au rapport achete a l unite ?
-  var rapportAchete = false;
-  var _urlB = new URLSearchParams(window.location.search);
-  if (currentUser) {
-    if (_urlB.get('rapport_achete') === '1') {
-      try { await db.from('rapports_achetes').insert({ annonce_id: b.id, user_id: currentUser.id, user_email: currentUser.email }); } catch (e) {}
-      rapportAchete = true;
-    } else {
-      try {
-        var _ach = await db.from('rapports_achetes').select('id').eq('annonce_id', b.id).eq('user_id', currentUser.id).limit(1);
-        rapportAchete = !!(_ach && _ach.data && _ach.data.length);
-      } catch (e) {}
-    }
+  // ===== Acces complet au dossier ? (sinon vue restreinte) =====
+  var _profils = currentUser ? (currentUser.user_metadata?.profils || []) : [];
+  var _forfaitAg = currentUser ? (currentUser.user_metadata?.forfait_agent || 'pay_per_use') : null;
+  var _um = currentUser ? (currentUser.user_metadata || {}) : {};
+  var _estProprio = currentUser && currentUser.email === b.email_contact;
+  var _isAgentAbonne = _profils.includes('agent') && _forfaitAg !== 'pay_per_use';
+  var _abonneAcheteur = (_profils.includes('acheteur') || _profils.includes('investisseur')) && (_um.abonnement_actif === true || (_um.forfait_acheteur && _um.forfait_acheteur !== 'gratuit') || (_um.forfait && _um.forfait !== 'gratuit'));
+  var accesComplet = _estProprio || _isAgentAbonne || _abonneAcheteur || rapportAchete;
+
+  if (!accesComplet) {
+    var _titreSafe = b.titre || (b.type_bien || 'Bien');
+    var _loadEl = document.getElementById('loading'); if (_loadEl) _loadEl.style.display = 'none';
+    var _ct = document.getElementById('content'); _ct.style.display = 'block';
+    var _pieces = (b.nb_pieces !== null && b.nb_pieces !== undefined && b.nb_pieces !== '') ? (b.nb_pieces + ' pieces') : 'Nombre de pieces non communique';
+    var _action = currentUser
+      ? '<button onclick="acheterRapport(\'' + b.id + '\')" style="width:100%;padding:11px;border:none;cursor:pointer;margin-bottom:8px;background:#C09B5A;color:#0F0F0E;border-radius:8px;font-family:Outfit,sans-serif;font-size:13px;font-weight:600">💳 Débloquer le dossier (4,99 €)</button>'
+      : '<a href="connexion.html" style="display:block;text-align:center;text-decoration:none;padding:11px;margin-bottom:8px;background:#C09B5A;color:#0F0F0E;border-radius:8px;font-size:13px;font-weight:600">Se connecter pour débloquer</a>';
+    _ct.innerHTML =
+      '<div class="breadcrumb"><a href="index.html">Accueil</a><span>&rsaquo;</span><a href="index.html">Annonces</a><span>&rsaquo;</span>' + _titreSafe + '</div>'
+      + '<div class="bien-layout">'
+        + '<div>'
+          + '<div class="galerie">' + mainPhoto + thumbsHtml + '</div>'
+          + '<h1 class="bien-titre">' + _titreSafe + '</h1>'
+          + '<div class="bien-localisation">📍 ' + (b.ville || '') + '</div>'
+          + '<div style="font-size:14px;color:var(--muted);margin:6px 0">' + _pieces + '</div>'
+          + '<div class="bien-prix">' + prixFmt + '</div>'
+        + '</div>'
+        + '<div><div class="rapport-card" style="border-color:#C09B5A">'
+          + '<div class="rapport-title">🔒 Dossier réservé aux membres</div>'
+          + "<div style='font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px'>Vous voyez les informations essentielles (photos, ville, nombre de pièces, prix). Le dossier complet — surface, adresse exacte, description, documents vérifiés et rapport Hanaé — est réservé aux acheteurs et investisseurs autorisés. Débloquez-le à l'unité, ou abonnez-vous.</div>"
+          + _action
+          + '<a href="forfaits.html" class="btn-contact bc-out" style="display:block;text-align:center;text-decoration:none;padding:9px">Voir les abonnements</a>'
+        + '</div></div>'
+      + '</div>';
+    return;
   }
 
   if (['silver','gold','platinium'].includes(niv)) {
@@ -760,7 +829,7 @@ function buildScoreDossierHtml(b) {
 var exclusiviteActive = null;
 
 async function checkExclusivite(bienId) {
-  var { data } = await db.rpc('get_exclusivite_active', { p_annonce_id: bienId }).catch(function(){ return { data: null }; });
+  var { data } = await db.rpc('get_exclusivite_active', { p_annonce_id: bienId }).then(undefined, function(){ return { data: null }; });
   exclusiviteActive = (data && data.length > 0) ? data[0] : null;
   return exclusiviteActive;
 }
@@ -962,7 +1031,7 @@ async function declarerAcheteur(annonceId, mandatId, forfait) {
       type: 'verifier_quota_lead',
       data: { agent_email: currentUser.email, annonce_id: annonceId, forfait: forfait }
     }
-  }).catch(function(){ return { data: { autorise: false, message: 'Erreur réseau' } }; })
+  }).then(undefined, function(){ return { data: { autorise: false, message: 'Erreur réseau' } }; })
 
   var result = res.data || {}
   if (!result.autorise) {
@@ -975,8 +1044,8 @@ async function declarerAcheteur(annonceId, mandatId, forfait) {
   }
 
   // Ouvrir la messagerie avec pré-remplissage "J\'ai un acheteur potentiel"
-  var { data: annonce } = await db.from('annonces_vendeurs').select('email_contact, titre, type_bien, ville').eq('id', annonceId).single().catch(function(){ return { data: null } })
-  var { data: mandat } = await db.from('mandats_recherche').select('label, budget_max, type_bien, secteur').eq('id', mandatId).single().catch(function(){ return { data: null } })
+  var { data: annonce } = await db.from('annonces_vendeurs').select('email_contact, titre, type_bien, ville').eq('id', annonceId).single().then(undefined, function(){ return { data: null } })
+  var { data: mandat } = await db.from('mandats_recherche').select('label, budget_max, type_bien, secteur').eq('id', mandatId).single().then(undefined, function(){ return { data: null } })
 
   var message = 'Bonjour,\n\nJ\'ai un acheteur potentiel pour votre bien.'
     + (mandat ? '\n\nProfil acheteur : ' + (mandat.label || 'Acheteur qualifié') + ' — budget jusqu\'à ' + Math.round(parseFloat(mandat.budget_max || 0)).toLocaleString('fr-FR') + ' €.' : '')
@@ -991,7 +1060,7 @@ async function declarerAcheteur(annonceId, mandatId, forfait) {
     type: 'acheteur_potentiel',
     mandat_recherche_id: mandatId,
     lu: false
-  }).catch(function(){})
+  }).then(undefined, function(){})
 
   // Envoyer email au vendeur
   await db.functions.invoke('envoyer-email', {
@@ -1006,7 +1075,7 @@ async function declarerAcheteur(annonceId, mandatId, forfait) {
       budget_max: mandat?.budget_max,
       lien: 'https://immoconnect-agence.fr/messagerie.html?annonce=' + annonceId
     }
-  }).catch(function(){})
+  }).then(undefined, function(){})
 
   showToast('Votre message a été envoyé au vendeur.', 'ok')
   // Rediriger vers la messagerie
@@ -1065,7 +1134,7 @@ async function envoyerSignalement(annonceId) {
         raison: description,
         lien: 'https://immoconnect-agence.fr/admin-agents.html'
       }
-    }).catch(function(){});
+    }).then(undefined, function(){});
 
     document.getElementById('modal-signalement').remove();
     alert('Signalement envoyé. ImmoConnect va vérifier et vous informer de la suite.');
@@ -1079,7 +1148,7 @@ var isSuivant = false;
 
 async function checkSuivi(bienId) {
   if (!currentUser) return;
-  var { data } = await db.from('suivi_biens').select('id').eq('annonce_id', bienId).eq('email', currentUser.email).single().catch(function(){ return { data: null }; });
+  var { data } = await db.from('suivi_biens').select('id').eq('annonce_id', bienId).eq('email', currentUser.email).single().then(undefined, function(){ return { data: null }; });
   isSuivant = !!data;
   majBtnSuivi(bienId);
 }
@@ -1214,7 +1283,7 @@ async function envoyerContact() {
     });
 
     // Incrémenter contacts
-    await db.rpc('incrementer_contacts', { annonce_uuid: bien.id }).catch(function(){});
+    await db.rpc('incrementer_contacts', { annonce_uuid: bien.id }).then(undefined, function(){});
 
     // Notifier le vendeur
     await db.functions.invoke('envoyer-email', {
@@ -1227,7 +1296,7 @@ async function envoyerContact() {
         bien: (bien.type_bien||'Bien') + ' · ' + (bien.ville||''),
         lien: 'https://immoconnect-agence.fr/connexion.html'
       }
-    }).catch(function(){});
+    }).then(undefined, function(){});
 
     ok.textContent = '✅ Message envoyé ! Le vendeur vous répondra rapidement.';
     ok.style.display = 'block';
@@ -1303,7 +1372,7 @@ async function confirmerVisite(dispoId) {
       bien: (bien.type_bien||'Bien') + ' · ' + (bien.ville||''),
       lien: 'https://immoconnect-agence.fr/calendrier.html'
     }
-  }).catch(function(){});
+  }).then(undefined, function(){});
 
   document.getElementById('visite-content').innerHTML =
     '<div style="text-align:center;padding:24px"><div style="font-size:48px;margin-bottom:14px">✅</div>' +
@@ -1331,7 +1400,7 @@ async function ouvrirSignalement() {
     raison: raison,
     statut: 'en_attente',
     created_at: new Date().toISOString()
-  }).catch(function(){});
+  }).then(undefined, function(){});
   await db.functions.invoke('envoyer-email', {
     body: {
       type: 'signalement_agent',
@@ -1343,7 +1412,7 @@ async function ouvrirSignalement() {
       raison: raison,
       lien: 'https://immoconnect-agence.fr/admin-agents.html'
     }
-  }).catch(function(){});
+  }).then(undefined, function(){});
   alert('Signalement envoyé. Nous traitons votre demande sous 48h.');
 }
 
@@ -1363,7 +1432,7 @@ function copierLien(url) {
         btn.style.borderColor = 'var(--line)';
       }, 2000);
     }
-  }).catch(function() {
+  }).then(undefined, function() {
     var ta = document.createElement('textarea');
     ta.value = url;
     document.body.appendChild(ta);

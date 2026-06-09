@@ -672,9 +672,9 @@ async function chargerProfil() {
   // Charger données agent depuis Supabase pour le score précis
   var { data: agentData } = await db.from('agents_validation')
     .select('nb_mandats_docage,note_moyenne,nb_ventes_similaires,penalite_score,photo_url,description,secteurs,carte_t_expiration,forfait_agent,score_coherence_moyen')
-    .eq('email', currentUser.email).single().catch(function(){ return { data: {} }; });
+    .eq('email', currentUser.email).single().then(undefined, function(){ return { data: {} }; });
   var { data: statsAgent } = await db.from('stats_agents')
-    .select('note_moyenne,nb_avis').eq('agent_email', currentUser.email).single().catch(function(){ return { data: {} }; });
+    .select('note_moyenne,nb_avis').eq('agent_email', currentUser.email).single().then(undefined, function(){ return { data: {} }; });
   var agentFull = Object.assign({}, agentData || {}, statsAgent || {}, meta);
   var scoreData = calculerScore(agentFull);
   var score = scoreData.total;
@@ -958,7 +958,7 @@ async function chargerMandats() {
   var { data: mands } = await db.from('mandats_agents').select('*').eq('agent_email', currentUser.email).eq('statut', 'actif');
   mandats = mands || [];
   afficherMandats();
-  afficherAcheteurs().catch(function(){});
+  afficherAcheteurs().then(undefined, function(){});
 }
 
 function afficherMandats() {
@@ -1055,7 +1055,7 @@ async function declarerAcheteurPortefeuille() {
       var el = document.getElementById(id); if (el) el.value = '';
     });
     document.getElementById('ach-type').value = '';
-    await afficherAcheteurs().catch(function(){});
+    await afficherAcheteurs().then(undefined, function(){});
   } else {
     alert('Erreur lors de l\'enregistrement');
   }
@@ -1064,7 +1064,7 @@ async function declarerAcheteurPortefeuille() {
 async function supprimerMandatRecherche(id) {
   if (!confirm('Retirer cet acheteur du portefeuille ?')) return;
   await db.from('mandats_recherche').delete().eq('id', id);
-  await afficherAcheteurs().catch(function(){});
+  await afficherAcheteurs().then(undefined, function(){});
 }
 
 // ── CONSEILS HANAE ──
@@ -1072,9 +1072,9 @@ async function genererConseils() {
   // Charger données agent depuis Supabase pour le score précis
   var { data: agentData } = await db.from('agents_validation')
     .select('nb_mandats_docage,note_moyenne,nb_ventes_similaires,penalite_score,photo_url,description,secteurs,carte_t_expiration,forfait_agent,score_coherence_moyen')
-    .eq('email', currentUser.email).single().catch(function(){ return { data: {} }; });
+    .eq('email', currentUser.email).single().then(undefined, function(){ return { data: {} }; });
   var { data: statsAgent } = await db.from('stats_agents')
-    .select('note_moyenne,nb_avis').eq('agent_email', currentUser.email).single().catch(function(){ return { data: {} }; });
+    .select('note_moyenne,nb_avis').eq('agent_email', currentUser.email).single().then(undefined, function(){ return { data: {} }; });
   var agentFull = Object.assign({}, agentData || {}, statsAgent || {}, meta);
   var scoreData = calculerScore(agentFull);
   var score = scoreData.total;
@@ -1145,7 +1145,7 @@ async function chargerPreuves() {
   var { data: agentData } = await db.from('agents_validation')
     .select('preuve_vente_url, nb_ventes_locales_prouvees')
     .eq('email', currentUser.email)
-    .single().catch(function(){ return { data: null }; });
+    .single().then(undefined, function(){ return { data: null }; });
   var el = document.getElementById('preuves-list');
   if (!el) return;
   var preuves = agentData?.preuve_vente_url || [];
@@ -1187,7 +1187,7 @@ function ouvrirUploadPreuves() {
 async function uploadPreuves() {
   var input = document.getElementById('preuve-upload-input');
   if (!input || !input.files.length) { showToast('Sélectionnez au moins un fichier.', 'error'); return; }
-  var { data: agentData } = await db.from('agents_validation').select('preuve_vente_url').eq('email', currentUser.email).single().catch(function(){ return { data: null }; });
+  var { data: agentData } = await db.from('agents_validation').select('preuve_vente_url').eq('email', currentUser.email).single().then(undefined, function(){ return { data: null }; });
   var existantes = agentData?.preuve_vente_url || [];
   var urls = [...existantes];
 
@@ -1212,7 +1212,7 @@ async function uploadPreuves() {
 
 async function supprimerPreuve(index) {
   if (!confirm('Supprimer cette preuve ?')) return;
-  var { data: agentData } = await db.from('agents_validation').select('preuve_vente_url').eq('email', currentUser.email).single().catch(function(){ return { data: null }; });
+  var { data: agentData } = await db.from('agents_validation').select('preuve_vente_url').eq('email', currentUser.email).single().then(undefined, function(){ return { data: null }; });
   var urls = (agentData?.preuve_vente_url || []).filter(function(_, i){ return i !== index; });
   await db.from('agents_validation').update({ preuve_vente_url: urls, nb_ventes_locales_prouvees: urls.length }).eq('email', currentUser.email);
   await chargerPreuves();
@@ -1398,7 +1398,7 @@ async function sauvegarderMandatRecherche() {
         rendement_min: rendement_min ? parseFloat(rendement_min) : null
       }
     }
-  }).catch(function(){});
+  }).then(undefined, function(){});
 }
 
 async function supprimerMandatRecherche(id) {
@@ -1480,7 +1480,7 @@ async function marquerVisiteEffectuee(visiteid, acheteurEmail, titreBien) {
         titre_bien: titreBien,
         lien_notation: lienNotation
       }
-    }).catch(function(){});
+    }).then(undefined, function(){});
   }
 
   showToast('Visite marquée comme effectuée ✅' + (acheteurEmail ? ' · Email de notation envoyé à l\'acheteur' : ''));

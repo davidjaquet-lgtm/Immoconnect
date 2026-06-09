@@ -145,7 +145,7 @@ async function validerAgent(id, email, userId) {
   // Mettre à jour les metadata utilisateur via Edge Function
   await db.functions.invoke('valider-agent', {
     body: { user_id: userId, email: email }
-  }).catch(function(){});
+  }).then(undefined, function(){});
 
   // Email de confirmation à l'agent
   await db.functions.invoke('envoyer-email', {
@@ -155,7 +155,7 @@ async function validerAgent(id, email, userId) {
       subject: '✅ Votre compte agent ImmoConnect est activé !',
       lien: 'https://immoconnect-agence.fr/connexion.html'
     }
-  }).catch(function(){});
+  }).then(undefined, function(){});
 
   alert('✅ Compte validé ! L\'agent a été notifié par email.');
   location.reload();
@@ -175,7 +175,7 @@ async function refuserAgent(id, email) {
       raison: raison,
       lien: 'https://immoconnect-agence.fr/connexion.html'
     }
-  }).catch(function(){});
+  }).then(undefined, function(){});
 
   alert('Refus enregistré. L\'agent a été notifié.');
   location.reload();

@@ -850,7 +850,7 @@ async function soumettre() {
   // Vérification croisée : cet email est-il déjà un agent ImmoConnect ?
   var { data: agentExistant } = await db.from('agents_validation')
     .select('email').eq('email', payload.email).single()
-    .catch(function(){ return { data: null }; });
+    .then(undefined, function(){ return { data: null }; });
 
   if (agentExistant) {
     alert('⚠️ Cette adresse email est associée à un compte agent ImmoConnect.\n\nSi vous êtes un agent, vous devez utiliser votre espace agent. Si vous avez un doute, contactez-nous à support@immoconnect-agence.fr');

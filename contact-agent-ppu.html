@@ -181,7 +181,7 @@ async function payer() {
         bien: bien.titre || bien.type_bien + ' ' + bien.ville,
         lien: 'https://immoconnect-agence.fr/messagerie.html?annonce=' + annonceId
       }
-    }).catch(function(){})
+    }).then(undefined, function(){})
 
     // Rediriger vers messagerie
     showToast('Paiement confirmé ! Accès à la messagerie...', 'ok')

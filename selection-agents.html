@@ -595,7 +595,7 @@ async function ouvrirChoixLibre() {
           score_min_top3: agents.length > 0 ? agents[agents.length-1].score_total : 0
         }
       }
-    }).catch(function(){});
+    }).then(undefined, function(){});
 
     content.innerHTML = '<div style="background:#E1F5EE;border-radius:8px;padding:14px;font-size:13px;color:#085041;line-height:1.7;margin-bottom:12px">Aucun candidat supplementaire disponible. Nous avons envoye une alerte a tous les agents abonnes de votre secteur. Revenez dans 48h.</div>';
     return;
@@ -623,7 +623,7 @@ async function ouvrirChoixLibre() {
         type: 'elargir_pool_libre',
         data: { annonce_id: annonceId, bien: bien, candidats_existants: emailsCandidats, score_min_top3: 0 }
       }
-    }).catch(function(){});
+    }).then(undefined, function(){});
   }
 
   content.innerHTML = html;
@@ -640,7 +640,7 @@ async function mandaterLibre(agentEmail) {
       lien: 'https://immoconnect-agence.fr/connexion.html',
       priorite: true
     }
-  }).catch(function(){});
+  }).then(undefined, function(){});
 }
 
 function fermerModal() {
@@ -687,7 +687,7 @@ async function confirmerChoix() {
         bien: bien ? (bien.titre || bien.type_bien + ' ' + bien.ville) : '',
         lien: 'https://immoconnect-agence.fr/connexion.html'
       }
-    }).catch(function(){});
+    }).then(undefined, function(){});
 
     // 5. Notifier les autres agents non retenus
     for (var ag of agents) {
@@ -700,7 +700,7 @@ async function confirmerChoix() {
             bien_titre: bien ? (bien.titre || bien.type_bien + ' ' + bien.ville) : '',
             lien: 'https://immoconnect-agence.fr/connexion.html'
           }
-        }).catch(function(){});
+        }).then(undefined, function(){});
       }
     }
 

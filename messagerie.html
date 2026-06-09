@@ -349,7 +349,7 @@ async function afficherChat(conv) {
   var quotaHtml = '';
   if (currentRole === 'agent') {
     var semaine = getSemaine();
-    var { data: q } = await db.from('contacts_semaine').select('nb_contacts').eq('agent_id',currentUser.id).eq('semaine',semaine).single().catch(function(){return{data:null};});
+    var { data: q } = await db.from('contacts_semaine').select('nb_contacts').eq('agent_id',currentUser.id).eq('semaine',semaine).single().then(undefined, function(){return{data:null};});
     var nbContacts = q ? q.nb_contacts : 0;
     var maxContacts = FORFAITS[currentForfait]?.contacts_semaine || 10;
     if (!conv.contact_consomme && nbContacts >= maxContacts && maxContacts !== 999) {
@@ -372,7 +372,7 @@ async function afficherChat(conv) {
   // Récupérer note moyenne de l'agent si on est vendeur
   var noteMoyenneHtml = '';
   if (peutNoter && conv.email_agent) {
-    var { data: stats } = await db.from('stats_agents').select('note_moyenne,nb_avis').eq('agent_email', conv.email_agent).single().catch(function(){return{data:null};});
+    var { data: stats } = await db.from('stats_agents').select('note_moyenne,nb_avis').eq('agent_email', conv.email_agent).single().then(undefined, function(){return{data:null};});
     if (stats && stats.nb_avis > 0) {
       noteMoyenneHtml = '<span style="font-size:11px;color:var(--muted)">★ '+stats.note_moyenne+' ('+stats.nb_avis+' avis)</span>';
     }
@@ -387,7 +387,7 @@ async function afficherChat(conv) {
     var { data: projetAcheteur } = await db.from('projets_acheteurs')
       .select('attestation_financement_url, attestation_financement_type, attestation_financement_at')
       .eq('email', conv.email_acheteur || emailInterlocuteur)
-      .single().catch(function(){ return { data: null }; });
+      .single().then(undefined, function(){ return { data: null }; });
     if (projetAcheteur?.attestation_financement_url) {
       var typeLabels = {
         simulation: 'Simulation bancaire',
@@ -445,7 +445,7 @@ async function afficherChat(conv) {
   html += '<div class="chat-input-zone">';
   if (currentRole === 'agent') {
     var semaine = getSemaine();
-    var { data: q2 } = await db.from('contacts_semaine').select('nb_contacts').eq('agent_id',currentUser.id).eq('semaine',semaine).single().catch(function(){return{data:null};});
+    var { data: q2 } = await db.from('contacts_semaine').select('nb_contacts').eq('agent_id',currentUser.id).eq('semaine',semaine).single().then(undefined, function(){return{data:null};});
     var nb = q2 ? q2.nb_contacts : 0;
     var max = FORFAITS[currentForfait]?.contacts_semaine || 10;
     var restants = max === 999 ? '∞' : Math.max(0, max - nb);
@@ -478,7 +478,7 @@ async function envoyerMessage() {
   // Quota agent
   if (currentRole === 'agent' && !conv.contact_consomme) {
     var semaine = getSemaine();
-    var { data: existing } = await db.from('contacts_semaine').select('*').eq('agent_id',currentUser.id).eq('semaine',semaine).single().catch(function(){return{data:null};});
+    var { data: existing } = await db.from('contacts_semaine').select('*').eq('agent_id',currentUser.id).eq('semaine',semaine).single().then(undefined, function(){return{data:null};});
     if (existing) {
       await db.from('contacts_semaine').update({nb_contacts:existing.nb_contacts+1}).eq('id',existing.id);
     } else {
@@ -486,7 +486,7 @@ async function envoyerMessage() {
     }
     await db.from('conversations').update({contact_consomme:true,date_contact:new Date().toISOString()}).eq('id',currentConvId);
     conv.contact_consomme = true;
-    if (conv.annonce_id) db.rpc('incrementer_contacts',{annonce_uuid:conv.annonce_id}).catch(function(){});
+    if (conv.annonce_id) db.rpc('incrementer_contacts',{annonce_uuid:conv.annonce_id}).then(undefined, function(){});
   }
 
   // Effacer typing
@@ -583,7 +583,7 @@ async function signalerContact(emailAgent, convId) {
     email_signalant: currentUser.email,
     raison: raison,
     statut: 'en_attente'
-  }).catch(function(){});
+  }).then(undefined, function(){});
 
   // Alerter l'admin
   await db.functions.invoke('envoyer-email', {
@@ -597,7 +597,7 @@ async function signalerContact(emailAgent, convId) {
       raison: raison,
       lien: 'https://immoconnect-agence.fr/admin-agents.html'
     }
-  }).catch(function(){});
+  }).then(undefined, function(){});
 
   alert('Signalement enregistre. Notre equipe examine ce compte sous 24h. Merci de nous aider a maintenir la qualite de la plateforme.');
 }

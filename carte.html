@@ -275,7 +275,7 @@ function afficherBiens(biens) {
 
     // Incrémenter vue au clic
     marker.on('popupopen', function() {
-      db.rpc('incrementer_vues', { annonce_uuid: b.id }).then(function(){}).catch(function(){});
+      db.rpc('incrementer_vues', { annonce_uuid: b.id }).then(function(){}).then(undefined, function(){});
     });
 
     marker.bindPopup(

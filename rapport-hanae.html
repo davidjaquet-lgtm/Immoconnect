@@ -426,7 +426,7 @@ async function confirmerReservation(dispoId, emailVendeur) {
         bien: (rapportData.annonce.type_bien||'Bien') + ' · ' + (rapportData.annonce.ville||''),
         lien: 'https://immoconnect-agence.fr/calendrier.html'
       }
-    }).catch(function(){});
+    }).then(undefined, function(){});
 
     document.getElementById('cal-modal-content').innerHTML =
       '<div style="text-align:center;padding:32px">' +

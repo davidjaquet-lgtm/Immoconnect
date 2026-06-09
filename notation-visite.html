@@ -254,7 +254,7 @@ async function soumettre() {
           qualificatifs: qualifSelectionnees,
           subject: 'Vous avez reçu une excellente notation — ImmoConnect'
         })
-      }).catch(function(){});
+      }).then(undefined, function(){});
     }
   }
 

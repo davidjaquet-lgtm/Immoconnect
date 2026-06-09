@@ -801,7 +801,7 @@ async function soumettre() {
         ville_souhaitee: acheteurs[i].secteur,
         forfait: 'agent_portefeuille',
         agent_email: email
-      }).catch(function(){});
+      }).then(undefined, function(){});
     }
 
     // Notifier l'admin
@@ -816,7 +816,7 @@ async function soumettre() {
         forfait: 'Pay per use (9,99€/candidature)',
         lien: 'https://immoconnect-agence.fr/admin-agents.html'
       }
-    }).catch(function(){});
+    }).then(undefined, function(){});
 
     // Afficher confirmation
     document.getElementById('recap-nom').textContent = prenom + ' ' + nom;

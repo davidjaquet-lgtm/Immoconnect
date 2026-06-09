@@ -841,7 +841,7 @@ async function payer() {
     await db.from('candidatures_agents').update({ paiement_statut: 'paye' }).eq('id', cand.id);
 
     // 3. Déclencher le scorer si assez de candidatures
-    await db.functions.invoke('scorer-candidatures', { body: { annonce_id: annonceId } }).catch(function(){});
+    await db.functions.invoke('scorer-candidatures', { body: { annonce_id: annonceId } }).then(undefined, function(){});
 
     goStep(4);
 

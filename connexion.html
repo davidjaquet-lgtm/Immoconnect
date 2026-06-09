@@ -901,7 +901,7 @@ async function envoyerQuestion(annonceId) {
       message: question,
       type: 'question_vendeur',
       lu: false
-    }).catch(function(){});
+    }).then(undefined, function(){});
     await db.functions.invoke('envoyer-email', {
       body: {
         type: 'question_vendeur_agent',
@@ -911,7 +911,7 @@ async function envoyerQuestion(annonceId) {
         question: question,
         lien: 'https://immoconnect-agence.fr/messagerie.html?annonce=' + annonceId
       }
-    }).catch(function(){});
+    }).then(undefined, function(){});
   }
   if (input) input.value = '';
   showToast('Question envoyée à ' + (cands||[]).length + ' agent(s).', 'ok');
@@ -929,7 +929,7 @@ async function confirmerChoix(annonceId) {
   if (!confirm('Confirmer le choix de ' + selIds.length + ' agent(s) pour ce bien ?')) return;
 
   var { data: choisis } = await db.from('candidatures_agents').select('agent_email, nom_agent').in('id', selIds);
-  var { data: annonce } = await db.from('annonces_vendeurs').select('titre, type_bien, ville').eq('id', annonceId).single().catch(function(){ return { data: null }; });
+  var { data: annonce } = await db.from('annonces_vendeurs').select('titre, type_bien, ville').eq('id', annonceId).single().then(undefined, function(){ return { data: null }; });
   var bienTitre = annonce ? (annonce.titre || annonce.type_bien + ' ' + annonce.ville) : 'votre bien';
 
   // Notifier les agents retenus
@@ -944,7 +944,7 @@ async function confirmerChoix(annonceId) {
         nb_agents: (choisis||[]).length,
         lien: 'https://immoconnect-agence.fr/connexion.html'
       }
-    }).catch(function(){});
+    }).then(undefined, function(){});
   }
 
   // Notifier les autres agents non retenus
@@ -962,7 +962,7 @@ async function confirmerChoix(annonceId) {
         bien_titre: bienTitre,
         lien: 'https://immoconnect-agence.fr/connexion.html'
       }
-    }).catch(function(){});
+    }).then(undefined, function(){});
   }
 
   // Mettre à jour statuts en base
@@ -1025,7 +1025,7 @@ async function buildAgentPanel(leads, meta) {
   // Compteur contacts semaine
   var semaine = getSemaine();
   var { data: quota } = await db.from('contacts_semaine')
-    .select('nb_contacts').eq('agent_id', user.id).eq('semaine', semaine).single().catch(function(){return{data:null};});
+    .select('nb_contacts').eq('agent_id', user.id).eq('semaine', semaine).single().then(undefined, function(){return{data:null};});
   var nbContacts = quota ? quota.nb_contacts : 0;
   var forfaitLabel = meta.forfait_agent || 'starter';
   var maxContacts = {starter:10, pro:15, expert:30, platinium:999}[forfaitLabel] || 10;
@@ -1140,7 +1140,7 @@ async function confirmerVente(annonceId) {
   var commissionDue = false;
   var { data: mandat } = await db.from('mandats_agents')
     .select('statut, type_mandat').eq('annonce_id', annonceId).single()
-    .catch(function(){ return { data: null }; });
+    .then(undefined, function(){ return { data: null }; });
 
   if (quiVendu === 'agent_immoconnect') {
     commissionDue = true;
@@ -1182,7 +1182,7 @@ async function confirmerVente(annonceId) {
       qui_vendu: quiVendu,
       commission_due: commissionDue
     })
-  }).catch(function(){});
+  }).then(undefined, function(){});
 
   fermerModalVente();
   alert('Vente enregistrée avec succès. Elle sera vérifiée et l\'annonce est maintenant marquée comme vendue.');
@@ -1614,7 +1614,7 @@ async function changerModeContact(annonceId, modeCurrent) {
         bien: annonce
       }
     }
-  }).catch(function(){});
+  }).then(undefined, function(){});
 
   alert('Mode de contact mis à jour : ' + nouveauMode + '. Les agents concernés ont été notifiés.');
   location.reload();
