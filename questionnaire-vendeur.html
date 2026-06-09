@@ -370,10 +370,11 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
           </div>
         </div>
         <div class="ib-neutral info-box">
-          <div class="ib-title">Charges syndic</div>
+          <div class="ib-title">🏅 Silver — Charges</div>
           <div class="field">
-            <label class="lbl">Charges de copropriété (€/mois)</label>
-            <input type="number" id="charges_syndic" placeholder="150" min="0">
+            <label class="lbl" style="color:var(--blue)">Charges de copropriété (€/mois)</label>
+            <input type="number" id="charges_syndic" placeholder="150" min="0" oninput="calcNiveau()">
+            <span class="hint">Obligatoire dès Silver pour les biens en copropriété — entre dans le calcul du rendement net.</span>
           </div>
           <div class="field" style="margin-top:8px">
             <label class="lbl">Nb de lots dans la copro</label>
@@ -424,7 +425,7 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
       <div class="form-grid col1">
         <div class="field">
           <label class="lbl">Adresse exacte <span style="font-size:10px;color:var(--muted);text-transform:none;font-weight:400;letter-spacing:0">(visible Gold & Platinium uniquement)</span></label>
-          <input type="text" id="adresse" placeholder="12 rue des Lilas" oninput="majScoreDossier()">
+          <input type="text" id="adresse" placeholder="12 rue des Lilas" oninput="majScoreDossier();calcNiveau()">
         </div>
       </div>
       <div class="form-grid col1">
@@ -631,7 +632,7 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
   <div class="section">
     <div class="section-head" onclick="toggle('s5')">
       <div class="sec-num num-silver">5</div>
-      <div class="sec-ttl">Justificatif valeur locative ou bail <span class="sec-sub">→ débloque Silver</span></div>
+      <div class="sec-ttl">Justificatif valeur locative ou bail <span class="sec-sub">→ optionnel</span></div>
       <span class="sec-badge b-silver">Silver</span>
       <span class="sec-arrow" id="arr-s5">▼</span>
     </div>
@@ -639,12 +640,12 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
       <div class="unlock-info ui-silver">
         <div class="ui-icon">🏅</div>
         <div class="ui-txt">
-          <strong>Niveau Silver — Photos illimitées + Matching investisseurs</strong>
-          Uploadez le justificatif papier de valeur locative cadastrale ou un bail signé.
+          <strong>Niveau Silver — Matching investisseurs (3 photos)</strong>
+          Pour Silver, il suffit de renseigner la valeur locative (et les charges si copropriété) à l'étape précédente. Ce justificatif reste optionnel.
         </div>
       </div>
       <div class="field" style="margin-bottom:4px">
-        <label class="lbl">Justificatif — Valeur locative ou bail *</label>
+        <label class="lbl">Justificatif — Valeur locative ou bail (optionnel)</label>
         <div class="upload-zone uz-silver">
           <input type="file" id="file-valeur-loc" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc('valeur_locative_doc','file-valeur-loc','fs-valeur-loc')">
           <div class="upload-icon">📄</div>
@@ -676,6 +677,7 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
         <label class="lbl">Avis de taxe foncière *
           <span style="font-size:10px;font-weight:500;background:#E1F5EE;color:#1E7A62;padding:2px 8px;border-radius:20px;margin-left:6px">🔒 Document confidentiel — non transmis</span>
         </label>
+        <div style="font-size:11px;color:#854F0B;background:#FAEEDA;border:1px solid #FAC775;border-radius:6px;padding:8px 10px;margin:6px 0;line-height:1.5">⚠️ <strong>Adresse exacte obligatoire</strong> — renseignez l'adresse du bien (section « Localisation ») avant d'uploader : elle permet de vérifier que le document correspond bien à ce logement.</div>
         <div class="upload-zone uz-gold">
           <input type="file" id="file-taxe" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadTaxe()">
           <div class="upload-icon">🧾</div>
@@ -688,7 +690,7 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
       <div id="bloc-copro" style="display:none">
         <hr class="div">
         <div class="field" style="margin-bottom:4px">
-          <label class="lbl">Compte rendu d'assemblée générale *</label>
+          <label class="lbl">Compte rendu d'assemblée générale (optionnel)</label>
           <div class="upload-zone uz-gold">
             <input type="file" id="file-copro" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc('copro_doc','file-copro','fs-copro');calcNiveau()">
             <div class="upload-icon">🏢</div>
@@ -733,6 +735,7 @@ hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
       </div>
       <div class="field" style="margin-bottom:4px">
         <label class="lbl">Rapport DPE officiel *</label>
+        <div style="font-size:11px;color:#854F0B;background:#FAEEDA;border:1px solid #FAC775;border-radius:6px;padding:8px 10px;margin:6px 0;line-height:1.5">⚠️ <strong>Adresse exacte obligatoire</strong> — renseignez l'adresse du bien (section « Localisation ») avant d'uploader : elle permet de vérifier que le document correspond bien à ce logement.</div>
         <div class="upload-zone uz-plat">
           <input type="file" id="file-dpe" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc('dpe_doc','file-dpe','fs-dpe');calcNiveau()">
           <div class="upload-icon">⚡</div>
@@ -1161,24 +1164,28 @@ async function verifierModeLock(annonce_id) {
 function toggleTravaux(v){document.getElementById('bloc-travaux').style.display=v?'block':'none';}
 
 function calcNiveau(){
-  // Le niveau dépend UNIQUEMENT des documents justificatifs fournis (pas des valeurs saisies)
-  var hasSilver=!!docs['valeur_locative_doc'];
-  var hasTaxe=!!docs['taxe_fonciere_doc'];
+  // Silver : valeur locative renseignée (déclarative). Gold/Platinium : documents VÉRIFIÉS + adresse exacte.
   var isCopro=getRadio('is_copro')==='Oui';
-  var hasCopro=!isCopro||!!docs['copro_doc'];
-  var hasDpe=!!docs['dpe_doc'];
+  var _chEl=document.getElementById('charges_syndic');
+  var aCharges=!!(_chEl && _chEl.value.trim()!=='');
+  var hasSilver=(+document.getElementById('valeur_locative').value>0) && (!isCopro || aCharges);
+  var hasTaxe=docs['taxe_fonciere_verifie']==='ok';
+  var hasDpe=docs['dpe_verifie']==='ok';
+  var aAdresse=!!(document.getElementById('adresse').value||'').trim();
+  var isCopro=getRadio('is_copro')==='Oui';
+  var hasCopro=!isCopro||docs['copro_verifie']==='ok';   // si copropriété : document copro vérifié requis pour Gold/Platinium
   var n='standard';
   if(hasSilver) n='silver';
-  if(hasSilver&&hasTaxe&&hasCopro) n='gold';
-  if(hasSilver&&hasTaxe&&hasCopro&&hasDpe) n='platinium';
+  if(hasSilver&&hasTaxe&&aAdresse&&hasCopro) n='gold';
+  if(hasSilver&&hasTaxe&&hasDpe&&aAdresse&&hasCopro) n='platinium';
   niveau=n; updateUI();
 }
 
 var NIV={
-  standard:{prog:10,pb:'pb-standard',icon:'🏠',label:'Niveau Standard',desc:'3 photos · Ville uniquement · Dossier 4,99 € · Contact vendeur 9,99 €',sn:'sn-standard'},
-  silver:{prog:40,pb:'pb-silver',icon:'🏅',label:'Niveau Silver',desc:'Photos illimitées · Matching investisseurs · Contact payant',sn:'sn-silver'},
-  gold:{prog:72,pb:'pb-gold',icon:'🥇',label:'Niveau Gold',desc:'Photos illimitées · Adresse exacte visible · Contact gratuit',sn:'sn-gold'},
-  platinium:{prog:100,pb:'pb-platinium',icon:'💎',label:'Niveau Platinium',desc:'Mise en avant · Contact libre acheteurs + agents immobiliers',sn:'sn-platinium'}
+  standard:{prog:10,pb:'pb-standard',icon:'🏠',label:'Niveau Standard',desc:'3 photos · Ville uniquement',sn:'sn-standard'},
+  silver:{prog:40,pb:'pb-silver',icon:'🏅',label:'Niveau Silver',desc:'3 photos · Matching investisseurs',sn:'sn-silver'},
+  gold:{prog:72,pb:'pb-gold',icon:'🥇',label:'Niveau Gold',desc:'Photos illimitées · Adresse exacte visible',sn:'sn-gold'},
+  platinium:{prog:100,pb:'pb-platinium',icon:'💎',label:'Niveau Platinium',desc:'Photos illimitées · Mise en avant · Contact libre acheteurs + agents',sn:'sn-platinium'}
 };
 var KEYS=['standard','silver','gold','platinium'];
 
@@ -1191,10 +1198,10 @@ function updateUI(){
     if(i<idx)el.classList.add('done');
     if(i===idx)el.classList.add('cur-'+k);
   });
-  maxPhotos=niveau==='standard'?3:9999;
+  maxPhotos=(niveau==='gold'||niveau==='platinium')?9999:3;
   var plb=document.getElementById('plb');
   if(plb){
-    plb.textContent=niveau==='standard'?'📷 3 photos minimum obligatoires (Standard : max 3)':'📷 Photos illimitées ('+cfg.label+') — 3 minimum obligatoires';
+    plb.textContent=(niveau==='gold'||niveau==='platinium')?'📷 Photos illimitées ('+cfg.label+') — 3 minimum obligatoires':'📷 3 photos max ('+cfg.label+') — 3 minimum obligatoires';
     plb.className='photos-limit-badge plb-'+niveau;
   }
   renderPhotos();
@@ -1318,106 +1325,82 @@ async function uploadTaxe() {
   var st = document.getElementById('fs-taxe');
   var ocrResult = document.getElementById('ocr-taxe-result');
   if (!file) return;
-
-  // SÉCURITÉ : le justificatif n'est PAS stocké. Il est lu à la volée pour l\'OCR
-  // à la publication (validerDocumentsAnnonce → ocr-documents), puis abandonné.
-  docs['taxe_fonciere_doc'] = { local: true };
-  st.className = 'file-status fs-ok'; st.textContent = '✅ ' + file.name;
-
-  // OCR via Claude API
   ocrResult.style.display = 'block';
-  ocrResult.style.background = '#F5F2EC';
-  ocrResult.style.border = '1px solid #E8E6E0';
-  ocrResult.innerHTML = '📄 <strong>Document reçu.</strong> La vérification automatique sera effectuée à la publication de l\'annonce.';
+
+  // Adresse exacte requise AVANT vérification (pour contrôler que le document correspond au bien)
+  if (!(document.getElementById('adresse').value||'').trim()) {
+    document.getElementById('file-taxe').value = '';
+    st.className='file-status'; st.style.color='#C0392B'; st.textContent="\u26a0\ufe0f Renseignez d'abord l'adresse exacte du bien.";
+    ocrResult.style.background='#FAECE7'; ocrResult.style.border='1px solid #F5C4B3';
+    ocrResult.innerHTML="\u26a0\ufe0f <strong>Adresse exacte requise</strong> \u2014 indiquez l'adresse du bien plus haut, afin de vérifier que la taxe foncière correspond bien à ce logement.";
+    return;
+  }
+
+  // SÉCURITÉ : le justificatif n'est PAS stocké \u2014 lu à la volée pour l'OCR, puis abandonné.
+  docs['taxe_fonciere_doc'] = { local: true };
+  docs['taxe_fonciere_verifie'] = null;
+  st.className='file-status'; st.style.color=''; st.textContent='\u23f3 ' + file.name;
+  ocrResult.style.background='#F5F2EC'; ocrResult.style.border='1px solid #E8E6E0';
+  ocrResult.innerHTML='\u23f3 <strong>Vérification du document en cours\u2026</strong>';
   calcNiveau();
-  return; // vérification désormais côté serveur (ocr-documents) à l\'enregistrement
 
   try {
-    // Lire le fichier en base64
-    var base64 = await new Promise(function(resolve, reject) {
-      var reader = new FileReader();
-      reader.onload = function(e) { resolve(e.target.result.split(',')[1]); };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-
-    var montantDeclare = document.getElementById('taxe_fonciere_montant').value;
-    var villeDec = document.getElementById('ville').value;
-    var nomDec = document.getElementById('nom_vendeur').value;
-
-    var mediaType = file.type === 'application/pdf' ? 'application/pdf' : 'image/jpeg';
-
-    var response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 500,
-        messages: [{
-          role: 'user',
-          content: [
-            {
-              type: mediaType === 'application/pdf' ? 'document' : 'image',
-              source: { type: 'base64', media_type: mediaType, data: base64 }
-            },
-            {
-              type: 'text',
-              text: 'Tu es un assistant de vérification de documents immobiliers. Analyse cet avis de taxe foncière et réponds UNIQUEMENT en JSON avec ces champs : {"montant_trouve": number|null, "adresse_trouvee": string|null, "proprietaire_trouve": string|null, "annee": string|null, "est_taxe_fonciere": boolean, "concordance_montant": boolean|null, "concordance_adresse": boolean|null, "alerte": string|null}. Montant déclaré par le vendeur: ' + (montantDeclare||'non renseigné') + '€. Ville déclarée: ' + (villeDec||'non renseignée') + '. Nom déclaré: ' + (nomDec||'non renseigné') + '. Ne mets rien d\'autre que le JSON.'
-            }
-          ]
-        }]
-      })
-    });
-
-    var data = await response.json();
-    var text = data.content && data.content[0] && data.content[0].text || '{}';
-    var ocr = JSON.parse(text.replace(/```json|```/g, '').trim());
-
-    if (!ocr.est_taxe_fonciere) {
-      ocrResult.style.background = '#FAECE7';
-      ocrResult.style.border = '1px solid #F5C4B3';
-      ocrResult.innerHTML = '❌ <strong>Document non reconnu</strong> — Ce document ne semble pas être un avis de taxe foncière. Veuillez uploader le bon document.';
-      docs['taxe_fonciere_doc'] = null;
-      docs['taxe_verifie'] = false;
-      return;
-    }
-
-    var alertes = [];
-    if (ocr.concordance_montant === false) alertes.push('Le montant trouvé (' + ocr.montant_trouve + '€) diffère du montant déclaré (' + montantDeclare + '€)');
-    if (ocr.concordance_adresse === false) alertes.push('L\'adresse du document ne correspond pas à la ville déclarée');
-    if (ocr.alerte) alertes.push(ocr.alerte);
-
-    if (alertes.length > 0) {
-      ocrResult.style.background = '#FAEEDA';
-      ocrResult.style.border = '1px solid #FAC775';
-      ocrResult.innerHTML = '⚠️ <strong>Vérification manuelle requise</strong><br>' + alertes.join('<br>') +
-        '<br><br>📋 Données extraites : Montant ' + (ocr.montant_trouve||'?') + '€ · ' + (ocr.adresse_trouvee||'adresse non lue') + ' · ' + (ocr.annee||'');
-      docs['taxe_verifie'] = 'partiel';
+    var b64 = await new Promise(function(resolve,reject){var r=new FileReader();r.onload=function(e){resolve(e.target.result.split(',')[1]);};r.onerror=reject;r.readAsDataURL(file);});
+    var mt = file.type==='application/pdf'?'application/pdf':(file.type||'image/jpeg');
+    var resp = await db.functions.invoke('ocr-documents', { body: { type:'valider_doc_vendeur', doc_type:'taxe_fonciere', image_base64:b64, media_type:mt, montant:document.getElementById('taxe_fonciere_montant').value, ville:document.getElementById('ville').value, adresse:document.getElementById('adresse').value, nom:document.getElementById('nom_vendeur').value } });
+    var rr = (resp && resp.data) || {};
+    if (rr.statut === 'ok') {
+      docs['taxe_fonciere_verifie'] = 'ok';
+      var ex = rr.extrait || {};
+      ocrResult.style.background='#E1F5EE'; ocrResult.style.border='1px solid #9FE1CB';
+      ocrResult.innerHTML='\u2705 <strong>Taxe foncière vérifiée</strong> \u2014 Montant : '+(ex.montant_trouve||'?')+' \u20ac · '+(ex.adresse_trouvee||'\u2014')+'<br><span style="font-size:11px;color:#1E7A62">\ud83d\udd12 Confidentiel \u2014 seul le statut « Vérifié » est affiché aux acheteurs.</span>';
+      st.className='file-status fs-ok'; st.style.color=''; st.textContent='\u2705 '+file.name;
+    } else if (rr.statut === 'litige') {
+      docs['taxe_fonciere_verifie'] = 'litige';
+      ocrResult.style.background='#FAEEDA'; ocrResult.style.border='1px solid #FAC775';
+      ocrResult.innerHTML='\u26a0\ufe0f <strong>Vérification manuelle requise</strong> \u2014 '+((rr.extrait&&rr.extrait.alerte)||"l'adresse ou le montant ne concordent pas")+'. Le niveau Gold n\'est pas débloqué automatiquement.';
+      st.style.color='#854F0B'; st.textContent='\u26a0\ufe0f '+file.name;
     } else {
-      ocrResult.style.background = '#E1F5EE';
-      ocrResult.style.border = '1px solid #9FE1CB';
-      ocrResult.innerHTML = '✅ <strong>Document vérifié automatiquement</strong>' +
-        '<br>Montant : <strong>' + (ocr.montant_trouve||'?') + ' €</strong> · ' +
-        'Adresse : ' + (ocr.adresse_trouvee||'—') + ' · Année : ' + (ocr.annee||'—') +
-        '<br><span style="font-size:11px;color:#1E7A62">🔒 Ce document reste confidentiel — seul le statut "Vérifié" sera affiché aux acheteurs et agents.</span>';
-      docs['taxe_verifie'] = 'ok';
+      docs['taxe_fonciere_doc'] = null; docs['taxe_fonciere_verifie'] = null;
+      document.getElementById('file-taxe').value='';
+      ocrResult.style.background='#FAECE7'; ocrResult.style.border='1px solid #F5C4B3';
+      ocrResult.innerHTML='\u274c <strong>Document non reconnu</strong> \u2014 ce document ne semble pas être un avis de taxe foncière correspondant à ce bien.';
+      st.style.color='#C0392B'; st.textContent='\u274c Document refusé';
     }
-    calcNiveau();
   } catch(e) {
-    ocrResult.style.background = '#F5F2EC';
-    ocrResult.style.border = '1px solid #E8E6E0';
-    ocrResult.innerHTML = '⚠️ Vérification automatique indisponible — votre document a bien été enregistré. Il sera vérifié manuellement par notre équipe.';
-    docs['taxe_verifie'] = 'manuel';
+    docs['taxe_fonciere_verifie'] = 'litige';
+    ocrResult.innerHTML='\u26a0\ufe0f Vérification indisponible \u2014 le document sera contrôlé à la publication.';
   }
+  calcNiveau();
 }
 
 async function uploadDoc(champ,inputId,statusId){
   var file=document.getElementById(inputId).files[0];
   var st=document.getElementById(statusId);
   if(!file)return;
-  // SÉCURITÉ : justificatif NON stocké — lu à la volée pour l\'OCR à la publication, puis abandonné.
-  docs[champ]={local:true};
-  st.className='file-status fs-ok';st.textContent='✅ '+file.name;
+  var DT={valeur_locative_doc:'valeur_locative',copro_doc:'copro',dpe_doc:'dpe'};
+  var docType=DT[champ]||champ;
+  var verifKey=docType+'_verifie';
+
+  // DPE (niveau Platinium) : adresse exacte requise avant vérification
+  if ((docType==='dpe'||docType==='copro') && !(document.getElementById('adresse').value||'').trim()) {
+    document.getElementById(inputId).value='';
+    st.className='file-status'; st.style.color='#C0392B'; st.textContent="\u26a0\ufe0f Renseignez d'abord l'adresse exacte du bien.";
+    return;
+  }
+
+  docs[champ]={local:true}; docs[verifKey]=null;
+  st.className='file-status'; st.style.color=''; st.textContent='\u23f3 Vérification\u2026';
+  calcNiveau();
+  try{
+    var b64=await new Promise(function(res,rej){var r=new FileReader();r.onload=function(e){res(e.target.result.split(',')[1]);};r.onerror=rej;r.readAsDataURL(file);});
+    var mt=file.type==='application/pdf'?'application/pdf':(file.type||'image/jpeg');
+    var resp=await db.functions.invoke('ocr-documents',{body:{type:'valider_doc_vendeur',doc_type:docType,image_base64:b64,media_type:mt,ville:document.getElementById('ville').value,adresse:document.getElementById('adresse').value,nom:document.getElementById('nom_vendeur').value,classe_dpe:(document.getElementById('classe_dpe')?document.getElementById('classe_dpe').value:'')}});
+    var rr=(resp&&resp.data)||{};
+    if(rr.statut==='ok'){docs[verifKey]='ok';st.className='file-status fs-ok';st.style.color='';st.textContent='\u2705 Document vérifié \u2014 '+file.name;}
+    else if(rr.statut==='litige'){docs[verifKey]='litige';st.className='file-status';st.style.color='#854F0B';st.textContent='\u26a0\ufe0f À vérifier ('+((rr.extrait&&rr.extrait.alerte)||'concordance incomplète')+') \u2014 niveau non débloqué.';}
+    else{docs[verifKey]=null;docs[champ]=null;document.getElementById(inputId).value='';st.className='file-status';st.style.color='#C0392B';st.textContent='\u274c Document non reconnu.';}
+  }catch(e){docs[verifKey]='litige';st.style.color='#854F0B';st.textContent='\u26a0\ufe0f Vérification indisponible \u2014 contrôle à la publication.';}
   calcNiveau();
 }
 
@@ -1651,6 +1634,7 @@ async function validerDocumentsAnnonce(annonceId){
   if(!annonceId) return;
   var ville      = (document.getElementById('ville')||{}).value || '';
   var nom        = (document.getElementById('nom_vendeur')||{}).value || '';
+  var adresse    = (document.getElementById('adresse')||{}).value || '';
   var montantTaxe= (document.getElementById('taxe_fonciere_montant')||{}).value || '';
   var valeurLoc  = (document.getElementById('valeur_locative')||{}).value || '';
   var classeDpe  = (document.getElementById('classe_dpe')||{}).value || '';
@@ -1675,7 +1659,7 @@ async function validerDocumentsAnnonce(annonceId){
         doc_type: d.doc_type,
         image_base64: b64,
         media_type: mediaType,
-        ville: ville, nom: nom, montant: d.montant, classe_dpe: classeDpe
+        ville: ville, adresse: adresse, nom: nom, montant: d.montant, classe_dpe: classeDpe
       }});
       if(res && res.error) console.warn('Validation '+d.doc_type+' :', res.error.message);
       return res ? res.data : null;

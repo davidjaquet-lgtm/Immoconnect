@@ -418,7 +418,7 @@ async function afficherBien(b, similaires) {
 
   // Adresse (selon niveau)
   var adresseHtml = '';
-  if (['silver','gold','platinium'].includes(niv) && b.adresse) {
+  if (currentUser && ['gold','platinium'].includes(niv) && b.adresse) {
     adresseHtml = '📍 ' + b.adresse + ', ' + b.ville + ' (' + (b.code_postal||'') + ')';
   } else {
     adresseHtml = '📍 ' + (b.ville || '') + ' (' + (b.code_postal||'') + ')';
@@ -571,6 +571,7 @@ async function afficherBien(b, similaires) {
     html += '<div style="text-align:center"><div style="font-size:18px;font-weight:500;color:var(--teal)">'+loyerEffectif.toLocaleString('fr-FR')+' €</div><div style="font-size:10px;color:var(--muted)">'+(loyer>0?'Loyer réel':'Loyer estimé')+'/mois</div></div>';
     html += '</div>';
     if (loyer === 0) html += '<div style="font-size:10px;color:var(--muted);margin-top:8px">* Loyer estimé sur la base de la carte des loyers. Le vendeur peut renseigner le loyer réel.</div>';
+    html += '<div style="font-size:10px;color:var(--muted);margin-top:6px">Rendement calculé à partir de la valeur locative et des charges déclarées par le vendeur.</div>';
     html += '</div>';
   }
 
