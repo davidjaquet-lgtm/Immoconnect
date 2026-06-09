@@ -351,27 +351,23 @@ async function afficherBien(b, similaires) {
     thumbsHtml += '</div>';
   }
 
-  // ── ACCES : teaser (hors forfait) vs dossier complet ──
-  var um = currentUser ? (currentUser.user_metadata || {}) : {};
-  var profilsAcc = um.profils || [];
-  var estProprioAcc = currentUser && currentUser.email === b.email_contact;
-  var isAgentAcc = profilsAcc.includes('agent');
-  var isAgentAbonneAcc = isAgentAcc && um.forfait_agent && um.forfait_agent !== 'pay_per_use';
-  var profilAcheteurAcc = profilsAcc.includes('acheteur') || profilsAcc.includes('investisseur');
-  var estAbonneAcheteurAcc = profilAcheteurAcc && (um.abonnement_actif === true || (um.forfait_acheteur && um.forfait_acheteur !== 'gratuit') || (um.forfait && um.forfait !== 'gratuit'));
-
-  var rapportAchete = false;
-  var _urlB = new URLSearchParams(window.location.search);
+  // ── ACCÈS : l'annonce est visible PAR TOUS. Les OPTIONS (visite, rapport, fiscalité) sont
+  //    réservées aux ABONNÉS. Le contact est gratuit pour tout compte connecté (plafonné + surveillé). ──
+  var estProprioAcces = currentUser && currentUser.email === b.email_contact;
+  var isAgent = false, isAgentAbonne = false, isInvestAbonne = false;
   if (currentUser) {
-    if (_urlB.get('rapport_achete') === '1') {
-      try { await db.from('rapports_achetes').insert({ annonce_id: b.id, user_id: currentUser.id, user_email: currentUser.email }); } catch (e) {}
-      rapportAchete = true;
-    } else {
-      try { var _ach = await db.from('rapports_achetes').select('id').eq('annonce_id', b.id).eq('user_id', currentUser.id).limit(1); rapportAchete = !!(_ach && _ach.data && _ach.data.length); } catch (e) {}
-    }
+    try {
+      var _av = await db.from('agents_validation').select('forfait_agent, abonnement_actif').eq('email', currentUser.email).maybeSingle();
+      if (_av && _av.data) { isAgent = true; isAgentAbonne = (_av.data.abonnement_actif === true) && _av.data.forfait_agent && _av.data.forfait_agent !== 'pay_per_use'; }
+    } catch (e) {}
+    try {
+      var _pa = await db.from('projets_acheteurs').select('forfait').eq('email', currentUser.email).maybeSingle();
+      if (_pa && _pa.data && _pa.data.forfait === 'investisseur') isInvestAbonne = true;
+    } catch (e) {}
   }
-
-  // (gating géré plus bas via les tables agents_validation / projets_acheteurs)
+  var estAbonne = estProprioAcces || isAgentAbonne || isInvestAbonne;
+  window._estAbonne = estAbonne;
+  window._estConnecte = !!currentUser;
 
   // Niveau et mandat
   var mandatHtml = b.sous_mandat_exclusif ? '<div class="mandat-badge">🤝 Sous mandat exclusif</div>' : '';
@@ -441,68 +437,8 @@ async function afficherBien(b, similaires) {
 
   // Sidebar rapport — différencié selon profil et forfait
   var rapportHtml = '';
-  // Statut d'acces lu dans les tables (agents_validation / projets_acheteurs)
-  var estProprioAcces = currentUser && currentUser.email === b.email_contact;
-  var isAgent = false, isAgentAbonne = false, isInvestAbonne = false;
-  if (currentUser) {
-    try {
-      var _av = await db.from('agents_validation').select('forfait_agent, abonnement_actif').eq('email', currentUser.email).maybeSingle();
-      if (_av && _av.data) { isAgent = true; isAgentAbonne = (_av.data.abonnement_actif === true) && _av.data.forfait_agent && _av.data.forfait_agent !== 'pay_per_use'; }
-    } catch (e) {}
-    try {
-      var _pa = await db.from('projets_acheteurs').select('forfait').eq('email', currentUser.email).maybeSingle();
-      if (_pa && _pa.data && _pa.data.forfait === 'investisseur') isInvestAbonne = true;
-    } catch (e) {}
-  }
 
-  // ===== Achat du CONTACT (9,99€) pour CE bien — donne dossier + contact + visite =====
-  var contactAchete = false;
-  if (currentUser) {
-    if (_urlB.get('contact_achete') === '1') {
-      try { await db.from('contacts_achetes').insert({ annonce_id: b.id, user_id: currentUser.id, user_email: currentUser.email }); } catch (e) {}
-      contactAchete = true;
-    } else {
-      try { var _ctA = await db.from('contacts_achetes').select('id').eq('annonce_id', b.id).eq('user_id', currentUser.id).limit(1); contactAchete = !!(_ctA && _ctA.data && _ctA.data.length); } catch (e) {}
-    }
-  }
-
-  var estAbonne = isAgentAbonne || isInvestAbonne;
-  // Droit de VOIR le dossier complet : abonné, proprio, achat contact, OU achat dossier
-  var accesDossier = estProprioAcces || estAbonne || contactAchete || rapportAchete;
-  // Droit d'INTERAGIR (contacter + réserver une visite) : l'achat du DOSSIER seul ne suffit PAS
-  var accesInteraction = estProprioAcces || estAbonne || contactAchete;
-  window._accesInteraction = accesInteraction;
-
-  if (!accesDossier) {
-    var _titreSafe = b.titre || (b.type_bien || 'Bien');
-    var _loadEl = document.getElementById('loading'); if (_loadEl) _loadEl.style.display = 'none';
-    var _ct = document.getElementById('content'); _ct.style.display = 'block';
-    var _pieces = (b.nb_pieces !== null && b.nb_pieces !== undefined && b.nb_pieces !== '') ? (b.nb_pieces + ' pieces') : 'Nombre de pieces non communique';
-    var _action = currentUser
-      ? '<button onclick="acheterContact(\'' + b.id + '\')" style="width:100%;padding:11px;border:none;cursor:pointer;margin-bottom:8px;background:#C09B5A;color:#0F0F0E;border-radius:8px;font-family:Outfit,sans-serif;font-size:13px;font-weight:600">🔓 Débloquer le contact (9,99 €)</button>'
-        + '<button onclick="acheterRapport(\'' + b.id + '\')" style="width:100%;padding:10px;cursor:pointer;margin-bottom:8px;background:transparent;color:#0F0F0E;border:1px solid var(--line);border-radius:8px;font-family:Outfit,sans-serif;font-size:13px;font-weight:500">Dossier seul (4,99 €)</button>'
-      : '<a href="connexion.html" style="display:block;text-align:center;text-decoration:none;padding:11px;margin-bottom:8px;background:#C09B5A;color:#0F0F0E;border-radius:8px;font-size:13px;font-weight:600">Se connecter pour débloquer</a>';
-    _ct.innerHTML =
-      '<div class="breadcrumb"><a href="index.html">Accueil</a><span>&rsaquo;</span><a href="index.html">Annonces</a><span>&rsaquo;</span>' + _titreSafe + '</div>'
-      + '<div class="bien-layout">'
-        + '<div>'
-          + '<div class="galerie">' + mainPhoto + thumbsHtml + '</div>'
-          + '<h1 class="bien-titre">' + _titreSafe + '</h1>'
-          + '<div class="bien-localisation">📍 ' + (b.ville || '') + '</div>'
-          + '<div style="font-size:14px;color:var(--muted);margin:6px 0">' + _pieces + '</div>'
-          + '<div class="bien-prix">' + prixFmt + '</div>'
-        + '</div>'
-        + '<div><div class="rapport-card" style="border-color:#C09B5A">'
-          + '<div class="rapport-title">🔒 Dossier réservé aux membres</div>'
-          + "<div style='font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px'>Vous voyez les informations essentielles (photos, ville, nombre de pièces, prix). Le dossier complet (surface, adresse, description, documents, rapport Hanaé) se débloque à l'unité (4,99 €). Pour aussi contacter le vendeur et réserver une visite, choisissez le contact (9,99 €, dossier inclus) ou un abonnement.</div>"
-          + _action
-          + '<a href="forfaits.html" class="btn-contact bc-out" style="display:block;text-align:center;text-decoration:none;padding:9px">Voir les abonnements</a>'
-        + '</div></div>'
-      + '</div>';
-    return;
-  }
-
-  if (['silver','gold','platinium'].includes(niv)) {
+  if (estAbonne) {
     if (isAgent) {
       rapportHtml = '<div class="rapport-card">'
         + '<div class="rapport-title">Analyse de marché Hanaé</div>'
@@ -616,7 +552,7 @@ async function afficherBien(b, similaires) {
   var loyerAuto = b.surface > 0 ? Math.round(loyerM2 * b.surface) : 0;
   var loyerEffectif = loyer > 0 ? loyer : loyerAuto;
   var prix = b.prix || 0;
-  if (prix > 0 && loyerEffectif > 0) {
+  if (estAbonne && prix > 0 && loyerEffectif > 0) {
     var loyerAnnuel = loyerEffectif * 12;
     var charges = (b.charges_syndic||0)*12 + (b.taxe_fonciere_montant||0);
     var rdtBrut = (loyerAnnuel / prix * 100).toFixed(1);
@@ -891,30 +827,25 @@ function buildContactButtons(b, niv) {
   }
 
   // PAS D\'EXCLUSIVITÉ — boutons normaux
-  var _peutInteragir = (typeof window._accesInteraction === 'undefined') ? true : (window._accesInteraction || isAgent);
-  var _upsellInteraction = '<div class="rapport-card" style="border-color:#C09B5A;margin-bottom:4px">'
-    + '<div style="font-size:13px;font-weight:600;margin-bottom:6px">Contacter le vendeur & réserver une visite</div>'
-    + '<div style="font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:10px">Vous avez accès au dossier. Pour contacter le vendeur et réserver une visite, débloquez le contact ou abonnez-vous.</div>'
-    + '<button onclick="acheterContact(\'' + b.id + '\')" style="width:100%;padding:11px;border:none;cursor:pointer;margin-bottom:8px;background:#C09B5A;color:#0F0F0E;border-radius:8px;font-family:Outfit,sans-serif;font-size:13px;font-weight:600">🔓 Débloquer le contact (9,99 €)</button>'
-    + '<a href="forfaits.html" class="btn-contact bc-out" style="display:block;text-align:center;text-decoration:none;padding:9px">Voir les abonnements</a>'
-    + '</div>';
-  if (niv === 'standard') {
-    html += '<div class="lock-info">📍 <strong>Ville : ' + (b.ville||'—') + '</strong><br>Connectez-vous pour voir l\'adresse complète</div>';
-    if (_peutInteragir) {
-      html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">Contacter le vendeur</button>';
-    } else { html += _upsellInteraction; }
-    html += '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px">Dossier : 4,99 € · Contact (dossier + visite inclus) : 9,99 €</div>';
-  } else if (niv === 'silver') {
-    if (_peutInteragir) {
-      html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">💬 Contacter le vendeur</button>';
-      html += '<button class="btn-contact bc-out" onclick="ouvrirVisite()">📅 Réserver une visite</button>';
-    } else { html += _upsellInteraction; }
+  var _estCo = (typeof window._estConnecte === 'undefined') ? !!currentUser : window._estConnecte;
+  var _estAb = (typeof window._estAbonne === 'undefined') ? false : window._estAbonne;
+  // CONTACT — gratuit, nécessite un compte (plafond + surveillance gérés à l'envoi)
+  if (_estCo) {
+    html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">💬 Contacter le vendeur</button>';
   } else {
-    if (_peutInteragir) {
-      html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">💬 Contacter le vendeur</button>';
-      html += '<button class="btn-contact bc-blue" onclick="ouvrirVisite()">📅 Réserver une visite</button>';
-    } else { html += _upsellInteraction; }
-    html += '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-out" style="margin-top:4px">📊 Rapport Hanaé</a>';
+    html += '<a href="connexion.html" class="btn-contact bc-teal" style="display:block;text-align:center;text-decoration:none">💬 Créez un compte gratuit pour contacter</a>';
+  }
+  // VISITE — abonnés uniquement
+  if (_estAb) {
+    html += '<button class="btn-contact bc-out" onclick="ouvrirVisite()">📅 Réserver une visite</button>';
+  } else {
+    html += '<a href="forfaits.html" class="btn-contact bc-out" style="display:block;text-align:center;text-decoration:none">📅 Réserver une visite — abonnés</a>';
+  }
+  // RAPPORT HANAÉ — abonnés uniquement
+  if (_estAb) {
+    html += '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-blue" style="margin-top:4px">📊 Rapport Hanaé</a>';
+  } else {
+    html += '<a href="forfaits.html" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;margin-top:4px">📊 Rapport Hanaé — abonnés</a>';
   }
 
   // AFFICHAGE QUOTA CONTACTS VENDEUR pour agents (mode acheteurs_agents)
@@ -1254,6 +1185,7 @@ function fermerModal() {
 }
 
 async function envoyerContact() {
+  if (!currentUser) { window.location.href = 'connexion.html'; return; }
   var nom = document.getElementById('c-nom').value.trim();
   var email = document.getElementById('c-email').value.trim();
   var tel = document.getElementById('c-tel').value.trim();
@@ -1268,6 +1200,21 @@ async function envoyerContact() {
   if (!consent) { err.textContent = 'Cochez la case de consentement.'; err.style.display = 'block'; return; }
   if (!bien) return;
 
+  // Plafond : 5 vendeurs / 7 jours (abonnés illimité)
+  if (!window._estAbonne) {
+    try {
+      var _depuis = new Date(Date.now() - 7*24*3600*1000).toISOString();
+      var _cpt = await db.from('contacts_envoyes').select('id').eq('user_id', currentUser.id).gte('created_at', _depuis);
+      if (_cpt && _cpt.data && _cpt.data.length >= 5) { err.textContent = 'Limite de 5 contacts par semaine atteinte. Passez à un abonnement pour contacter sans limite.'; err.style.display='block'; return; }
+    } catch(e) {}
+  }
+
+  // Surveillance Hanaé : blocage du démarchage d'agent déguisé
+  try {
+    var _scan = await db.functions.invoke('analyser-contact', { body: { message: msg, nom: nom } });
+    if (_scan && _scan.data && _scan.data.suspect === true) { err.textContent = "Ce message s'apparente à du démarchage professionnel. Le contact vendeur est réservé aux acheteurs ; les agents disposent d'un accès dédié via leur abonnement."; err.style.display='block'; return; }
+  } catch(e) {}
+
   try {
     // Enregistrer dans messages_annonces
     await db.from('messages_annonces').insert({
@@ -1279,6 +1226,8 @@ async function envoyerContact() {
       message: msg,
       lu: false
     });
+    // Compteur du plafond hebdomadaire
+    await db.from('contacts_envoyes').insert({ user_id: currentUser.id, user_email: currentUser.email, annonce_id: bien.id, email_vendeur: bien.email_contact }).then(undefined, function(){});
 
     // Incrémenter contacts
     await db.rpc('incrementer_contacts', { annonce_uuid: bien.id }).then(undefined, function(){});
