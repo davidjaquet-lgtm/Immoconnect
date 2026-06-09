@@ -1161,11 +1161,12 @@ async function verifierModeLock(annonce_id) {
 function toggleTravaux(v){document.getElementById('bloc-travaux').style.display=v?'block':'none';}
 
 function calcNiveau(){
-  var hasSilver=docs['valeur_locative_doc']||(+document.getElementById('valeur_locative').value>0);
-  var hasTaxe=docs['taxe_fonciere_doc']||(+document.getElementById('taxe_fonciere_montant').value>0);
+  // Le niveau dépend UNIQUEMENT des documents justificatifs fournis (pas des valeurs saisies)
+  var hasSilver=!!docs['valeur_locative_doc'];
+  var hasTaxe=!!docs['taxe_fonciere_doc'];
   var isCopro=getRadio('is_copro')==='Oui';
   var hasCopro=!isCopro||!!docs['copro_doc'];
-  var hasDpe=docs['dpe_doc']||document.getElementById('classe_dpe').value;
+  var hasDpe=!!docs['dpe_doc'];
   var n='standard';
   if(hasSilver) n='silver';
   if(hasSilver&&hasTaxe&&hasCopro) n='gold';
@@ -1495,7 +1496,7 @@ async function soumettre(){
     return;
   }
   var btn=document.getElementById('btn-submit');
-  var required={type_bien:'Type de bien',titre:'Titre',description:'Description',surface:'Surface',nb_pieces:'Nb de pièces',prix:'Prix',ville:'Ville',code_postal:'Code postal',nom_vendeur:'Nom / Prénom',telephone:'Téléphone',email_contact:'Email'};
+  var required={type_bien:'Type de bien',statut_occupation:"Statut d'occupation",mode_contact:'Mode de contact',titre:'Titre',description:'Description',surface:'Surface',nb_pieces:'Nb de pièces',prix:'Prix',ville:'Ville',code_postal:'Code postal',nom_vendeur:'Nom / Prénom',telephone:'Téléphone',email_contact:'Email'};
   var missing=[];
   Object.keys(required).forEach(function(id){
     var v=document.getElementById(id).value;
