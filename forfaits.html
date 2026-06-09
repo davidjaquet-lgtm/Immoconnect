@@ -215,7 +215,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
           <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Ville visible (adresse masquée)</span></div>
           <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Contactable par acheteurs</span></div>
         </div>
-        <div class="feat-note">Dossier complet : 4,99€ · Contact vendeur : 9,99€ — à la charge de l'acheteur</div>
+        <div class="feat-note">Les acheteurs voient l'annonce en entier et vous contactent gratuitement</div>
       </div>
 
       <!-- SILVER -->
@@ -285,7 +285,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
         <tr><td>Tarif</td><td class="yes">Gratuit</td><td class="yes">Gratuit</td><td class="yes">Gratuit</td><td class="yes plat-col">Gratuit</td></tr>
         <tr><td>Photos</td><td>3 max</td><td class="yes">Illimitées</td><td class="yes">Illimitées</td><td class="yes plat-col">Illimitées</td></tr>
         <tr><td>Adresse visible</td><td style="font-size:11px">Ville seule</td><td style="font-size:11px">Acheteurs éligibles</td><td class="yes" style="font-size:11px">Tous</td><td class="yes plat-col" style="font-size:11px">Tous + prioritaire</td></tr>
-        <tr><td>Contact acheteurs</td><td class="amber-txt">9,99€/contact</td><td class="yes">Gratuit</td><td class="yes">Gratuit</td><td class="yes plat-col">Gratuit</td></tr>
+        <tr><td>Contact acheteurs</td><td class="yes">Gratuit</td><td class="yes">Gratuit</td><td class="yes">Gratuit</td><td class="yes plat-col">Gratuit</td></tr>
         <tr><td>Matching investisseurs</td><td><span class="no">—</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes plat-col">✓</td></tr>
         <tr><td>Choix libre d'agent</td><td><span class="no">—</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes plat-col">✓</td></tr>
         <tr><td>Top 3 agents Hanaé IA</td><td><span class="no">—</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes plat-col">✓</td></tr>
@@ -298,7 +298,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
   <div id="panel-acheteurs" class="panel">
     <div class="eyebrow">2 niveaux progressifs · un seul onglet</div>
     <div class="sec-title">Accédez aux biens qui vous correspondent</div>
-    <div class="subtitle">Les informations essentielles sont visibles gratuitement. Débloquez le dossier complet ou contactez directement le vendeur selon vos besoins. Passez Investisseur pour un accès total et un matching automatique sur le rendement.</div>
+    <div class="subtitle">L'intégralité de chaque annonce est visible gratuitement par tous. Contactez les vendeurs gratuitement (jusqu'à 5 vendeurs par semaine). Les options avancées — réserver une visite, rapport Hanaé IA, matching automatique sur le rendement, simulateurs — sont réservées à l'abonnement Investisseur.</div>
 
     <!-- PLANS -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px">
@@ -307,46 +307,17 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
       <div class="aplan">
         <div class="plan-label">Acheteur</div>
         <div class="plan-price">Gratuit</div>
-        <div class="plan-period">1 contact vendeur offert par semaine</div>
+        <div class="plan-period">5 contacts vendeurs gratuits / semaine</div>
         <hr class="plan-sep">
 
         <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Visible gratuitement sur chaque annonce</div>
         <div class="plan-feats" style="margin-bottom:16px">
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Ville, surface, type de bien, nombre de pièces</div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>L'intégralité de l'annonce</strong> — photos, surface, description, caractéristiques</div>
           <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Prix affiché en clair</strong></div>
           <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Alertes email quotidiennes</div>
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>1 contact vendeur offert/semaine</strong> — débloque le dossier complet</div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Contact vendeur gratuit</strong> — jusqu'à 5 vendeurs / semaine</div>
         </div>
-
-        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px">Options pay per use sur chaque bien</div>
-        <div style="border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--warm)">
-          <div style="display:grid;grid-template-columns:1fr 64px 64px;background:var(--bg);border-bottom:1px solid var(--line)">
-            <div style="padding:7px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Option</div>
-            <div style="padding:7px 8px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);text-align:center;border-left:1px solid var(--line)">Tarif</div>
-            <div style="padding:7px 8px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--teal);text-align:center;border-left:1px solid var(--line)">Gratuit</div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 64px 64px;border-bottom:1px solid var(--line)">
-            <div style="padding:9px 10px">
-              <div style="font-size:12px;color:var(--ink);font-weight:500">Dossier complet</div>
-              <div style="font-size:10px;color:var(--muted);margin-top:2px;line-height:1.5">Adresse exacte · toutes photos · rapport Hanaé IA</div>
-            </div>
-            <div style="padding:9px 8px;border-left:1px solid var(--line);display:flex;align-items:center;justify-content:center">
-                <button onclick="payerDossier('price_1TdFJmRWjX9H4QylhXCGndPu')" style="font-size:12px;font-weight:600;color:var(--amber);background:transparent;border:none;cursor:pointer;font-family:'Outfit',sans-serif;padding:0;text-decoration:underline">4,99€</button>
-              </div>
-            <div style="padding:9px 8px;text-align:center;border-left:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);opacity:.3">—</div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 64px 64px">
-            <div style="padding:9px 10px">
-              <div style="font-size:12px;color:var(--ink);font-weight:500">Contact vendeur</div>
-              <div style="font-size:10px;color:var(--muted);margin-top:2px;line-height:1.5">Dossier complet inclus + coordonnées vendeur</div>
-            </div>
-            <div style="padding:9px 8px;border-left:1px solid var(--line);display:flex;align-items:center;justify-content:center">
-                <button onclick="payerContact('price_1TdFKKRWjX9H4QylHGG1ymnK')" style="font-size:12px;font-weight:600;color:var(--amber);background:transparent;border:none;cursor:pointer;font-family:'Outfit',sans-serif;padding:0;text-decoration:underline">9,99€</button>
-              </div>
-            <div style="padding:9px 8px;text-align:center;border-left:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--teal);font-weight:600">✓</div>
-          </div>
-        </div>
-        <div style="margin-top:10px;font-size:11px;color:var(--muted);background:var(--bg);border-radius:6px;padding:8px 10px;line-height:1.6">Le contact à 9,99€ inclut automatiquement le dossier complet. Le contact hebdomadaire gratuit fonctionne de la même façon.</div>
+        <div style="font-size:11px;color:var(--muted);background:var(--bg);border-radius:6px;padding:8px 10px;line-height:1.6">Réserver une visite, le rapport Hanaé IA et l'analyse de rendement sont réservés à l'abonnement Investisseur.</div>
       </div>
 
       <!-- INVESTISSEUR -->
@@ -354,18 +325,18 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
         <div class="plan-badge">Niveau supérieur</div>
         <div class="plan-label">Investisseur</div>
         <div class="plan-price">29,99 €</div>
-        <div class="plan-period">/mois · contact supp. 1,99€</div>
+        <div class="plan-period">/ mois</div>
         <hr class="plan-sep">
         <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:10px">Tout inclus d'emblée sur tous les biens</div>
         <div class="plan-feats">
           <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Dossier complet accessible sur tous les biens</strong> — adresse exacte, rapport Hanaé IA, toutes photos</div>
-          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>5 contacts vendeurs offerts/semaine</strong></div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Contacts vendeurs illimités</strong></div>
           <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Matching auto sur rendement net et prix/m²</strong></div>
           <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Contacté directement par vendeurs Platinium</div>
           <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Alertes temps réel sur vos critères</div>
           <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Simulateur rendement net intégré</div>
           <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> Calcul capacité d'emprunt</div>
-          <div class="plan-feat" style="color:var(--amber);margin-top:4px"><span style="flex-shrink:0">→</span> Contact vendeur supplémentaire : <strong>1,99€</strong></div>
+          <div class="plan-feat"><span style="color:var(--teal);font-weight:600;flex-shrink:0">✓</span> <strong>Réservation de visite + calendrier</strong></div>
         </div>
 
         <hr class="plan-sep">
@@ -393,14 +364,12 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
       <div style="background:#E6F1FB;border:1px solid #B8D4F5;border-radius:var(--r);padding:14px 16px">
         <div style="font-size:13px;font-weight:600;color:#0C447C;margin-bottom:4px">Acheteur — Gratuit</div>
-        <div style="font-size:12px;color:#185FA5;line-height:1.6;margin-bottom:10px">Explorez les annonces gratuitement. Dossier 4,99€ · Contact vendeur 9,99€ · 1 contact/sem offert</div>
+        <div style="font-size:12px;color:#185FA5;line-height:1.6;margin-bottom:10px">Toute l'annonce est visible gratuitement, et vous contactez les vendeurs gratuitement (jusqu'à 5 par semaine).</div>
         <a href="questionnaire-acheteur.html" style="display:block;text-align:center;background:#185FA5;color:#fff;padding:9px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:500">Déposer mon projet →</a>
-        <button onclick="payerDossier('price_1TdFJmRWjX9H4QylhXCGndPu')" style="display:block;text-align:center;background:transparent;color:#185FA5;padding:9px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid #185FA5;width:100%;font-family:'Outfit',sans-serif;margin-top:6px">Accès dossier complet 4,99€ →</button>
-        <button onclick="payerContact('price_1TdFKKRWjX9H4QylHGG1ymnK')" style="display:block;text-align:center;background:transparent;color:#185FA5;padding:9px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid #185FA5;width:100%;font-family:'Outfit',sans-serif;margin-top:6px">Contacter un vendeur 9,99€ →</button>
       </div>
       <div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:var(--r);padding:14px 16px">
         <div style="font-size:13px;font-weight:600;color:#085041;margin-bottom:4px">Investisseur — 29,99€/mois</div>
-        <div style="font-size:12px;color:#1E7A62;line-height:1.6;margin-bottom:10px">Dossiers complets · Matching rendement · 5 contacts/sem · Simulateur financier · contact supp. 1,99€</div>
+        <div style="font-size:12px;color:#1E7A62;line-height:1.6;margin-bottom:10px">Dossiers complets · Visite &amp; calendrier · Rapport Hanaé · Matching rendement · Contacts illimités · Simulateurs</div>
         <button onclick="souscrire('price_1TdFIGRWjX9H4QylcuF948q2','investisseur')" style="display:block;text-align:center;background:#085041;color:#fff;padding:9px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:none;width:100%;font-family:'Outfit',sans-serif">S'inscrire Investisseur →</button>
       </div>
     </div>
@@ -411,12 +380,12 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
       <div style="display:flex;align-items:stretch;gap:0">
         <div style="flex:1;background:var(--bg);border-radius:8px;padding:12px;text-align:center">
           <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px">Acheteur</div>
-          <div style="font-size:11px;color:var(--muted);line-height:1.5">Gratuit · 1 contact/sem<br>Dossier 4,99€ · Contact 9,99€</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.5">Gratuit · 5 contacts/sem<br>Annonces en intégralité</div>
         </div>
         <div style="padding:0 14px;font-size:20px;color:var(--gold);display:flex;align-items:center">→</div>
         <div style="flex:1;background:#E1F5EE;border-radius:8px;padding:12px;text-align:center;border:1px solid #9FE1CB">
           <div style="font-size:12px;font-weight:600;color:#085041;margin-bottom:4px">Investisseur</div>
-          <div style="font-size:11px;color:#1E7A62;line-height:1.5">29,99€/mois · tout inclus<br>5 contacts/sem · matching auto rendement</div>
+          <div style="font-size:11px;color:#1E7A62;line-height:1.5">29,99€/mois · tout inclus<br>contacts illimités · visite, rapport, matching</div>
         </div>
       </div>
       <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">Le passage Investisseur se justifie dès que vous consultez régulièrement plusieurs biens ou que le rendement locatif est un critère de sélection.</div>
@@ -541,7 +510,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
         <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px;font-size:12px">
           <div>⏰ Alertes H+12</div>
           <div>📋 5 candidatures/mois</div>
-          <div>👥 5 contacts vendeur/semaine</div>
+          <div>👥 8 contacts vendeur/semaine</div>
           <div>🤖 Analyse Hanaé incluse</div>
         </div>
         <button onclick="souscrire('price_1TdEauRWjX9H4QylxnyRrSIY','starter')" class="stripe-btn" style="width:100%;padding:11px;background:var(--ink);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif">
@@ -625,7 +594,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
           <tr>
             <td>Contacts vendeur/semaine inclus</td>
             <td><span class="ppu-pill">4,99€/contact</span></td>
-            <td>5</td><td>15</td>
+            <td>8</td><td>15</td>
             <td class="hi prem-col">Illimité</td>
           </tr>
           <tr>

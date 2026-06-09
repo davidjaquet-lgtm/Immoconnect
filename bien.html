@@ -851,7 +851,7 @@ function buildContactButtons(b, niv) {
   // AFFICHAGE QUOTA CONTACTS VENDEUR pour agents (mode acheteurs_agents)
   if (isAgent && modeContact === 'acheteurs_agents') {
     var forfaitAgent = currentUser ? (currentUser.user_metadata?.forfait_agent || 'pay_per_use') : 'pay_per_use'
-    var maxLeads = { pay_per_use: 2, starter: 5, pro: 15, premium: '∞' }
+    var maxLeads = { pay_per_use: 2, starter: 8, pro: 15, premium: '∞' }
     var isAgentPPU = forfaitAgent === 'pay_per_use'
 
     if (isAgentPPU) {
