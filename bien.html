@@ -251,7 +251,8 @@ var currentUser = null;
   var metaDesc = document.querySelector('meta[name="description"]');
   if (metaDesc) metaDesc.content = (bien.type_bien||'Bien') + ' ' + (bien.surface||'') + 'm² à ' + (bien.ville||'') + ' — ' + (bien.prix ? Math.round(bien.prix).toLocaleString('fr-FR') + '€' : '');
 
-  // Vérifier si connecté
+  // Vérifier si connecté (refresh pour récupérer un abonnement récent)
+  try { await db.auth.refreshSession(); } catch (e) {}
   var { data: { session } } = await db.auth.getSession();
   currentUser = session ? session.user : null;
 
@@ -444,20 +445,22 @@ async function afficherBien(b, similaires) {
 
   // Sidebar rapport — différencié selon profil et forfait
   var rapportHtml = '';
-  var userProfilsRap = currentUser ? (currentUser.user_metadata?.profils || []) : [];
-  var forfaitRap = currentUser ? (currentUser.user_metadata?.forfait_agent || 'pay_per_use') : null;
-  var isAgentRap = userProfilsRap.includes('agent');
-  var isAgentAbonne = isAgentRap && forfaitRap !== 'pay_per_use';
-  var isAgentPPU = isAgentRap && forfaitRap === 'pay_per_use';
+  // Statut d'acces lu dans les tables (agents_validation / projets_acheteurs)
+  var estProprioAcces = currentUser && currentUser.email === b.email_contact;
+  var isAgent = false, isAgentAbonne = false, isInvestAbonne = false;
+  if (currentUser) {
+    try {
+      var _av = await db.from('agents_validation').select('forfait_agent, abonnement_actif').eq('email', currentUser.email).maybeSingle();
+      if (_av && _av.data) { isAgent = true; isAgentAbonne = (_av.data.abonnement_actif === true) && _av.data.forfait_agent && _av.data.forfait_agent !== 'pay_per_use'; }
+    } catch (e) {}
+    try {
+      var _pa = await db.from('projets_acheteurs').select('forfait').eq('email', currentUser.email).maybeSingle();
+      if (_pa && _pa.data && _pa.data.forfait === 'investisseur') isInvestAbonne = true;
+    } catch (e) {}
+  }
 
   // ===== Acces complet au dossier ? (sinon vue restreinte) =====
-  var _profils = currentUser ? (currentUser.user_metadata?.profils || []) : [];
-  var _forfaitAg = currentUser ? (currentUser.user_metadata?.forfait_agent || 'pay_per_use') : null;
-  var _um = currentUser ? (currentUser.user_metadata || {}) : {};
-  var _estProprio = currentUser && currentUser.email === b.email_contact;
-  var _isAgentAbonne = _profils.includes('agent') && _forfaitAg !== 'pay_per_use';
-  var _abonneAcheteur = (_profils.includes('acheteur') || _profils.includes('investisseur')) && (_um.abonnement_actif === true || (_um.forfait_acheteur && _um.forfait_acheteur !== 'gratuit') || (_um.forfait && _um.forfait !== 'gratuit'));
-  var accesComplet = _estProprio || _isAgentAbonne || _abonneAcheteur || rapportAchete;
+  var accesComplet = estProprioAcces || isAgentAbonne || isInvestAbonne || rapportAchete;
 
   if (!accesComplet) {
     var _titreSafe = b.titre || (b.type_bien || 'Bien');
@@ -488,48 +491,18 @@ async function afficherBien(b, similaires) {
   }
 
   if (['silver','gold','platinium'].includes(niv)) {
-    if (!isAgentRap) {
-      // Acheteur / investisseur - acces reserve aux membres autorises
-      var um = currentUser ? (currentUser.user_metadata || {}) : {};
-      var estProprio = currentUser && currentUser.email === b.email_contact;
-      var profilAcheteur = userProfilsRap.includes('acheteur') || userProfilsRap.includes('investisseur');
-      var estAbonneAcheteur = profilAcheteur && (um.abonnement_actif === true || (um.forfait_acheteur && um.forfait_acheteur !== 'gratuit') || (um.forfait && um.forfait !== 'gratuit'));
-      var aDroitRapport = estProprio || rapportAchete || estAbonneAcheteur;
-      if (aDroitRapport) {
-        rapportHtml = '<div class="rapport-card">'
-          + '<div class="rapport-title">Rapport Hanaé IA</div>'
-          + '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px">Estimation basée sur DVF + Notaires-INSEE + carte des loyers</div>'
-          + '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;padding:10px">📊 Voir le rapport complet</a>'
-          + '</div>';
-      } else {
-        rapportHtml = '<div class="rapport-card" style="border-color:#C09B5A">'
-          + '<div class="rapport-title">🔒 Rapport réservé aux membres</div>'
-          + "<div style='font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px'>Le rapport Hanaé complet (estimation, prix/m², rendement net) est réservé aux acheteurs et investisseurs autorisés. Achetez-le à l'unité, ou abonnez-vous.</div>"
-          + (currentUser
-              ? '<button onclick="acheterRapport(\'' + b.id + '\')" style="width:100%;padding:10px;border:none;cursor:pointer;margin-bottom:8px;background:#C09B5A;color:#0F0F0E;border-radius:8px;font-family:Outfit,sans-serif;font-size:13px;font-weight:500">💳 Acheter le dossier (4,99 €)</button>'
-              : '<a href="connexion.html" style="display:block;text-align:center;text-decoration:none;padding:10px;margin-bottom:8px;background:#C09B5A;color:#0F0F0E;border-radius:8px;font-size:13px;font-weight:500">Se connecter pour y accéder</a>')
-          + '<a href="forfaits.html" class="btn-contact bc-out" style="display:block;text-align:center;text-decoration:none;padding:9px">Voir les abonnements</a>'
-          + '</div>';
-      }
-    } else if (isAgentAbonne) {
-      // Agent abonné : analyse de marché SANS le prix estimé
+    if (isAgent) {
       rapportHtml = '<div class="rapport-card">'
         + '<div class="rapport-title">Analyse de marché Hanaé</div>'
         + '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:8px">DVF · Notaires-INSEE · Loyers du secteur</div>'
-        + '<div style="background:#FAEEDA;border-radius:6px;padding:8px 10px;font-size:11px;color:#854F0B;line-height:1.6;margin-bottom:10px">'
-        + '💡 L\'estimation de prix est confidentielle — elle sert à évaluer la cohérence de votre proposition lors du scoring. L\'agent retenu pourra évaluer le bien de manière optimale en le visitant.'
-        + '</div>'
+        + "<div style='background:#FAEEDA;border-radius:6px;padding:8px 10px;font-size:11px;color:#854F0B;line-height:1.6;margin-bottom:10px'>L'estimation de prix est confidentielle (cohérence du scoring). L'agent retenu évaluera le bien lors de la visite.</div>"
         + '<a href="rapport-hanae.html?annonce=' + b.id + '&mode=agent" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;padding:10px">📊 Voir l\'analyse de marché</a>'
         + '</div>';
-    } else if (isAgentPPU) {
-      // Agent pay per use : accès dossier complet MAIS pas analyse Hanaé
+    } else {
       rapportHtml = '<div class="rapport-card">'
-        + '<div class="rapport-title">Dossier complet</div>'
-        + '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:8px">Accès aux documents vendeur disponible</div>'
-        + '<div style="background:#FAEEDA;border-radius:6px;padding:10px 12px;font-size:11px;color:#633806;line-height:1.6;margin-bottom:10px">'
-        + '📋 Vous avez accès au dossier complet. L\'analyse de marché Hanaé est réservée aux agents abonnés (Starter, Pro, Premium).'
-        + '</div>'
-        + '<a href="candidature-agent.html?annonce=' + b.id + '" class="btn-contact bc-teal" style="display:block;text-align:center;text-decoration:none;padding:10px">Candidater sur ce bien →</a>'
+        + '<div class="rapport-title">Rapport Hanaé IA</div>'
+        + '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px">Estimation basée sur DVF + Notaires-INSEE + carte des loyers</div>'
+        + '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;padding:10px">📊 Voir le rapport complet</a>'
         + '</div>';
     }
   }
