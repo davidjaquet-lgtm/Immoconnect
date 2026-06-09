@@ -301,6 +301,27 @@ async function acheterRapport(annonceId) {
   } catch (e) { alert('Erreur : ' + e.message); }
 }
 
+// ── ACHAT CONTACT (Stripe) — 9,99€, inclut dossier + visite ──
+var CONTACT_PRICE_ID = 'price_1TdFKKRWjX9H4QylHGG1ymnK'; // contact vendeur 9,99€ (prix Stripe existant)
+async function acheterContact(annonceId) {
+  try {
+    var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/creer-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        price_id: CONTACT_PRICE_ID,
+        forfait: 'contact',
+        mode: 'payment',
+        success_url: 'https://immoconnect-agence.fr/bien.html?id=' + annonceId + '&contact_achete=1',
+        cancel_url: 'https://immoconnect-agence.fr/bien.html?id=' + annonceId
+      })
+    });
+    var data = await res.json();
+    if (data.url) { window.location.href = data.url; }
+    else { alert('Erreur : ' + (data.error || 'Stripe indisponible')); }
+  } catch (e) { alert('Erreur : ' + e.message); }
+}
+
 // ── AFFICHER ──
 async function afficherBien(b, similaires) {
   var niv = b.niveau_vendeur || 'standard';
@@ -350,32 +371,7 @@ async function afficherBien(b, similaires) {
     }
   }
 
-  var accesComplet = estProprioAcc || isAgentAbonneAcc || estAbonneAcheteurAcc || rapportAchete;
-
-  if (!accesComplet) {
-    var piecesT = (b.nb_pieces != null && b.nb_pieces !== '') ? (b.nb_pieces + ' pièces') : 'Pièces NC';
-    var teaser = '<div class="breadcrumb"><a href="index.html">Accueil</a><span>\u203A</span>' + (b.ville || 'Bien') + '</div>'
-      + '<div class="bien-layout"><div>'
-      + mainPhoto + thumbsHtml
-      + '<div class="section" style="margin-top:20px">'
-      + '<div style="font-size:24px;font-weight:600;color:var(--teal);margin-bottom:6px">' + prixFmt + '</div>'
-      + '<div style="font-size:15px;font-weight:500;margin-bottom:8px">' + (b.type_bien || 'Bien') + ' \u00B7 ' + piecesT + '</div>'
-      + '<div style="font-size:13px;color:var(--muted)">\uD83D\uDCCD ' + (b.ville || '') + (b.code_postal ? ' (' + b.code_postal + ')' : '') + '</div>'
-      + '</div></div>'
-      + '<div><div class="rapport-card" style="border-color:#C09B5A">'
-      + '<div class="rapport-title">\uD83D\uDD12 Dossier réservé aux membres</div>'
-      + "<div style='font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px'>Pour accéder à la surface, l'adresse exacte, la description complète, les documents vérifiés et le rapport Hanaé, débloquez le dossier complet ou abonnez-vous.</div>"
-      + (currentUser
-          ? '<button onclick="acheterRapport(\'' + b.id + '\')" style="width:100%;padding:11px;border:none;cursor:pointer;margin-bottom:8px;background:#C09B5A;color:#0F0F0E;border-radius:8px;font-family:Outfit,sans-serif;font-size:13px;font-weight:600">\uD83D\uDCB3 Débloquer le dossier (4,99 \u20AC)</button>'
-          : '<a href="connexion.html" style="display:block;text-align:center;text-decoration:none;padding:11px;margin-bottom:8px;background:#C09B5A;color:#0F0F0E;border-radius:8px;font-size:13px;font-weight:600">Se connecter pour y accéder</a>')
-      + '<a href="forfaits.html" class="btn-contact bc-out" style="display:block;text-align:center;text-decoration:none;padding:10px">Voir les abonnements</a>'
-      + (isAgentAcc ? '<a href="candidature-agent.html?annonce=' + b.id + '" class="btn-contact bc-teal" style="display:block;text-align:center;text-decoration:none;padding:10px;margin-top:8px">Candidater sur ce bien \u2192</a>' : '')
-      + '</div></div></div>';
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('content').innerHTML = teaser;
-    document.getElementById('content').style.display = 'block';
-    return;
-  }
+  // (gating géré plus bas via les tables agents_validation / projets_acheteurs)
 
   // Niveau et mandat
   var mandatHtml = b.sous_mandat_exclusif ? '<div class="mandat-badge">🤝 Sous mandat exclusif</div>' : '';
@@ -459,16 +455,32 @@ async function afficherBien(b, similaires) {
     } catch (e) {}
   }
 
-  // ===== Acces complet au dossier ? (sinon vue restreinte) =====
-  var accesComplet = estProprioAcces || isAgentAbonne || isInvestAbonne || rapportAchete;
+  // ===== Achat du CONTACT (9,99€) pour CE bien — donne dossier + contact + visite =====
+  var contactAchete = false;
+  if (currentUser) {
+    if (_urlB.get('contact_achete') === '1') {
+      try { await db.from('contacts_achetes').insert({ annonce_id: b.id, user_id: currentUser.id, user_email: currentUser.email }); } catch (e) {}
+      contactAchete = true;
+    } else {
+      try { var _ctA = await db.from('contacts_achetes').select('id').eq('annonce_id', b.id).eq('user_id', currentUser.id).limit(1); contactAchete = !!(_ctA && _ctA.data && _ctA.data.length); } catch (e) {}
+    }
+  }
 
-  if (!accesComplet) {
+  var estAbonne = isAgentAbonne || isInvestAbonne;
+  // Droit de VOIR le dossier complet : abonné, proprio, achat contact, OU achat dossier
+  var accesDossier = estProprioAcces || estAbonne || contactAchete || rapportAchete;
+  // Droit d'INTERAGIR (contacter + réserver une visite) : l'achat du DOSSIER seul ne suffit PAS
+  var accesInteraction = estProprioAcces || estAbonne || contactAchete;
+  window._accesInteraction = accesInteraction;
+
+  if (!accesDossier) {
     var _titreSafe = b.titre || (b.type_bien || 'Bien');
     var _loadEl = document.getElementById('loading'); if (_loadEl) _loadEl.style.display = 'none';
     var _ct = document.getElementById('content'); _ct.style.display = 'block';
     var _pieces = (b.nb_pieces !== null && b.nb_pieces !== undefined && b.nb_pieces !== '') ? (b.nb_pieces + ' pieces') : 'Nombre de pieces non communique';
     var _action = currentUser
-      ? '<button onclick="acheterRapport(\'' + b.id + '\')" style="width:100%;padding:11px;border:none;cursor:pointer;margin-bottom:8px;background:#C09B5A;color:#0F0F0E;border-radius:8px;font-family:Outfit,sans-serif;font-size:13px;font-weight:600">💳 Débloquer le dossier (4,99 €)</button>'
+      ? '<button onclick="acheterContact(\'' + b.id + '\')" style="width:100%;padding:11px;border:none;cursor:pointer;margin-bottom:8px;background:#C09B5A;color:#0F0F0E;border-radius:8px;font-family:Outfit,sans-serif;font-size:13px;font-weight:600">🔓 Débloquer le contact (9,99 €)</button>'
+        + '<button onclick="acheterRapport(\'' + b.id + '\')" style="width:100%;padding:10px;cursor:pointer;margin-bottom:8px;background:transparent;color:#0F0F0E;border:1px solid var(--line);border-radius:8px;font-family:Outfit,sans-serif;font-size:13px;font-weight:500">Dossier seul (4,99 €)</button>'
       : '<a href="connexion.html" style="display:block;text-align:center;text-decoration:none;padding:11px;margin-bottom:8px;background:#C09B5A;color:#0F0F0E;border-radius:8px;font-size:13px;font-weight:600">Se connecter pour débloquer</a>';
     _ct.innerHTML =
       '<div class="breadcrumb"><a href="index.html">Accueil</a><span>&rsaquo;</span><a href="index.html">Annonces</a><span>&rsaquo;</span>' + _titreSafe + '</div>'
@@ -482,7 +494,7 @@ async function afficherBien(b, similaires) {
         + '</div>'
         + '<div><div class="rapport-card" style="border-color:#C09B5A">'
           + '<div class="rapport-title">🔒 Dossier réservé aux membres</div>'
-          + "<div style='font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px'>Vous voyez les informations essentielles (photos, ville, nombre de pièces, prix). Le dossier complet — surface, adresse exacte, description, documents vérifiés et rapport Hanaé — est réservé aux acheteurs et investisseurs autorisés. Débloquez-le à l'unité, ou abonnez-vous.</div>"
+          + "<div style='font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px'>Vous voyez les informations essentielles (photos, ville, nombre de pièces, prix). Le dossier complet (surface, adresse, description, documents, rapport Hanaé) se débloque à l'unité (4,99 €). Pour aussi contacter le vendeur et réserver une visite, choisissez le contact (9,99 €, dossier inclus) ou un abonnement.</div>"
           + _action
           + '<a href="forfaits.html" class="btn-contact bc-out" style="display:block;text-align:center;text-decoration:none;padding:9px">Voir les abonnements</a>'
         + '</div></div>'
@@ -879,16 +891,29 @@ function buildContactButtons(b, niv) {
   }
 
   // PAS D\'EXCLUSIVITÉ — boutons normaux
+  var _peutInteragir = (typeof window._accesInteraction === 'undefined') ? true : (window._accesInteraction || isAgent);
+  var _upsellInteraction = '<div class="rapport-card" style="border-color:#C09B5A;margin-bottom:4px">'
+    + '<div style="font-size:13px;font-weight:600;margin-bottom:6px">Contacter le vendeur & réserver une visite</div>'
+    + '<div style="font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:10px">Vous avez accès au dossier. Pour contacter le vendeur et réserver une visite, débloquez le contact ou abonnez-vous.</div>'
+    + '<button onclick="acheterContact(\'' + b.id + '\')" style="width:100%;padding:11px;border:none;cursor:pointer;margin-bottom:8px;background:#C09B5A;color:#0F0F0E;border-radius:8px;font-family:Outfit,sans-serif;font-size:13px;font-weight:600">🔓 Débloquer le contact (9,99 €)</button>'
+    + '<a href="forfaits.html" class="btn-contact bc-out" style="display:block;text-align:center;text-decoration:none;padding:9px">Voir les abonnements</a>'
+    + '</div>';
   if (niv === 'standard') {
     html += '<div class="lock-info">📍 <strong>Ville : ' + (b.ville||'—') + '</strong><br>Connectez-vous pour voir l\'adresse complète</div>';
-    html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">Contacter le vendeur</button>';
-    html += '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px">Dossier complet : 4,99 € · Contact vendeur : 9,99 €</div>';
+    if (_peutInteragir) {
+      html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">Contacter le vendeur</button>';
+    } else { html += _upsellInteraction; }
+    html += '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px">Dossier : 4,99 € · Contact (dossier + visite inclus) : 9,99 €</div>';
   } else if (niv === 'silver') {
-    html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">💬 Contacter le vendeur</button>';
-    html += '<button class="btn-contact bc-out" onclick="ouvrirVisite()">📅 Réserver une visite</button>';
+    if (_peutInteragir) {
+      html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">💬 Contacter le vendeur</button>';
+      html += '<button class="btn-contact bc-out" onclick="ouvrirVisite()">📅 Réserver une visite</button>';
+    } else { html += _upsellInteraction; }
   } else {
-    html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">💬 Contacter le vendeur</button>';
-    html += '<button class="btn-contact bc-blue" onclick="ouvrirVisite()">📅 Réserver une visite</button>';
+    if (_peutInteragir) {
+      html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">💬 Contacter le vendeur</button>';
+      html += '<button class="btn-contact bc-blue" onclick="ouvrirVisite()">📅 Réserver une visite</button>';
+    } else { html += _upsellInteraction; }
     html += '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-out" style="margin-top:4px">📊 Rapport Hanaé</a>';
   }
 
@@ -1294,7 +1319,14 @@ async function ouvrirVisite() {
 
   var container = document.getElementById('visite-content');
   if (!dispos || !dispos.length) {
-    container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Aucun créneau disponible pour le moment.<br>Contactez le vendeur via la messagerie.</div>';
+    container.innerHTML =
+      '<div style="font-size:13px;color:var(--muted);margin-bottom:14px">Aucun créneau prédéfini par le vendeur. Envoyez une demande de visite : il vous répondra directement.</div>'
+      + '<div class="field"><label class="lbl">Votre nom *</label><input type="text" id="vl-nom" placeholder="Jean Dupont"></div>'
+      + '<div class="field"><label class="lbl">Votre email *</label><input type="email" id="vl-email" placeholder="jean@exemple.fr"></div>'
+      + '<div class="field"><label class="lbl">Date souhaitée *</label><input type="date" id="vl-date"></div>'
+      + '<div class="field"><label class="lbl">Créneau souhaité</label><input type="text" id="vl-heure" placeholder="ex. après-midi, 14h-16h..."></div>'
+      + '<div class="field"><label class="lbl">Message (optionnel)</label><textarea id="vl-msg" rows="3" placeholder="Précisions sur votre projet..."></textarea></div>'
+      + '<button onclick="envoyerDemandeLibre()" style="width:100%;padding:12px;border-radius:8px;border:none;background:#0F0F0E;color:#fff;font-family:Outfit,sans-serif;font-size:14px;font-weight:500;cursor:pointer">Envoyer ma demande →</button>';
     return;
   }
 
@@ -1318,6 +1350,7 @@ async function ouvrirVisite() {
 function selectionnerCreneau(dispoId, date, debut, fin) {
   var dateObj = new Date(date + 'T12:00:00');
   var dateStr = dateObj.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+  window._creneauLabel = dateStr + ' · ' + debut + ' – ' + fin;
   document.getElementById('visite-content').innerHTML =
     '<div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:14px;margin-bottom:14px;font-size:13px;line-height:1.7">✅ <strong>' + dateStr + ' · ' + debut + ' – ' + fin + '</strong></div>' +
     '<div class="field"><label class="lbl">Votre nom *</label><input type="text" id="v-nom" placeholder="Jean Dupont"></div>' +
@@ -1332,25 +1365,64 @@ async function confirmerVisite(dispoId) {
   var msg = document.getElementById('v-msg') ? document.getElementById('v-msg').value : '';
   if (!nom || !email) { alert('Renseignez votre nom et email.'); return; }
 
+  var bienLabel = (bien.type_bien||'Bien') + ' · ' + (bien.ville||'');
+  var creneauLabel = window._creneauLabel || '';
+  var urlBien = 'https://immoconnect-agence.fr/bien.html?id=' + bien.id;
   await db.from('reservations_visites').insert({
-    dispo_id: dispoId, email_vendeur: bien.email_contact,
-    email_acheteur: email, message: msg || null, statut: 'en_attente'
+    dispo_id: dispoId, annonce_id: bien.id, email_vendeur: bien.email_contact,
+    email_acheteur: email, nom_acheteur: nom, bien_label: bienLabel,
+    creneau_souhaite: creneauLabel, message: msg || null, statut: 'en_attente', type_demande: 'creneau'
   });
   await db.from('disponibilites_visites').update({ statut: 'reserve' }).eq('id', dispoId);
+  // Notif vendeur
   await db.functions.invoke('envoyer-email', {
     body: {
       type: 'demande_visite', to: bien.email_contact,
       subject: '📅 Nouvelle demande de visite — ImmoConnect',
-      acheteur: nom + ' (' + email + ')', message: msg,
-      bien: (bien.type_bien||'Bien') + ' · ' + (bien.ville||''),
-      lien: 'https://immoconnect-agence.fr/calendrier.html'
+      acheteur: nom + ' (' + email + ')', message: (creneauLabel ? 'Créneau : ' + creneauLabel + '. ' : '') + (msg||''),
+      bien: bienLabel, lien: 'https://immoconnect-agence.fr/calendrier.html'
     }
+  }).then(undefined, function(){});
+  // Accusé de réception acheteur
+  await db.functions.invoke('envoyer-email', {
+    body: { type: 'visite_accuse', to: email, subject: '📩 Demande de visite reçue — ImmoConnect', bien: bienLabel, creneau: creneauLabel, lien: urlBien }
   }).then(undefined, function(){});
 
   document.getElementById('visite-content').innerHTML =
     '<div style="text-align:center;padding:24px"><div style="font-size:48px;margin-bottom:14px">✅</div>' +
     '<div style="font-size:15px;font-weight:500;margin-bottom:8px">Demande envoyée !</div>' +
     '<div style="font-size:13px;color:var(--muted)">Le vendeur a été notifié et confirmera votre visite sous 24h.</div></div>';
+}
+
+async function envoyerDemandeLibre() {
+  var nom = document.getElementById('vl-nom').value.trim();
+  var email = document.getElementById('vl-email').value.trim();
+  var date = document.getElementById('vl-date').value;
+  var heure = document.getElementById('vl-heure').value.trim();
+  var msg = document.getElementById('vl-msg').value.trim();
+  if (!nom || !email || !date) { alert('Renseignez votre nom, votre email et la date souhaitée.'); return; }
+  var bienLabel = (bien.type_bien||'Bien') + ' · ' + (bien.ville||'');
+  var creneau = new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'}) + (heure ? ' · ' + heure : '');
+  var urlBien = 'https://immoconnect-agence.fr/bien.html?id=' + bien.id;
+
+  await db.from('reservations_visites').insert({
+    dispo_id: null, annonce_id: bien.id, email_vendeur: bien.email_contact,
+    email_acheteur: email, nom_acheteur: nom, bien_label: bienLabel,
+    creneau_souhaite: creneau, message: msg || null, statut: 'en_attente', type_demande: 'libre'
+  });
+  await db.functions.invoke('envoyer-email', {
+    body: { type: 'demande_visite', to: bien.email_contact, subject: '📅 Nouvelle demande de visite — ImmoConnect',
+      acheteur: nom + ' (' + email + ')', message: 'Créneau souhaité : ' + creneau + '. ' + (msg||''),
+      bien: bienLabel, lien: 'https://immoconnect-agence.fr/calendrier.html' }
+  }).then(undefined, function(){});
+  await db.functions.invoke('envoyer-email', {
+    body: { type: 'visite_accuse', to: email, subject: '📩 Demande de visite reçue — ImmoConnect', bien: bienLabel, creneau: creneau, lien: urlBien }
+  }).then(undefined, function(){});
+
+  document.getElementById('visite-content').innerHTML =
+    '<div style="text-align:center;padding:24px"><div style="font-size:48px;margin-bottom:14px">✅</div>' +
+    '<div style="font-size:15px;font-weight:500;margin-bottom:8px">Demande envoyée !</div>' +
+    '<div style="font-size:13px;color:var(--muted)">Un accusé de réception vous a été envoyé par email. Le vendeur vous répondra sous 24h.</div></div>';
 }
 
 // ── GALERIE ──
