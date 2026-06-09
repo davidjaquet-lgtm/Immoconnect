@@ -289,9 +289,9 @@ function afficherBiens(biens) {
       '</div>' +
       '<div class="popup-prix">' + prixFmt + '</div>' +
       (pm2 ? '<div class="popup-pm2">' + pm2 + '</div>' : '') +
-      '<a href="bien.html?id=' + b.id + '" class="popup-btn">Voir le dossier →</a>' +
+      '<a href="bien.html?id=' + b.id + '" class="popup-btn" style="background:#0F0F0E">Voir le dossier →</a>' +
       ((['silver','gold','platinium'].includes(b.niveau_vendeur)) ?
-        '<a href="calendrier.html" class="popup-btn" style="background:#1E7A62;margin-top:6px">📅 Réserver une visite</a>' : '') +
+        '<a href="calendrier.html" class="popup-btn" style="background:#C09B5A;color:#0F0F0E;margin-top:6px">📅 Réserver une visite</a>' : '') +
       '</div>',
       { maxWidth: 240 }
     );
