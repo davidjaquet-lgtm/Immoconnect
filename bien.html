@@ -396,8 +396,8 @@ async function afficherBien(b, similaires) {
       if (_av && _av.data) { isAgent = true; isAgentAbonne = (_av.data.abonnement_actif === true) && _av.data.forfait_agent && _av.data.forfait_agent !== 'pay_per_use'; }
     } catch (e) {}
     try {
-      var _pa = await db.from('projets_acheteurs').select('forfait').eq('email', currentUser.email).maybeSingle();
-      if (_pa && _pa.data && _pa.data.forfait === 'investisseur') isInvestAbonne = true;
+      var _pa = await db.from('projets_acheteurs').select('forfait,apport,duree_emprunt,taux_envisage,strategie,tmi,regime_fiscal').eq('email', currentUser.email).maybeSingle();
+      if (_pa && _pa.data) { if (_pa.data.forfait === 'investisseur') isInvestAbonne = true; window._profil = _pa.data; }
     } catch (e) {}
   }
   var estAbonne = estProprioAcces || isAgentAbonne || isInvestAbonne;
@@ -592,17 +592,21 @@ async function afficherBien(b, similaires) {
   if (estAbonne && prix > 0) {
     var chargesAnnuelles = (b.charges_syndic||0)*12 + (b.taxe_fonciere_montant||0);
     window._simu = { loyer: loyerEffectif, charges: chargesAnnuelles, silverPlus: silverPlus };
+    var prof = window._profil || {};
+    var stratMap = {'Location meubl\u00e9e (LMNP)':'lmnp_micro','Location nue longue dur\u00e9e':'micro','Colocation':'lmnp_micro','Immeuble de rapport':'reel','D\u00e9ficit foncier / travaux':'reel','Location courte dur\u00e9e (Airbnb)':'lmnp_micro'};
+    var dApport = prof.apport || 0, dTaux = prof.taux_envisage || 3.5, dDuree = prof.duree_emprunt || 20, dTmi = String(prof.tmi || 30), dRegime = prof.regime_fiscal || stratMap[prof.strategie] || 'micro';
+    var sel = function(v,t){ return v===t ? ' selected' : ''; };
     var s = '<div class="simu-card"><div class="simu-title">\ud83e\uddee Simulateur acheteur</div>';
     s += '<div class="simu-grid">';
     s += '<label>Prix du bien (\u20ac)<input type="number" id="si-prix" value="'+prix+'" oninput="recalcSimu()"></label>';
-    s += '<label>Apport (\u20ac)<input type="number" id="si-apport" value="0" oninput="recalcSimu()"></label>';
-    s += '<label>Taux annuel (%)<input type="number" step="0.1" id="si-taux" value="3.5" oninput="recalcSimu()"></label>';
-    s += '<label>Dur\u00e9e (ans)<input type="number" id="si-duree" value="20" oninput="recalcSimu()"></label>';
+    s += '<label>Apport (\u20ac)<input type="number" id="si-apport" value="'+dApport+'" oninput="recalcSimu()"></label>';
+    s += '<label>Taux annuel (%)<input type="number" step="0.1" id="si-taux" value="'+dTaux+'" oninput="recalcSimu()"></label>';
+    s += '<label>Dur\u00e9e (ans)<input type="number" id="si-duree" value="'+dDuree+'" oninput="recalcSimu()"></label>';
     s += '<label>Honoraires agent (\u20ac)<input type="number" id="si-hono" value="0" oninput="recalcSimu()"></label>';
     s += '<label>Type de bien<select id="si-type" onchange="recalcSimu()"><option value="ancien">Ancien (~7,5%)</option><option value="neuf">Neuf (~2,5%)</option></select></label>';
     if (silverPlus) {
-      s += '<label>R\u00e9gime fiscal<select id="si-regime" onchange="recalcSimu()"><option value="micro">Nu \u2014 micro-foncier (30%)</option><option value="reel">Nu \u2014 r\u00e9el</option><option value="lmnp_micro">LMNP \u2014 micro-BIC (50%)</option><option value="lmnp_reel">LMNP \u2014 r\u00e9el (amortissement)</option></select></label>';
-      s += '<label>Votre TMI<select id="si-tmi" onchange="recalcSimu()"><option value="11">11 %</option><option value="30" selected>30 %</option><option value="41">41 %</option><option value="45">45 %</option></select></label>';
+      s += '<label>R\u00e9gime fiscal<select id="si-regime" onchange="recalcSimu()"><option value="micro"'+sel(dRegime,'micro')+'>Nu \u2014 micro-foncier (30%)</option><option value="reel"'+sel(dRegime,'reel')+'>Nu \u2014 r\u00e9el</option><option value="lmnp_micro"'+sel(dRegime,'lmnp_micro')+'>LMNP \u2014 micro-BIC (50%)</option><option value="lmnp_reel"'+sel(dRegime,'lmnp_reel')+'>LMNP \u2014 r\u00e9el (amortissement)</option></select></label>';
+      s += '<label>Votre TMI<select id="si-tmi" onchange="recalcSimu()"><option value="11"'+sel(dTmi,'11')+'>11 %</option><option value="30"'+sel(dTmi,'30')+'>30 %</option><option value="41"'+sel(dTmi,'41')+'>41 %</option><option value="45"'+sel(dTmi,'45')+'>45 %</option></select></label>';
     }
     s += '</div>';
     s += '<button type="button" class="simu-zero" onclick="document.getElementById(\'si-hono\').value=0;recalcSimu()">Mettre les honoraires agent \u00e0 0 \u20ac</button>';
@@ -616,10 +620,13 @@ async function afficherBien(b, similaires) {
       s += '<div class="simu-row"><span>Rendement net</span><strong id="so-rdt-net">\u2014</strong></div>';
       s += '<div class="simu-row"><span>Imp\u00f4t annuel estim\u00e9</span><strong id="so-impot">\u2014</strong></div>';
       s += '<div class="simu-row simu-hl"><span>Rendement net apr\u00e8s imp\u00f4t</span><strong id="so-rdt-apres">\u2014</strong></div>';
+      s += '<div class="simu-row"><span>Cash-flow mensuel (avant imp\u00f4t)</span><strong id="so-cf-avant">\u2014</strong></div>';
+      s += '<div class="simu-row simu-hl"><span>Cash-flow mensuel (apr\u00e8s imp\u00f4t)</span><strong id="so-cf-apres">\u2014</strong></div>';
     }
     s += '</div>';
     if (silverPlus) s += '<div class="simu-note">Rendement bas\u00e9 sur la valeur locative et les charges d\u00e9clar\u00e9es par le vendeur.</div>';
     else s += '<div class="simu-note">Le rendement locatif s\'affiche d\u00e8s que le bien atteint le niveau Silver.</div>';
+    if (prof && (prof.apport || prof.taux_envisage)) s += '<div class="simu-note">Valeurs pr\u00e9-remplies depuis votre profil investisseur \u2014 modifiables ici.</div>';
     s += '<div class="simu-note">Frais de notaire, mensualit\u00e9s et fiscalit\u00e9 estimatifs \u2014 \u00e0 confirmer avec votre notaire, votre banque et un conseiller fiscal.</div>';
     s += '</div>';
     html += s;
@@ -1466,6 +1473,11 @@ function recalcSimu(){
     var impot=calculerImpot(la, s.charges||0, prix, regime, tmi);
     var ei=document.getElementById('so-impot'); if(ei) ei.textContent=la>0?f(impot)+'/an':'\u2014';
     var ea=document.getElementById('so-rdt-apres'); if(ea) ea.textContent=(prix>0&&la>0)?(((la-(s.charges||0)-impot)/prix)*100).toFixed(1)+' %':'\u2014';
+    var loyerM=s.loyer||0, chargesM=(s.charges||0)/12;
+    var cfAvant=loyerM-chargesM-mens, cfApres=cfAvant-impot/12;
+    var fcf=function(v){var r=Math.round(v);return (r>=0?'+':'')+r.toLocaleString('fr-FR')+' \u20ac/mois';};
+    var ca=document.getElementById('so-cf-avant'); if(ca) ca.textContent=la>0?fcf(cfAvant):'\u2014';
+    var cp=document.getElementById('so-cf-apres'); if(cp) cp.textContent=la>0?fcf(cfApres):'\u2014';
   }
 }
 function calculerImpot(loyerAnnuel, charges, prix, regime, tmi){

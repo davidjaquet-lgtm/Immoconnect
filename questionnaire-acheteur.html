@@ -521,6 +521,23 @@ nav .nav-link{margin-right:18px}
             <option>Déficit foncier / travaux</option>
           </select>
         </div>
+        <div class="field"><label class="lbl">Votre tranche d'imposition (TMI)</label>
+          <select id="tmi">
+            <option value="11">11 %</option>
+            <option value="30" selected>30 %</option>
+            <option value="41">41 %</option>
+            <option value="45">45 %</option>
+          </select>
+          <span class="hint">Pour estimer l'impôt et le rendement net après impôt</span>
+        </div>
+        <div class="field"><label class="lbl">Régime fiscal envisagé</label>
+          <select id="regime_fiscal">
+            <option value="micro">Nu — micro-foncier (30%)</option>
+            <option value="reel">Nu — réel</option>
+            <option value="lmnp_micro" selected>LMNP — micro-BIC (50%)</option>
+            <option value="lmnp_reel">LMNP — réel (amortissement)</option>
+          </select>
+        </div>
       </div>
       <div class="form-grid">
         <div class="field"><label class="lbl">Horizon de détention</label>
@@ -828,6 +845,8 @@ async function soumettre() {
     taux_endettement:      Math.round(tauxEndt * 10) / 10 || null,
     rendement_min:         +document.getElementById('rendement_min_inv').value || null,
     strategie:             document.getElementById('strategie').value,
+    tmi:                   +document.getElementById('tmi').value || null,
+    regime_fiscal:         document.getElementById('regime_fiscal').value,
     horizon_detention:     document.getElementById('horizon_detention').value,
     tolerance_travaux:     getRadio('tolerance_travaux'),
     type_bien_recherche:   document.getElementById('type_bien_recherche').value,
