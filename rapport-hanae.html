@@ -223,7 +223,7 @@ async function chargerRapport() {
 
     // 2. Récupérer données DVF — sources multiples
     document.getElementById('rapport-content').innerHTML = '<div class="loading"><div class="loading-spin"></div>Récupération données DVF Etalab…</div>';
-    var dvf = await fetchDVF(annonce.code_postal, annonce.type_bien, annonce.surface);
+    var dvf = await fetchDVF(annonce.code_postal, annonce.type_bien, annonce.surface, annonce.ville);
 
     // 2b. DVF+ CEREMA (géolocalisé, plus précis) — fallback silencieux si indisponible
     document.getElementById('rapport-content').innerHTML = '<div class="loading"><div class="loading-spin"></div>Récupération DVF+ CEREMA géolocalisé…</div>';
@@ -729,61 +729,105 @@ async function fetchAnnoncesActives(codePostal, typeBien, surface, prixMax) {
   return null; // Pas de clé configurée → utiliser le baromètre statique
 }
 
-async function fetchDVF(codePostal, typeBien, surface) {
+function parseDVFCsv(txt){
+  var lines = txt.split(/\r?\n/);
+  if (lines.length < 2) return [];
+  var head = lines[0].split(','); var idx = {};
+  head.forEach(function(h,i){ idx[h.trim()] = i; });
+  var out = [];
+  for (var k=1;k<lines.length;k++){
+    if (!lines[k]) continue;
+    var col = lines[k].split(',');
+    out.push({
+      id_mutation: col[idx['id_mutation']],
+      date_mutation: col[idx['date_mutation']],
+      nature_mutation: col[idx['nature_mutation']],
+      valeur_fonciere: parseFloat(col[idx['valeur_fonciere']]) || 0,
+      type_local: col[idx['type_local']],
+      surface_reelle_bati: parseFloat(col[idx['surface_reelle_bati']]) || 0
+    });
+  }
+  return out;
+}
+
+async function fetchDVF(codePostal, typeBien, surface, ville) {
+  var EMPTY = { similaires:[], prixMoyen:0, prixMedian:0, prixM2Moyen:0, prixM2Median:0, nbVentes:0, historique:[], source:'DVF indisponible' };
   try {
     var typeCode = typeBien && typeBien.toLowerCase().includes('maison') ? 'Maison' : 'Appartement';
-    var url = 'https://api.dvf.etalab.gouv.fr/geoapi/dvf/?code_postal=' + codePostal + '&type_local=' + encodeURIComponent(typeCode) + '&nb_resultats=50';
-    var res = await fetch(url);
-    var data = await res.json();
-    var mutations = data.features || [];
-
-    // Filtrer par surface similaire ±30%
     var surf = parseFloat(surface) || 50;
-    var similaires = mutations.filter(function(m) {
-      var s = m.properties.surface_reelle_bati;
-      return s && s >= surf * 0.7 && s <= surf * 1.3 && m.properties.valeur_fonciere > 0;
+
+    // 1) Resoudre le code INSEE + departement (le DVF s'interroge par code commune, jamais par code postal)
+    var geo = await fetch('https://geo.api.gouv.fr/communes?codePostal=' + codePostal + '&fields=nom,code,codeDepartement&format=json').then(function(r){ return r.json(); });
+    if (!geo || !geo.length) return EMPTY;
+    var commune = geo[0];
+    if (ville && geo.length > 1) {
+      var norm = function(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z]/g,''); };
+      var match = geo.filter(function(co){ return norm(co.nom) === norm(ville); })[0];
+      if (match) commune = match;
+    }
+    var insee = commune.code, dept = commune.codeDepartement;
+    if (!insee || !dept) return EMPTY;
+
+    // 2) Lire les mutations geo-DVF officielles Etalab (fichiers par commune / annee)
+    var mutations = [], annees = ['2020','2021','2022','2023','2024'], seen = {};
+    for (var a=0;a<annees.length;a++){
+      try {
+        var csvUrl = 'https://files.data.gouv.fr/geo-dvf/latest/csv/' + annees[a] + '/communes/' + dept + '/' + insee + '.csv';
+        var resp = await fetch(csvUrl);
+        if (resp.ok){
+          var txt = await resp.text();
+          parseDVFCsv(txt).forEach(function(m){
+            // dedoublonnage par mutation (les lots multiples repetent la meme vente)
+            var key = (m.id_mutation||'') + '|' + (m.surface_reelle_bati||'');
+            if (!seen[key]){ seen[key]=1; mutations.push(m); }
+          });
+        }
+      } catch(e){}
+    }
+
+    // 3) Repli JSON (api.cquest.org) si aucun fichier exploitable
+    if (!mutations.length) {
+      try {
+        var cq = await fetch('https://api.cquest.org/dvf?code_commune=' + insee).then(function(r){ return r.json(); });
+        var rs = (cq && (cq.resultats || cq.features)) || [];
+        mutations = rs.map(function(m){ var p = m.properties || m; return {
+          id_mutation: p.id_mutation, date_mutation: p.date_mutation, nature_mutation: p.nature_mutation,
+          valeur_fonciere: parseFloat(p.valeur_fonciere)||0, type_local: p.type_local,
+          surface_reelle_bati: parseFloat(p.surface_reelle_bati)||0 }; });
+      } catch(e){}
+    }
+
+    // 4) Filtrer : ventes du bon type, surface +/-30 %, valeur valide
+    var similaires = mutations.filter(function(m){
+      return m.nature_mutation === 'Vente' && m.type_local === typeCode &&
+             m.valeur_fonciere > 0 && m.surface_reelle_bati &&
+             m.surface_reelle_bati >= surf*0.7 && m.surface_reelle_bati <= surf*1.3;
     });
+    if (!similaires.length) return Object.assign({}, EMPTY, { source: 'geo-DVF Etalab - aucune vente comparable (commune ' + insee + ')' });
 
-    // Stats
-    var prix = similaires.map(function(m){ return m.properties.valeur_fonciere; }).filter(Boolean);
-    var surfaces = similaires.map(function(m){ return m.properties.surface_reelle_bati; }).filter(Boolean);
-    var prixM2 = similaires.map(function(m){ return m.properties.valeur_fonciere / m.properties.surface_reelle_bati; }).filter(function(v){ return v > 0 && v < 20000; });
+    var prix = similaires.map(function(m){ return m.valeur_fonciere; });
+    var prixM2 = similaires.map(function(m){ return m.valeur_fonciere / m.surface_reelle_bati; }).filter(function(v){ return v>0 && v<20000; });
+    var moy = function(arr){ return arr.length ? arr.reduce(function(x,y){return x+y;},0)/arr.length : 0; };
+    var med = function(arr){ if(!arr.length) return 0; var s=arr.slice().sort(function(x,y){return x-y;}); return s[Math.floor(s.length/2)]; };
 
-    var moy = function(arr) { return arr.length ? arr.reduce(function(a,b){return a+b},0)/arr.length : 0; };
-    var med = function(arr) {
-      if (!arr.length) return 0;
-      var s = arr.slice().sort(function(a,b){return a-b});
-      return s[Math.floor(s.length/2)];
-    };
-
-    // Grouper par année
     var parAnnee = {};
-    similaires.forEach(function(m) {
-      var date = m.properties.date_mutation || '';
-      var annee = date.substring(0,4);
-      if (annee && annee >= '2019') {
-        if (!parAnnee[annee]) parAnnee[annee] = [];
-        parAnnee[annee].push(m.properties.valeur_fonciere / m.properties.surface_reelle_bati);
-      }
+    similaires.forEach(function(m){
+      var annee = (m.date_mutation||'').substring(0,4);
+      if (annee >= '2019'){ if(!parAnnee[annee]) parAnnee[annee]=[]; parAnnee[annee].push(m.valeur_fonciere/m.surface_reelle_bati); }
     });
-
-    var historique = Object.keys(parAnnee).sort().map(function(a) {
-      return { annee: a, prixM2: Math.round(moy(parAnnee[a])), nb: parAnnee[a].length };
-    });
+    var historique = Object.keys(parAnnee).sort().map(function(an){ return { annee:an, prixM2:Math.round(moy(parAnnee[an])), nb:parAnnee[an].length }; });
 
     return {
-      similaires: similaires.slice(0,8),
+      similaires: similaires.slice(0,8).map(function(m){ return { properties:{ valeur_fonciere:m.valeur_fonciere, surface_reelle_bati:m.surface_reelle_bati, date_mutation:m.date_mutation, type_local:m.type_local } }; }),
       prixMoyen: Math.round(moy(prix)),
       prixMedian: Math.round(med(prix)),
       prixM2Moyen: Math.round(moy(prixM2)),
       prixM2Median: Math.round(med(prixM2)),
       nbVentes: similaires.length,
       historique: historique,
-      source: 'DVF Etalab — données officielles DGFiP'
+      source: 'geo-DVF Etalab - DGFiP (commune ' + insee + ')'
     };
-  } catch(e) {
-    return { similaires:[], prixMoyen:0, prixMedian:0, prixM2Moyen:0, prixM2Median:0, nbVentes:0, historique:[], source:'DVF indisponible' };
-  }
+  } catch(e){ return EMPTY; }
 }
 
 /* ══ API INSEE / GEO ══ */
