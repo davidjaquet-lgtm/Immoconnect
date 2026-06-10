@@ -380,8 +380,15 @@ nav .nav-link{margin-right:18px}
           </div>
         </div>
         <div class="ib-neutral info-box">
-          <div class="ib-title">🏅 Silver — Charges</div>
+          <div class="ib-title">🏅 Silver — Copropriété & charges</div>
           <div class="field">
+            <label class="lbl" style="color:var(--blue)">Copropriété ?</label>
+            <div class="radio-group">
+              <label class="radio-opt selected" onclick="setRadio(this,'is_copro');showCopro(false);calcNiveau()"><input type="radio" name="is_copro" value="Non">Non</label>
+              <label class="radio-opt" onclick="setRadio(this,'is_copro');showCopro(true);calcNiveau()"><input type="radio" name="is_copro" value="Oui">Oui</label>
+            </div>
+          </div>
+          <div class="field" style="margin-top:8px">
             <label class="lbl" style="color:var(--blue)">Charges de copropriété (€/mois)</label>
             <input type="number" id="charges_syndic" placeholder="150" min="0" oninput="calcNiveau()">
             <span class="hint">Obligatoire dès Silver pour les biens en copropriété — entre dans le calcul du rendement net.</span>
@@ -396,13 +403,6 @@ nav .nav-link{margin-right:18px}
           <div class="field">
             <label class="lbl" style="color:#854F0B">Taxe foncière annuelle (€/an)</label>
             <input type="number" id="taxe_fonciere_montant" placeholder="1 400" min="0" oninput="calcNiveau()">
-          </div>
-          <div class="field" style="margin-top:8px">
-            <label class="lbl" style="color:#854F0B">Copropriété ?</label>
-            <div class="radio-group">
-              <label class="radio-opt selected" onclick="setRadio(this,'is_copro');showCopro(false);calcNiveau()"><input type="radio" name="is_copro" value="Non">Non</label>
-              <label class="radio-opt" onclick="setRadio(this,'is_copro');showCopro(true);calcNiveau()"><input type="radio" name="is_copro" value="Oui">Oui</label>
-            </div>
           </div>
         </div>
         <div class="ib-plat info-box">
@@ -638,39 +638,10 @@ nav .nav-link{margin-right:18px}
     </div>
   </div>
 
-  <!-- 5 : SILVER — JUSTIFICATIF VALEUR LOCATIVE -->
-  <div class="section">
-    <div class="section-head" onclick="toggle('s5')">
-      <div class="sec-num num-silver">5</div>
-      <div class="sec-ttl">Justificatif valeur locative ou bail <span class="sec-sub">→ optionnel</span></div>
-      <span class="sec-badge b-silver">Silver</span>
-      <span class="sec-arrow" id="arr-s5">▼</span>
-    </div>
-    <div class="sec-body" id="s5">
-      <div class="unlock-info ui-silver">
-        <div class="ui-icon">🏅</div>
-        <div class="ui-txt">
-          <strong>Niveau Silver — Matching investisseurs (3 photos)</strong>
-          Pour Silver, il suffit de renseigner la valeur locative (et les charges si copropriété) à l'étape précédente. Ce justificatif reste optionnel.
-        </div>
-      </div>
-      <div class="field" style="margin-bottom:4px">
-        <label class="lbl">Justificatif — Valeur locative ou bail (optionnel)</label>
-        <div class="upload-zone uz-silver">
-          <input type="file" id="file-valeur-loc" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc('valeur_locative_doc','file-valeur-loc','fs-valeur-loc')">
-          <div class="upload-icon">📄</div>
-          <div class="upload-title">Déposer le justificatif</div>
-          <div class="upload-sub">Avis valeur locative cadastrale · Bail signé — PDF ou image</div>
-        </div>
-        <div class="file-status fs-none" id="fs-valeur-loc">📎 Aucun fichier sélectionné</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 6 : GOLD — JUSTIFICATIF TAXE FONCIÈRE + COPRO -->
+  <!-- 5 : GOLD — JUSTIFICATIF TAXE FONCIÈRE + COPRO -->
   <div class="section">
     <div class="section-head" onclick="toggle('s6')">
-      <div class="sec-num num-gold">6</div>
+      <div class="sec-num num-gold">5</div>
       <div class="sec-ttl">Justificatif taxe foncière & copropriété <span class="sec-sub">→ débloque Gold</span></div>
       <span class="sec-badge b-gold">Gold</span>
       <span class="sec-arrow" id="arr-s6">▼</span>
@@ -713,10 +684,10 @@ nav .nav-link{margin-right:18px}
     </div>
   </div>
 
-  <!-- 7 : PLATINIUM — JUSTIFICATIF DPE -->
+  <!-- 6 : PLATINIUM — JUSTIFICATIF DPE -->
   <div class="section">
     <div class="section-head" onclick="toggle('s7')">
-      <div class="sec-num num-plat">7</div>
+      <div class="sec-num num-plat">6</div>
       <div class="sec-ttl">Justificatif DPE — Diagnostic Énergétique <span class="sec-sub">→ débloque Platinium</span></div>
       <span class="sec-badge b-plat">Platinium</span>
       <span class="sec-arrow" id="arr-s7">▼</span>
@@ -753,6 +724,31 @@ nav .nav-link{margin-right:18px}
           <div class="upload-sub">DPE réalisé par un professionnel certifié — PDF</div>
         </div>
         <div class="file-status fs-none" id="fs-dpe">📎 Aucun fichier sélectionné</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTRES DOCUMENTS (facultatif) -->
+  <div class="section">
+    <div class="section-head" onclick="toggle('sautres')">
+      <div class="sec-num num-std">🗂️</div>
+      <div class="sec-ttl">Autres documents <span class="sec-sub">→ facultatif</span></div>
+      <span class="sec-arrow" id="arr-sautres">▼</span>
+    </div>
+    <div class="sec-body" id="sautres">
+      <div style="display:flex;gap:10px;align-items:flex-start;background:#F1EFE8;border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:12px">
+        <div style="font-size:18px">📎</div>
+        <div style="font-size:12px;line-height:1.6;color:var(--ink)"><strong>Documents complémentaires — facultatifs.</strong> Joignez des pièces utiles à l’analyse de votre bien (ex : compte rendu de copropriété, règlement de copropriété, diagnostics complémentaires, plan…). PDF ou image.</div>
+      </div>
+      <div class="field" style="margin-bottom:4px">
+        <label class="lbl">Joindre des documents (facultatif)</label>
+        <div class="upload-zone" style="border-color:var(--line)">
+          <input type="file" id="file-autres" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="addAutresDocs(this)">
+          <div class="upload-icon">🗂️</div>
+          <div class="upload-title">Déposer un ou plusieurs documents</div>
+          <div class="upload-sub">Ex : compte rendu de copropriété · règlement · diagnostics — PDF ou image</div>
+        </div>
+        <div id="autres-docs-list" style="margin-top:8px"></div>
       </div>
     </div>
   </div>
@@ -1301,6 +1297,34 @@ function addPhotos(inp){
 }
 function delPhoto(i){photos.splice(i,1);renderPhotos();}
 
+var autresDocs=[];
+function renderAutresDocs(){
+  var el=document.getElementById('autres-docs-list'); if(!el)return;
+  var h='';
+  for(var i=0;i<autresDocs.length;i++){
+    var nom=String(autresDocs[i].name).replace(/[<>]/g,'');
+    var tag=autresDocs[i].url?' \u2713':'';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;margin-top:6px;font-size:12px"><span>\uD83D\uDCC4 '+nom+tag+'</span><button type="button" onclick="delAutreDoc('+i+')" style="background:transparent;border:none;color:#C0392B;cursor:pointer;font-size:14px">\u2715</button></div>';
+  }
+  el.innerHTML=h;
+}
+function addAutresDocs(inp){
+  Array.from(inp.files).forEach(function(f){autresDocs.push({file:f,name:f.name});});
+  renderAutresDocs();inp.value='';
+}
+function delAutreDoc(i){autresDocs.splice(i,1);renderAutresDocs();}
+async function uploadAutresDocs(){
+  var out=[];
+  for(var i=0;i<autresDocs.length;i++){
+    if(autresDocs[i].url){out.push({name:autresDocs[i].name,url:autresDocs[i].url});continue;}
+    var f=autresDocs[i].file,ext=(f.name.split('.').pop()||'pdf');
+    var path='vendeurs/autres/'+Date.now()+'_'+i+'.'+ext;
+    var up=await db.storage.from(BUCKET).upload(path,f,{upsert:true});
+    if(!up.error){var pub=db.storage.from(BUCKET).getPublicUrl(path);out.push({name:f.name,url:pub.data.publicUrl});}
+  }
+  return out;
+}
+
 // ── GÉOCODAGE AUTOMATIQUE (Nominatim OpenStreetMap) ──
 async function geocoderAdresse(adresse, ville, codePostal) {
   try {
@@ -1508,6 +1532,7 @@ async function soumettre(){
   btn.disabled=true;btn.textContent='Publication en cours…';
   showToast('Upload des photos…','info');
   var photoUrls=await uploadPhotos();
+  var autresDocsUrls=await uploadAutresDocs();
 
   var payload={
     nom_vendeur:document.getElementById('nom_vendeur').value,
@@ -1544,6 +1569,7 @@ async function soumettre(){
     digicode:getRadio('digicode'),
     piscine:getRadio('piscine')==='Oui',
     photos_urls:photoUrls,
+    autres_documents:autresDocsUrls,
     photo_principale:photoUrls[0]||null,
     valeur_locative:+document.getElementById('valeur_locative').value||null,
     loyer_mensuel:+document.getElementById('loyer_mensuel').value||null,
@@ -1650,7 +1676,6 @@ async function validerDocumentsAnnonce(annonceId){
   var classeDpe  = (document.getElementById('classe_dpe')||{}).value || '';
 
   var aValider = [
-    { input:'file-valeur-loc', doc_type:'valeur_locative', montant:valeurLoc },
     { input:'file-taxe',       doc_type:'taxe_fonciere',   montant:montantTaxe },
     { input:'file-copro',      doc_type:'copro',           montant:'' },
     { input:'file-dpe',        doc_type:'dpe',             montant:'' }
@@ -1688,7 +1713,7 @@ function showToast(msg,type){
   setTimeout(function(){t.classList.remove('show');},3500);
 }
 
-renderPhotos();updateUI();
+renderPhotos();renderAutresDocs();updateUI();
 </script>
 <script>
 (function() {
