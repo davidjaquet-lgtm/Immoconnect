@@ -54,6 +54,22 @@ nav{background:#fff;border-bottom:1px solid var(--line);height:54px;display:flex
 .photos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:4px}
 .photo-thumb{width:100%;height:80px;object-fit:cover;cursor:pointer;transition:opacity .2s}
 .photo-thumb:hover{opacity:.8}
+.photo-wrap{position:relative}
+.carousel-arrow{position:absolute;top:200px;transform:translateY(-50%);width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.92);color:#0F0F0E;font-size:26px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.18);z-index:6}
+.ca-prev{left:12px}.ca-next{right:12px}
+.carousel-arrow:hover{background:#fff}
+.carousel-count{position:absolute;bottom:12px;right:12px;background:rgba(15,15,14,.7);color:#fff;font-size:12px;padding:4px 10px;border-radius:20px;z-index:6}
+.simu-card{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:20px}
+.simu-title{font-size:13px;font-weight:600;margin-bottom:12px}
+.simu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.simu-grid label{display:flex;flex-direction:column;font-size:11px;color:var(--muted);gap:4px}
+.simu-grid input,.simu-grid select{padding:8px 10px;border:1px solid var(--line);border-radius:6px;font-family:inherit;font-size:13px;color:var(--ink);background:#fff}
+.simu-zero{margin-top:8px;width:100%;padding:7px;border:1px dashed var(--line);background:#fff;border-radius:6px;font-family:inherit;font-size:12px;cursor:pointer;color:var(--muted)}
+.simu-out{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.simu-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;color:var(--ink)}
+.simu-row span{color:var(--muted)}
+.simu-row.simu-hl strong{color:var(--teal);font-size:16px}
+.simu-note{font-size:10px;color:var(--muted);margin-top:8px;line-height:1.5}
 .niveau-badge{position:absolute;top:16px;left:16px;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.8px}
 .nb-standard{background:#F1EFE8;color:#555}
 .nb-silver{background:#E6F1FB;color:var(--blue)}
@@ -353,15 +369,19 @@ async function afficherBien(b, similaires) {
     try { var sup = JSON.parse(b.photos_supplementaires); photos = photos.concat(sup); } catch(e) {}
   }
 
+  window._photos = photos; window._photoIdx = 0;
+  var carouselCtrl = photos.length > 1
+    ? '<button class="carousel-arrow ca-prev" type="button" onclick="navPhoto(-1)">\u2039</button><button class="carousel-arrow ca-next" type="button" onclick="navPhoto(1)">\u203a</button><div class="carousel-count" id="carousel-count">1 / ' + photos.length + '</div>'
+    : '';
   var mainPhoto = photos.length > 0
-    ? '<img class="photo-main" src="' + photos[0] + '" alt="' + titre + '" id="main-photo">'
+    ? '<div class="photo-wrap"><img class="photo-main" src="' + photos[0] + '" alt="' + titre + '" id="main-photo">' + carouselCtrl + '</div>'
     : '<div class="photo-main-placeholder">🏠</div>';
 
   var thumbsHtml = '';
   if (photos.length > 1) {
     thumbsHtml = '<div class="photos-grid">';
     photos.slice(1, 5).forEach(function(p, i) {
-      thumbsHtml += '<img class="photo-thumb" src="' + p + '" onclick="changePhoto(\'' + p + '\')" alt="Photo ' + (i+2) + '">';
+      thumbsHtml += '<img class="photo-thumb" src="' + p + '" onclick="setPhoto(' + (i+1) + ')" alt="Photo ' + (i+2) + '">';
     });
     thumbsHtml += '</div>';
   }
@@ -561,33 +581,42 @@ async function afficherBien(b, similaires) {
     html += buildScoreDossierHtml(b);
   }
 
-  // RENDEMENT INVESTISSEUR
-  var loyer = b.loyer_mensuel || 0;
+  // SIMULATEUR ACHETEUR — abonnés uniquement
+  var loyer = b.loyer_mensuel || b.valeur_locative || 0;
   var loyerM2 = (b.type_bien||'').toLowerCase().includes('maison') ? 8.5 : 11;
   var loyerAuto = b.surface > 0 ? Math.round(loyerM2 * b.surface) : 0;
   var loyerEffectif = loyer > 0 ? loyer : loyerAuto;
   var prix = b.prix || 0;
-  if (estAbonne && prix > 0 && loyerEffectif > 0) {
-    var loyerAnnuel = loyerEffectif * 12;
-    var charges = (b.charges_syndic||0)*12 + (b.taxe_fonciere_montant||0);
-    var rdtBrut = (loyerAnnuel / prix * 100).toFixed(1);
-    var rdtNet = charges > 0 ? ((loyerAnnuel - charges) / prix * 100).toFixed(1) : null;
-    var rdtBrutNum = parseFloat(rdtBrut);
-    var badgeColor = rdtBrutNum >= 7 ? '#993C1D' : rdtBrutNum >= 5 ? '#185FA5' : '#1E7A62';
-    var badgeBg = rdtBrutNum >= 7 ? '#FAECE7' : rdtBrutNum >= 5 ? '#E6F1FB' : '#E1F5EE';
-    html += '<div style="background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:20px">';
-    html += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">';
-    html += '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">💰 Potentiel locatif</div>';
-    if (rdtBrutNum >= 3) html += '<div style="background:'+badgeBg+';color:'+badgeColor+';font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px">🎯 Compatible investisseur</div>';
-    html += '</div>';
-    html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px">';
-    html += '<div style="text-align:center"><div style="font-size:18px;font-weight:500;color:var(--teal)">'+rdtBrut+' %</div><div style="font-size:10px;color:var(--muted)">Rendement brut</div></div>';
-    if (rdtNet) html += '<div style="text-align:center"><div style="font-size:18px;font-weight:500;color:var(--teal)">'+rdtNet+' %</div><div style="font-size:10px;color:var(--muted)">Rendement net</div></div>';
-    html += '<div style="text-align:center"><div style="font-size:18px;font-weight:500;color:var(--teal)">'+loyerEffectif.toLocaleString('fr-FR')+' €</div><div style="font-size:10px;color:var(--muted)">'+(loyer>0?'Loyer réel':'Loyer estimé')+'/mois</div></div>';
-    html += '</div>';
-    if (loyer === 0) html += '<div style="font-size:10px;color:var(--muted);margin-top:8px">* Loyer estimé sur la base de la carte des loyers. Le vendeur peut renseigner le loyer réel.</div>';
-    html += '<div style="font-size:10px;color:var(--muted);margin-top:6px">Rendement calculé à partir de la valeur locative et des charges déclarées par le vendeur.</div>';
-    html += '</div>';
+  var niveauBien = b.niveau_vendeur || 'standard';
+  var silverPlus = ['silver','gold','platinium'].indexOf(niveauBien) !== -1;
+  if (estAbonne && prix > 0) {
+    var chargesAnnuelles = (b.charges_syndic||0)*12 + (b.taxe_fonciere_montant||0);
+    window._simu = { loyer: loyerEffectif, charges: chargesAnnuelles, silverPlus: silverPlus };
+    var s = '<div class="simu-card"><div class="simu-title">\ud83e\uddee Simulateur acheteur</div>';
+    s += '<div class="simu-grid">';
+    s += '<label>Prix du bien (\u20ac)<input type="number" id="si-prix" value="'+prix+'" oninput="recalcSimu()"></label>';
+    s += '<label>Apport (\u20ac)<input type="number" id="si-apport" value="0" oninput="recalcSimu()"></label>';
+    s += '<label>Taux annuel (%)<input type="number" step="0.1" id="si-taux" value="3.5" oninput="recalcSimu()"></label>';
+    s += '<label>Dur\u00e9e (ans)<input type="number" id="si-duree" value="20" oninput="recalcSimu()"></label>';
+    s += '<label>Honoraires agent (\u20ac)<input type="number" id="si-hono" value="0" oninput="recalcSimu()"></label>';
+    s += '<label>Type de bien<select id="si-type" onchange="recalcSimu()"><option value="ancien">Ancien (~7,5%)</option><option value="neuf">Neuf (~2,5%)</option></select></label>';
+    s += '</div>';
+    s += '<button type="button" class="simu-zero" onclick="document.getElementById(\'si-hono\').value=0;recalcSimu()">Mettre les honoraires agent \u00e0 0 \u20ac</button>';
+    s += '<div class="simu-out">';
+    s += '<div class="simu-row"><span>Frais de notaire</span><strong id="so-notaire">\u2014</strong></div>';
+    s += '<div class="simu-row"><span>Co\u00fbt total d\'acquisition</span><strong id="so-total">\u2014</strong></div>';
+    s += '<div class="simu-row"><span>Montant emprunt\u00e9</span><strong id="so-emprunt">\u2014</strong></div>';
+    s += '<div class="simu-row simu-hl"><span>Mensualit\u00e9 estim\u00e9e</span><strong id="so-mens">\u2014</strong></div>';
+    if (silverPlus) {
+      s += '<div class="simu-row"><span>Rendement brut</span><strong id="so-rdt-brut">\u2014</strong></div>';
+      s += '<div class="simu-row"><span>Rendement net</span><strong id="so-rdt-net">\u2014</strong></div>';
+    }
+    s += '</div>';
+    if (silverPlus) s += '<div class="simu-note">Rendement bas\u00e9 sur la valeur locative et les charges d\u00e9clar\u00e9es par le vendeur.</div>';
+    else s += '<div class="simu-note">Le rendement locatif s\'affiche d\u00e8s que le bien atteint le niveau Silver.</div>';
+    s += '<div class="simu-note">Frais de notaire et mensualit\u00e9s estimatifs \u2014 \u00e0 confirmer avec votre notaire et votre banque.</div>';
+    s += '</div>';
+    html += s;
   }
 
   if (b.description) {
@@ -612,6 +641,7 @@ async function afficherBien(b, similaires) {
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('content').innerHTML = html;
+  if (document.getElementById('si-prix')) recalcSimu();
   document.getElementById('content').style.display = 'block';
 }
 
@@ -1391,6 +1421,42 @@ async function envoyerDemandeLibre() {
 }
 
 // ── GALERIE ──
+function setPhoto(idx){
+  if(!window._photos||!window._photos.length)return;
+  window._photoIdx=(idx+window._photos.length)%window._photos.length;
+  var img=document.getElementById('main-photo'); if(img) img.src=window._photos[window._photoIdx];
+  var cc=document.getElementById('carousel-count'); if(cc) cc.textContent=(window._photoIdx+1)+' / '+window._photos.length;
+}
+function navPhoto(dir){ setPhoto((window._photoIdx||0)+dir); }
+function recalcSimu(){
+  var prix=+(document.getElementById('si-prix').value)||0;
+  var apport=+(document.getElementById('si-apport').value)||0;
+  var taux=+(document.getElementById('si-taux').value)||0;
+  var duree=+(document.getElementById('si-duree').value)||0;
+  var hono=+(document.getElementById('si-hono').value)||0;
+  var type=document.getElementById('si-type').value;
+  var tauxNot=type==='neuf'?0.025:0.075;
+  var notaire=Math.round(prix*tauxNot);
+  var total=prix+notaire+hono;
+  var emprunt=Math.max(total-apport,0);
+  var mens=0;
+  if(emprunt>0 && duree>0){
+    if(taux>0){ var i=taux/100/12, n=duree*12; mens=Math.round(emprunt*i/(1-Math.pow(1+i,-n))); }
+    else { mens=Math.round(emprunt/(duree*12)); }
+  }
+  var f=function(v){return (Math.round(v)).toLocaleString('fr-FR')+' \u20ac';};
+  document.getElementById('so-notaire').textContent=f(notaire);
+  document.getElementById('so-total').textContent=f(total);
+  document.getElementById('so-emprunt').textContent=f(emprunt);
+  document.getElementById('so-mens').textContent=mens?f(mens)+'/mois':'\u2014';
+  var s=window._simu||{};
+  if(s.silverPlus){
+    var la=(s.loyer||0)*12;
+    var eb=document.getElementById('so-rdt-brut'), en=document.getElementById('so-rdt-net');
+    if(eb) eb.textContent=(prix>0&&la>0)?(la/prix*100).toFixed(1)+' %':'\u2014';
+    if(en) en.textContent=(prix>0&&la>0)?((la-(s.charges||0))/prix*100).toFixed(1)+' %':'\u2014';
+  }
+}
 function changePhoto(src) {
   var el = document.getElementById('main-photo');
   if (el) el.src = src;
