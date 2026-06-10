@@ -996,7 +996,7 @@ function calculer(annonce, dvf, loyers, indice, dvfCerema, prixFNAIM, prixImmoCo
 /* ══ SYNTHÈSE HANAÉ (Claude API) ══ */
 async function genererSynthese(annonce, dvf, calculs) {
   try {
-    var prompt = `Tu es Hanaé, l\'agent IA d\'ImmoConnect. Rédige une synthèse professionnelle d\'évaluation immobilière en 4 paragraphes (200 mots max) pour ce bien.
+    var prompt = `Tu es Hanaé, l\'agent IA d\'ImmoConnect. Rédige une synthèse professionnelle d\'évaluation immobilière en 5 paragraphes (320 mots max) pour ce bien.
 
 BIEN : ${annonce.type_bien} ${annonce.surface}m² à ${annonce.ville} (${annonce.code_postal})
 Année construction : ${annonce.annee_construction || 'NC'} · DPE : ${annonce.classe_dpe || 'NC'} · État : ${annonce.statut_occupation || 'NC'}
@@ -1017,7 +1017,7 @@ LOYER & RENDEMENT :
 
 MARCHÉ : ${dvf.nbVentes} ventes DVF analysées · Tendance 2023 : ${calculs.tendance2023}% · Tendance 2024 : ${calculs.tendance2024}%
 
-Sois professionnel et factuel. Explique la méthode des 3 sources (DVF + indice Notaires-INSEE + carte des loyers). Donne un avis clair sur le positionnement prix.`;
+Sois professionnel et factuel. Explique la méthode des 3 sources (DVF + indice Notaires-INSEE + carte des loyers). Donne un avis clair sur le positionnement prix. Termine par un paragraphe intitulé « Les alentours » décrivant le quartier et l'environnement de ${annonce.ville} : ambiance générale du secteur, commerces et commodités de proximité, transports, écoles et cadre de vie, d'après ta connaissance de la commune.`;
 
     // Appel sécurisé via Edge Function (clé Anthropic protégée côté serveur)
     var res = await db.functions.invoke('rapport-hanae', {
