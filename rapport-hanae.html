@@ -271,7 +271,7 @@ async function chargerRapport() {
     // 5. Stocker
     var dept = annonce.code_postal ? annonce.code_postal.substring(0,2) : '';
     var barometre = prixFNAIM > 0 ? { prixM2Moyen: prixFNAIM, departement: 'Dept ' + dept, miseAJour: 'Mai 2026' } : null;
-    rapportData = { annonce, dvf, dvfCerema, prixFNAIM, prixImmoConnect, barometre, insee, calculs, biensComparatifs };
+    rapportData = { annonce, dvf, dvfCerema, prixFNAIM, prixImmoConnect: prixM2ImmoConnect, barometre, insee, calculs, biensComparatifs };
 
     document.getElementById('rapport-content').innerHTML = '<div class="loading"><div class="loading-spin"></div>Hanaé rédige la synthèse…</div>';
 
