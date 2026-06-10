@@ -794,9 +794,6 @@ function buildContactButtons(b, niv) {
       html += 'Vous êtes le seul agent à pouvoir contacter ce vendeur pendant cette période.</div>';
       html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">💬 Contacter le vendeur</button>';
       html += '<button class="btn-contact bc-blue" onclick="ouvrirVisite()">📅 Réserver une visite</button>';
-      if (niv === 'gold' || niv === 'platinium') {
-        html += '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-out" style="margin-top:4px">📊 Rapport Hanaé</a>';
-      }
       return html;
     } else if (isAgent) {
       // Autre agent : bien bloqué
@@ -860,12 +857,6 @@ function buildContactButtons(b, niv) {
     html += '<button class="btn-contact bc-out" onclick="ouvrirVisite()">📅 Réserver une visite</button>';
   } else {
     html += '<a href="forfaits.html" class="btn-contact bc-out" style="display:block;text-align:center;text-decoration:none">📅 Réserver une visite — abonnés</a>';
-  }
-  // RAPPORT HANAÉ — abonnés uniquement
-  if (_estAb) {
-    html += '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-blue" style="margin-top:4px">📊 Rapport Hanaé</a>';
-  } else {
-    html += '<a href="forfaits.html" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;margin-top:4px">📊 Rapport Hanaé — abonnés</a>';
   }
 
   // AFFICHAGE QUOTA CONTACTS VENDEUR pour agents (mode acheteurs_agents)
