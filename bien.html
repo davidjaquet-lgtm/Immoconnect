@@ -70,6 +70,10 @@ nav{background:#fff;border-bottom:1px solid var(--line);height:54px;display:flex
 .simu-row span{color:var(--muted)}
 .simu-row.simu-hl strong{color:var(--teal);font-size:16px}
 .simu-note{font-size:10px;color:var(--muted);margin-top:8px;line-height:1.5}
+.simu-tabs{display:flex;gap:6px;margin-bottom:12px}
+.simu-tab{flex:1;padding:8px;border:1px solid var(--line);background:#fff;border-radius:6px;font-family:inherit;font-size:12px;cursor:pointer;color:var(--muted)}
+.simu-tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.simu-card.mode-simple .simu-fisc{display:none}
 .niveau-badge{position:absolute;top:16px;left:16px;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.8px}
 .nb-standard{background:#F1EFE8;color:#555}
 .nb-silver{background:#E6F1FB;color:var(--blue)}
@@ -401,7 +405,7 @@ async function afficherBien(b, similaires) {
       if (_av && _av.data) { isAgent = true; isAgentAbonne = (_av.data.abonnement_actif === true) && _av.data.forfait_agent && _av.data.forfait_agent !== 'pay_per_use'; }
     } catch (e) {}
     try {
-      var _pa = await db.from('projets_acheteurs').select('forfait,apport,duree_emprunt,taux_envisage,strategie,tmi,regime_fiscal').eq('email', currentUser.email).maybeSingle();
+      var _pa = await db.from('projets_acheteurs').select('forfait,apport,duree_emprunt,taux_envisage,strategie,tmi,regime_fiscal,salaire_net,salaire_co,primes_annuelles,revenus_locatifs').eq('email', currentUser.email).maybeSingle();
       if (_pa && _pa.data) { if (_pa.data.forfait === 'investisseur') isInvestAbonne = true; window._profil = _pa.data; }
     } catch (e) {}
   }
@@ -596,12 +600,15 @@ async function afficherBien(b, similaires) {
   var silverPlus = ['silver','gold','platinium'].indexOf(niveauBien) !== -1;
   if (estAbonne && prix > 0) {
     var chargesAnnuelles = (b.charges_syndic||0)*12 + (b.taxe_fonciere_montant||0);
-    window._simu = { loyer: loyerEffectif, charges: chargesAnnuelles, silverPlus: silverPlus };
+    window._simu = { loyer: loyerEffectif, charges: chargesAnnuelles, silverPlus: silverPlus, typeBien: (b.type_bien||'') };
     var prof = window._profil || {};
     var stratMap = {'Location meubl\u00e9e (LMNP)':'lmnp_micro','Location nue longue dur\u00e9e':'micro','Colocation':'lmnp_micro','Immeuble de rapport':'reel','D\u00e9ficit foncier / travaux':'reel','Location courte dur\u00e9e (Airbnb)':'lmnp_micro'};
-    var dApport = prof.apport || 0, dTaux = prof.taux_envisage || 3.5, dDuree = prof.duree_emprunt || 20, dTmi = String(prof.tmi || 30), dRegime = prof.regime_fiscal || stratMap[prof.strategie] || 'micro';
+    var dApport = prof.apport || 0, dTaux = prof.taux_envisage || 3.5, dDuree = prof.duree_emprunt || 20, dTmi = (prof.tmi ? String(prof.tmi) : ''), dRegime = prof.regime_fiscal || stratMap[prof.strategie] || 'micro';
+    var dRevenu = Math.round(((prof.salaire_net||0)+(prof.salaire_co||0))*12 + (prof.primes_annuelles||0) + (prof.revenus_locatifs||0));
+    var dParts = prof.parts || 1;
     var sel = function(v,t){ return v===t ? ' selected' : ''; };
-    var s = '<div class="simu-card"><div class="simu-title">\ud83e\uddee Simulateur acheteur</div>';
+    var s = '<div class="simu-card mode-simple"><div class="simu-title">\ud83e\uddee Simulateur acheteur</div>';
+    if (silverPlus) s += '<div class="simu-tabs"><button type="button" class="simu-tab active" id="tab-simple" onclick="setSimuMode(\'simple\')">Sans imp\u00f4t</button><button type="button" class="simu-tab" id="tab-impot" onclick="setSimuMode(\'impot\')">Avec imp\u00f4t</button></div>';
     s += '<div class="simu-grid">';
     s += '<label>Prix du bien (\u20ac)<input type="number" id="si-prix" value="'+prix+'" oninput="recalcSimu()"></label>';
     s += '<label>Apport (\u20ac)<input type="number" id="si-apport" value="'+dApport+'" oninput="recalcSimu()"></label>';
@@ -609,8 +616,10 @@ async function afficherBien(b, similaires) {
     s += '<label>Dur\u00e9e (ans)<input type="number" id="si-duree" value="'+dDuree+'" oninput="recalcSimu()"></label>';
     s += '<label>Type de bien<select id="si-type" onchange="recalcSimu()"><option value="ancien">Ancien (~7,5%)</option><option value="neuf">Neuf (~2,5%)</option></select></label>';
     if (silverPlus) {
-      s += '<label>R\u00e9gime fiscal<select id="si-regime" onchange="recalcSimu()"><option value="micro"'+sel(dRegime,'micro')+'>Nu \u2014 micro-foncier (30%)</option><option value="reel"'+sel(dRegime,'reel')+'>Nu \u2014 r\u00e9el</option><option value="lmnp_micro"'+sel(dRegime,'lmnp_micro')+'>LMNP \u2014 micro-BIC (50%)</option><option value="lmnp_reel"'+sel(dRegime,'lmnp_reel')+'>LMNP \u2014 r\u00e9el (amortissement)</option></select></label>';
-      s += '<label>Votre TMI<select id="si-tmi" onchange="recalcSimu()"><option value="11"'+sel(dTmi,'11')+'>11 %</option><option value="30"'+sel(dTmi,'30')+'>30 %</option><option value="41"'+sel(dTmi,'41')+'>41 %</option><option value="45"'+sel(dTmi,'45')+'>45 %</option></select></label>';
+      s += '<label class="simu-fisc">R\u00e9gime fiscal<select id="si-regime" onchange="recalcSimu()"><option value="micro"'+sel(dRegime,'micro')+'>Nu \u2014 micro-foncier (30%)</option><option value="reel"'+sel(dRegime,'reel')+'>Nu \u2014 r\u00e9el</option><option value="lmnp_micro"'+sel(dRegime,'lmnp_micro')+'>LMNP \u2014 micro-BIC (50%)</option><option value="lmnp_reel"'+sel(dRegime,'lmnp_reel')+'>LMNP \u2014 r\u00e9el (amortissement)</option></select></label>';
+      s += '<label class="simu-fisc">Votre TMI<select id="si-tmi" onchange="recalcSimu()"><option value=""'+sel(dTmi,'')+'>\u2014 \u00e0 renseigner \u2014</option><option value="11"'+sel(dTmi,'11')+'>11 %</option><option value="30"'+sel(dTmi,'30')+'>30 %</option><option value="41"'+sel(dTmi,'41')+'>41 %</option><option value="45"'+sel(dTmi,'45')+'>45 %</option></select></label>';
+      s += '<label class="simu-fisc">Revenu net imposable foyer (\u20ac/an)<input type="number" id="si-revenu" value="'+dRevenu+'" oninput="recalcSimu()"></label>';
+      s += '<label class="simu-fisc">Nombre de parts<input type="number" step="0.5" min="1" id="si-parts" value="'+dParts+'" oninput="recalcSimu()"></label>';
     }
     s += '</div>';
     s += '<div class="simu-out">';
@@ -621,15 +630,16 @@ async function afficherBien(b, similaires) {
     if (silverPlus) {
       s += '<div class="simu-row"><span>Rendement brut</span><strong id="so-rdt-brut">\u2014</strong></div>';
       s += '<div class="simu-row"><span>Rendement net</span><strong id="so-rdt-net">\u2014</strong></div>';
-      s += '<div class="simu-row"><span>Imp\u00f4t annuel estim\u00e9</span><strong id="so-impot">\u2014</strong></div>';
-      s += '<div class="simu-row simu-hl"><span>Rendement net apr\u00e8s imp\u00f4t</span><strong id="so-rdt-apres">\u2014</strong></div>';
-      s += '<div class="simu-row"><span>Cash-flow mensuel (avant imp\u00f4t)</span><strong id="so-cf-avant">\u2014</strong></div>';
-      s += '<div class="simu-row simu-hl"><span>Cash-flow mensuel (apr\u00e8s imp\u00f4t)</span><strong id="so-cf-apres">\u2014</strong></div>';
+      s += '<div class="simu-row simu-fisc"><span>Imp\u00f4t annuel estim\u00e9</span><strong id="so-impot">\u2014</strong></div>';
+      s += '<div class="simu-row simu-hl simu-fisc"><span>Rendement net apr\u00e8s imp\u00f4t</span><strong id="so-rdt-apres">\u2014</strong></div>';
+      s += '<div class="simu-row simu-hl"><span>Cash-flow mensuel (avant imp\u00f4t)</span><strong id="so-cf-avant">\u2014</strong></div>';
+      s += '<div class="simu-row simu-hl simu-fisc"><span>Cash-flow mensuel (apr\u00e8s imp\u00f4t)</span><strong id="so-cf-apres">\u2014</strong></div>';
     }
     s += '</div>';
     if (silverPlus) s += '<div class="simu-note">Rendement bas\u00e9 sur la valeur locative et les charges d\u00e9clar\u00e9es par le vendeur.</div>';
     else s += '<div class="simu-note">Le rendement locatif s\'affiche d\u00e8s que le bien atteint le niveau Silver.</div>';
     if (prof && (prof.apport || prof.taux_envisage)) s += '<div class="simu-note">Valeurs pr\u00e9-remplies depuis votre profil investisseur \u2014 modifiables ici.</div>';
+    if (silverPlus) s += '<div class="simu-note simu-fisc" id="so-mode"></div>';
     s += '<div class="simu-note">Frais de notaire, mensualit\u00e9s et fiscalit\u00e9 estimatifs \u2014 \u00e0 confirmer avec votre notaire, votre banque et un conseiller fiscal.</div>';
     s += '</div>';
     html += s;
@@ -1444,6 +1454,13 @@ function setPhoto(idx){
   var cc=document.getElementById('carousel-count'); if(cc) cc.textContent=(window._photoIdx+1)+' / '+window._photos.length;
 }
 function navPhoto(dir){ setPhoto((window._photoIdx||0)+dir); }
+function setSimuMode(m){
+  var card=document.querySelector('.simu-card'); if(!card) return;
+  if(m==='impot') card.classList.remove('mode-simple'); else card.classList.add('mode-simple');
+  var ts=document.getElementById('tab-simple'), ti=document.getElementById('tab-impot');
+  if(ts) ts.classList.toggle('active', m!=='impot');
+  if(ti) ti.classList.toggle('active', m==='impot');
+}
 function recalcSimu(){
   var prix=+(document.getElementById('si-prix').value)||0;
   var apport=+(document.getElementById('si-apport').value)||0;
@@ -1471,24 +1488,64 @@ function recalcSimu(){
     if(eb) eb.textContent=(prix>0&&la>0)?(la/prix*100).toFixed(1)+' %':'\u2014';
     if(en) en.textContent=(prix>0&&la>0)?((la-(s.charges||0))/prix*100).toFixed(1)+' %':'\u2014';
     var regime=(document.getElementById('si-regime')||{}).value||'micro';
-    var tmi=(document.getElementById('si-tmi')||{}).value||'30';
-    var impot=calculerImpot(la, s.charges||0, prix, regime, tmi);
-    var ei=document.getElementById('so-impot'); if(ei) ei.textContent=la>0?f(impot)+'/an':'\u2014';
-    var ea=document.getElementById('so-rdt-apres'); if(ea) ea.textContent=(prix>0&&la>0)?(((la-(s.charges||0)-impot)/prix)*100).toFixed(1)+' %':'\u2014';
+    var tmi=(document.getElementById('si-tmi')||{}).value;
+    var revenuFoyer=+(document.getElementById('si-revenu')||{}).value||0;
+    var parts=+(document.getElementById('si-parts')||{}).value||1;
+    var interets=Math.round(emprunt*(taux/100));
+    var fiscCalc=(revenuFoyer>0)||(tmi!==''&&tmi!=null);
     var loyerM=s.loyer||0, chargesM=(s.charges||0)/12;
-    var cfAvant=loyerM-chargesM-mens, cfApres=cfAvant-impot/12;
-    var fcf=function(v){var r=Math.round(v);return (r>=0?'+':'')+r.toLocaleString('fr-FR')+' \u20ac/mois';};
-    var ca=document.getElementById('so-cf-avant'); if(ca) ca.textContent=la>0?fcf(cfAvant):'\u2014';
-    var cp=document.getElementById('so-cf-apres'); if(cp) cp.textContent=la>0?fcf(cfApres):'\u2014';
+    var cfAvant=loyerM-chargesM-mens;
+    var fcf=function(v){var x=Math.round(v);return (x>=0?'+':'')+x.toLocaleString('fr-FR')+' \u20ac/mois';};
+    var RED='#c0392b';
+    var ei=document.getElementById('so-impot'), ea=document.getElementById('so-rdt-apres'), em=document.getElementById('so-mode'), ca=document.getElementById('so-cf-avant'), cp=document.getElementById('so-cf-apres');
+    if(ca){ ca.textContent=la>0?fcf(cfAvant):'\u2014'; ca.style.color=(la>0&&cfAvant<0)?RED:''; }
+    if(!fiscCalc){
+      if(ei) ei.textContent='Non calculable';
+      if(ea) ea.textContent='Non calculable';
+      if(cp){ cp.textContent='Non calculable'; cp.style.color=''; }
+      if(em) em.textContent='Renseignez votre revenu imposable et vos parts (ou au minimum votre TMI) pour estimer l\'imp\u00f4t et le cash-flow apr\u00e8s imp\u00f4t.';
+    } else {
+      var r=calculerImpot({loyerAnnuel:la, charges:(s.charges||0), interets:interets, prix:prix, regime:regime, typeBien:(s.typeBien||''), revenuFoyer:revenuFoyer, parts:parts, tmi:tmi});
+      var impot=r.impot;
+      var cfApres=cfAvant-impot/12;
+      if(ei) ei.textContent=la>0?f(impot)+'/an':'\u2014';
+      if(ea) ea.textContent=(prix>0&&la>0)?(((la-(s.charges||0)-impot)/prix)*100).toFixed(1)+' %':'\u2014';
+      if(cp){ cp.textContent=la>0?fcf(cfApres):'\u2014'; cp.style.color=(la>0&&cfApres<0)?RED:''; }
+      if(em){ em.textContent=(r.mode==='bareme')?('Imp\u00f4t au bar\u00e8me progressif ('+parts+' part'+(parts>1?'s':'')+', revenu foyer renseign\u00e9) + 17,2 % de pr\u00e9l\u00e8vements sociaux.'):('Estimation simplifi\u00e9e \u00e0 la TMI ('+tmi+' %) + 17,2 % \u2014 renseignez revenu imposable et parts pour un calcul au bar\u00e8me.'); }
+    }
   }
 }
-function calculerImpot(loyerAnnuel, charges, prix, regime, tmi){
-  var tmiNum=parseFloat(tmi)/100, prelevement=0.172, ri=0;
-  if(regime==='micro') ri=loyerAnnuel*0.70;
-  else if(regime==='reel') ri=Math.max(0,loyerAnnuel-charges);
-  else if(regime==='lmnp_micro') ri=loyerAnnuel*0.50;
-  else if(regime==='lmnp_reel') ri=Math.max(0,loyerAnnuel-charges-prix*0.0333);
-  return Math.round(ri*(tmiNum+prelevement));
+function _irBareme(revenu, parts){
+  parts = parts>0?parts:1;
+  var q=revenu/parts; if(q<=0) return 0;
+  var tr=[[11600,0],[29579,0.11],[84577,0.30],[181917,0.41],[1e15,0.45]];
+  var t=0, prev=0;
+  for(var i=0;i<tr.length;i++){ var seuil=tr[i][0], taux=tr[i][1]; if(q>prev){ t+=(Math.min(q,seuil)-prev)*taux; prev=seuil; } else break; }
+  return t*parts;
+}
+function calculerImpot(p){
+  var loyer=p.loyerAnnuel||0, charges=p.charges||0, interets=p.interets||0, prix=p.prix||0, regime=p.regime||'micro';
+  var base=0, basePS=0;
+  if(regime==='micro'){ if(loyer>15000) regime='reel'; else { base=loyer*0.70; basePS=base; } }
+  if(regime==='lmnp_micro'){ if(loyer>77700) regime='lmnp_reel'; else { base=loyer*0.50; basePS=base; } }
+  if(regime==='reel'){ base=loyer-charges-interets; basePS=Math.max(0,base); }
+  if(regime==='lmnp_reel'){
+    var pt=(p.typeBien&&p.typeBien.toLowerCase().indexOf('maison')!==-1)?0.20:0.15;
+    var amortMax=prix*(1-pt)/30 + prix*0.10/7;
+    var resAvant=loyer-charges-interets;
+    var amort=Math.min(Math.max(resAvant,0), amortMax);
+    base=Math.max(0, resAvant-amort); basePS=base;
+  }
+  var ps=Math.round(Math.max(0,basePS)*0.172);
+  var ir=0, mode='tmi';
+  var bi=base<0?Math.max(base,-10700):base;
+  if(p.revenuFoyer>0){
+    ir=Math.round(_irBareme(p.revenuFoyer+bi, p.parts)-_irBareme(p.revenuFoyer, p.parts));
+    mode='bareme';
+  } else {
+    ir=Math.round(bi*(parseFloat(p.tmi)/100));
+  }
+  return { impot: ir+ps, ir: ir, ps: ps, base: Math.round(base), regime: regime, mode: mode };
 }
 function changePhoto(src) {
   var el = document.getElementById('main-photo');
