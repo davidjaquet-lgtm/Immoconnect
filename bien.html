@@ -570,9 +570,6 @@ async function afficherBien(b, similaires) {
   // Mettre à jour les meta Open Graph dynamiquement
   majMetaOG(b, urlBien, titrePartage);
 
-  // BOUTONS PARTAGE — visibles par tous
-  html += buildBoutonsPartage(b);
-
   html += statsHtml;
   if (docsHtml) html += '<div style="margin-bottom:16px">' + docsHtml + '</div>';
 
