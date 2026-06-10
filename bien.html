@@ -570,14 +570,6 @@ async function afficherBien(b, similaires) {
   // Mettre à jour les meta Open Graph dynamiquement
   majMetaOG(b, urlBien, titrePartage);
 
-  // SIMULATEUR NET VENDEUR — visible par le vendeur connecté
-  var userProfils3 = currentUser ? (currentUser.user_metadata?.profils || []) : [];
-  var isVendeurDuBien = currentUser && b.email_contact === currentUser.email;
-  if (isVendeurDuBien) {
-    var prix = b.prix || 0;
-    html += buildSimulateurNetVendeur(prix, b.type_bien);
-  }
-
   // BOUTONS PARTAGE — visibles par tous
   html += buildBoutonsPartage(b);
 
@@ -691,50 +683,6 @@ function calculerScoreDossier(b) {
   var obtenu = criteres.filter(function(c) { return c.ok; }).reduce(function(acc, c) { return acc + c.pts; }, 0)
   var score = Math.round(obtenu / total * 100)
   return { score, criteres, obtenu, total }
-}
-
-function buildSimulateurNetVendeur(prix, typeBien) {
-  if (!prix) return '';
-  var estMaison = typeBien && (typeBien.toLowerCase().includes('maison') || typeBien.toLowerCase().includes('villa'));
-
-  // Valeurs par défaut
-  var honorairesPct = 3;
-  var fraisDiagnostics = estMaison ? 600 : 350;
-  var fraisAgent = Math.round(prix * honorairesPct / 100);
-  var netVendeur = prix - fraisAgent - fraisDiagnostics;
-
-  return '<div style="background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:16px" id="simulateur-net">'
-    + '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">Simulateur — Net vendeur estimé</div>'
-    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">'
-    + '<div><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Honoraires agent (%)</div>'
-    + '<div style="display:flex;align-items:center;gap:6px">'
-    + '<input type="range" min="1" max="6" step="0.5" value="3" id="sim-honoraires" oninput="calculerNet()" style="flex:1">'
-    + '<span id="sim-honoraires-val" style="font-size:13px;font-weight:500;min-width:36px">3%</span>'
-    + '</div></div>'
-    + '<div><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Frais diagnostics (€)</div>'
-    + '<input type="number" id="sim-diagnostics" value="' + fraisDiagnostics + '" min="0" max="3000" step="50" oninput="calculerNet()" style="width:100%;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg)">'
-    + '</div></div>'
-    + '<div style="background:var(--bg);border-radius:8px;padding:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">'
-    + '<div><div style="font-size:11px;color:var(--muted)">Prix demandé</div><div style="font-size:16px;font-weight:500" id="sim-prix-affiche">' + Math.round(prix).toLocaleString("fr-FR") + ' €</div></div>'
-    + '<div><div style="font-size:11px;color:var(--muted)">Frais déduits</div><div style="font-size:16px;font-weight:500;color:var(--coral)" id="sim-frais-total">—</div></div>'
-    + '<div style="background:#E1F5EE;border-radius:6px;padding:6px"><div style="font-size:11px;color:#085041">Net vendeur estimé</div><div style="font-size:17px;font-weight:500;color:var(--teal)" id="sim-net">—</div></div>'
-    + '</div>'
-    + '<div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.5">Estimation indicative. Les honoraires réels dépendent du mandat signé avec votre agent. Ne comprend pas les éventuels remboursements de charges de copropriété.</div>'
-    + '</div>';
-}
-
-function calculerNet() {
-  var prixEl = document.querySelector('.bien-prix');
-  var prixText = prixEl ? prixEl.textContent.replace(/[^0-9]/g, '') : '0';
-  var prix = parseInt(prixText) || 0;
-  var honorairesPct = parseFloat(document.getElementById('sim-honoraires')?.value || 3);
-  var diagnostics = parseInt(document.getElementById('sim-diagnostics')?.value || 0);
-  document.getElementById('sim-honoraires-val').textContent = honorairesPct + '%';
-  var fraisAgent = Math.round(prix * honorairesPct / 100);
-  var totalFrais = fraisAgent + diagnostics;
-  var net = prix - totalFrais;
-  document.getElementById('sim-frais-total').textContent = '-' + totalFrais.toLocaleString('fr-FR') + ' €';
-  document.getElementById('sim-net').textContent = net.toLocaleString('fr-FR') + ' €';
 }
 
 function buildBoutonsPartage(b) {
