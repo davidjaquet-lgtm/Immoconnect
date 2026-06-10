@@ -287,7 +287,8 @@ async function chargerRapport() {
     // Afficher bouton visite si niveau Silver, Gold ou Platinium
     var niv = rapportData.annonce.niveau_vendeur || 'standard';
     if (['silver','gold','platinium'].includes(niv)) {
-      document.getElementById('btn-visite').style.display = 'inline-block';
+      var bv = document.getElementById('btn-visite');
+      if (bv) bv.style.display = 'inline-block';
     }
 
   } catch(e) {
