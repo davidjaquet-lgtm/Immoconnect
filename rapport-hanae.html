@@ -1494,5 +1494,20 @@ async function genererPDF() {
 function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
 function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
 </script>
+<script>
+(function(){
+  var aid = new URLSearchParams(location.search).get('annonce');
+  if (!aid) return;
+  var go = function(){
+    var inp = document.getElementById('annonce-id');
+    if (inp) inp.value = aid;
+    var sb = document.querySelector('.search-box');
+    if (sb) sb.style.display = 'none';
+    if (typeof chargerRapport === 'function') chargerRapport();
+  };
+  if (document.readyState !== 'loading') go();
+  else document.addEventListener('DOMContentLoaded', go);
+})();
+</script>
 </body>
 </html>

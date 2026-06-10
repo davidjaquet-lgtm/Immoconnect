@@ -364,9 +364,14 @@ async function afficherBien(b, similaires) {
   // Photos
   var photosHtml = '';
   var photos = [];
-  if (b.photo_principale) photos.push(b.photo_principale);
-  if (b.photos_supplementaires) {
-    try { var sup = JSON.parse(b.photos_supplementaires); photos = photos.concat(sup); } catch(e) {}
+  try {
+    var pu = b.photos_urls;
+    if (typeof pu === 'string') pu = JSON.parse(pu);
+    if (Array.isArray(pu)) photos = pu.filter(Boolean);
+  } catch(e) {}
+  if (!photos.length && b.photo_principale) photos = [b.photo_principale];
+  if (!photos.length && b.photos_supplementaires) {
+    try { var sup = JSON.parse(b.photos_supplementaires); if (Array.isArray(sup)) photos = sup.filter(Boolean); } catch(e) {}
   }
 
   window._photos = photos; window._photoIdx = 0;
@@ -602,14 +607,12 @@ async function afficherBien(b, similaires) {
     s += '<label>Apport (\u20ac)<input type="number" id="si-apport" value="'+dApport+'" oninput="recalcSimu()"></label>';
     s += '<label>Taux annuel (%)<input type="number" step="0.1" id="si-taux" value="'+dTaux+'" oninput="recalcSimu()"></label>';
     s += '<label>Dur\u00e9e (ans)<input type="number" id="si-duree" value="'+dDuree+'" oninput="recalcSimu()"></label>';
-    s += '<label>Honoraires agent (\u20ac)<input type="number" id="si-hono" value="0" oninput="recalcSimu()"></label>';
     s += '<label>Type de bien<select id="si-type" onchange="recalcSimu()"><option value="ancien">Ancien (~7,5%)</option><option value="neuf">Neuf (~2,5%)</option></select></label>';
     if (silverPlus) {
       s += '<label>R\u00e9gime fiscal<select id="si-regime" onchange="recalcSimu()"><option value="micro"'+sel(dRegime,'micro')+'>Nu \u2014 micro-foncier (30%)</option><option value="reel"'+sel(dRegime,'reel')+'>Nu \u2014 r\u00e9el</option><option value="lmnp_micro"'+sel(dRegime,'lmnp_micro')+'>LMNP \u2014 micro-BIC (50%)</option><option value="lmnp_reel"'+sel(dRegime,'lmnp_reel')+'>LMNP \u2014 r\u00e9el (amortissement)</option></select></label>';
       s += '<label>Votre TMI<select id="si-tmi" onchange="recalcSimu()"><option value="11"'+sel(dTmi,'11')+'>11 %</option><option value="30"'+sel(dTmi,'30')+'>30 %</option><option value="41"'+sel(dTmi,'41')+'>41 %</option><option value="45"'+sel(dTmi,'45')+'>45 %</option></select></label>';
     }
     s += '</div>';
-    s += '<button type="button" class="simu-zero" onclick="document.getElementById(\'si-hono\').value=0;recalcSimu()">Mettre les honoraires agent \u00e0 0 \u20ac</button>';
     s += '<div class="simu-out">';
     s += '<div class="simu-row"><span>Frais de notaire</span><strong id="so-notaire">\u2014</strong></div>';
     s += '<div class="simu-row"><span>Co\u00fbt total d\'acquisition</span><strong id="so-total">\u2014</strong></div>';
@@ -1446,11 +1449,10 @@ function recalcSimu(){
   var apport=+(document.getElementById('si-apport').value)||0;
   var taux=+(document.getElementById('si-taux').value)||0;
   var duree=+(document.getElementById('si-duree').value)||0;
-  var hono=+(document.getElementById('si-hono').value)||0;
   var type=document.getElementById('si-type').value;
   var tauxNot=type==='neuf'?0.025:0.075;
   var notaire=Math.round(prix*tauxNot);
-  var total=prix+notaire+hono;
+  var total=prix+notaire;
   var emprunt=Math.max(total-apport,0);
   var mens=0;
   if(emprunt>0 && duree>0){
