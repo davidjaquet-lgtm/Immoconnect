@@ -86,7 +86,17 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 .fn-val{color:#633806;font-weight:600}
 
 /* SYNTHESE HANAE */
-.hanae-synthese{background:var(--bg);border-radius:8px;padding:16px;font-size:13px;line-height:1.8;color:var(--ink)}
+.hanae-synthese{font-size:13px;line-height:1.75;color:var(--ink)}
+.syn-title{font-size:18px;font-weight:600;color:var(--ink);margin:0 0 4px;line-height:1.3}
+.syn-subtitle{font-size:12px;color:var(--muted);font-style:italic;margin:0 0 16px}
+.syn-section{background:var(--bg);border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:10px;padding:14px 16px;margin:0 0 12px}
+.syn-section-head{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.5px;margin:0 0 8px}
+.syn-ico{font-size:16px;line-height:1}
+.syn-p{font-size:13px;line-height:1.75;color:var(--ink);margin:0 0 8px}
+.syn-section .syn-p:last-child{margin-bottom:0}
+.syn-hr{border:none;border-top:1px solid var(--line);margin:14px 0}
+.hanae-synthese strong{font-weight:600;color:var(--ink)}
+.hanae-synthese em{color:var(--muted);font-style:italic}
 .hanae-typing{display:inline-block;width:8px;height:16px;background:var(--teal);animation:blink .8s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
@@ -994,6 +1004,42 @@ function calculer(annonce, dvf, loyers, indice, dvfCerema, prixFNAIM, prixImmoCo
 }
 
 /* ══ SYNTHÈSE HANAÉ (Claude API) ══ */
+function formatSynthese(md){
+  if(!md) return '';
+  var esc = String(md).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  function inline(t){ return t.replace(/\*\*([^*]+?)\*\*/g,'<strong>$1</strong>').replace(/\*([^*]+?)\*/g,'<em>$1</em>'); }
+  function icon(title){
+    var t = title.toLowerCase();
+    if(/m[ée]thodolog/.test(t)) return '\ud83d\udcca';
+    if(/position|prix|valeur/.test(t)) return '\ud83c\udff7\ufe0f';
+    if(/locatif|rendement|loyer/.test(t)) return '\ud83d\udcb0';
+    if(/conclusion|synth|recommand/.test(t)) return '\u2705';
+    if(/alentour|quartier|environ|secteur/.test(t)) return '\ud83d\udccd';
+    return '\u2022';
+  }
+  var lines = esc.split(/\n+/).map(function(l){ return l.trim(); }).filter(Boolean);
+  var out=''; var inSection=false; var titleDone=false;
+  function closeSection(){ if(inSection){ out+='</div>'; inSection=false; } }
+  lines.forEach(function(line){
+    if(/^-{3,}$/.test(line)) return;
+    var hm = line.match(/^#{1,6}\s+(.*)$/);
+    if(hm){ closeSection(); out += '<div class="syn-title">'+inline(hm[1])+'</div>'; titleDone=true; return; }
+    var sm = line.match(/^\*\*(.+?)\*\*\s*(.*)$/);
+    if(sm && sm[1].length<70){
+      closeSection();
+      out += '<div class="syn-section"><div class="syn-section-head"><span class="syn-ico">'+icon(sm[1])+'</span>'+inline(sm[1])+'</div>';
+      inSection=true;
+      if(sm[2]) out += '<p class="syn-p">'+inline(sm[2])+'</p>';
+      return;
+    }
+    if(titleDone && !inSection && /^\*[^*].*[^*]\*$/.test(line)){
+      out += '<div class="syn-subtitle">'+inline(line.replace(/^\*|\*$/g,''))+'</div>'; return;
+    }
+    out += '<p class="syn-p">'+inline(line)+'</p>';
+  });
+  closeSection();
+  return out;
+}
 async function genererSynthese(annonce, dvf, calculs) {
   try {
     var prompt = `Tu es Hanaé, l\'agent IA d\'ImmoConnect. Rédige une synthèse professionnelle d\'évaluation immobilière en 5 paragraphes (320 mots max) pour ce bien.
@@ -1017,7 +1063,7 @@ LOYER & RENDEMENT :
 
 MARCHÉ : ${dvf.nbVentes} ventes DVF analysées · Tendance 2023 : ${calculs.tendance2023}% · Tendance 2024 : ${calculs.tendance2024}%
 
-Sois professionnel et factuel. Explique la méthode des 3 sources (DVF + indice Notaires-INSEE + carte des loyers). Donne un avis clair sur le positionnement prix. Termine par un paragraphe intitulé « Les alentours » décrivant le quartier et l'environnement de ${annonce.ville} : ambiance générale du secteur, commerces et commodités de proximité, transports, écoles et cadre de vie, d'après ta connaissance de la commune.`;
+Sois professionnel et factuel. Explique la méthode des 3 sources (DVF + indice Notaires-INSEE + carte des loyers). Donne un avis clair sur le positionnement prix. Termine par un paragraphe intitulé « Les alentours » décrivant le quartier et l'environnement de ${annonce.ville} : ambiance générale du secteur, commerces et commodités de proximité, transports, écoles et cadre de vie, d'après ta connaissance de la commune. Structure ta réponse avec un titre de section markdown « ## » devant chaque partie : ## Méthodologie, ## Positionnement prix, ## Rendement locatif, ## Les alentours, ## Conclusion. Mets en gras (**…**) uniquement les chiffres clés.`;
 
     // Appel sécurisé via Edge Function (clé Anthropic protégée côté serveur)
     var res = await db.functions.invoke('rapport-hanae', {
@@ -1239,7 +1285,7 @@ function afficherRapport(d) {
   html += '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1E7A62,#185FA5);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🤖</div>';
   html += '<div><div style="font-size:12px;font-weight:600">Hanaé — Agent IA ImmoConnect</div><div style="font-size:11px;color:var(--muted)">Analyse basée sur les données DVF officielles</div></div>';
   html += '</div>';
-  html += '<div class="hanae-synthese">' + (d.synthese || '') + '</div>';
+  html += '<div class="hanae-synthese">' + formatSynthese(d.synthese || '') + '</div>';
   html += '<div class="disclaimer" style="margin-top:12px">Cet avis de valeur est généré automatiquement par intelligence artificielle sur la base des données DVF (Demandes de Valeurs Foncières) de la DGFiP et des informations renseignées par le vendeur. Il ne constitue pas une expertise immobilière et ne saurait engager la responsabilité d\'ImmoConnect. Les données de marché sont issues des ventes passées enregistrées dans la base DVF officielle.</div>';
   html += '</div></div>';
 
@@ -1451,7 +1497,8 @@ async function genererPDF() {
   y += 14;
 
   doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(15,15,14);
-  var synLines = doc.splitTextToSize(rapportData.synthese || '', pw-6);
+  var syntheseTxt = (rapportData.synthese || '').replace(/^#{1,6}\s*/gm,'').replace(/\*\*/g,'').replace(/\*/g,'').replace(/^-{3,}\s*$/gm,'');
+  var synLines = doc.splitTextToSize(syntheseTxt, pw-6);
   doc.text(synLines, lm+3, y);
   y += synLines.length * 5 + 10;
 
