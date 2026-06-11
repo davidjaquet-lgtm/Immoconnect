@@ -420,7 +420,7 @@ nav .nav-link{margin-right:18px}
           </div>
           <div style="background:var(--warm);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--line)">
             <div style="font-size:20px;font-weight:500;color:var(--teal)" id="rdt-cashflow">—</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:2px">Cashflow/mois</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px">Loyer net de charges /mois</div>
           </div>
         </div>
         <div id="matching-preview" style="font-size:12px;color:var(--muted);line-height:1.6"></div>
@@ -898,7 +898,7 @@ function afficherResultats(d) {
     html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">';
     html += '<div class="stat-box"><div class="stat-val">'+r.rdtBrut+' %</div><div class="stat-lbl">Rendement brut</div><div class="stat-sub">Loyer annuel / prix</div></div>';
     html += '<div class="stat-box" style="border:2px solid var(--teal)"><div class="stat-val" style="font-size:24px">'+r.rdtNet+' %</div><div class="stat-lbl" style="color:var(--teal)">Rendement net</div><div class="stat-sub">Après charges'+(r.travaux>0?' + travaux':' ')+'</div></div>';
-    html += '<div class="stat-box"><div class="stat-val" style="color:'+cashCol+'">'+(r.cashflow>=0?'+':'')+r.cashflow.toLocaleString('fr-FR')+' €</div><div class="stat-lbl">Cashflow mensuel</div><div class="stat-sub">Loyer − charges</div></div>';
+    html += '<div class="stat-box"><div class="stat-val" style="color:'+cashCol+'">'+(r.cashflow>=0?'+':'')+r.cashflow.toLocaleString('fr-FR')+' €</div><div class="stat-lbl">Loyer net de charges /mois</div><div class="stat-sub">Hors cr\u00e9dit et fiscalit\u00e9 \u2014 cash-flow complet r\u00e9serv\u00e9 aux abonn\u00e9s investisseurs</div></div>';
     html += '</div>';
 
     // Détail charges
