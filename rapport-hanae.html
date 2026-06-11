@@ -209,6 +209,17 @@ async function chargerRapport() {
   try {
     // 1. Charger l\'annonce depuis Supabase
     var { data: annonce, error } = await db.from('annonces_vendeurs').select('*').eq('id', id).single();
+
+    // CONFIDENTIALITÉ : un agent (autre que le vendeur) ne doit pas voir l'estimation Hanaé
+    // — son estimation personnelle est un critère de sélection des agents.
+    window._estAgentTiers = false;
+    try {
+      var { data: { session: _s } } = await db.auth.getSession();
+      if (_s && _s.user && annonce && _s.user.email !== annonce.email) {
+        var _av = await db.from('agents_validation').select('email').eq('email', _s.user.email).maybeSingle();
+        if (_av && _av.data) window._estAgentTiers = true;
+      }
+    } catch(e) {}
     if (error || !annonce) {
       // Essai par code postal
       var { data: annonces } = await db.from('annonces_vendeurs').select('*').eq('code_postal', id).order('created_at', {ascending:false}).limit(1);
@@ -286,7 +297,7 @@ async function chargerRapport() {
     document.getElementById('rapport-content').innerHTML = '<div class="loading"><div class="loading-spin"></div>Hanaé rédige la synthèse…</div>';
 
     // 6. Synthèse Hanaé via Claude
-    var synthese = await genererSynthese(annonce, dvf, calculs);
+    var synthese = window._estAgentTiers ? null : await genererSynthese(annonce, dvf, calculs);
 
     rapportData.synthese = synthese;
 
@@ -1084,7 +1095,9 @@ function afficherRapport(d) {
   if (baro) {
     html += '<div class="prix-card"><div class="prix-val" style="color:#185FA5">' + fmt(baro.prixM2Moyen) + ' €/m²</div><div class="prix-lbl">Baromètre ' + baro.departement + '</div><div class="prix-sub">SeLoger/MA · ' + baro.miseAJour + '</div></div>';
   }
-  html += '<div class="prix-card featured"><div class="prix-val">' + fmt(c.prixM2Marche) + ' €/m²</div><div class="prix-lbl">Prix composite</div><div class="prix-sub" style="color:' + c.scoreColor + ';font-weight:600">' + c.score + '</div></div>';
+  if (!window._estAgentTiers) {
+    html += '<div class="prix-card featured"><div class="prix-val">' + fmt(c.prixM2Marche) + ' €/m²</div><div class="prix-lbl">Prix composite</div><div class="prix-sub" style="color:' + c.scoreColor + ';font-weight:600">' + c.score + '</div></div>';
+  }
   html += '</div>';
 
   // Méthodologie composite
@@ -1096,13 +1109,21 @@ function afficherRapport(d) {
   html += '. Sources officielles prioritaires sur les indicateurs de marché.';
   html += '</div>';
 
-  // Fourchette
-  html += '<div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:16px">';
-  html += '<span style="font-size:16px">🎯</span>';
-  html += '<div><div style="font-size:11px;font-weight:600;color:#085041;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px">Fourchette estimée Hanaé</div>';
-  html += '<div style="font-size:16px;font-weight:500;color:#0F6E56">' + fmt(c.fourchetteBas) + ' € — ' + fmt(c.fourchettHaut) + ' €</div>';
-  html += '<div style="font-size:10px;color:#0F6E56;margin-top:2px">Croisement de ' + c.nbSources + ' sources · ' + (a.surface || '—') + ' m² · ' + a.ville + '</div>';
-  html += '</div></div>';
+  // Fourchette — confidentielle pour les agents tiers (critère de sélection)
+  if (window._estAgentTiers) {
+    html += '<div style="background:#FAEEDA;border:1px solid rgba(192,155,90,.35);border-radius:8px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:16px">';
+    html += '<span style="font-size:16px">🔒</span>';
+    html += '<div><div style="font-size:11px;font-weight:600;color:#633806;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px">Estimation Hanaé confidentielle</div>';
+    html += '<div style="font-size:12px;color:#633806;line-height:1.6">Réservée au vendeur. Votre propre estimation du prix de marché fait partie des critères de sélection des agents — elle sera comparée aux données DVF du secteur.</div>';
+    html += '</div></div>';
+  } else {
+    html += '<div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:16px">';
+    html += '<span style="font-size:16px">🎯</span>';
+    html += '<div><div style="font-size:11px;font-weight:600;color:#085041;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px">Fourchette estimée Hanaé</div>';
+    html += '<div style="font-size:16px;font-weight:500;color:#0F6E56">' + fmt(c.fourchetteBas) + ' € — ' + fmt(c.fourchettHaut) + ' €</div>';
+    html += '<div style="font-size:10px;color:#0F6E56;margin-top:2px">Croisement de ' + c.nbSources + ' sources · ' + (a.surface || '—') + ' m² · ' + a.ville + '</div>';
+    html += '</div></div>';
+  }
   html += '</div></div>';
 
   // ── SECTION 3 : VENTES PASSÉES ──
@@ -1233,7 +1254,8 @@ function afficherRapport(d) {
     html += '</div></div>';
   }
 
-  // ── SECTION 7 : SYNTHÈSE HANAÉ ──
+  // ── SECTION 7 : SYNTHÈSE HANAÉ ── (masquée pour les agents tiers : elle cite la fourchette)
+  if (!window._estAgentTiers) {
   html += '<div class="rapport-section">';
   html += '<div class="rs-head"><span class="rs-icon">🤖</span><span class="rs-title">Synthèse Hanaé — Avis de valeur IA</span><span class="rs-badge">Généré par IA</span></div>';
   html += '<div class="rs-body">';
@@ -1244,6 +1266,7 @@ function afficherRapport(d) {
   html += '<div class="hanae-synthese">' + formatSynthese(d.synthese || '') + '</div>';
   html += '<div class="disclaimer" style="margin-top:12px">Cet avis de valeur est généré automatiquement par intelligence artificielle sur la base des données DVF (Demandes de Valeurs Foncières) de la DGFiP et des informations renseignées par le vendeur. Il ne constitue pas une expertise immobilière et ne saurait engager la responsabilité d\'ImmoConnect. Les données de marché sont issues des ventes passées enregistrées dans la base DVF officielle.</div>';
   html += '</div></div>';
+  }
 
   document.getElementById('rapport-content').innerHTML = html;
 }
