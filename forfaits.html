@@ -176,6 +176,36 @@ nav .nav-link{margin-right:18px}
 
 <div class="page">
 
+  <!-- ══ LE SITE EN BREF ══ -->
+  <div style="background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;margin-bottom:22px">
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:4px">Comment fonctionne ImmoConnect</div>
+    <div style="font-size:17px;font-weight:600;color:var(--ink);margin-bottom:14px">L'immobilier en direct, en 4 étapes simples</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px" class="how-grid">
+      <div style="background:var(--bg);border-radius:8px;padding:12px 14px">
+        <div style="font-size:18px;margin-bottom:4px">🏠</div>
+        <div style="font-size:12px;font-weight:600;margin-bottom:3px">1 · Le vendeur publie — gratuit</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6">Annonce gratuite, estimation IA offerte. Plus le dossier est complet, plus l'annonce est visible et crédible.</div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:12px 14px">
+        <div style="font-size:18px;margin-bottom:4px">🔑</div>
+        <div style="font-size:12px;font-weight:600;margin-bottom:3px">2 · L'acheteur contacte — gratuit</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6">Toutes les annonces visibles en entier, prix en clair. Contact direct vendeur gratuit (5 par semaine).</div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:12px 14px">
+        <div style="font-size:18px;margin-bottom:4px">📈</div>
+        <div style="font-size:12px;font-weight:600;margin-bottom:3px">3 · L'investisseur s'équipe</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6">Abonnement 29,99 €/mois : rendement net et fiscalité calculés, rapports IA, visites, matching automatique.</div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:12px 14px">
+        <div style="font-size:18px;margin-bottom:4px">🤝</div>
+        <div style="font-size:12px;font-weight:600;margin-bottom:3px">4 · Des agents, si VOUS voulez</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6">Aucun démarchage par défaut. Le vendeur peut ouvrir son bien à des agents vérifiés (carte T) et choisit librement.</div>
+      </div>
+    </div>
+    <div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:10px 14px;font-size:12px;color:#085041;line-height:1.6"><strong>Qui paie quoi ?</strong> Vendre : gratuit, à tous les niveaux. Acheter : gratuit. Seuls paient un abonnement les <strong>investisseurs</strong> (outils d'analyse) et les <strong>agents</strong> (accès aux dossiers vendeurs). Aucune commission sur la vente.</div>
+  </div>
+  <style>@media(max-width:760px){.how-grid{grid-template-columns:1fr 1fr!important}}</style>
+
   <div class="tabs">
     <button class="tab active" data-panel="vendeurs">Vendeurs</button>
     <button class="tab" data-panel="acheteurs">Acheteurs & Investisseurs</button>
@@ -186,7 +216,7 @@ nav .nav-link{margin-right:18px}
   <div id="panel-vendeurs" class="panel active">
     <div class="eyebrow">4 niveaux · 100% gratuits</div>
     <div class="sec-title">Vendez comme vous voulez</div>
-    <div class="subtitle">Complétez votre dossier pour débloquer plus d'options. Plus votre dossier est complet, plus vous choisissez librement qui peut vous contacter.</div>
+    <div class="subtitle">Publier est gratuit, quel que soit le niveau. Le principe est simple : <strong>plus vous renseignez votre bien, plus votre annonce est visible et inspire confiance</strong> — et plus vous avez d'options pour choisir qui peut vous contacter (acheteurs seuls, agents, ou les deux).</div>
 
     <!-- PITCH OPTIONS SILVER+ -->
     <div style="background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;margin-bottom:20px">
@@ -217,7 +247,7 @@ nav .nav-link{margin-right:18px}
     <div class="levels-grid">
       <div class="level-card">
         <div class="level-accent" style="background:#B4B2A9"></div>
-        <div class="level-name">Standard</div>
+        <div class="level-name">Standard <span style="font-size:11px;font-weight:500;color:var(--muted)">· Annonce de base</span></div>
         <div class="level-sub">Démarrez sans aucun document</div>
         <div class="level-doc">Aucun document requis</div>
         <div class="feat-list">
@@ -231,9 +261,9 @@ nav .nav-link{margin-right:18px}
       <!-- SILVER -->
       <div class="level-card">
         <div class="level-accent" style="background:var(--blue)"></div>
-        <div class="level-name">Silver</div>
+        <div class="level-name">Silver <span style="font-size:11px;font-weight:500;color:var(--blue)">· Annonce enrichie</span></div>
         <div class="level-sub">Le bon équilibre pour commencer</div>
-        <div class="level-doc"><strong>Requis :</strong> valeur locative + charges de copropriété — déclarées, sans justificatif</div>
+        <div class="level-doc"><strong>Requis :</strong> valeur locative estimée + charges de copropriété si votre bien est en copro — simple déclaration, aucun justificatif</div>
         <div class="feat-list">
           <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">3 photos</span></div>
           <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Contact acheteurs gratuit</span></div>
@@ -248,11 +278,13 @@ nav .nav-link{margin-right:18px}
       <div class="level-card best">
         <div class="level-accent" style="background:var(--gold)"></div>
         <span class="level-badge" style="background:#FAEEDA;color:#633806">Recommandé</span>
-        <div class="level-name">Gold</div>
-        <div class="level-sub">Visibilité maximale auprès des acheteurs</div>
-        <div class="level-doc"><strong>Requis :</strong> Silver + taxe foncière avec justificatif + adresse exacte (pour vérification)</div>
+        <div class="level-name">Gold <span style="font-size:11px;font-weight:500;color:#854F0B">· Dossier vérifié ✓</span></div>
+        <div class="level-sub">Le badge de confiance qui rassure les acheteurs</div>
+        <div class="level-doc"><strong>Requis :</strong> Silver + avis de taxe foncière (justificatif vérifié) + adresse exacte. Aucun document de copropriété exigé.</div>
         <div class="feat-list">
           <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Tout Silver inclus</span></div>
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Photos illimitées</span></div>
+          <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Badge « Dossier vérifié ✓ » sur l'annonce</span></div>
           <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Adresse exacte visible par tous</span></div>
           <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Contact direct gratuit</span></div>
         </div>
@@ -262,9 +294,9 @@ nav .nav-link{margin-right:18px}
       <div class="level-card">
         <div class="level-accent" style="background:var(--teal)"></div>
         <span class="level-badge" style="background:#E1F5EE;color:#085041">Maximum</span>
-        <div class="level-name">Platinium</div>
+        <div class="level-name">Platinium <span style="font-size:11px;font-weight:500;color:#085041">· Dossier vérifié + DPE ✓✓</span></div>
         <div class="level-sub">Mise en avant prioritaire dans les résultats</div>
-        <div class="level-doc"><strong>Requis :</strong> Gold + DPE</div>
+        <div class="level-doc"><strong>Requis :</strong> Gold + DPE (justificatif vérifié)</div>
         <div class="feat-list">
           <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Tout Gold inclus</span></div>
           <div class="feat"><span class="feat-yes">✓</span><span class="feat-txt">Mise en avant prioritaire</span></div>
@@ -300,6 +332,7 @@ nav .nav-link{margin-right:18px}
         <tr><td>Choix libre d'agent</td><td><span class="no">—</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes plat-col">✓</td></tr>
         <tr><td>Top 3 agents Hanaé IA</td><td><span class="no">—</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes plat-col">✓</td></tr>
         <tr><td>Mise en avant prioritaire</td><td><span class="no">—</span></td><td><span class="no">—</span></td><td><span class="no">—</span></td><td class="yes plat-col">✓</td></tr>
+        <tr><td>Documents complémentaires (compte rendu de copro…)</td><td colspan="4" style="font-size:11px;color:var(--muted)">Facultatifs à tous les niveaux — jamais exigés</td></tr>
       </tbody>
     </table></div>
   </div>
@@ -308,7 +341,7 @@ nav .nav-link{margin-right:18px}
   <div id="panel-acheteurs" class="panel">
     <div class="eyebrow">2 niveaux progressifs · un seul onglet</div>
     <div class="sec-title">Accédez aux biens qui vous correspondent</div>
-    <div class="subtitle">L'intégralité de chaque annonce est visible gratuitement par tous. Contactez les vendeurs gratuitement (jusqu'à 5 vendeurs par semaine). Les options avancées — réserver une visite, rapport Hanaé IA, matching automatique sur le rendement, simulateurs — sont réservées à l'abonnement Investisseur.</div>
+    <div class="subtitle">Pour acheter, tout est gratuit : annonces complètes, prix en clair, contact direct avec 5 vendeurs par semaine. L'abonnement Investisseur (29,99 €/mois) s'adresse à ceux qui achètent pour louer : il ajoute les outils d'analyse — rendement net et fiscalité calculés sur chaque bien, rapport Hanaé IA, réservation de visites et alertes automatiques sur vos critères de rendement.</div>
 
     <!-- PLANS -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px">
@@ -406,7 +439,7 @@ nav .nav-link{margin-right:18px}
   <div id="panel-agents" class="panel">
     <div class="eyebrow">Agents immobiliers · carte T obligatoire</div>
     <div class="sec-title">Accédez aux meilleurs dossiers vendeurs</div>
-    <div class="subtitle">Candidatez sur les biens qui vous intéressent. Payez à la candidature ou choisissez un forfait pour gagner en réactivité et volume.</div>
+    <div class="subtitle">Les vendeurs qui le souhaitent ouvrent leur bien aux agents. Vous consultez le dossier complet, candidatez avec votre stratégie et vos honoraires, et le vendeur choisit librement. Sans engagement : payez à la candidature — ou prenez un forfait pour être alerté plus tôt et candidater davantage.</div>
 
     <!-- PITCH -->
     <div class="pitch">
