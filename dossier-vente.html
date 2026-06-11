@@ -389,22 +389,20 @@ async function chargerDVF(){
   try{
     // 1. Géocoder l'adresse via API Adresse
     const adresseQ = `${vendeur.adresse||''} ${vendeur.code_postal||''} ${vendeur.ville||''}`.trim();
-    const geoRes = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(adresseQ)}&limit=1`);
+    const geoRes = await fetch(`https://data.geopf.fr/geocodage/search/?q=${encodeURIComponent(adresseQ)}&limit=1`);
     const geoData = await geoRes.json();
     const feature = geoData.features?.[0];
     const codeInsee = feature?.properties?.citycode || vendeur.code_postal;
     const lon = feature?.geometry?.coordinates?.[0];
     const lat = feature?.geometry?.coordinates?.[1];
 
-    // 2. DVF par commune
-    const dvfRes = await fetch(`https://api.gouv.fr/api/explore/v2.1/catalog/datasets/buildingref-france-dvf-opendata-france/records?where=code_commune_prefixe%3D%22${codeInsee}%22%20AND%20type_local%3D%22${encodeURIComponent(vendeur.type_bien==='Appartement'?'Appartement':'Maison')}%22&limit=100&order_by=date_mutation%20DESC`);
-
-    // 3. Fallback DVF simplifié via api.data.gouv
-    const dvfSimple = await fetch(`https://api.data.gouv.fr/api/1/datasets/5c4ae55a634f4117716d5656/`);
-
-    // 4. DVF direct Etalab
-    const dvfEtalab = await fetch(`https://api.dvf.etalab.gouv.fr/dvf/?code_commune=${codeInsee}&type_local=${vendeur.type_bien==='Appartement'?'Appartement':'Maison'}&per_page=50`);
-    const dvfJson = await dvfEtalab.json();
+    // 2. DVF via edge function (geo-DVF officiel, filtrage par rayon si adresse geocodee)
+    const dvfRes2 = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/dvf-commune', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM', 'apikey': 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM' },
+      body: JSON.stringify({ codePostal: vendeur.code_postal, ville: vendeur.ville || null, typeBien: vendeur.type_bien || 'Appartement', surface: parseFloat(vendeur.surface) || 0, lat: lat || null, lon: lon || null })
+    });
+    const dvfJson = await dvfRes2.json();
 
     processDVF(dvfJson, codeInsee);
   } catch(e){
@@ -442,23 +440,10 @@ function processDVF(dvfJson, codeInsee){
 
   // Si DVF disponible, affiner avec les vraies données
   let dvfRows = [];
-  if(dvfJson && dvfJson.results && dvfJson.results.length > 0){
-    const ventes = dvfJson.results.filter(v=>v.valeur_fonciere && v.surface_reelle_bati);
-    if(ventes.length > 0){
-      const prixM2Real = ventes.map(v=>v.valeur_fonciere/v.surface_reelle_bati).filter(p=>p>500&&p<20000);
-      if(prixM2Real.length > 0) prixM2 = prixM2Real.reduce((a,b)=>a+b,0)/prixM2Real.length;
-      // Grouper par année
-      const byYear = {};
-      ventes.forEach(v=>{
-        const yr = v.date_mutation?.slice(0,4)||'?';
-        if(!byYear[yr]) byYear[yr]={count:0,total:0};
-        byYear[yr].count++;
-        byYear[yr].total += v.valeur_fonciere/v.surface_reelle_bati;
-      });
-      dvfRows = Object.entries(byYear).sort((a,b)=>b[0]-a[0]).slice(0,5).map(([yr,d])=>({
-        annee:yr, nb:d.count, prixM2:Math.round(d.total/d.count)
-      }));
-    }
+  if(dvfJson && dvfJson.nbVentes > 0){
+    prixM2 = dvfJson.prixM2Median || dvfJson.prixM2Moyen || prixM2;
+    dvfRows = (dvfJson.historique || []).slice().sort((a,b)=>b.annee-a.annee).slice(0,5)
+      .map(h=>({ annee: h.annee, nb: h.nb, prixM2: h.prixM2 }));
   }
 
   // Fallback DVF simulé depuis données historiques approximatives
@@ -736,7 +721,7 @@ async function genererDossier(){
       <div class="section" style="margin-top:20px">
         <div class="section-title">Source des données</div>
         <div class="desc-box" style="font-size:12px">
-          Les données de ventes sont issues des <strong>Demandes de Valeurs Foncières (DVF)</strong> fournies par la Direction Générale des Finances Publiques via l'API Etalab (api.dvf.etalab.gouv.fr). 
+          Les données de ventes sont issues des <strong>Demandes de Valeurs Foncières (DVF)</strong> fournies par la Direction Générale des Finances Publiques via les fichiers geo-DVF officiels d'Etalab (data.gouv.fr). 
           Elles recensent l'ensemble des transactions immobilières enregistrées par les notaires depuis 2019.
           Ces données sont complétées par les informations renseignées par le vendeur (surface, état, DPE) pour calculer l'estimation personnalisée.
         </div>

@@ -310,19 +310,22 @@ window.addEventListener('DOMContentLoaded', async function() {
 // ── DVF ────────────────────────────────────────────────────────────────
 async function chargerDVF(villeNom) {
   try {
-    var [resAppart, resMaison] = await Promise.all([
-      fetch('https://api.dvf.etalab.gouv.fr/geoapi/dvf/?code_postal=' + villeData.cp + '&type_local=Appartement&nb_resultats=100'),
-      fetch('https://api.dvf.etalab.gouv.fr/geoapi/dvf/?code_postal=' + villeData.cp + '&type_local=Maison&nb_resultats=100')
-    ]);
-
-    if (resAppart.ok) {
-      var data = await resAppart.json();
-      dvfAppart = calculerStatsDVF(data.features || []);
+    function dvfEdge(type){
+      return fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/dvf-commune', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM','apikey':'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM'},
+        body: JSON.stringify({ codePostal: villeData.cp, typeBien: type, surface: 0, ville: villeData.nom || null })
+      }).then(function(r){ return r.json(); }).catch(function(){ return null; });
     }
-    if (resMaison.ok) {
-      var data2 = await resMaison.json();
-      dvfMaison = calculerStatsDVF(data2.features || []);
+    function toStats(d){
+      if (!d || !d.nbVentes) return null;
+      var tendances = {};
+      (d.historique || []).forEach(function(h){ tendances[h.annee] = h.prixM2; });
+      return { median: d.prixM2Median, q1: d.prixM2Q1 || Math.round(d.prixM2Median*0.85), q3: d.prixM2Q3 || Math.round(d.prixM2Median*1.15), nb: d.nbVentes, tendances: tendances };
     }
+    var [dA, dM] = await Promise.all([dvfEdge('appartement'), dvfEdge('maison')]);
+    dvfAppart = toStats(dA);
+    dvfMaison = toStats(dM);
 
     if (dvfAppart) {
       document.getElementById('pm2-appart').textContent = dvfAppart.median.toLocaleString('fr-FR') + '€';
