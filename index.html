@@ -120,6 +120,22 @@
     font-weight: 300;
   }
   .hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; }
+  .hero-paths { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:560px; }
+  .hero-path { display:flex; flex-direction:column; gap:4px; padding:16px 14px; background:var(--charcoal); color:var(--cream); border-radius:4px; text-decoration:none; transition:all .25s; border:1.5px solid var(--charcoal); }
+  .hero-path:hover { background:var(--gold); border-color:var(--gold); color:var(--charcoal); transform:translateY(-2px); }
+  .hp-ico { font-size:20px; }
+  .hp-name { font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; letter-spacing:.3px; }
+  .hp-sub { font-size:11px; opacity:.75; line-height:1.4; }
+  @media (max-width:640px){ .hero-paths{grid-template-columns:1fr;} }
+  .hanae-teaser { margin-top:22px; max-width:560px; background:rgba(184,154,94,.08); border:1px solid rgba(184,154,94,.35); border-radius:6px; padding:14px 16px; }
+  .ht-label { font-size:12px; font-weight:600; color:var(--charcoal); margin-bottom:8px; }
+  .ht-row { display:flex; gap:8px; }
+  .ht-row input { flex:1; padding:11px 12px; border:1px solid rgba(28,28,26,.25); border-radius:3px; font-family:'DM Sans',sans-serif; font-size:13px; background:#fff; }
+  .ht-row button { padding:11px 16px; background:var(--charcoal); color:var(--cream); border:none; border-radius:3px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; cursor:pointer; transition:all .25s; white-space:nowrap; }
+  .ht-row button:hover { background:var(--gold); color:var(--charcoal); }
+  .ht-result { margin-top:10px; font-size:13px; line-height:1.6; color:var(--charcoal); }
+  .ht-result .ht-price { font-size:20px; font-weight:600; }
+  .ht-result a { color:#1E7A62; font-weight:600; text-decoration:none; }
   .btn-primary {
     padding: 16px 36px; background: var(--charcoal);
     color: var(--cream); border: none; border-radius: 2px;
@@ -616,16 +632,38 @@
 <!-- HERO -->
 <section class="hero">
   <div class="hero-left">
-    <div class="hero-eyebrow">Vendeurs · Acheteurs · Investisseurs · Agents immo</div>
+    <div class="hero-eyebrow">L'immobilier en direct, sans commission d'agence</div>
     <h1 class="hero-title">
-      Publiez gratuitement.<br>Choisissez qui vous contacte.<br><em>Vendez à votre façon.</em>
+      Vendez sans agence.<br><em>Achetez en direct.</em>
     </h1>
     <p class="hero-sub">
-      Publiez gratuitement en 4 niveaux — tous gratuits. Vous choisissez qui peut vous contacter : acheteurs uniquement, agents libres, ou Hanaé IA sélectionne les 3 meilleurs agents pour vous. Prix affiché en clair dès le départ pour les acheteurs. Matching automatique sur rendement net pour les investisseurs.
+      Annonce et estimation IA gratuites pour les vendeurs. Prix affichés en clair pour les acheteurs. Rendement et fiscalité calculés pour les investisseurs.
     </p>
-    <div class="hero-ctas">
-      <button class="btn-primary" onclick="window.location.href='questionnaire-acheteur.html'">Explorer les biens</button>
-      <button class="btn-outline" onclick="window.location.href='questionnaire-vendeur.html'">Vendre mon bien</button>
+    <div class="hero-paths">
+      <a class="hero-path" href="questionnaire-vendeur.html">
+        <span class="hp-ico">🏠</span>
+        <span class="hp-name">Je vends</span>
+        <span class="hp-sub">Annonce gratuite · estimation IA offerte</span>
+      </a>
+      <a class="hero-path" href="carte.html">
+        <span class="hp-ico">🔑</span>
+        <span class="hp-name">J'achète</span>
+        <span class="hp-sub">Contact direct vendeur · prix en clair</span>
+      </a>
+      <a class="hero-path" href="questionnaire-acheteur.html">
+        <span class="hp-ico">📈</span>
+        <span class="hp-name">J'investis</span>
+        <span class="hp-sub">Rendement net et fiscalité calculés</span>
+      </a>
+    </div>
+    <!-- PROP 4 : teaser Hanaé — la valeur avant l'inscription -->
+    <div class="hanae-teaser">
+      <div class="ht-label">🤖 Hanaé — testez gratuitement : le prix du marché dans votre commune</div>
+      <div class="ht-row">
+        <input type="text" id="ht-cp" maxlength="5" inputmode="numeric" placeholder="Code postal (ex : 33260)" onkeydown="if(event.key==='Enter')htEstimer()">
+        <button onclick="htEstimer()" id="ht-btn">Voir le prix du marché</button>
+      </div>
+      <div id="ht-result" class="ht-result" style="display:none"></div>
     </div>
   </div>
   <div class="hero-right" style="background:#1C1C1A;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;">
@@ -1429,5 +1467,31 @@ function refuserCookies() {
 </script>
 
 <script src="/pwa.js"></script>
+<script>
+async function htEstimer(){
+  var cp=(document.getElementById('ht-cp').value||'').trim();
+  var out=document.getElementById('ht-result'); var btn=document.getElementById('ht-btn');
+  if(!/^\d{5}$/.test(cp)){ out.style.display='block'; out.innerHTML='Entrez un code postal \u00e0 5 chiffres.'; return; }
+  btn.disabled=true; btn.textContent='Analyse\u2026';
+  out.style.display='block'; out.innerHTML='\u23f3 Hana\u00e9 analyse les ventes officielles (DVF)\u2026';
+  try{
+    var res=await db.functions.invoke('dvf-commune',{body:{codePostal:cp,typeBien:'appartement',surface:55}});
+    var d=(res&&res.data)||{};
+    if(!d.nbVentes){
+      var res2=await db.functions.invoke('dvf-commune',{body:{codePostal:cp,typeBien:'maison',surface:100}});
+      var d2=(res2&&res2.data)||{};
+      if(d2.nbVentes){ d=d2; d._type='maisons'; }
+    } else { d._type='appartements'; }
+    if(d.nbVentes){
+      out.innerHTML='<span class="ht-price">'+Math.round(d.prixM2Median).toLocaleString('fr-FR')+' \u20ac/m\u00b2</span> \u2014 prix m\u00e9dian '+d._type+' \u00b7 '+d.nbVentes+' ventes officielles analys\u00e9es (DVF)<br><a href="questionnaire-vendeur.html">Obtenez l\u2019estimation compl\u00e8te de votre bien \u2014 gratuite \u2192</a>';
+    } else {
+      out.innerHTML='Pas assez de ventes r\u00e9centes dans cette commune. <a href="questionnaire-vendeur.html">Demandez l\u2019analyse Hana\u00e9 compl\u00e8te \u2192</a>';
+    }
+  }catch(e){
+    out.innerHTML='Service momentan\u00e9ment indisponible. <a href="questionnaire-vendeur.html">Publiez votre annonce gratuite \u2192</a>';
+  }
+  btn.disabled=false; btn.textContent='Voir le prix du march\u00e9';
+}
+</script>
 </body>
 </html>

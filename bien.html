@@ -360,7 +360,8 @@ async function acheterContact(annonceId) {
 // ── AFFICHER ──
 async function afficherBien(b, similaires) {
   var niv = b.niveau_vendeur || 'standard';
-  var nivLabel = niv.charAt(0).toUpperCase() + niv.slice(1);
+  var NIVLBL = { standard:'Annonce', silver:'Annonce enrichie', gold:'Vérifié ✓', platinium:'Vérifié + DPE ✓✓' };
+  var nivLabel = NIVLBL[niv] || (niv.charAt(0).toUpperCase() + niv.slice(1));
   var pm2 = b.prix && b.surface ? Math.round(b.prix / b.surface).toLocaleString('fr-FR') + ' €/m²' : '';
   var prixFmt = b.prix ? Math.round(b.prix).toLocaleString('fr-FR') + ' €' : 'Prix sur demande';
   var titre = b.titre || (b.type_bien || 'Bien') + ' · ' + (b.surface || '—') + ' m²';
@@ -536,7 +537,7 @@ async function afficherBien(b, similaires) {
       + '<div style="font-size:12px;color:#633806;line-height:1.6">'
       + '<strong>Accès limité — Pay per use</strong><br>'
       + 'Vous voyez ce bien comme un acheteur payant : adresse, photos et prix vendeur. '
-      + 'La qualification du dossier (Silver/Gold/Platinium), les alertes de publication et l\'analyse de marché Hanaé sont réservées aux forfaits abonnés.'
+      + 'Le badge « Dossier vérifié », les alertes de publication et l\'analyse de marché Hanaé sont réservés aux abonnés.'
       + ' <a href="forfaits.html" style="color:#854F0B;font-weight:600">Voir les forfaits →</a>'
       + '</div></div>';
   }
@@ -626,7 +627,7 @@ async function afficherBien(b, similaires) {
     }
     s += '</div>';
     if (silverPlus) s += '<div class="simu-note">Rendement bas\u00e9 sur la valeur locative et les charges d\u00e9clar\u00e9es par le vendeur.</div>';
-    else s += '<div class="simu-note">Le rendement locatif s\'affiche d\u00e8s que le bien atteint le niveau Silver.</div>';
+    else s += '<div class="simu-note">Le rendement locatif s\'affiche d\u00e8s que le vendeur a renseigné le loyer estimé.</div>';
     if (prof && (prof.apport || prof.taux_envisage)) s += '<div class="simu-note">Valeurs pr\u00e9-remplies depuis votre profil investisseur \u2014 modifiables ici.</div>';
     if (silverPlus) s += '<div class="simu-note simu-fisc" id="so-mode"></div>';
     s += '<div class="simu-note">Frais de notaire, mensualit\u00e9s et fiscalit\u00e9 estimatifs \u2014 \u00e0 confirmer avec votre notaire, votre banque et un conseiller fiscal.</div>';

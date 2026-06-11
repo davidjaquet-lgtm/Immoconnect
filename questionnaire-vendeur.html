@@ -188,15 +188,9 @@ nav .nav-link{margin-right:18px}
     <div style="font-size:13px;color:var(--muted);line-height:1.7;max-width:580px">Votre niveau est calculé <strong>automatiquement</strong> selon les documents fournis. Tout est gratuit.</div>
   </div>
 
-  <div class="niveau-banner">
-    <span class="niveau-title">Mon niveau</span>
-    <div class="niv-step cur-standard" id="niv-standard"><div class="niv-dot"></div>Standard</div>
-    <div class="niv-sep"></div>
-    <div class="niv-step" id="niv-silver"><div class="niv-dot"></div>Silver</div>
-    <div class="niv-sep"></div>
-    <div class="niv-step" id="niv-gold"><div class="niv-dot"></div>Gold</div>
-    <div class="niv-sep"></div>
-    <div class="niv-step" id="niv-platinium"><div class="niv-dot"></div>Platinium</div>
+  <div class="niveau-banner" style="flex-direction:column;align-items:flex-start;gap:6px">
+    <span class="niveau-title">Visibilité de votre annonce</span>
+    <div id="niv-benefit" style="font-size:13px;font-weight:500;color:var(--ink)">Complétez votre dossier — chaque information ajoutée rend votre annonce plus visible et plus crédible.</div>
   </div>
   <div class="progress-wrap"><div class="progress-bar pb-standard" id="prog" style="width:10%"></div></div>
 
@@ -237,9 +231,11 @@ nav .nav-link{margin-right:18px}
       <!-- MODE DE CONTACT -->
       <div class="form-grid col1">
         <div class="field">
-          <label class="lbl">Mode de contact *</label>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Choisissez qui peut vous contacter. Modifiable à tout moment depuis votre tableau de bord.</div>
-          <div class="mode-cards" id="mode-cards" style="grid-template-columns:repeat(3,1fr)">
+          <label class="lbl">Qui peut vous contacter ?</label>
+          <div style="background:#E6F1FB;border:1px solid rgba(24,95,165,.25);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.6;color:var(--ink);margin-bottom:6px">
+            Par défaut : <strong>acheteurs et investisseurs uniquement</strong> (aucun agent ne peut vous démarcher). <button type="button" onclick="document.getElementById('mode-cards').style.display='grid';this.parentNode.style.display='none'" style="background:transparent;border:none;color:#185FA5;font-weight:600;cursor:pointer;text-decoration:underline;font-family:Outfit,sans-serif;font-size:12px;padding:0">Modifier</button> — réglage modifiable à tout moment après publication.
+          </div>
+          <div class="mode-cards" id="mode-cards" style="grid-template-columns:repeat(3,1fr);display:none">
             <div class="mode-card selected-acheteurs" id="mc-acheteurs" onclick="setModeContact('acheteurs')">
               <div class="mode-icon">👤</div>
               <div class="mode-name" style="color:#185FA5">Acheteurs &amp; investisseurs</div>
@@ -253,7 +249,7 @@ nav .nav-link{margin-right:18px}
             </div>
             <div class="mode-card" id="mc-comparatif" onclick="setModeContact('comparatif')">
               <div class="mode-icon">📊</div>
-              <div class="mode-name" style="color:#854F0B">ImmoConnect sélectionne les 3 meilleurs</div>
+              <div class="mode-name" style="color:#854F0B">ImmoConnect choisit pour moi</div>
               <div class="mode-desc">Acheteurs et investisseurs peuvent vous contacter. Hanaé analyse tous les agents candidats et vous présente les 3 les plus aptes à vendre votre bien.</div>
               <div class="mode-lock">🏅 Silver, Gold et Platinium</div>
             </div>
@@ -638,11 +634,11 @@ nav .nav-link{margin-right:18px}
     </div>
   </div>
 
-  <!-- 5 : GOLD — JUSTIFICATIF TAXE FONCIÈRE + COPRO -->
+  <!-- 5 : GOLD — JUSTIFICATIF TAXE FONCIÈRE -->
   <div class="section">
     <div class="section-head" onclick="toggle('s6')">
       <div class="sec-num num-gold">5</div>
-      <div class="sec-ttl">Justificatif taxe foncière & copropriété <span class="sec-sub">→ débloque Gold</span></div>
+      <div class="sec-ttl">Justificatif taxe foncière <span class="sec-sub">→ débloque Gold</span></div>
       <span class="sec-badge b-gold">Gold</span>
       <span class="sec-arrow" id="arr-s6">▼</span>
     </div>
@@ -651,7 +647,7 @@ nav .nav-link{margin-right:18px}
         <div class="ui-icon">🥇</div>
         <div class="ui-txt">
           <strong>Niveau Gold — Adresse exacte visible + Contact gratuit</strong>
-          Uploadez l'avis de taxe foncière + compte rendu de copro si applicable.
+          Uploadez l'avis de taxe foncière. Le compte rendu de copropriété n'est pas requis pour Gold (facultatif, section « Autres documents »).
         </div>
       </div>
       <div class="field" style="margin-bottom:12px">
@@ -667,19 +663,6 @@ nav .nav-link{margin-right:18px}
         </div>
         <div class="file-status fs-none" id="fs-taxe">📎 Aucun fichier sélectionné</div>
         <div id="ocr-taxe-result" style="display:none;margin-top:10px;border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.7"></div>
-      </div>
-      <div id="bloc-copro" style="display:none">
-        <hr class="div">
-        <div class="field" style="margin-bottom:4px">
-          <label class="lbl">Compte rendu d'assemblée générale (optionnel)</label>
-          <div class="upload-zone uz-gold">
-            <input type="file" id="file-copro" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc('copro_doc','file-copro','fs-copro');calcNiveau()">
-            <div class="upload-icon">🏢</div>
-            <div class="upload-title">PV d'assemblée générale</div>
-            <div class="upload-sub">Dernier compte rendu signé — PDF</div>
-          </div>
-          <div class="file-status fs-none" id="fs-copro">📎 Aucun fichier sélectionné</div>
-        </div>
       </div>
     </div>
   </div>
@@ -817,7 +800,7 @@ function getRadio(name){
   var s=document.querySelector('.radio-opt.selected input[name="'+name+'"]');
   return s?s.value:'';
 }
-function showCopro(v){document.getElementById('bloc-copro').style.display=v?'block':'none';}
+function showCopro(v){var el=document.getElementById('bloc-copro');if(el)el.style.display=v?'block':'none';}
 // ── ALERTES BAISSE DE PRIX ──
 async function envoyerAlertesBaissePrix(annonceId, ancienPrix, nouveauPrix, baissePct, bien) {
   try {
@@ -1179,19 +1162,18 @@ function calcNiveau(){
   var hasDpe=docs['dpe_verifie']==='ok';
   var aAdresse=!!(document.getElementById('adresse').value||'').trim();
   var isCopro=getRadio('is_copro')==='Oui';
-  var hasCopro=!isCopro||docs['copro_verifie']==='ok';   // si copropriété : document copro vérifié requis pour Gold/Platinium
   var n='standard';
   if(hasSilver) n='silver';
-  if(hasSilver&&hasTaxe&&aAdresse&&hasCopro) n='gold';
-  if(hasSilver&&hasTaxe&&hasDpe&&aAdresse&&hasCopro) n='platinium';
+  if(hasSilver&&hasTaxe&&aAdresse) n='gold';                 // Gold : taxe foncière vérifiée + adresse (copro non requise)
+  if(hasSilver&&hasTaxe&&hasDpe&&aAdresse) n='platinium';    // Platinium : Gold + DPE vérifié
   niveau=n; updateUI();
 }
 
 var NIV={
-  standard:{prog:10,pb:'pb-standard',icon:'🏠',label:'Niveau Standard',desc:'3 photos · Ville uniquement',sn:'sn-standard'},
-  silver:{prog:40,pb:'pb-silver',icon:'🏅',label:'Niveau Silver',desc:'3 photos · Matching investisseurs',sn:'sn-silver'},
-  gold:{prog:72,pb:'pb-gold',icon:'🥇',label:'Niveau Gold',desc:'Photos illimitées · Adresse exacte visible',sn:'sn-gold'},
-  platinium:{prog:100,pb:'pb-platinium',icon:'💎',label:'Niveau Platinium',desc:'Photos illimitées · Mise en avant · Contact libre acheteurs + agents',sn:'sn-platinium'}
+  standard:{prog:25,pb:'pb-standard',icon:'🏠',label:'Annonce de base',desc:'3 photos · Ville seule · Ajoutez le loyer estimé pour être proposé aux investisseurs',benefit:'➜ Prochaine étape : indiquez la valeur locative (et les charges si copropriété) pour apparaître dans les recherches investisseurs.',sn:'sn-standard'},
+  silver:{prog:50,pb:'pb-silver',icon:'📈',label:'Annonce enrichie',desc:'Rendement affiché · Visible des investisseurs',benefit:'➜ Prochaine étape : adresse exacte + avis de taxe foncière vérifié = badge « Dossier vérifié ✓ » et photos illimitées.',sn:'sn-silver'},
+  gold:{prog:75,pb:'pb-gold',icon:'✓',label:'Dossier vérifié ✓',desc:'Photos illimitées · Adresse visible · Confiance acheteurs',benefit:'➜ Dernière étape : ajoutez votre DPE vérifié pour la visibilité maximale.',sn:'sn-gold'},
+  platinium:{prog:100,pb:'pb-platinium',icon:'✓✓',label:'Dossier vérifié + DPE ✓✓',desc:'Visibilité maximale · Mise en avant',benefit:'🎉 Dossier complet — votre annonce a la visibilité maximale.',sn:'sn-platinium'}
 };
 var KEYS=['standard','silver','gold','platinium'];
 
@@ -1199,11 +1181,8 @@ function updateUI(){
   var cfg=NIV[niveau],idx=KEYS.indexOf(niveau);
   var bar=document.getElementById('prog');
   bar.style.width=cfg.prog+'%';bar.className='progress-bar '+cfg.pb;
-  KEYS.forEach(function(k,i){
-    var el=document.getElementById('niv-'+k);el.className='niv-step';
-    if(i<idx)el.classList.add('done');
-    if(i===idx)el.classList.add('cur-'+k);
-  });
+  var nb=document.getElementById('niv-benefit');
+  if(nb) nb.innerHTML='<strong>'+cfg.label+'</strong> · '+cfg.benefit;
   maxPhotos=(niveau==='gold'||niveau==='platinium')?9999:3;
   var plb=document.getElementById('plb');
   if(plb){
@@ -1242,7 +1221,6 @@ function majScoreDossier() {
     { label:'Année construction',       ok: !!annee,                              pts:5  },
     { label:'Valeur locative / Loyer',  ok: !!valeurLoc || !!loyer,               pts:10 },
     { label:'Taxe foncière',            ok: !!taxe || !!docs['taxe_fonciere_doc'],pts:15 },
-    { label:'Copropriété',              ok: !isCopro || !!docs['copro_doc'],      pts:10 },
     { label:'DPE renseigné',            ok: !!dpe || !!docs['dpe_doc'],           pts:15 },
     { label:'Adresse complète',         ok: !!adresse,                            pts:5  },
   ];
