@@ -1483,12 +1483,12 @@ async function htEstimer(){
       if(d2.nbVentes){ d=d2; d._type='maisons'; }
     } else { d._type='appartements'; }
     if(d.nbVentes){
-      out.innerHTML='<span class="ht-price">'+Math.round(d.prixM2Median).toLocaleString('fr-FR')+' \u20ac/m\u00b2</span> \u2014 prix m\u00e9dian '+d._type+' \u00b7 '+d.nbVentes+' ventes officielles analys\u00e9es (DVF)<br><a href="questionnaire-vendeur.html">Obtenez l\u2019estimation compl\u00e8te de votre bien \u2014 gratuite \u2192</a>';
+      out.innerHTML='<span class="ht-price">'+Math.round(d.prixM2Median).toLocaleString('fr-FR')+' \u20ac/m\u00b2</span> \u2014 prix m\u00e9dian '+d._type+' \u00b7 '+d.nbVentes+' ventes officielles analys\u00e9es (DVF)<br><a href="estimation.html?cp='+cp+'">Estimez votre bien en 1 minute \u2014 gratuit, sans inscription \u2192</a>';
     } else {
-      out.innerHTML='Pas assez de ventes r\u00e9centes dans cette commune. <a href="questionnaire-vendeur.html">Demandez l\u2019analyse Hana\u00e9 compl\u00e8te \u2192</a>';
+      out.innerHTML='Pas assez de ventes r\u00e9centes dans cette commune. <a href="estimation.html?cp='+cp+'">Estimez votre bien avec Hana\u00e9 \u2014 gratuit \u2192</a>';
     }
   }catch(e){
-    out.innerHTML='Service momentan\u00e9ment indisponible. <a href="questionnaire-vendeur.html">Publiez votre annonce gratuite \u2192</a>';
+    out.innerHTML='Service momentan\u00e9ment indisponible. <a href="estimation.html">Essayez l\u2019estimation gratuite \u2192</a>';
   }
   btn.disabled=false; btn.textContent='Voir le prix du march\u00e9';
 }

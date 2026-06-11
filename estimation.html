@@ -895,28 +895,16 @@ async function animerEtape(idActif, idSuivant, delai) {
 
 // ── API DVF ──
 async function fetchDVF(cp, type, surface) {
+  var EMPTY={similaires:[],prixM2Moyen:0,prixM2Median:0,nbVentes:0,historique:[],source:'DVF indisponible'};
   try {
-    var typeCode = (type||'').toLowerCase().includes('maison')||(type||'').toLowerCase().includes('villa') ? 'Maison' : 'Appartement';
-    var url = 'https://api.dvf.etalab.gouv.fr/geoapi/dvf/?code_postal='+cp+'&type_local='+encodeURIComponent(typeCode)+'&nb_resultats=50';
-    var res = await fetch(url);
-    var data = await res.json();
-    var mutations = data.features || [];
-    var surf = parseFloat(surface) || 50;
-    var similaires = mutations.filter(function(m){
-      var s = m.properties.surface_reelle_bati;
-      return s && s >= surf*0.65 && s <= surf*1.4 && m.properties.valeur_fonciere > 0;
+    var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/dvf-commune', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM','apikey':'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM'},
+      body:JSON.stringify({codePostal:cp,typeBien:type,surface:surface})
     });
-    var prixM2 = similaires.map(function(m){ return m.properties.valeur_fonciere/m.properties.surface_reelle_bati; }).filter(function(v){ return v>0&&v<20000; });
-    var moy = function(arr){ return arr.length ? arr.reduce(function(a,b){return a+b},0)/arr.length : 0; };
-    var med = function(arr){ if(!arr.length) return 0; var s=arr.slice().sort(function(a,b){return a-b}); return s[Math.floor(s.length/2)]; };
-    var parAnnee = {};
-    similaires.forEach(function(m){
-      var a=(m.properties.date_mutation||'').substring(0,4);
-      if(a>='2019'){if(!parAnnee[a])parAnnee[a]=[];parAnnee[a].push(m.properties.valeur_fonciere/m.properties.surface_reelle_bati);}
-    });
-    var historique = Object.keys(parAnnee).sort().map(function(a){ return {annee:a,prixM2:Math.round(moy(parAnnee[a])),nb:parAnnee[a].length}; });
-    return { similaires:similaires.slice(0,8), prixM2Moyen:Math.round(moy(prixM2)), prixM2Median:Math.round(med(prixM2)), nbVentes:similaires.length, historique, source:'DVF Etalab — DGFiP' };
-  } catch(e) { return { similaires:[], prixM2Moyen:0, prixM2Median:0, nbVentes:0, historique:[], source:'DVF indisponible' }; }
+    var d = await res.json();
+    return (d && typeof d.nbVentes!=='undefined') ? d : EMPTY;
+  } catch(e){ return EMPTY; }
 }
 
 // ── API INSEE ──
@@ -983,12 +971,13 @@ ${prixSouhaite>0?'Prix souhaité : '+prixSouhaite.toLocaleString('fr-FR')+' € 
 
 Explique brièvement la méthode (DVF + Notaires-INSEE + score qualité). Commente les critères qui ont le plus impacté l'estimation. Conclus avec un conseil actionnable.`;
 
-    var res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:350,messages:[{role:'user',content:prompt}]})
+    var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/rapport-hanae', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM','apikey':'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM'},
+      body:JSON.stringify({prompt:prompt})
     });
     var data = await res.json();
-    return data.content&&data.content[0] ? data.content[0].text : null;
+    return data && data.synthese ? data.synthese : null;
   } catch(e) { return null; }
 }
 
@@ -1213,7 +1202,7 @@ function afficherResultats(d) {
   }
 
   // CTA
-  html += '<div class="cta-box"><div class="cta-title">Publiez votre bien gratuitement</div><div class="cta-sub">Votre estimation est prête. Publiez maintenant et bénéficiez<br>de tout le réseau ImmoConnect — agents et acheteurs qualifiés.</div><div class="cta-btns"><a href="questionnaire-vendeur.html" class="btn-gold">🏠 Publier mon annonce gratuitement →</a><a href="rapport-hanae.html" class="btn-outline-w">📋 Rapport complet Hanaé</a></div></div>';
+  html += '<div class="cta-box"><div class="cta-title">Publiez votre bien gratuitement</div><div class="cta-sub">Votre estimation est prête. Publiez maintenant et bénéficiez<br>de tout le réseau ImmoConnect — agents et acheteurs qualifiés.</div><div class="cta-btns"><a href="questionnaire-vendeur.html" class="btn-gold">🏠 Publier mon annonce gratuitement →</a></div></div>';
 
   document.getElementById('result-section').innerHTML = html;
   document.getElementById('result-section').style.display = 'block';
@@ -1234,6 +1223,12 @@ function recommencer() {
   ['step-dvf','step-insee','step-notaires','step-qualite','step-hanae'].forEach(function(id,i){ document.getElementById(id).className=i===0?'step-item active':'step-item'; });
   window.scrollTo({top:0,behavior:'smooth'});
 }
+</script>
+<script>
+(function(){
+  var cp=new URLSearchParams(location.search).get('cp');
+  if(cp&&/^\d{5}$/.test(cp)){var el=document.getElementById('code-postal');if(el){el.value=cp;}}
+})();
 </script>
 </body>
 </html>
