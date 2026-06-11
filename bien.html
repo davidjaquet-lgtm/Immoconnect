@@ -304,6 +304,8 @@ var currentUser = null;
     .neq('id', bien.id)
     .limit(3);
 
+  verifierRetourExclusivite();
+
   try {
     await afficherBien(bien, similaires || []);
   } catch (err) {
@@ -314,48 +316,6 @@ var currentUser = null;
       ct.innerHTML = '<div style="max-width:620px;margin:60px auto;padding:24px;text-align:center;color:#712B13;background:#FAECE7;border-radius:10px;font-size:14px">Une erreur est survenue à l\'affichage de cette annonce.<br><span style="font-size:11px;color:#9a6a55">' + ((err && err.message) ? err.message : err) + '</span></div>'; }
   }
 })();
-
-// ── ACHAT RAPPORT (Stripe) ──
-var REPORT_PRICE_ID = 'price_1TdFJmRWjX9H4QylhXCGndPu'; // dossier complet 4,99€ (prix Stripe existant)
-async function acheterRapport(annonceId) {
-  try {
-    var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/creer-checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        price_id: REPORT_PRICE_ID,
-        forfait: 'rapport',
-        mode: 'payment',
-        success_url: 'https://immoconnect-agence.fr/bien.html?id=' + annonceId + '&rapport_achete=1',
-        cancel_url: 'https://immoconnect-agence.fr/bien.html?id=' + annonceId
-      })
-    });
-    var data = await res.json();
-    if (data.url) { window.location.href = data.url; }
-    else { alert('Erreur : ' + (data.error || 'Stripe indisponible')); }
-  } catch (e) { alert('Erreur : ' + e.message); }
-}
-
-// ── ACHAT CONTACT (Stripe) — 9,99€, inclut dossier + visite ──
-var CONTACT_PRICE_ID = 'price_1TdFKKRWjX9H4QylHGG1ymnK'; // contact vendeur 9,99€ (prix Stripe existant)
-async function acheterContact(annonceId) {
-  try {
-    var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/creer-checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        price_id: CONTACT_PRICE_ID,
-        forfait: 'contact',
-        mode: 'payment',
-        success_url: 'https://immoconnect-agence.fr/bien.html?id=' + annonceId + '&contact_achete=1',
-        cancel_url: 'https://immoconnect-agence.fr/bien.html?id=' + annonceId
-      })
-    });
-    var data = await res.json();
-    if (data.url) { window.location.href = data.url; }
-    else { alert('Erreur : ' + (data.error || 'Stripe indisponible')); }
-  } catch (e) { alert('Erreur : ' + e.message); }
-}
 
 // ── AFFICHER ──
 async function afficherBien(b, similaires) {
@@ -1125,62 +1085,66 @@ async function toggleSuivi(bienId) {
 async function acheterExclusivite(dureeHeures, prix) {
   if (!currentUser) { alert('Connectez-vous pour activer une exclusivité.'); return; }
   if (!bien) return;
-
   var btn = event.target;
   btn.disabled = true;
-  btn.textContent = 'Activation en cours…';
-
+  btn.textContent = 'Redirection vers le paiement…';
   try {
-    // Note : le paiement Stripe sera intégré ici
-    // Pour l\'instant on enregistre directement (à conditionner au paiement)
-    var debut = new Date();
-    var fin = new Date(debut.getTime() + dureeHeures * 3600000);
-
-    var { error } = await db.from('exclusivites_contact').insert({
-      annonce_id: bien.id,
-      agent_email: currentUser.email,
-      forfait_agent: currentUser.user_metadata?.forfait_agent || 'expert',
-      duree_heures: dureeHeures,
-      debut_at: debut.toISOString(),
-      fin_at: fin.toISOString(),
-      prix_paye: prix,
-      email_vendeur: bien.email_contact,
-      statut: 'active'
-    });
-
-    if (error) throw error;
-
-    // Email au vendeur
-    var nomAgent = currentUser.user_metadata?.nom_complet || currentUser.email.split('@')[0];
-    var finStr = fin.toLocaleDateString('fr-FR', { weekday:'long', day:'2-digit', month:'long', hour:'2-digit', minute:'2-digit' });
-    await db.functions.invoke('envoyer-email', {
+    // SÉCURITÉ : aucun droit n'est accordé ici. Le paiement Stripe est vérifié
+    // côté serveur (edge function verifier-achat) qui seule insère l'exclusivité.
+    var res = await db.functions.invoke('creer-checkout-exclusivite', {
       body: {
-        type: 'exclusivite_contact',
-        to: bien.email_contact,
-        subject: 'Un agent a une exclusivite de contact sur votre bien - ImmoConnect',
-        agent_nom: nomAgent,
+        annonce_id: bien.id,
         agent_email: currentUser.email,
-        bien_titre: bien.titre || (bien.type_bien + ' ' + bien.ville),
+        email_vendeur: bien.email_contact,
         duree_heures: dureeHeures,
-        fin_at: finStr,
-        lien: 'https://immoconnect-agence.fr/connexion.html'
+        prix: prix,
+        forfait_agent: (currentUser.user_metadata && currentUser.user_metadata.forfait_agent) || 'expert',
+        success_url: 'https://immoconnect-agence.fr/bien.html?id=' + bien.id,
+        cancel_url: 'https://immoconnect-agence.fr/bien.html?id=' + bien.id
       }
     });
-
-    // Rafraîchir la page
-    exclusiviteActive = { agent_email: currentUser.email, heures_restantes: dureeHeures, duree_heures: dureeHeures };
-    var contactCard = document.querySelector('.contact-card');
-    if (contactCard) {
-      contactCard.innerHTML = '<div class="contact-title">Intéressé(e) par ce bien ?</div>' + buildContactButtons(bien, currentNiv);
-    }
-
-    alert('✅ Exclusivité de ' + dureeHeures + 'h activée ! Le vendeur a été prévenu. Vous êtes maintenant le seul agent à pouvoir le contacter.');
-
+    if (res.error) throw new Error(res.error.message);
+    if (res.data && res.data.url) { window.location.href = res.data.url; return; }
+    throw new Error((res.data && res.data.error) || 'Stripe indisponible');
   } catch(e) {
     btn.disabled = false;
     btn.textContent = 'Exclusivité ' + dureeHeures + 'h — ' + prix.toFixed(2).replace('.',',') + ' €';
     alert('Erreur : ' + e.message);
   }
+}
+
+// ── RETOUR PAIEMENT EXCLUSIVITÉ : vérification serveur puis confirmation ──
+async function verifierRetourExclusivite() {
+  var params = new URLSearchParams(window.location.search);
+  var sid = params.get('exclu_session');
+  if (!sid) return;
+  window.history.replaceState({}, '', 'bien.html?id=' + params.get('id'));
+  try {
+    var res = await db.functions.invoke('verifier-achat', { body: { session_id: sid } });
+    var d = res.data || {};
+    if (d.verified && d.action === 'exclusivite') {
+      // Email au vendeur (après vérification du paiement uniquement)
+      if (!d.already && d.email_vendeur) {
+        var nomAgent = (currentUser && currentUser.user_metadata && currentUser.user_metadata.nom_complet) || (d.agent_email || '').split('@')[0];
+        var finStr = d.fin_at ? new Date(d.fin_at).toLocaleDateString('fr-FR', { weekday:'long', day:'2-digit', month:'long', hour:'2-digit', minute:'2-digit' }) : '';
+        db.functions.invoke('envoyer-email', { body: {
+          type: 'exclusivite_contact',
+          to: d.email_vendeur,
+          subject: 'Un agent a une exclusivite de contact sur votre bien - ImmoConnect',
+          agent_nom: nomAgent,
+          agent_email: d.agent_email,
+          bien_titre: (bien && (bien.titre || (bien.type_bien + ' ' + bien.ville))) || '',
+          duree_heures: d.duree_heures,
+          fin_at: finStr,
+          lien: 'https://immoconnect-agence.fr/connexion.html'
+        }}).then(undefined, function(){});
+      }
+      alert('\u2705 Paiement confirm\u00e9 — exclusivit\u00e9 de ' + (d.duree_heures || '') + 'h activ\u00e9e ! Le vendeur a \u00e9t\u00e9 pr\u00e9venu.');
+      location.reload();
+    } else if (d.verified === false) {
+      alert('Paiement non confirm\u00e9 — l\'exclusivit\u00e9 n\'a pas \u00e9t\u00e9 activ\u00e9e.');
+    }
+  } catch(e) {}
 }
 
 var currentNiv = 'standard';
