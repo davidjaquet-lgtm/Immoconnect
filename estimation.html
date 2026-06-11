@@ -225,9 +225,15 @@ nav .nav-link{margin-right:18px}
             <option value="Local commercial">Local commercial</option>
           </select>
         </div>
+        <div class="form-group full">
+          <label class="lbl">Adresse du bien *</label>
+          <input type="text" id="adresse-bien" list="ban-suggestions" placeholder="ex : 12 rue des Pins, La Teste-de-Buch" autocomplete="off" oninput="banAutocomplete(this.value)" onchange="banResolve(this.value)">
+          <datalist id="ban-suggestions"></datalist>
+          <div id="adresse-confirm" style="display:none;font-size:11px;color:var(--teal);margin-top:4px"></div>
+        </div>
         <div class="form-group">
           <label class="lbl">Code postal *</label>
-          <input type="text" id="code-postal" placeholder="ex: 65000" maxlength="5" oninput="this.value=this.value.replace(/\D/g,'')">
+          <input type="text" id="code-postal" placeholder="rempli via l'adresse" maxlength="5" oninput="this.value=this.value.replace(/\D/g,'')">
         </div>
         <div class="form-group">
           <label class="lbl">Surface habitable (m²) *</label>
@@ -502,6 +508,8 @@ function allerEtape2() {
   var cp = document.getElementById('code-postal').value.trim();
   var surface = parseFloat(document.getElementById('surface').value);
   if (!type) { alert('Choisissez un type de bien.'); return; }
+  var adr=document.getElementById('adresse-bien').value.trim();
+  if (!adr || adr.length<6) { alert('Renseignez l\'adresse du bien.'); return; }
   if (!cp || cp.length !== 5) { alert('Renseignez un code postal valide (5 chiffres).'); return; }
   if (!surface || surface < 5) { alert('Renseignez la surface de votre bien.'); return; }
   document.getElementById('step1').style.display = 'none';
@@ -610,14 +618,15 @@ async function lancerEstimation() {
   document.getElementById('result-section').style.display = 'none';
 
   await animerEtape('step-dvf', 'step-insee', 900);
-  var dvf = await fetchDVF(cp, type, surface);
+  var villeBAN = banChoix && banChoix.cp===cp ? banChoix.ville : null;
+  var dvf = await fetchDVF(cp, type, surface, villeBAN);
   await animerEtape('step-insee', 'step-notaires', 600);
   var insee = await fetchINSEE(cp);
   await animerEtape('step-notaires', 'step-qualite', 500);
   var indice = fetchIndice(type);
   await animerEtape('step-qualite', 'step-hanae', 400);
   var calculs = calculer({surface, prix:prixSouhaite, annee_construction:annee, type_bien:type}, dvf, indice, coeffQualite);
-  var synthese = await genererSynthese({type_bien:type, surface, code_postal:cp, ville:insee.nom, annee_construction:annee}, dvf, calculs, prixSouhaite, coeffQualite, scoreData);
+  var synthese = await genererSynthese({type_bien:type, surface, code_postal:cp, ville:(villeBAN||insee.nom), adresse:(banChoix&&banChoix.cp===cp?banChoix.label:null), annee_construction:annee}, dvf, calculs, prixSouhaite, coeffQualite, scoreData);
   document.getElementById('step-hanae').className = 'step-item done';
   await new Promise(function(r){ setTimeout(r,400); });
 
@@ -633,13 +642,46 @@ async function animerEtape(idActif, idSuivant, delai) {
 }
 
 // ── API DVF ──
-async function fetchDVF(cp, type, surface) {
+var banTimer=null, banChoix=null;
+var BAN_API='https://data.geopf.fr/geocodage/search/'; // Service officiel IGN Geoplateforme (api-adresse decommissionne jan. 2026)
+function banAutocomplete(q){
+  clearTimeout(banTimer);
+  if(!q || q.length<4) return;
+  banTimer=setTimeout(async function(){
+    try{
+      var r=await fetch(BAN_API+'?q='+encodeURIComponent(q)+'&type=housenumber&autocomplete=1&limit=5');
+      var d=await r.json();
+      var dl=document.getElementById('ban-suggestions'); dl.innerHTML='';
+      (d.features||[]).forEach(function(ft){
+        var o=document.createElement('option'); o.value=ft.properties.label; dl.appendChild(o);
+      });
+    }catch(e){}
+  },250);
+}
+async function banResolve(q){
+  if(!q || q.length<4) return;
+  try{
+    var r=await fetch(BAN_API+'?q='+encodeURIComponent(q)+'&limit=1');
+    var d=await r.json();
+    var ft=(d.features||[])[0];
+    if(ft){
+      var co=(ft.geometry&&ft.geometry.coordinates)||[null,null];
+      banChoix={label:ft.properties.label, ville:ft.properties.city, cp:ft.properties.postcode, citycode:ft.properties.citycode, lon:co[0], lat:co[1]};
+      var cpEl=document.getElementById('code-postal');
+      if(cpEl && banChoix.cp) cpEl.value=banChoix.cp;
+      var cf=document.getElementById('adresse-confirm');
+      if(cf){ cf.style.display='block'; cf.textContent='\u2713 '+banChoix.label+' \u2014 les ventes proches de cette adresse seront privil\u00e9gi\u00e9es'; }
+    }
+  }catch(e){}
+}
+
+async function fetchDVF(cp, type, surface, ville) {
   var EMPTY={similaires:[],prixM2Moyen:0,prixM2Median:0,nbVentes:0,historique:[],source:'DVF indisponible'};
   try {
     var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/dvf-commune', {
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM','apikey':'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM'},
-      body:JSON.stringify({codePostal:cp,typeBien:type,surface:surface})
+      body:JSON.stringify({codePostal:cp,typeBien:type,surface:surface,ville:(banChoix&&banChoix.ville)||ville||null,lat:(banChoix&&banChoix.lat)||null,lon:(banChoix&&banChoix.lon)||null})
     });
     var d = await res.json();
     return (d && typeof d.nbVentes!=='undefined') ? d : EMPTY;
@@ -697,9 +739,9 @@ async function genererSynthese(annonce, dvf, calculs, prixSouhaite, coeffQualite
     var criteres = Object.values(scoreData).map(function(s){ return s.label; }).join(', ');
     var prompt = `Tu es Hanaé, l'agent IA ImmoConnect. En 3 paragraphes courts (160 mots max), synthétise cette estimation immobilière.
 
-BIEN : ${annonce.type_bien} ${annonce.surface}m² à ${annonce.ville||'?'} (${annonce.code_postal})${annonce.annee_construction?' · Construction '+annonce.annee_construction:''}
+BIEN : ${annonce.type_bien} ${annonce.surface}m² — ${(banChoix&&banChoix.label)||('à '+(annonce.ville||'?'))} (${annonce.code_postal})${annonce.adresse?' · Adresse : '+annonce.adresse:''}${annonce.annee_construction?' · Construction '+annonce.annee_construction:''}
 
-DONNÉES DVF : ${dvf.nbVentes} ventes similaires analysées · Prix/m² DVF : ${calculs.prixM2DVF} € · DVF corrigé Notaires-INSEE (tendance ${calculs.tendance2024}%) : ${calculs.prixM2DVFCorrige} €/m²
+DONNÉES DVF (périmètre : ${dvf.source||'commune'}) : ${dvf.nbVentes} ventes similaires analysées · Prix/m² DVF : ${calculs.prixM2DVF} € · DVF corrigé Notaires-INSEE (tendance ${calculs.tendance2024}%) : ${calculs.prixM2DVFCorrige} €/m²
 
 SCORE QUALITÉ : ${coeffQualite>0?'+':''}${Math.round(coeffQualite*100)}% de correction appliquée
 Critères renseignés : ${criteres}
@@ -708,7 +750,7 @@ Prix/m² après correction qualité : ${calculs.prixM2Corrige} €/m²
 ESTIMATION FINALE : ${calculs.fourchetteBas.toLocaleString('fr-FR')} € — ${calculs.fourchettHaut.toLocaleString('fr-FR')} € · Valeur centrale : ${calculs.prixEstime.toLocaleString('fr-FR')} €
 ${prixSouhaite>0?'Prix souhaité : '+prixSouhaite.toLocaleString('fr-FR')+' € → '+(calculs.ecartMarche>0?'+':'')+calculs.ecartMarche+'% vs estimation ('+(calculs.score||'—')+')'  :''}
 
-Explique brièvement la méthode (DVF + Notaires-INSEE + score qualité). Commente les critères qui ont le plus impacté l'estimation. Conclus avec un conseil actionnable.`;
+Explique brièvement la méthode (DVF + Notaires-INSEE + score qualité). Commente les critères qui ont le plus impacté l'estimation.${annonce.adresse?" Ajoute une phrase sur l’environnement et le quartier de cette adresse à "+annonce.ville+" d’après ta connaissance de la commune.":""} Conclus avec un conseil actionnable.`;
 
     var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/rapport-hanae', {
       method:'POST',
