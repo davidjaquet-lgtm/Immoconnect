@@ -534,6 +534,26 @@ async function afficherBien(b, similaires) {
   html += statsHtml;
   if (docsHtml) html += '<div style="margin-bottom:16px">' + docsHtml + '</div>';
 
+  // DOCUMENTS COMPLÉMENTAIRES VENDEUR — abonnés uniquement, via URL signées
+  var autresDocsB = [];
+  try { var ad = b.autres_documents; if (typeof ad === 'string') ad = JSON.parse(ad); if (Array.isArray(ad)) autresDocsB = ad.filter(Boolean); } catch(e) {}
+  if (autresDocsB.length && estAbonne) {
+    var adh = '<div style="background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:16px">';
+    adh += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px">\ud83d\uddc2\ufe0f Documents fournis par le vendeur</div>';
+    autresDocsB.forEach(function(d, i){
+      var nom = String(d.name || 'Document ' + (i+1)).replace(/[<>]/g, '');
+      adh += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px"><span>\ud83d\udcc4 ' + nom + '</span>';
+      if (d.path) {
+        adh += '<button type="button" onclick="ouvrirDocVendeur(\'' + String(d.path).replace(/'/g, '') + '\')" style="background:var(--ink);color:#fff;border:none;border-radius:5px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:inherit">Ouvrir</button>';
+      } else if (d.url) {
+        adh += '<a href="' + d.url + '" target="_blank" rel="noopener" style="font-size:11px">Ouvrir</a>';
+      }
+      adh += '</div>';
+    });
+    adh += '<div style="font-size:10px;color:var(--muted);margin-top:8px">Acc\u00e8s confidentiel \u2014 liens s\u00e9curis\u00e9s \u00e0 dur\u00e9e limit\u00e9e</div></div>';
+    html += adh;
+  }
+
   // SCORE DOSSIER — visible uniquement par les agents connectés
   var userProfils2 = currentUser ? (currentUser.user_metadata?.profils || []) : [];
   if (userProfils2.includes('agent')) {
@@ -1148,6 +1168,15 @@ async function verifierRetourExclusivite() {
 }
 
 var currentNiv = 'standard';
+
+// ── OUVERTURE DOCUMENT VENDEUR (URL signée, abonnés) ──
+async function ouvrirDocVendeur(path) {
+  try {
+    var res = await db.functions.invoke('doc-url', { body: { bucket: 'documents-vendeurs', path: path } });
+    if (res.data && res.data.url) { window.open(res.data.url, '_blank', 'noopener'); }
+    else { alert('Document indisponible.'); }
+  } catch(e) { alert('Document indisponible.'); }
+}
 
 // ── CONTACT ──
 function ouvrirContact() {

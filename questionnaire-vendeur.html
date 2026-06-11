@@ -721,7 +721,7 @@ nav .nav-link{margin-right:18px}
     <div class="sec-body" id="sautres">
       <div style="display:flex;gap:10px;align-items:flex-start;background:#F1EFE8;border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:12px">
         <div style="font-size:18px">📎</div>
-        <div style="font-size:12px;line-height:1.6;color:var(--ink)"><strong>Documents complémentaires — facultatifs.</strong> Joignez des pièces utiles à l’analyse de votre bien (ex : compte rendu de copropriété, règlement de copropriété, diagnostics complémentaires, plan…). PDF ou image.</div>
+        <div style="font-size:12px;line-height:1.6;color:var(--ink)"><strong>Documents complémentaires — facultatifs.</strong> Joignez des pièces utiles à l’analyse de votre bien (ex : compte rendu de copropriété, règlement de copropriété, diagnostics complémentaires, plan…). PDF ou image. <strong>Stockage confidentiel</strong> : visibles uniquement par les membres abonnés consultant votre dossier, jamais publics.</div>
       </div>
       <div class="field" style="margin-bottom:4px">
         <label class="lbl">Joindre des documents (facultatif)</label>
@@ -1292,13 +1292,15 @@ function addAutresDocs(inp){
 }
 function delAutreDoc(i){autresDocs.splice(i,1);renderAutresDocs();}
 async function uploadAutresDocs(){
+  // SÉCURITÉ : bucket PRIVÉ documents-vendeurs — on stocke le chemin, jamais d'URL publique.
+  // La consultation passe par des URL signées (edge function doc-url), réservées aux abonnés.
   var out=[];
   for(var i=0;i<autresDocs.length;i++){
-    if(autresDocs[i].url){out.push({name:autresDocs[i].name,url:autresDocs[i].url});continue;}
+    if(autresDocs[i].path){out.push({name:autresDocs[i].name,path:autresDocs[i].path});continue;}
     var f=autresDocs[i].file,ext=(f.name.split('.').pop()||'pdf');
-    var path='vendeurs/autres/'+Date.now()+'_'+i+'.'+ext;
-    var up=await db.storage.from(BUCKET).upload(path,f,{upsert:true});
-    if(!up.error){var pub=db.storage.from(BUCKET).getPublicUrl(path);out.push({name:f.name,url:pub.data.publicUrl});}
+    var path='autres/'+Date.now()+'_'+i+'.'+ext;
+    var up=await db.storage.from('documents-vendeurs').upload(path,f,{upsert:true});
+    if(!up.error){out.push({name:f.name,path:path});}
   }
   return out;
 }
