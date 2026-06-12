@@ -584,6 +584,7 @@ async function afficherBien(b, similaires) {
     s += '<label>Apport (\u20ac)<input type="number" id="si-apport" value="'+dApport+'" oninput="recalcSimu()"></label>';
     s += '<label>Taux annuel (%)<input type="number" step="0.1" id="si-taux" value="'+dTaux+'" oninput="recalcSimu()"></label>';
     s += '<label>Dur\u00e9e (ans)<input type="number" id="si-duree" value="'+dDuree+'" oninput="recalcSimu()"></label>';
+    s += '<label>Assurance (%/an)<input type="number" step="0.05" id="si-assurance" value="0.30" oninput="recalcSimu()"></label>';
     s += '<label>Type de bien<select id="si-type" onchange="recalcSimu()"><option value="ancien">Ancien (~7,5%)</option><option value="neuf">Neuf (~2,5%)</option></select></label>';
     if (silverPlus) {
       s += '<label class="simu-fisc">R\u00e9gime fiscal<select id="si-regime" onchange="recalcSimu()"><option value="micro"'+sel(dRegime,'micro')+'>Nu \u2014 micro-foncier (30%)</option><option value="reel"'+sel(dRegime,'reel')+'>Nu \u2014 r\u00e9el</option><option value="lmnp_micro"'+sel(dRegime,'lmnp_micro')+'>LMNP \u2014 micro-BIC (50%)</option><option value="lmnp_reel"'+sel(dRegime,'lmnp_reel')+'>LMNP \u2014 r\u00e9el (amortissement)</option></select></label>';
@@ -1401,16 +1402,19 @@ function recalcSimu(){
   var notaire=Math.round(prix*tauxNot);
   var total=prix+notaire;
   var emprunt=Math.max(total-apport,0);
-  var mens=0;
+  var tauxAss=+(document.getElementById('si-assurance')||{}).value||0;
+  var mens=0, mensAss=0;
   if(emprunt>0 && duree>0){
     if(taux>0){ var i=taux/100/12, n=duree*12; mens=Math.round(emprunt*i/(1-Math.pow(1+i,-n))); }
     else { mens=Math.round(emprunt/(duree*12)); }
+    mensAss=Math.round(emprunt*tauxAss/100/12);
+    mens+=mensAss; // mensualit\u00e9 totale cr\u00e9dit + assurance
   }
   var f=function(v){return (Math.round(v)).toLocaleString('fr-FR')+' \u20ac';};
   document.getElementById('so-notaire').textContent=f(notaire);
   document.getElementById('so-total').textContent=f(total);
   document.getElementById('so-emprunt').textContent=f(emprunt);
-  document.getElementById('so-mens').textContent=mens?f(mens)+'/mois':'\u2014';
+  document.getElementById('so-mens').textContent=mens?f(mens)+'/mois'+(mensAss?' (dont assurance '+f(mensAss)+')':''):'\u2014';
   var s=window._simu||{};
   if(s.silverPlus){
     var la=(s.loyer||0)*12;

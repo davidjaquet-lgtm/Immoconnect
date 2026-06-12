@@ -303,6 +303,7 @@ async function chargerRapport() {
 
     // 7. Afficher
     afficherRapport(rapportData);
+    chargerPOI(rapportData.annonce);
     document.getElementById('btn-pdf').disabled = false;
 
     // Afficher bouton visite si niveau Silver, Gold ou Platinium
@@ -318,6 +319,72 @@ async function chargerRapport() {
 }
 
 /* ══ MODAL CALENDRIER VISITES ══ */
+// ── POINTS D'INTÉRÊT RÉELS (OpenStreetMap) — biens avec adresse exacte ──
+async function chargerPOI(a) {
+  try {
+    if (!a || !a.adresse) return; // adresse exacte requise (Gold/Platinium)
+    // 1. Géocodage IGN (adresse → lat/lon)
+    var q = encodeURIComponent(a.adresse + ' ' + (a.code_postal || '') + ' ' + (a.ville || ''));
+    var geo = await fetch('https://data.geopf.fr/geocodage/search/?q=' + q + '&limit=1').then(function(r){ return r.json(); });
+    var f = geo && geo.features && geo.features[0];
+    if (!f || (f.properties.score || 0) < 0.5) return;
+    var lon = f.geometry.coordinates[0], lat = f.geometry.coordinates[1];
+    // 2. Requête Overpass : équipements dans un rayon de 1 km
+    var ql = '[out:json][timeout:10];(' +
+      'node(around:1000,' + lat + ',' + lon + ')[amenity~"^(school|kindergarten|pharmacy|doctors|supermarket)$"];' +
+      'node(around:1000,' + lat + ',' + lon + ')[shop~"^(supermarket|bakery)$"];' +
+      'node(around:800,'  + lat + ',' + lon + ')[highway=bus_stop];' +
+      'node(around:1500,' + lat + ',' + lon + ')[railway=station];' +
+      ');out body 60;';
+    var ctl = new AbortController(); var to = setTimeout(function(){ ctl.abort(); }, 9000);
+    var osm = await fetch('https://overpass-api.de/api/interpreter', { method:'POST', body:'data='+encodeURIComponent(ql), signal: ctl.signal }).then(function(r){ return r.json(); });
+    clearTimeout(to);
+    var els = (osm && osm.elements) || [];
+    if (!els.length) return;
+    // 3. Distance + déduplication par catégorie (le plus proche de chaque type)
+    function dist(la, lo) {
+      var R=6371000, dLa=(la-lat)*Math.PI/180, dLo=(lo-lon)*Math.PI/180;
+      var x = Math.sin(dLa/2)*Math.sin(dLa/2) + Math.cos(lat*Math.PI/180)*Math.cos(la*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2);
+      return Math.round(2*R*Math.asin(Math.sqrt(x)));
+    }
+    var cats = {
+      ecole:      { lbl:'\ud83c\udfeb \u00c9cole',        test:function(t){ return t.amenity==='school'||t.amenity==='kindergarten'; } },
+      commerce:   { lbl:'\ud83d\uded2 Supermarch\u00e9',  test:function(t){ return t.amenity==='supermarket'||t.shop==='supermarket'; } },
+      boulangerie:{ lbl:'\ud83e\udd56 Boulangerie',        test:function(t){ return t.shop==='bakery'; } },
+      pharmacie:  { lbl:'\ud83d\udc8a Pharmacie',          test:function(t){ return t.amenity==='pharmacy'; } },
+      medecin:    { lbl:'\ud83e\ude7a M\u00e9decin',      test:function(t){ return t.amenity==='doctors'; } },
+      bus:        { lbl:'\ud83d\ude8c Arr\u00eat de bus', test:function(t){ return t.highway==='bus_stop'; } },
+      gare:       { lbl:'\ud83d\ude89 Gare',               test:function(t){ return t.railway==='station'; } }
+    };
+    var best = {};
+    els.forEach(function(e){
+      if (!e.tags || !e.lat) return;
+      var d = dist(e.lat, e.lon);
+      for (var k in cats) {
+        if (cats[k].test(e.tags)) {
+          if (!best[k] || d < best[k].d) best[k] = { d: d, nom: e.tags.name || '' };
+          break;
+        }
+      }
+    });
+    var keys = Object.keys(best);
+    if (!keys.length) return;
+    var h = '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">';
+    h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px">\ud83d\udccd \u00c0 proximit\u00e9 (donn\u00e9es OpenStreetMap)</div>';
+    h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px;font-size:12px">';
+    keys.sort(function(x,y){ return best[x].d - best[y].d; }).forEach(function(k){
+      var b = best[k];
+      var min = Math.max(1, Math.round(b.d / 1000 * 12)); // ~12 min/km à pied
+      h += '<div style="background:var(--bg);border-radius:6px;padding:7px 10px">' + cats[k].lbl +
+           (b.nom ? ' <span style="color:var(--muted)">' + b.nom.replace(/[<>]/g,'') + '</span>' : '') +
+           '<br><strong>' + (b.d < 1000 ? b.d + ' m' : (b.d/1000).toFixed(1) + ' km') + '</strong> \u00b7 ' + min + ' min \u00e0 pied</div>';
+    });
+    h += '</div></div>';
+    var slot = document.getElementById('poi-section');
+    if (slot) slot.innerHTML = h;
+  } catch(e) { /* d\u00e9faillance silencieuse : la section reste vide */ }
+}
+
 function ouvrirCalendrier() {
   var annonce = rapportData && rapportData.annonce;
   if (!annonce) return;
@@ -1074,7 +1141,10 @@ function afficherRapport(d) {
   html += '<div><span style="color:var(--muted)">DPE :</span> <strong>' + (a.classe_dpe || 'Non renseigné') + '</strong></div>';
   html += '<div><span style="color:var(--muted)">Parking :</span> <strong>' + (a.parking || '—') + '</strong></div>';
   html += '<div><span style="color:var(--muted)">Extérieur :</span> <strong>' + (a.exterieur || '—') + '</strong></div>';
-  html += '</div></div></div>';
+  html += '</div>';
+  // POI réels OpenStreetMap (rempli en différé si adresse exacte disponible — Gold/Platinium)
+  html += '<div id="poi-section"></div>';
+  html += '</div></div>';
 
   // ── SECTION 2 : PRIX MARCHÉ ──
   html += '<div class="rapport-section">';
