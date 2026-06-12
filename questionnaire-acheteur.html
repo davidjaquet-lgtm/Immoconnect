@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trouver un bien immobilier — Déposer mon projet acheteur — ImmoConnect</title>
-<meta name="description" content="Déposez votre projet d'achat immobilier sur ImmoConnect. Recevez des alertes personnalisées dès qu'un bien correspond à vos critères. Accès au dossier complet pour 4,99€.">
+<meta name="description" content="Déposez votre projet d'achat immobilier sur ImmoConnect. Recevez des alertes personnalisées dès qu'un bien correspond à vos critères et contactez les vendeurs gratuitement.">
 <meta name="keywords" content="acheter maison appartement, projet achat immobilier, alerte immobilière, recherche bien immobilier">
 <meta property="og:title" content="Trouvez votre bien idéal sur ImmoConnect">
 <meta property="og:description" content="Déposez vos critères et recevez des alertes dès qu'un bien correspond. Accès aux dossiers vendeurs complets.">
@@ -155,7 +155,7 @@ nav .nav-link{margin-right:18px}
       <div class="fc-icon">🏠</div>
       <div class="fc-name">Acheteur gratuit</div>
       <div class="fc-price">0 € / toujours</div>
-      <div class="fc-desc">Prix · ville · surface · pièces visibles · 1 contact/semaine offert · Dossier 4,99€ · Contact 9,99€</div>
+      <div class="fc-desc">Annonces complètes avec prix affiché · Contact vendeur gratuit · Alertes personnalisées dès qu'un bien correspond</div>
     </div>
     <div class="forfait-card" id="fc-investisseur" onclick="setForfait('investisseur')">
       <div class="fc-icon">📈</div>
@@ -738,9 +738,8 @@ function calculerCapacite() {
 /* ══ RECAP SUBMIT ══ */
 function updateRecap() {
   var txt = '';
-  if (forfait === 'gratuit')      txt = 'Forfait Gratuit — accès annonces de base.';
-  if (forfait === 'acheteur')     txt = 'Forfait Acheteur 19,99€/mois — infos complètes, rapport Hanaé, 1 contact vendeur/semaine.';
-  if (forfait === 'investisseur') txt = 'Forfait Investisseur 39€/mois — matching automatique, 5 contacts/semaine, vendeurs Platinium.';
+  if (forfait === 'gratuit')      txt = 'Acheteur gratuit — annonces complètes, contact vendeur gratuit, alertes personnalisées.';
+  if (forfait === 'investisseur') txt = 'Forfait Investisseur 29,99€/mois — matching rendement automatique, dossiers et rapports inclus, vendeurs Platinium.';
   document.getElementById('submit-recap').textContent = txt;
 }
 
