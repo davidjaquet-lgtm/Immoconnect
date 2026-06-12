@@ -372,7 +372,7 @@ function buildReservations() {
     h += '<div class="resa-info">';
     h += '<div class="resa-titre">' + (bien ? (bien.type_bien||'Bien') + ' · ' + (bien.surface||'—') + 'm² · ' + (bien.ville||'') : (r.bien_label || '—')) + '</div>';
     h += '<div class="resa-meta">⏰ ' + (dispo ? dispo.heure_debut + ' – ' + dispo.heure_fin : (r.creneau_souhaite || 'Créneau à convenir'));
-    h += ' · ' + (currentRole === 'vendeur' ? '👤 ' + (r.nom_acheteur ? r.nom_acheteur + ' · ' : '') + (r.email_acheteur||'') : '🏠 ' + (r.email_vendeur||'')) + '</div>';
+    h += ' · ' + (currentRole === 'vendeur' ? '👤 Un acheteur (identité protégée)' : '🏠 Le vendeur') + '</div>';
     if (r.message) h += '<div class="resa-meta" style="margin-top:4px;font-style:italic">"' + r.message + '"</div>';
     h += '</div>';
 
@@ -581,5 +581,6 @@ async function chargerAgentsDispos() {
 function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
 function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
 </script>
+<script src="feedback.js" defer></script>
 </body>
 </html>

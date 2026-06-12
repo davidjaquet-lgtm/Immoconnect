@@ -253,12 +253,32 @@ function afficherListeConvs(convs) {
     document.getElementById('conv-list').innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px">Aucune conversation</div>';
     return;
   }
+  // CONFIDENTIALITÉ : les particuliers ne voient jamais le nom/email des autres.
+  // On affiche des rôles ; seuls les agents (professionnels) restent identifiés comme tels.
+  if (!window.__agentsSet) {
+    window.__agentsSet = new Set();
+    try {
+      var emailsTiers = [];
+      convs.forEach(function(cv){ emailsTiers.push(cv.email_agent, cv.email_vendeur); });
+      var uniq = Array.from(new Set(emailsTiers.filter(Boolean)));
+      if (uniq.length) {
+        db.from('agents_validation').select('email').in('email', uniq).then(function(res){
+          ((res && res.data) || []).forEach(function(a){ window.__agentsSet.add(a.email); });
+          try { afficherListeConvs(convs); } catch(e) {} // ré-affichage avec les rôles précis
+        });
+      }
+    } catch(e) {}
+  }
+  function roleDe(emailTiers, conv) {
+    if (emailTiers === conv.email_vendeur) return 'Vendeur';
+    if (window.__agentsSet.has(emailTiers)) return 'Agent immobilier';
+    return 'Acheteur';
+  }
   var html = '';
   convs.forEach(function(c) {
     var isAgent = c.email_agent === currentUser.email;
-    var nomInterlocuteur = isAgent
-      ? (c.email_vendeur || '').split('@')[0]
-      : (c.email_agent || '').split('@')[0];
+    var emailTiers = isAgent ? c.email_vendeur : c.email_agent;
+    var nomInterlocuteur = roleDe(emailTiers, c);
     var bien = c.annonces_vendeurs;
     var preview = c.dernier_message || (bien ? (bien.type_bien||'Bien')+' · '+(bien.ville||'') : '—');
     var avatarClass = isAgent ? 'av-vendeur' : 'av-agent';
@@ -343,9 +363,9 @@ async function onTyping() {
 async function afficherChat(conv) {
   var bien = conv.annonces_vendeurs;
   var isAgent = conv.email_agent === currentUser.email;
-  var nomInterlocuteur = isAgent
-    ? (conv.email_vendeur||'').split('@')[0]
-    : (conv.email_agent||'').split('@')[0];
+  var emailTiersConv = isAgent ? conv.email_vendeur : conv.email_agent;
+  var nomInterlocuteur = (emailTiersConv === conv.email_vendeur) ? 'Vendeur'
+    : (window.__agentsSet && window.__agentsSet.has(emailTiersConv)) ? 'Agent immobilier' : 'Acheteur';
   var emailInterlocuteur = isAgent ? conv.email_agent : conv.email_vendeur;
 
   // Charger messages
@@ -527,7 +547,7 @@ async function envoyerMessage() {
 function ouvrirModal(convId, nomAgent) {
   convPourNotation = convId;
   noteSelectionnee = 0;
-  document.getElementById('modal-agent-nom').textContent = 'Donnez votre avis sur '+nomAgent;
+  document.getElementById('modal-agent-nom').textContent = 'Donnez votre avis sur cet agent';
   document.getElementById('notation-commentaire').value = '';
   document.querySelectorAll('.star-btn').forEach(function(b){ b.classList.remove('active'); });
   document.getElementById('modal-notation').classList.add('open');
@@ -647,5 +667,6 @@ document.getElementById('modal-notation').addEventListener('click', function(e){
 function icAccepter(){localStorage.setItem('ic_cookie_consent','accepted');document.getElementById('cookie-banner').style.display='none';}
 function icRefuser(){localStorage.setItem('ic_cookie_consent','refused');document.getElementById('cookie-banner').style.display='none';}
 </script>
+<script src="feedback.js" defer></script>
 </body>
 </html>

@@ -1241,7 +1241,7 @@ async function envoyerContact() {
         type: 'nouveau_message',
         to: bien.email_contact,
         subject: '💬 Nouveau contact pour votre bien — ImmoConnect',
-        expediteur: nom,
+        expediteur: 'Un acheteur ImmoConnect',
         message: msg,
         bien: (bien.type_bien||'Bien') + ' · ' + (bien.ville||''),
         lien: 'https://immoconnect-agence.fr/connexion.html'
@@ -1331,7 +1331,7 @@ async function confirmerVisite(dispoId) {
     body: {
       type: 'demande_visite', to: bien.email_contact,
       subject: '📅 Nouvelle demande de visite — ImmoConnect',
-      acheteur: nom + ' (' + email + ')', message: (creneauLabel ? 'Créneau : ' + creneauLabel + '. ' : '') + (msg||''),
+      acheteur: 'Un acheteur ImmoConnect (identité protégée — répondez depuis votre calendrier)', message: (creneauLabel ? 'Créneau : ' + creneauLabel + '. ' : '') + (msg||''),
       bien: bienLabel, lien: 'https://immoconnect-agence.fr/calendrier.html'
     }
   }).then(undefined, function(){});
@@ -1364,7 +1364,7 @@ async function envoyerDemandeLibre() {
   });
   await db.functions.invoke('envoyer-email', {
     body: { type: 'demande_visite', to: bien.email_contact, subject: '📅 Nouvelle demande de visite — ImmoConnect',
-      acheteur: nom + ' (' + email + ')', message: 'Créneau souhaité : ' + creneau + '. ' + (msg||''),
+      acheteur: 'Un acheteur ImmoConnect (identité protégée — répondez depuis votre calendrier)', message: 'Créneau souhaité : ' + creneau + '. ' + (msg||''),
       bien: bienLabel, lien: 'https://immoconnect-agence.fr/calendrier.html' }
   }).then(undefined, function(){});
   await db.functions.invoke('envoyer-email', {
@@ -1584,5 +1584,6 @@ function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); do
 function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
 </script>
 <script src="/pwa.js"></script>
+<script src="feedback.js" defer></script>
 </body>
 </html>
