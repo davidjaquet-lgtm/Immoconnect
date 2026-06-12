@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Inscription agent immobilier</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--amber:#D4732A;--coral:#C0392B;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:24px;align-items:center;flex:1;margin-left:32px}
+.nav-links a{text-decoration:none;color:#888780;font-size:13px}
+.nav-out{padding:8px 20px;border:1px solid #444;color:#fff!important;border-radius:4px;font-size:13px;font-weight:500;text-decoration:none}
+
+.page{max-width:700px;margin:0 auto;padding:40px 24px 80px}
+
+/* PROGRESS */
+.progress-steps{display:flex;gap:0;margin-bottom:32px}
+.progress-step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+.progress-step::before{content:'';position:absolute;top:14px;left:-50%;width:100%;height:2px;background:var(--line);z-index:0}
+.progress-step:first-child::before{display:none}
+.step-circle{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:var(--warm);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--muted);position:relative;z-index:1;transition:all .3s}
+.step-circle.active{border-color:var(--amber);background:var(--amber);color:#fff}
+.step-circle.done{border-color:var(--teal);background:var(--teal);color:#fff}
+.step-label{font-size:10px;color:var(--muted);margin-top:6px;text-align:center;font-weight:500}
+.step-label.active{color:var(--amber)}
+
+/* SECTIONS */
+.section{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:24px;margin-bottom:16px}
+.section-title{font-size:14px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-icon{width:28px;height:28px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:14px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+label.lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+input,select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink);outline:none;transition:border .15s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--ink)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field-hint{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5}
+
+/* CARTE T */
+.carte-feedback{font-size:11px;margin-top:4px;display:none}
+.carte-ocr{display:none;margin-top:10px;border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.7}
+
+/* EXPIRATION WARNING */
+.expir-warning{display:none;background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:10px 14px;font-size:12px;color:#712B13;margin-top:6px}
+.expir-ok{display:none;background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:10px 14px;font-size:12px;color:#085041;margin-top:6px}
+
+/* SCORE PREVIEW */
+.score-preview{background:var(--bg);border-radius:8px;padding:14px 16px;margin-top:12px}
+.score-preview-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.score-items{display:flex;flex-direction:column;gap:6px}
+.score-item{display:flex;align-items:center;gap:8px;font-size:12px}
+.score-bar{height:4px;border-radius:2px;background:var(--line);flex:1}
+.score-bar-fill{height:100%;border-radius:2px;background:var(--teal);transition:width .4s}
+.score-pts{font-size:10px;color:var(--muted);min-width:50px;text-align:right}
+
+/* MODÈLE TARIFAIRE */
+.tarif-info{background:linear-gradient(135deg,#E1F5EE,#E6F1FB);border:1px solid #9FE1CB;border-radius:10px;padding:16px 18px;margin-bottom:20px}
+.tarif-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(30,122,98,.15);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;color:#1E7A62;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.tarif-plans{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.tarif-plan{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:12px;text-align:center}
+.tarif-plan.recommended{border:2px solid var(--teal)}
+.plan-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:4px}
+.plan-price{font-size:18px;font-weight:500;color:var(--ink)}
+.plan-cadid{font-size:10px;color:var(--muted);margin-top:2px}
+.plan-rec{font-size:9px;font-weight:700;color:var(--teal);margin-top:4px;text-transform:uppercase}
+.tarif-plan.selected-plan{border:2px solid var(--ink);background:var(--bg)}
+.tarif-plan{cursor:pointer;transition:all .2s}
+.tarif-plan:hover{border-color:var(--muted)}
+
+/* CANDIDATS ACHETEURS */
+.acheteur-card{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:10px;position:relative}
+.acheteur-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.acheteur-num{font-size:11px;font-weight:600;color:var(--muted)}
+.btn-remove{background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:0;width:auto}
+.btn-add-acheteur{width:100%;padding:10px;border-radius:8px;border:1px dashed var(--line);background:transparent;font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;color:var(--muted);transition:all .15s;margin-top:4px}
+.btn-add-acheteur:hover{border-color:var(--teal);color:var(--teal)}
+
+/* CONSENTEMENTS */
+.consent-box{background:#FEF3E7;border:1px solid rgba(212,115,42,.2);border-radius:8px;padding:16px;margin-bottom:10px}
+.consent-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--amber);margin-bottom:12px}
+.consent-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer}
+.consent-item:last-child{margin-bottom:0}
+.consent-item input[type=checkbox]{width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:var(--amber)}
+.consent-text{font-size:13px;line-height:1.6;color:var(--ink)}
+.consent-text a{color:var(--teal);text-decoration:none}
+
+/* BOUTONS */
+.btn-submit{width:100%;padding:14px;border-radius:8px;border:none;background:var(--amber);color:#fff;font-family:'Outfit',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:opacity .15s;margin-top:8px}
+.btn-submit:hover{opacity:.85}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed}
+.btn-row{display:flex;gap:12px}
+.btn-back{background:var(--bg);color:var(--ink);border:1px solid var(--line);flex:0 0 120px}
+
+/* BOXES */
+.info-box{background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:12px 14px;font-size:12px;color:#0A4A35;line-height:1.7;margin-bottom:16px}
+.warn-box{background:#FAEEDA;border:1px solid rgba(192,155,90,.3);border-radius:8px;padding:12px 14px;font-size:12px;color:#633806;line-height:1.7;margin-bottom:16px}
+.err-box{background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:12px 14px;font-size:12px;color:#712B13;line-height:1.7;margin-bottom:16px}
+
+/* CONFIRMATION */
+.confetti-wrap{text-align:center;padding:32px 0 16px}
+.confetti-icon{font-size:48px;margin-bottom:16px}
+.recap-card{background:var(--bg);border-radius:8px;padding:16px;margin:16px 0}
+.recap-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)}
+.recap-row:last-child{border-bottom:none}
+.recap-label{color:var(--muted)}
+.recap-val{font-weight:500}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;display:none;max-width:400px;text-align:center}
+.toast.ok{background:#1E7A62;color:#fff}
+.toast.err{background:#C0392B;color:#fff}
+.spin{width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:600px){.grid2{grid-template-columns:1fr}.tarif-plans{grid-template-columns:1fr}}
+</style>
+<style>
+/* Bandeau supérieur unifié — fond blanc, texte foncé (override global) */
+nav{background:#fff!important;border-bottom:1px solid #E8E6E0!important}
+nav .nav-logo{color:#0F0F0E!important}
+nav .nav-logo span{color:#C09B5A!important}
+nav a{color:#0F0F0E!important}
+nav a:hover{color:#C09B5A!important}
+nav .nav-out{color:#0F0F0E!important;border-color:#0F0F0E!important}
+nav .nav-link{margin-right:18px}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-links">
+    <a href="index.html">Accueil</a>
+    <a href="comment-ca-marche-agents.html">Comment ça marche</a>
+    <a href="connexion.html">Se connecter</a>
+  </div>
+  <a href="index.html" class="nav-out">Accueil</a>
+</nav>
+
+<div class="page">
+
+  <!-- PROGRESS -->
+  <div class="progress-steps">
+    <div class="progress-step">
+      <div class="step-circle active" id="sc1">1</div>
+      <div class="step-label active" id="sl1">Profil</div>
+    </div>
+    <div class="progress-step">
+      <div class="step-circle" id="sc2">2</div>
+      <div class="step-label" id="sl2">Carte T</div>
+    </div>
+    <div class="progress-step">
+      <div class="step-circle" id="sc3">3</div>
+      <div class="step-label" id="sl3">Expérience</div>
+    </div>
+    <div class="progress-step">
+      <div class="step-circle" id="sc4">4</div>
+      <div class="step-label" id="sl4">Compte</div>
+    </div>
+    <div class="progress-step">
+      <div class="step-circle" id="sc5">5</div>
+      <div class="step-label" id="sl5">Confirmation</div>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 1 — PROFIL -->
+  <div id="step1">
+    <div class="tarif-info">
+      <div class="tarif-badge">🤝 Choisissez votre forfait</div>
+      <div style="font-size:14px;font-weight:500;margin-bottom:4px;color:var(--ink)">Commencez gratuitement ou choisissez un forfait</div>
+      <div style="font-size:12px;color:#085041;line-height:1.6;margin-bottom:14px">Inscription gratuite. Candidatez à 9,99€/unité en pay per use ou choisissez un forfait pour accéder aux alertes et augmenter votre volume.</div>
+      <input type="hidden" id="forfait_agent" value="pay_per_use">
+      <div class="tarif-plans" style="grid-template-columns:repeat(4,1fr)">
+        <div class="tarif-plan selected-plan" id="fp-pay_per_use" onclick="selectForfaitAgent('pay_per_use')">
+          <div class="plan-name">Pay per use</div>
+          <div class="plan-price" style="font-size:14px">Gratuit</div>
+          <div class="plan-cadid">9,99€/candidature</div>
+          <div class="plan-cadid" style="margin-top:3px">Alerte mode top 3</div>
+        </div>
+        <div class="tarif-plan" id="fp-starter" onclick="selectForfaitAgent('starter')">
+          <div class="plan-name">Starter</div>
+          <div class="plan-price">49€</div>
+          <div class="plan-cadid">/mois · H+12</div>
+          <div class="plan-cadid" style="margin-top:3px">5 candidatures/mois</div>
+        </div>
+        <div class="tarif-plan recommended" id="fp-pro" onclick="selectForfaitAgent('pro')">
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">99€</div>
+          <div class="plan-cadid">/mois · H+4</div>
+          <div class="plan-cadid" style="margin-top:3px">20 candidatures/mois</div>
+          <div class="plan-rec">Recommandé</div>
+        </div>
+        <div class="tarif-plan" id="fp-premium" onclick="selectForfaitAgent('premium')">
+          <div class="plan-name">Premium</div>
+          <div class="plan-price">199€</div>
+          <div class="plan-cadid">/mois · H+0</div>
+          <div class="plan-cadid" style="margin-top:3px">Illimité · +10 pts</div>
+        </div>
+      </div>
+      <div id="forfait-detail" style="margin-top:10px;font-size:11px;color:var(--muted);background:var(--bg);border-radius:6px;padding:8px 10px;line-height:1.6"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><div class="section-icon">👤</div>Informations personnelles</div>
+      <div class="grid2">
+        <div class="field">
+          <label class="lbl">Prénom *</label>
+          <input type="text" id="prenom" placeholder="Jean">
+        </div>
+        <div class="field">
+          <label class="lbl">Nom *</label>
+          <input type="text" id="nom" placeholder="Dupont">
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl">Téléphone *</label>
+        <input type="tel" id="telephone" placeholder="06 12 34 56 78">
+      </div>
+      <div class="field">
+        <label class="lbl">Email professionnel *</label>
+        <input type="email" id="email" placeholder="jean.dupont@agence.fr">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><div class="section-icon">🏢</div>Informations professionnelles</div>
+      <div class="field">
+        <label class="lbl">Nom de l'agence *</label>
+        <input type="text" id="agence" placeholder="Agence Dupont Immobilier">
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label class="lbl">Ville principale d'exercice *</label>
+          <input type="text" id="ville" placeholder="Tarbes">
+        </div>
+        <div class="field">
+          <label class="lbl">Code postal *</label>
+          <input type="text" id="code_postal" placeholder="65000">
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl">Rayon d'intervention (km)</label>
+        <select id="rayon">
+          <option value="10">10 km</option>
+          <option value="20" selected>20 km</option>
+          <option value="30">30 km</option>
+          <option value="50">50 km</option>
+          <option value="100">+ de 50 km</option>
+        </select>
+        <div class="field-hint">Utilisé pour vous alerter des nouvelles annonces dans votre secteur.</div>
+      </div>
+      <div class="field">
+        <label class="lbl">Spécialité principale</label>
+        <select id="specialite">
+          <option value="">Sélectionner</option>
+          <option>Résidentiel ancien</option>
+          <option>Résidentiel neuf</option>
+          <option>Résidentiel luxe</option>
+          <option>Investissement locatif</option>
+          <option>Commerce et bureaux</option>
+          <option>Tous types</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl">Présentation courte</label>
+        <textarea id="presentation" rows="3" placeholder="Ex: Agent spécialisé dans le résidentiel tarbais depuis 8 ans. Connaissance fine du marché local, 45 ventes réalisées en 2024."></textarea>
+        <div class="field-hint">Visible par les vendeurs dans votre fiche agent. Soyez factuel et précis.</div>
+      </div>
+    </div>
+
+    <button class="btn-submit" style="background:var(--ink)" onclick="goStep(2)">Continuer → Carte T</button>
+  </div>
+
+  <!-- ÉTAPE 2 — CARTE T -->
+  <div id="step2" style="display:none">
+    <div class="err-box">
+      🪪 <strong>Carte professionnelle obligatoire</strong> — La loi Hoguet du 2 janvier 1970 impose la détention d'une carte T valide pour exercer. Votre inscription sera bloquée sans carte T vérifiée. Votre compte sera activé sous <strong>48h maximum</strong> après vérification.
+    </div>
+
+    <div class="section">
+      <div class="section-title"><div class="section-icon">🪪</div>Carte professionnelle (carte T)</div>
+
+      <div class="field">
+        <label class="lbl">Numéro de carte T *</label>
+        <input type="text" id="carte-t" placeholder="CPI 7501 2024 000 012345" oninput="validerCarteT()">
+        <div class="field-hint">Format : CPI XXXX 20XX XXX XXXXXX — délivré par votre CCI</div>
+        <div class="carte-feedback" id="carte-feedback"></div>
+      </div>
+
+      <div class="grid2">
+        <div class="field">
+          <label class="lbl">CCI émettrice *</label>
+          <input type="text" id="cci" placeholder="ex: CCI Tarbes-Hautes-Pyrénées">
+        </div>
+        <div class="field">
+          <label class="lbl">Date d'expiration *</label>
+          <input type="date" id="expiration" onchange="checkExpiration()">
+          <div class="expir-warning" id="expir-warning">⚠️ Votre carte T est expirée ou expire dans moins de 30 jours. Renouvelez-la auprès de votre CCI avant de vous inscrire.</div>
+          <div class="expir-ok" id="expir-ok">✅ Carte T valide</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="lbl">Photo de la carte T * <span style="font-size:10px;font-weight:400;color:var(--muted)">(recto — JPG, PNG ou PDF)</span></label>
+        <input type="file" id="carte-photo" accept=".jpg,.jpeg,.png,.pdf" onchange="analyserCarte()">
+        <div class="field-hint">Jamais transmis à des tiers. Sert uniquement à vérifier votre habilitation.</div>
+        <div class="carte-ocr" id="carte-ocr"></div>
+      </div>
+
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-top:12px">
+        <input type="checkbox" id="certif-carte" style="width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:var(--amber)">
+        <label for="certif-carte" style="font-size:13px;line-height:1.6;cursor:pointer">
+          Je certifie être titulaire de cette carte professionnelle valide et en cours de validité, conformément à la loi Hoguet du 2 janvier 1970. Je m'engage à signaler immédiatement à ImmoConnect tout renouvellement ou retrait de ma carte professionnelle.
+        </label>
+      </div>
+
+      <div class="info-box" style="margin-top:14px">
+        📅 <strong>Renouvellement automatique</strong> — ImmoConnect vous alertera par email 30 jours avant l'expiration de votre carte T. En cas d'expiration non renouvelée, votre compte sera automatiquement suspendu.
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-submit btn-back" onclick="goStep(1)">← Retour</button>
+      <button class="btn-submit" style="flex:1" onclick="goStep(3)">Continuer → Expérience</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 3 — EXPÉRIENCE ET ACHETEURS -->
+  <div id="step3" style="display:none">
+
+    <div class="section">
+      <div class="section-title"><div class="section-icon">📊</div>Votre expérience locale</div>
+      <div class="field-hint" style="margin-bottom:12px">Ces informations alimentent votre score de sélection visible par les vendeurs. Plus vous êtes précis, plus votre score est élevé.</div>
+
+      <div class="grid2">
+        <div class="field">
+          <label class="lbl">Ventes réalisées (12 derniers mois)</label>
+          <input type="number" id="nb_ventes_12m" placeholder="ex: 12" min="0" oninput="majScorePreview()">
+        </div>
+        <div class="field">
+          <label class="lbl">Dont ventes dans votre secteur</label>
+          <input type="number" id="nb_ventes_locales" placeholder="ex: 8" min="0" oninput="majScorePreview()">
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="field">
+          <label class="lbl">Délai moyen de vente (jours)</label>
+          <input type="number" id="delai_moyen" placeholder="ex: 45" min="0" oninput="majScorePreview()">
+        </div>
+        <div class="field">
+          <label class="lbl">Taux de vente au prix affiché (%)</label>
+          <input type="number" id="taux_prix" placeholder="ex: 94" min="0" max="100" oninput="majScorePreview()">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="lbl">Fourchette d'honoraires habituels</label>
+        <select id="honoraires" onchange="majScorePreview()">
+          <option value="">Sélectionner</option>
+          <option value="2-3">2% à 3% TTC</option>
+          <option value="3-4">3% à 4% TTC</option>
+          <option value="4-5">4% à 5% TTC</option>
+          <option value="5+">Plus de 5% TTC</option>
+          <option value="fixe">Honoraires fixes</option>
+        </select>
+      </div>
+
+      <!-- PREVIEW SCORE -->
+      <div class="score-preview" id="score-preview" style="display:none">
+        <div class="score-preview-title">Votre score de sélection estimé</div>
+        <div class="score-items" id="score-items"></div>
+        <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+          <div style="font-size:24px;font-weight:500" id="score-total">0</div>
+          <div style="font-size:12px;color:var(--muted)">/100 — <span id="score-label">Complétez les champs pour améliorer votre score</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><div class="section-icon">👥</div>Acheteurs en portefeuille</div>
+      <div class="field-hint" style="margin-bottom:12px">Si vous avez des acheteurs actifs, déclarez-les ici. Quand un bien correspond à leurs critères, vous serez automatiquement sélectionné avec un score majoré.</div>
+
+      <div id="acheteurs-list"></div>
+      <button type="button" class="btn-add-acheteur" onclick="ajouterAcheteur()">+ Ajouter un acheteur en portefeuille</button>
+
+      <div class="warn-box" style="margin-top:14px">
+        🤝 Les identités de vos acheteurs restent confidentielles. Seuls leur budget, type de bien et secteur recherché sont utilisés pour le matching automatique.
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-submit btn-back" onclick="goStep(2)">← Retour</button>
+      <button class="btn-submit" style="flex:1" onclick="goStep(4)">Continuer → Créer mon compte</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 4 — COMPTE -->
+  <div id="step4" style="display:none">
+    <div class="section">
+      <div class="section-title"><div class="section-icon">🔐</div>Créer votre compte</div>
+      <div class="field">
+        <label class="lbl">Mot de passe *</label>
+        <input type="password" id="password" placeholder="8 caractères minimum" minlength="8" oninput="checkPassword()">
+        <div id="password-strength" style="font-size:11px;margin-top:4px;display:none"></div>
+      </div>
+      <div class="field">
+        <label class="lbl">Confirmer le mot de passe *</label>
+        <input type="password" id="password2" placeholder="Répétez votre mot de passe">
+      </div>
+    </div>
+
+    <div class="consent-box">
+      <div class="consent-title">⚖️ Consentements obligatoires</div>
+      <label class="consent-item">
+        <input type="checkbox" id="consent1">
+        <span class="consent-text">J'autorise ImmoConnect à transmettre mes informations professionnelles aux vendeurs dans le cadre du système de sélection d'agents.</span>
+      </label>
+      <label class="consent-item">
+        <input type="checkbox" id="consent2">
+        <span class="consent-text">Je confirme être titulaire d'une Carte T valide et m'engage à signaler toute modification ou expiration à ImmoConnect. Je reconnais que mon compte sera suspendu automatiquement en cas d'expiration non renouvelée.</span>
+      </label>
+      <label class="consent-item">
+        <input type="checkbox" id="consent3">
+        <span class="consent-text">Je reconnais qu'ImmoConnect est une plateforme de mise en relation et non un mandataire immobilier. Je reste seul responsable du respect de la loi Hoguet, des obligations LCB-FT et de la déontologie FNAIM dans mon exercice professionnel.</span>
+      </label>
+      <label class="consent-item">
+        <input type="checkbox" id="consent4">
+        <span class="consent-text">J'accepte les <a href="cgu.html" target="_blank">CGU d'ImmoConnect</a> et la <a href="mentions-legales.html" target="_blank">politique de confidentialité</a>.</span>
+      </label>
+    </div>
+
+    <div class="info-box">
+      💳 <strong>Candidatures à 9,99€</strong> — Aucun prélèvement aujourd'hui. Vous payerez uniquement lorsque vous candidaterez sur une annonce vendeur. Paiement sécurisé par Stripe.
+    </div>
+
+    <button class="btn-submit" id="btn-submit" onclick="soumettre()">Créer mon compte agent →</button>
+    <div class="btn-row" style="margin-top:8px">
+      <button class="btn-submit btn-back" style="flex:1;margin-top:0" onclick="goStep(3)">← Retour</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 5 — CONFIRMATION -->
+  <div id="step5" style="display:none">
+    <div class="section">
+      <div class="confetti-wrap">
+        <div class="confetti-icon">🎉</div>
+        <div style="font-size:20px;font-weight:500;margin-bottom:8px">Inscription envoyée !</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7;max-width:400px;margin:0 auto">
+          Votre dossier est en cours de vérification. Vous recevrez un email de confirmation sous <strong>48h maximum</strong>.
+        </div>
+      </div>
+
+      <div class="recap-card">
+        <div class="recap-row"><span class="recap-label">Nom</span><span class="recap-val" id="recap-nom">—</span></div>
+        <div class="recap-row"><span class="recap-label">Agence</span><span class="recap-val" id="recap-agence">—</span></div>
+        <div class="recap-row"><span class="recap-label">Carte T</span><span class="recap-val" id="recap-carte">—</span></div>
+        <div class="recap-row"><span class="recap-label">Email</span><span class="recap-val" id="recap-email">—</span></div>
+        <div class="recap-row"><span class="recap-label">Statut</span><span class="recap-val" style="color:var(--amber)">En attente de validation</span></div>
+      </div>
+
+      <div class="warn-box">
+        📧 <strong>Vérifiez votre email</strong> — Un email de vérification vous a été envoyé. Cliquez sur le lien pour confirmer votre adresse. Sans confirmation, votre compte ne sera pas activé.
+      </div>
+
+      <div style="margin-top:16px">
+        <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Prochaines étapes</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="width:24px;height:24px;border-radius:50%;background:#E1F5EE;color:#1E7A62;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">1</span>Confirmez votre email (lien envoyé)</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="width:24px;height:24px;border-radius:50%;background:#E6F1FB;color:#185FA5;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">2</span>Validation de votre Carte T sous 48h</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="width:24px;height:24px;border-radius:50%;background:#FAEEDA;color:#854F0B;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">3</span>Accès à votre espace agent et aux annonces</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="width:24px;height:24px;border-radius:50%;background:#F5F2EC;color:#888780;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">4</span>Candidatez sur votre premier bien à 9,99€</div>
+        </div>
+      </div>
+    </div>
+    <a href="index.html" class="btn-submit" style="display:block;text-align:center;text-decoration:none;margin-top:16px">Retour à l'accueil</a>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+var nbAcheteurs = 0;
+
+// ── NAVIGATION ÉTAPES ──
+function goStep(n) {
+  if (!validerEtape(n - 1)) return;
+  for (var i = 1; i <= 5; i++) {
+    var s = document.getElementById('step' + i);
+    if (s) s.style.display = i === n ? 'block' : 'none';
+    var sc = document.getElementById('sc' + i);
+    var sl = document.getElementById('sl' + i);
+    if (sc) sc.className = 'step-circle' + (i < n ? ' done' : i === n ? ' active' : '');
+    if (sl) sl.className = 'step-label' + (i === n ? ' active' : '');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function validerEtape(n) {
+  if (n === 1) {
+    if (!document.getElementById('prenom').value.trim()) { showToast('Renseignez votre prénom.', 'err'); return false; }
+    if (!document.getElementById('nom').value.trim()) { showToast('Renseignez votre nom.', 'err'); return false; }
+    if (!document.getElementById('email').value.trim()) { showToast('Renseignez votre email.', 'err'); return false; }
+    if (!document.getElementById('telephone').value.trim()) { showToast('Renseignez votre téléphone.', 'err'); return false; }
+    if (!document.getElementById('agence').value.trim()) { showToast('Renseignez le nom de votre agence.', 'err'); return false; }
+    if (!document.getElementById('ville').value.trim()) { showToast('Renseignez votre ville d\'exercice.', 'err'); return false; }
+    if (!document.getElementById('code_postal').value.trim()) { showToast('Renseignez votre code postal.', 'err'); return false; }
+  }
+  if (n === 2) {
+    var carteT = document.getElementById('carte-t').value.trim();
+    var expiration = document.getElementById('expiration').value;
+    var cci = document.getElementById('cci').value.trim();
+    if (!carteT) { showToast('Renseignez votre numéro de Carte T.', 'err'); return false; }
+    if (!cci) { showToast('Renseignez votre CCI émettrice.', 'err'); return false; }
+    if (!expiration) { showToast('Renseignez la date d\'expiration de votre Carte T.', 'err'); return false; }
+    if (new Date(expiration) < new Date()) { showToast('Votre Carte T est expirée. Renouvelez-la avant de vous inscrire.', 'err'); return false; }
+    if (!document.getElementById('certif-carte').checked) { showToast('Certifiez être titulaire de votre Carte T.', 'err'); return false; }
+  }
+  if (n === 4) {
+    var pwd = document.getElementById('password').value;
+    var pwd2 = document.getElementById('password2').value;
+    if (!pwd || pwd.length < 8) { showToast('Mot de passe trop court (8 caractères minimum).', 'err'); return false; }
+    if (pwd !== pwd2) { showToast('Les mots de passe ne correspondent pas.', 'err'); return false; }
+    if (!document.getElementById('consent1').checked) { showToast('Acceptez le consentement de transmission de données.', 'err'); return false; }
+    if (!document.getElementById('consent2').checked) { showToast('Confirmez votre engagement sur la Carte T.', 'err'); return false; }
+    if (!document.getElementById('consent3').checked) { showToast('Reconnaissez le rôle de mise en relation d\'ImmoConnect.', 'err'); return false; }
+    if (!document.getElementById('consent4').checked) { showToast('Acceptez les CGU.', 'err'); return false; }
+  }
+  return true;
+}
+
+// ── VALIDATION CARTE T ──
+function validerCarteT() {
+  var input = document.getElementById('carte-t');
+  var fb = document.getElementById('carte-feedback');
+  var val = input.value.trim().toUpperCase();
+  fb.style.display = val ? 'block' : 'none';
+  var ok = /^CPI\s?\d{4}\s?\d{4}\s?\d{3}\s?\d{6}$/.test(val.replace(/\s+/g, ' ').trim());
+  fb.style.color = ok ? '#1E7A62' : '#D4732A';
+  fb.textContent = ok ? '✅ Format valide' : '⚠️ Format attendu : CPI XXXX 20XX XXX XXXXXX';
+}
+
+// ── VÉRIFICATION EXPIRATION ──
+function checkExpiration() {
+  var expiration = document.getElementById('expiration').value;
+  var warn = document.getElementById('expir-warning');
+  var ok = document.getElementById('expir-ok');
+  if (!expiration) { warn.style.display = 'none'; ok.style.display = 'none'; return; }
+  var exp = new Date(expiration);
+  var now = new Date();
+  var in30 = new Date(); in30.setDate(in30.getDate() + 30);
+  if (exp < now || exp < in30) {
+    warn.style.display = 'block'; ok.style.display = 'none';
+  } else {
+    warn.style.display = 'none'; ok.style.display = 'block';
+  }
+}
+
+// ── ANALYSE CARTE T (OCR) ──
+async function analyserCarte() {
+  var file = document.getElementById('carte-photo').files[0];
+  var ocrDiv = document.getElementById('carte-ocr');
+  if (!file) return;
+  ocrDiv.style.display = 'block';
+  ocrDiv.style.background = '#F5F2EC';
+  ocrDiv.style.border = '1px solid #E8E6E0';
+  ocrDiv.innerHTML = '🔍 Analyse de votre Carte T en cours…';
+  try {
+    var base64 = await new Promise(function(res, rej) {
+      var reader = new FileReader();
+      reader.onload = function(e) { res(e.target.result.split(',')[1]); };
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+    });
+    var nomDeclare = document.getElementById('prenom').value + ' ' + document.getElementById('nom').value;
+    var numDeclare = document.getElementById('carte-t').value.trim();
+    var mediaType = file.type === 'application/pdf' ? 'application/pdf' : 'image/jpeg';
+    var { data, error: ocrError } = await db.functions.invoke('ocr-documents', {
+      body: {
+        base64, mediaType,
+        prompt: 'Analyse cette carte professionnelle immobilière française (Carte T). Réponds UNIQUEMENT en JSON valide: {"est_carte_t":boolean,"numero_trouve":string|null,"nom_trouve":string|null,"expiration_trouvee":string|null,"concordance_numero":boolean|null,"concordance_nom":boolean|null,"valide":boolean,"alerte":string|null}. Numéro déclaré: "' + numDeclare + '". Nom déclaré: "' + nomDeclare + '". JSON uniquement, aucun texte.'
+      }
+    });
+    if (ocrError) throw ocrError;
+    var text = data.content && data.content[0] && data.content[0].text || '{}';
+    var ocr = JSON.parse(text.replace(/```json|```/g, '').trim());
+    if (!ocr.est_carte_t) {
+      ocrDiv.style.background = '#FAECE7'; ocrDiv.style.border = '1px solid #F5C4B3';
+      ocrDiv.innerHTML = '❌ Document non reconnu — uploadez le recto de votre Carte T (JPG ou PNG de préférence).';
+      return;
+    }
+    var alertes = [];
+    if (ocr.concordance_numero === false) alertes.push('Numéro différent du numéro déclaré (' + ocr.numero_trouve + ')');
+    if (ocr.concordance_nom === false) alertes.push('Nom différent (' + ocr.nom_trouve + ')');
+    if (ocr.alerte) alertes.push(ocr.alerte);
+    if (alertes.length > 0) {
+      ocrDiv.style.background = '#FAEEDA'; ocrDiv.style.border = '1px solid #FAC775';
+      ocrDiv.innerHTML = '⚠️ <strong>Vérification manuelle requise</strong> — ' + alertes.join(' · ') + '<br><span style="color:#888780;font-size:11px">Votre dossier sera examiné manuellement sous 48h.</span>';
+    } else {
+      ocrDiv.style.background = '#E1F5EE'; ocrDiv.style.border = '1px solid #9FE1CB';
+      ocrDiv.innerHTML = '✅ <strong>Carte T reconnue</strong> — ' + (ocr.nom_trouve || '') + ' · ' + (ocr.numero_trouve || '') + (ocr.expiration_trouvee ? ' · Exp. ' + ocr.expiration_trouvee : '') + '<br><span style="color:#1E7A62;font-size:11px">Activation sous 48h après confirmation finale.</span>';
+      if (ocr.numero_trouve && !document.getElementById('carte-t').value.trim()) {
+        document.getElementById('carte-t').value = ocr.numero_trouve; validerCarteT();
+      }
+      if (ocr.expiration_trouvee && !document.getElementById('expiration').value) {
+        var parts = ocr.expiration_trouvee.split('/');
+        if (parts.length === 2) document.getElementById('expiration').value = '20' + parts[1] + '-' + parts[0] + '-01';
+        else if (parts.length === 3) document.getElementById('expiration').value = parts[2] + '-' + parts[1] + '-' + parts[0];
+        checkExpiration();
+      }
+    }
+  } catch(e) {
+    ocrDiv.style.background = '#F5F2EC'; ocrDiv.style.border = '1px solid #E8E6E0';
+    ocrDiv.innerHTML = '⚠️ Analyse indisponible — votre Carte T sera vérifiée manuellement sous 48h.';
+  }
+}
+
+// ── SCORE PREVIEW ──
+function majScorePreview() {
+  var nbVentes = parseInt(document.getElementById('nb_ventes_locales').value) || 0;
+  var delai = parseInt(document.getElementById('delai_moyen').value) || 0;
+  var taux = parseInt(document.getElementById('taux_prix').value) || 0;
+  var honoraires = document.getElementById('honoraires').value;
+
+  var scoreExp = Math.min(20, Math.round(nbVentes / 10 * 20));
+  var scoreDelai = delai > 0 ? (delai <= 30 ? 15 : delai <= 60 ? 10 : 5) : 0;
+  var scoreTaux = taux > 0 ? (taux >= 98 ? 15 : taux >= 95 ? 10 : 5) : 0;
+  var scoreHono = honoraires ? 10 : 0;
+  var scoreProfile = 5;
+  var total = scoreExp + scoreDelai + scoreTaux + scoreHono + scoreProfile;
+
+  var label = total >= 80 ? 'Excellent — vous serez souvent sélectionné' :
+              total >= 60 ? 'Bon profil — complétez pour améliorer' :
+              total >= 40 ? 'Moyen — ajoutez vos ventes locales' : 'Faible — renseignez votre expérience';
+
+  var items = [
+    { label: 'Expérience locale', pts: scoreExp, max: 20 },
+    { label: 'Délai de vente', pts: scoreDelai, max: 15 },
+    { label: 'Taux au prix affiché', pts: scoreTaux, max: 15 },
+    { label: 'Honoraires renseignés', pts: scoreHono, max: 10 },
+    { label: 'Profil de base', pts: scoreProfile, max: 5 },
+  ];
+
+  var preview = document.getElementById('score-preview');
+  var itemsEl = document.getElementById('score-items');
+  preview.style.display = 'block';
+  document.getElementById('score-total').textContent = total;
+  document.getElementById('score-label').textContent = label;
+  document.getElementById('score-total').style.color = total >= 60 ? 'var(--teal)' : total >= 40 ? 'var(--amber)' : 'var(--coral)';
+
+  itemsEl.innerHTML = items.map(function(it) {
+    return '<div class="score-item"><span style="flex:1;color:var(--muted)">' + it.label + '</span>'
+      + '<div class="score-bar"><div class="score-bar-fill" style="width:' + Math.round(it.pts / it.max * 100) + '%"></div></div>'
+      + '<span class="score-pts">' + it.pts + '/' + it.max + ' pts</span></div>';
+  }).join('');
+}
+
+// ── ACHETEURS EN PORTEFEUILLE ──
+function ajouterAcheteur() {
+  nbAcheteurs++;
+  var id = nbAcheteurs;
+  var list = document.getElementById('acheteurs-list');
+  var div = document.createElement('div');
+  div.className = 'acheteur-card';
+  div.id = 'acheteur-' + id;
+  div.innerHTML = '<div class="acheteur-card-header"><span class="acheteur-num">Acheteur ' + id + '</span><button type="button" class="btn-remove" onclick="supprimerAcheteur(' + id + ')">✕</button></div>'
+    + '<div class="grid2"><div class="field"><label class="lbl">Budget max (€)</label><input type="number" id="ach-budget-' + id + '" placeholder="300000" min="0"></div>'
+    + '<div class="field"><label class="lbl">Type de bien</label><select id="ach-type-' + id + '"><option value="">Indifférent</option><option>Appartement</option><option>Maison</option><option>Terrain</option><option>Commerce</option></select></div></div>'
+    + '<div class="grid2"><div class="field"><label class="lbl">Surface min (m²)</label><input type="number" id="ach-surface-' + id + '" placeholder="60" min="0"></div>'
+    + '<div class="field"><label class="lbl">Secteur recherché</label><input type="text" id="ach-secteur-' + id + '" placeholder="ex: Tarbes, Pau…"></div></div>'
+    + '<div class="field" style="margin-top:6px"><label class="lbl">Mandat de recherche signé ?</label><select id="ach-mandat-' + id + '"><option value="non">Non</option><option value="oui">Oui — je peux le fournir</option></select></div>';
+  list.appendChild(div);
+}
+
+function supprimerAcheteur(id) {
+  var el = document.getElementById('acheteur-' + id);
+  if (el) el.remove();
+}
+
+function collecterAcheteurs() {
+  var acheteurs = [];
+  for (var i = 1; i <= nbAcheteurs; i++) {
+    var el = document.getElementById('acheteur-' + i);
+    if (!el) continue;
+    acheteurs.push({
+      budget: parseInt(document.getElementById('ach-budget-' + i).value) || 0,
+      type: document.getElementById('ach-type-' + i).value,
+      surface: parseInt(document.getElementById('ach-surface-' + i).value) || 0,
+      secteur: document.getElementById('ach-secteur-' + i).value.trim(),
+      mandat_recherche: document.getElementById('ach-mandat-' + i).value === 'oui'
+    });
+  }
+  return acheteurs.filter(function(a) { return a.budget > 0; });
+}
+
+// ── MOT DE PASSE ──
+function checkPassword() {
+  var pwd = document.getElementById('password').value;
+  var el = document.getElementById('password-strength');
+  if (!pwd) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  if (pwd.length < 8) { el.style.color = '#C0392B'; el.textContent = 'Trop court — 8 caractères minimum'; }
+  else if (pwd.length < 12 || !/[0-9]/.test(pwd)) { el.style.color = '#D4732A'; el.textContent = 'Moyen — ajoutez des chiffres ou caractères spéciaux'; }
+  else { el.style.color = '#1E7A62'; el.textContent = '✅ Mot de passe fort'; }
+}
+
+// ── SOUMETTRE ──
+function selectForfaitAgent(forfait) {
+  document.getElementById('forfait_agent').value = forfait;
+  ['pay_per_use','starter','pro','premium'].forEach(function(f) {
+    var el = document.getElementById('fp-' + f);
+    if (el) el.classList.remove('selected-plan');
+  });
+  var sel = document.getElementById('fp-' + forfait);
+  if (sel) sel.classList.add('selected-plan');
+  var details = {
+    pay_per_use: 'Inscription gratuite. Alertes uniquement en mode comparatif top 3. Candidatures à 9,99€/unité. Accès dossier uniquement sur les biens en mode top 3.',
+    starter: 'Alertes H+12 sur nouveaux biens. 5 candidatures/mois incluses. 5 contacts vendeur/semaine. Matching mandats de recherche actif.',
+    pro: 'Alertes H+4 sur nouveaux biens. 20 candidatures/mois incluses. 15 contacts vendeur/semaine. Matching mandats de recherche actif.',
+    premium: 'Alertes H+0 dès la publication. Candidatures illimitées. Contacts illimités. +10 pts bonus score Hanaé. Matching mandats de recherche actif.'
+  };
+  var detail = document.getElementById('forfait-detail');
+  if (detail) detail.textContent = details[forfait] || '';
+}
+
+async function soumettre() {
+  if (!validerEtape(4)) return;
+  var btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>Création du compte…';
+
+  var prenom = document.getElementById('prenom').value.trim();
+  var nom = document.getElementById('nom').value.trim();
+  var email = document.getElementById('email').value.trim();
+  var pwd = document.getElementById('password').value;
+  var agence = document.getElementById('agence').value.trim();
+  var ville = document.getElementById('ville').value.trim();
+  var cp = document.getElementById('code_postal').value.trim();
+  var rayon = document.getElementById('rayon').value;
+  var specialite = document.getElementById('specialite').value;
+  var presentation = document.getElementById('presentation').value.trim();
+  var carteT = document.getElementById('carte-t').value.trim();
+  var cci = document.getElementById('cci').value.trim();
+  var expiration = document.getElementById('expiration').value;
+  var tel = document.getElementById('telephone').value.trim();
+  var nbVentes12m = parseInt(document.getElementById('nb_ventes_12m').value) || 0;
+  var nbVentesLocales = parseInt(document.getElementById('nb_ventes_locales').value) || 0;
+  var delaiMoyen = parseInt(document.getElementById('delai_moyen').value) || 0;
+  var tauxPrix = parseInt(document.getElementById('taux_prix').value) || 0;
+  var honoraires = document.getElementById('honoraires').value;
+  var acheteurs = collecterAcheteurs();
+
+  try {
+    var { data, error } = await db.auth.signUp({
+      email, password: pwd,
+      options: {
+        data: {
+          nom: prenom + ' ' + nom,
+          prenom, nom_famille: nom,
+          profils: ['agent'],
+          agence, ville, code_postal: cp,
+          rayon_intervention: parseInt(rayon),
+          telephone: tel,
+          specialite,
+          presentation,
+          carte_t: carteT,
+          cci,
+          carte_t_expiration: expiration,
+          nb_ventes_12m: nbVentes12m,
+          nb_ventes_locales: nbVentesLocales,
+          delai_moyen_vente: delaiMoyen,
+          taux_vente_prix: tauxPrix,
+          honoraires_fourchette: honoraires,
+          acheteurs_portefeuille: JSON.stringify(acheteurs),
+          compte_agent_valide: false,
+          forfait_agent: document.getElementById('forfait_agent').value || 'pay_per_use'
+        }
+      }
+    });
+
+    if (error) throw error;
+
+    // Enregistrer dans agents_validation
+    await db.from('agents_validation').insert({
+      user_id: data.user.id,
+      email, nom: prenom + ' ' + nom,
+      agence, carte_t: carteT,
+      cci, carte_t_expiration: expiration || null,
+      ocr_statut: document.getElementById('carte-ocr').textContent.includes('reconnue') ? 'ok' : 'en_attente',
+      statut: 'en_attente'
+    });
+
+    // Enregistrer acheteurs en portefeuille dans projets_acheteurs
+    for (var i = 0; i < acheteurs.length; i++) {
+      await db.from('projets_acheteurs').insert({
+        email,
+        type_profil: 'investisseur',
+        budget_total: acheteurs[i].budget,
+        type_bien: acheteurs[i].type,
+        surface_souhaitee: acheteurs[i].surface,
+        ville_souhaitee: acheteurs[i].secteur,
+        forfait: 'agent_portefeuille',
+        agent_email: email
+      }).then(undefined, function(){});
+    }
+
+    // Notifier l'admin
+    await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'nouveau_agent',
+        to: 'contact@immoconnect-agence.fr',
+        subject: 'Nouvelle inscription agent — ' + prenom + ' ' + nom,
+        nom: prenom + ' ' + nom,
+        email, agence,
+        carte_t: carteT, cci,
+        forfait: 'Pay per use (9,99€/candidature)',
+        lien: 'https://immoconnect-agence.fr/admin-agents.html'
+      }
+    }).then(undefined, function(){});
+
+    // Afficher confirmation
+    document.getElementById('recap-nom').textContent = prenom + ' ' + nom;
+    document.getElementById('recap-agence').textContent = agence;
+    document.getElementById('recap-carte').textContent = carteT;
+    document.getElementById('recap-email').textContent = email;
+    goStep(5);
+
+  } catch(e) {
+    showToast('Erreur : ' + (e.message || 'Réessayez.'), 'err');
+    btn.disabled = false;
+    btn.innerHTML = 'Créer mon compte agent →';
+  }
+}
+
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+  t.style.display = 'block';
+  setTimeout(function(){ t.style.display = 'none'; }, 4500);
+}
+</script>
+
+<script>
+(function() {
+  var consent = localStorage.getItem('ic_cookie_consent');
+  if (!consent) {
+    var b = document.createElement('div');
+    b.id = 'cookie-banner';
+    b.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1C1C1A;border-top:1px solid rgba(255,255,255,.1);padding:16px 32px;font-family:Outfit,sans-serif';
+    b.innerHTML = '<div style="max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;font-weight:500;color:#FAFAF7;margin-bottom:4px">Cookies et confidentialite</div><div style="font-size:12px;color:rgba(250,250,247,.6);line-height:1.6">ImmoConnect utilise des cookies strictement necessaires. Aucun cookie publicitaire. <a href="mentions-legales.html" style="color:#C09B5A">En savoir plus</a></div></div><div style="display:flex;gap:10px;flex-shrink:0"><button onclick="icRefuser()" style="padding:9px 20px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(250,250,247,.7);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer">Refuser</button><button onclick="icAccepter()" style="padding:9px 20px;border-radius:8px;border:none;background:#C09B5A;color:#1C1C1A;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer">Accepter</button></div></div>';
+    document.body.appendChild(b);
+  }
+})();
+function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
+function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
+</script>
+<script src="feedback.js" defer></script>
+</body>
+</html>

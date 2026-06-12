@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vendre mon bien immobilier gratuitement — ImmoConnect</title>
+<meta name="description" content="Publiez votre annonce gratuitement sur ImmoConnect. Notre IA Hanaé évalue votre bien avec les données DVF réelles. Les meilleurs agents locaux candidatent pour vous accompagner. Zéro commission à l'inscription.">
+<meta name="keywords" content="vendre maison appartement, annonce immobilière gratuite, estimation bien immobilier, agent immobilier local">
+<meta property="og:title" content="Publiez votre bien gratuitement sur ImmoConnect">
+<meta property="og:description" content="Estimation gratuite par Hanaé, sélection des meilleurs agents, vente au meilleur prix. 100% gratuit pour les vendeurs.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ImmoConnect">
+<meta property="og:url" content="https://immoconnect-agence.fr/questionnaire-vendeur.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Publiez votre bien gratuitement sur ImmoConnect">
+<meta name="twitter:description" content="Estimation gratuite par Hanaé, sélection des meilleurs agents, vente au meilleur prix. 100% gratuit pour les vendeurs.">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff}.nav-logo span{color:var(--gold)}
+.page{max-width:780px;margin:0 auto;padding:36px 24px 80px}
+.niveau-banner{display:flex;align-items:center;gap:8px;background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:14px 20px;margin-bottom:20px;flex-wrap:wrap}
+.niveau-title{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:600;flex-shrink:0;margin-right:4px}
+.niv-step{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:5px 12px;border-radius:20px;transition:all .3s;color:var(--muted)}
+.niv-step.done{color:var(--teal);background:#EAF3DE}
+.niv-step.cur-standard{color:var(--ink);background:#F1EFE8;font-weight:600}
+.niv-step.cur-silver{color:var(--blue);background:#E6F1FB;font-weight:600}
+.niv-step.cur-gold{color:#854F0B;background:#FAEEDA;font-weight:600}
+.niv-step.cur-platinium{color:var(--teal);background:#E1F5EE;font-weight:600}
+.niv-sep{width:18px;height:1px;background:var(--line);flex-shrink:0}
+.niv-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
+.progress-wrap{height:4px;border-radius:2px;background:var(--line);margin-bottom:28px;overflow:hidden}
+.progress-bar{height:100%;border-radius:2px;transition:width .5s ease,background .5s ease}
+.pb-standard{background:#888780}.pb-silver{background:var(--blue)}.pb-gold{background:var(--gold)}.pb-platinium{background:var(--teal)}
+.section{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
+.section-head{padding:13px 20px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.sec-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.num-std{background:#F1EFE8;color:var(--ink)}
+.num-silver{background:#E6F1FB;color:var(--blue)}
+.num-gold{background:#FAEEDA;color:#854F0B}
+.num-plat{background:#E1F5EE;color:var(--teal)}
+.sec-ttl{font-size:13px;font-weight:500;flex:1}
+.sec-sub{font-size:11px;color:var(--muted);font-weight:400}
+.sec-badge{font-size:9px;font-weight:600;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.8px;flex-shrink:0}
+.b-std{background:#F1EFE8;color:#555}
+.b-silver{background:#E6F1FB;color:var(--blue)}
+.b-gold{background:#FAEEDA;color:#854F0B}
+.b-plat{background:#E1F5EE;color:var(--teal)}
+.sec-arrow{font-size:11px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.sec-arrow.open{transform:rotate(180deg)}
+.sec-body{padding:0 20px 20px;display:none}
+.sec-body.open{display:block}
+.unlock-info{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:12px;line-height:1.5}
+.ui-silver{background:#E6F1FB;border:1px solid rgba(24,95,165,.25);color:var(--blue)}
+.ui-gold{background:#FAEEDA;border:1px solid rgba(192,155,90,.35);color:#854F0B}
+.ui-plat{background:#E1F5EE;border:1px solid rgba(30,122,98,.25);color:var(--teal)}
+.ui-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.ui-txt strong{display:block;font-weight:600;margin-bottom:2px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-grid.col1{grid-template-columns:1fr}
+.form-grid.col3{grid-template-columns:1fr 1fr 1fr}
+.form-grid.col4{grid-template-columns:1fr 1fr 1fr 1fr}
+.field{display:flex;flex-direction:column;gap:5px}
+label.lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+input[type=text],input[type=number],input[type=tel],input[type=email],input[type=date],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink);outline:none;transition:border .15s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--ink)}
+textarea{resize:vertical;min-height:90px}
+.hint{font-size:10px;color:var(--muted);line-height:1.5;margin-top:2px}
+hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
+.radio-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.radio-opt{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;border:1px solid var(--line);cursor:pointer;font-size:12px;font-weight:500;background:var(--bg);transition:all .15s;user-select:none}
+.radio-opt input[type=radio]{display:none}
+.radio-opt.selected{background:var(--ink);color:#fff;border-color:var(--ink)}
+/* INFO BOXES niveaux */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.info-box{border-radius:8px;padding:10px 14px;font-size:11px;line-height:1.6}
+.ib-silver{background:#E6F1FB;border:1px solid rgba(24,95,165,.2)}
+.ib-gold{background:#FAEEDA;border:1px solid rgba(192,155,90,.3)}
+.ib-plat{background:#E1F5EE;border:1px solid rgba(30,122,98,.2)}
+.ib-neutral{background:var(--bg);border:1px solid var(--line)}
+.ib-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.ib-silver .ib-title{color:var(--blue)}
+.ib-gold .ib-title{color:#854F0B}
+.ib-plat .ib-title{color:var(--teal)}
+.ib-neutral .ib-title{color:var(--muted)}
+.ib-val{font-size:15px;font-weight:600;margin-bottom:2px}
+.ib-silver .ib-val{color:var(--blue)}
+.ib-gold .ib-val{color:#854F0B}
+.ib-plat .ib-val{color:var(--teal)}
+.ib-neutral .ib-val{color:var(--ink)}
+.ib-hint{font-size:10px;color:var(--muted)}
+/* TRAVAUX */
+.travaux-box{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:12px}
+.travaux-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+/* UPLOAD */
+.upload-zone{border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);position:relative;margin-bottom:6px}
+.upload-zone:hover{border-color:var(--ink);background:#EFEDE7}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:22px;margin-bottom:5px}
+.upload-title{font-size:12px;font-weight:500;margin-bottom:2px}
+.upload-sub{font-size:11px;color:var(--muted)}
+.uz-silver{border-color:rgba(24,95,165,.3)}.uz-silver:hover{border-color:var(--blue);background:rgba(24,95,165,.04)}
+.uz-gold{border-color:rgba(192,155,90,.4)}.uz-gold:hover{border-color:var(--gold);background:rgba(192,155,90,.04)}
+.uz-plat{border-color:rgba(30,122,98,.3)}.uz-plat:hover{border-color:var(--teal);background:rgba(30,122,98,.04)}
+.file-status{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;font-size:12px}
+.fs-none{background:var(--bg);border:1px solid var(--line);color:var(--muted)}
+.fs-ok{background:#EAF3DE;border:1px solid #9FD9C0;color:#27500A}
+.fs-loading{background:#E6F1FB;border:1px solid rgba(24,95,165,.2);color:var(--blue)}
+/* PHOTOS */
+.photos-limit-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;padding:4px 10px;border-radius:20px}
+.plb-standard{background:#F1EFE8;border:1px solid var(--line);color:var(--muted)}
+.vv-box{background:linear-gradient(135deg,#E1F5EE,#E6F1FB);border:1px solid #9FE1CB;border-radius:8px;padding:14px 16px;margin-top:12px}
+.vv-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(30,122,98,.15);border:1px solid rgba(30,122,98,.3);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;color:#1E7A62;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.vv-tabs{display:flex;gap:6px;margin-bottom:12px}
+.mode-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.mode-card{border:2px solid var(--line);border-radius:10px;padding:14px;cursor:pointer;transition:all .2s;background:var(--warm)}
+.mode-card:hover{border-color:var(--muted)}
+.mode-card.selected-acheteurs{border-color:var(--blue);background:#E6F1FB}
+.mode-card.selected-agents{border-color:var(--teal);background:#E1F5EE}
+.mode-card.selected-comparatif{border-color:var(--gold);background:#FAEEDA}
+.mode-icon{font-size:22px;margin-bottom:8px}
+.mode-name{font-size:12px;font-weight:600;margin-bottom:4px}
+.mode-desc{font-size:10px;color:var(--muted);line-height:1.5}
+.vv-tab{flex:1;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--warm);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;transition:all .15s;text-align:center;font-weight:500;color:var(--muted)}
+.vv-tab.active{border-color:#1E7A62;background:#E1F5EE;color:#1E7A62}
+.plb-silver{background:#E6F1FB;border:1px solid rgba(24,95,165,.2);color:var(--blue)}
+.plb-gold{background:#EAF3DE;border:1px solid #9FD9C0;color:#27500A}
+.plb-platinium{background:#EAF3DE;border:1px solid #9FD9C0;color:#27500A}
+.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.photo-thumb{aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid var(--line);position:relative}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-del{position:absolute;top:4px;right:4px;background:rgba(15,15,14,.75);color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center}
+.photo-add{aspect-ratio:1;border-radius:8px;border:1.5px dashed var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:11px;color:var(--muted);gap:4px;position:relative;background:var(--bg);transition:all .15s}
+.photo-add:hover{border-color:var(--ink);color:var(--ink)}
+.photo-add input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.alerte-rouge{background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:9px 14px;font-size:12px;color:#712B13;margin-bottom:10px;display:none}
+/* SUBMIT */
+.submit-zone{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-top:20px}
+.submit-niveau{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:8px;margin-bottom:14px}
+.sn-standard{background:#F1EFE8;border:1px solid #D3D1C7}
+.sn-silver{background:#E6F1FB;border:1px solid rgba(24,95,165,.2)}
+.sn-gold{background:#FAEEDA;border:1px solid rgba(192,155,90,.3)}
+.sn-platinium{background:#E1F5EE;border:1px solid rgba(30,122,98,.2)}
+.sn-icon{font-size:22px}
+.sn-info{flex:1}
+.sn-label{font-size:12px;font-weight:600;margin-bottom:2px}
+.sn-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.btn-submit{width:100%;padding:12px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:none;background:var(--ink);color:#fff;transition:opacity .15s}
+.btn-submit:hover{opacity:.85}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed}
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:999;transform:translateY(80px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.t-ok{background:#1E7A62;color:#fff}.t-err{background:#C0392B;color:#fff}.t-info{background:var(--ink);color:#fff}
+@media(max-width:600px){.form-grid,.form-grid.col3,.form-grid.col4{grid-template-columns:1fr}.photo-grid{grid-template-columns:repeat(3,1fr)}.info-grid{grid-template-columns:1fr}}
+</style>
+<style>
+/* Bandeau supérieur unifié — fond blanc, texte foncé (override global) */
+nav{background:#fff!important;border-bottom:1px solid #E8E6E0!important}
+nav .nav-logo{color:#0F0F0E!important}
+nav .nav-logo span{color:#C09B5A!important}
+nav a{color:#0F0F0E!important}
+nav a:hover{color:#C09B5A!important}
+nav .nav-out{color:#0F0F0E!important;border-color:#0F0F0E!important}
+nav .nav-link{margin-right:18px}
+</style>
+</head>
+<body>
+<nav style="background:#0F0F0E;height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100;gap:0">
+  <a href="index.html" style="text-decoration:none;margin-right:32px"><img src="logo-immoconnect.png" alt="ImmoConnect" style="height:38px;width:auto;object-fit:contain;vertical-align:middle"><span style="font-size:22px;font-weight:600;color:#0F0F0E;margin-left:8px">Immo<span style="color:#C09B5A">Connect</span></span></a>
+  <div style="display:flex;gap:24px;align-items:center;flex:1">
+    <a href="forfaits.html" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Forfaits</a>
+    <a href="questionnaire-vendeur.html" style="text-decoration:none;padding:7px 16px;background:#C09B5A;color:#0F0F0E;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif">Vendre</a>
+  <a href="blog.html" style="color:rgba(255,255,255,.6);text-decoration:none;font-size:13px">Blog</a>
+    <a href="questionnaire-acheteur.html" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Acheter</a>
+    <a href="index.html#agents" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Agents immo</a>
+  </div>
+  <a href="index.html" style="text-decoration:none;padding:8px 20px;border:1px solid #444;color:#fff;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif;transition:all .2s" onmouseover="this.style.borderColor='#C09B5A';this.style.color='#C09B5A'" onmouseout="this.style.borderColor='#444';this.style.color='#fff'">Accueil</a>
+</nav>
+<div class="page">
+
+  <div style="margin-bottom:22px">
+    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:500">Vendeur</div>
+    <div style="font-size:22px;font-weight:500;margin-bottom:6px">Déposer mon bien</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.7;max-width:580px">Votre niveau est calculé <strong>automatiquement</strong> selon les documents fournis. Tout est gratuit.</div>
+  </div>
+
+  <div class="niveau-banner" style="flex-direction:column;align-items:flex-start;gap:6px">
+    <span class="niveau-title">Visibilité de votre annonce</span>
+    <div id="niv-benefit" style="font-size:13px;font-weight:500;color:var(--ink)">Complétez votre dossier — chaque information ajoutée rend votre annonce plus visible et plus crédible.</div>
+  </div>
+  <div class="progress-wrap"><div class="progress-bar pb-standard" id="prog" style="width:10%"></div></div>
+
+  <!-- 1 : INFOS BIEN -->
+  <div class="section">
+    <div class="section-head" onclick="toggle('s1')">
+      <div class="sec-num num-std">1</div>
+      <div class="sec-ttl">Informations du bien</div>
+      <span class="sec-badge b-std">Standard</span>
+      <span class="sec-arrow open" id="arr-s1">▼</span>
+    </div>
+    <div class="sec-body open" id="s1">
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Type de bien *</label>
+          <select id="type_bien">
+            <option value="">Sélectionner</option>
+            <option>Appartement</option><option>Maison</option><option>Villa</option>
+            <option>Studio</option><option>Loft</option><option>Local commercial</option>
+            <option>Terrain</option><option>Immeuble</option><option>Parking / Box</option><option>Autre</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="lbl">Statut d'occupation *</label>
+          <select id="statut_occupation">
+            <option value="">Sélectionner</option>
+            <option>Occupé par le propriétaire</option>
+            <option>Loué</option><option>Vacant</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid col1">
+        <div class="field">
+          <label class="lbl">Titre de l'annonce *</label>
+          <input type="text" id="titre" placeholder="Ex : Bel appartement T3 avec balcon — Toulouse centre">
+        </div>
+      </div>
+      <!-- MODE DE CONTACT -->
+      <div class="form-grid col1">
+        <div class="field">
+          <label class="lbl">Qui peut vous contacter ?</label>
+          <div style="background:#E6F1FB;border:1px solid rgba(24,95,165,.25);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.6;color:var(--ink);margin-bottom:6px">
+            Par défaut : <strong>acheteurs et investisseurs uniquement</strong> (aucun agent ne peut vous démarcher). <button type="button" onclick="document.getElementById('mode-cards').style.display='grid';this.parentNode.style.display='none'" style="background:transparent;border:none;color:#185FA5;font-weight:600;cursor:pointer;text-decoration:underline;font-family:Outfit,sans-serif;font-size:12px;padding:0">Modifier</button> — réglage modifiable à tout moment après publication.
+          </div>
+          <div class="mode-cards" id="mode-cards" style="grid-template-columns:repeat(3,1fr);display:none">
+            <div class="mode-card selected-acheteurs" id="mc-acheteurs" onclick="setModeContact('acheteurs')">
+              <div class="mode-icon">👤</div>
+              <div class="mode-name" style="color:#185FA5">Acheteurs &amp; investisseurs</div>
+              <div class="mode-desc">Acheteurs et investisseurs peuvent vous contacter selon leurs droits habituels. Aucun agent immobilier ne peut vous joindre. Vous gérez la vente en direct.</div>
+            </div>
+            <div class="mode-card" id="mc-acheteurs_agents" onclick="setModeContact('acheteurs_agents')">
+              <div class="mode-icon">🤝</div>
+              <div class="mode-name" style="color:#1E7A62">Acheteurs + Je choisis mon agent</div>
+              <div class="mode-desc">Acheteurs et investisseurs peuvent vous contacter, et tous les agents peuvent également vous joindre. Vous choisissez librement l'agent qui vous convient.</div>
+              <div class="mode-lock">🏅 Silver, Gold et Platinium</div>
+            </div>
+            <div class="mode-card" id="mc-comparatif" onclick="setModeContact('comparatif')">
+              <div class="mode-icon">📊</div>
+              <div class="mode-name" style="color:#854F0B">ImmoConnect choisit pour moi</div>
+              <div class="mode-desc">Acheteurs et investisseurs peuvent vous contacter. Hanaé analyse tous les agents candidats et vous présente les 3 les plus aptes à vendre votre bien.</div>
+              <div class="mode-lock">🏅 Silver, Gold et Platinium</div>
+            </div>
+          </div>
+          <input type="hidden" id="mode_contact" value="acheteurs">
+          <div id="mode-niveau-info" style="display:none;margin-top:8px;border-radius:8px;padding:8px 12px;font-size:11px;line-height:1.6"></div>
+        </div>
+      </div>
+
+      <div class="form-grid col3">
+        <div class="field">
+          <label class="lbl">Surface (m²) *</label>
+          <input type="number" id="surface" placeholder="75" min="1" oninput="majScoreDossier()">
+        </div>
+        <div class="field">
+          <label class="lbl">Nb de pièces *</label>
+          <input type="number" id="nb_pieces" placeholder="3" min="1">
+        </div>
+        <div class="field">
+          <label class="lbl">Nb de chambres</label>
+          <input type="number" id="nb_chambres" placeholder="2" min="0">
+        </div>
+      </div>
+      <div class="form-grid col3">
+        <div class="field">
+          <label class="lbl">Étage</label>
+          <input type="number" id="etage" placeholder="2" min="0">
+        </div>
+        <div class="field">
+          <label class="lbl">Nb étages total</label>
+          <input type="number" id="nb_etages" placeholder="5" min="0">
+        </div>
+        <div class="field">
+          <label class="lbl">Année construction</label>
+          <input type="number" id="annee_construction" placeholder="1990" min="1800" max="2025">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Prix demandé (€) *</label>
+          <input type="number" id="prix" placeholder="250000" min="0" oninput="majScoreDossier()">
+        </div>
+        <div class="field">
+          <label class="lbl">Date d'achat du bien</label>
+          <input type="date" id="date_achat">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Prix négociable ?</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'negociable')"><input type="radio" name="negociable" value="Oui">Oui</label>
+            <label class="radio-opt" onclick="setRadio(this,'negociable')"><input type="radio" name="negociable" value="Non">Non</label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">Travaux effectués ?</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'travaux_bool');toggleTravaux(false)"><input type="radio" name="travaux_bool" value="Non">Non</label>
+            <label class="radio-opt" onclick="setRadio(this,'travaux_bool');toggleTravaux(true)"><input type="radio" name="travaux_bool" value="Oui">Oui</label>
+          </div>
+        </div>
+      </div>
+      <div id="bloc-travaux" style="display:none">
+        <div class="travaux-box">
+          <div class="travaux-title">Détail des travaux</div>
+          <div class="form-grid">
+            <div class="field">
+              <label class="lbl">Nature des travaux</label>
+              <select id="nature_travaux">
+                <option value="">Sélectionner</option>
+                <option>Rénovation complète</option>
+                <option>Cuisine</option>
+                <option>Salle de bain</option>
+                <option>Toiture</option>
+                <option>Isolation</option>
+                <option>Électricité</option>
+                <option>Plomberie</option>
+                <option>Fenêtres / Menuiseries</option>
+                <option>Ravalement de façade</option>
+                <option>Autre</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="lbl">Année des travaux</label>
+              <input type="number" id="annee_travaux" placeholder="2022" min="1900" max="2025">
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label class="lbl">Montant des travaux (€)</label>
+              <input type="number" id="montant_travaux" placeholder="15000" min="0">
+            </div>
+            <div class="field">
+              <label class="lbl">Travaux réalisés par</label>
+              <div class="radio-group">
+                <label class="radio-opt selected" onclick="setRadio(this,'travaux_par')"><input type="radio" name="travaux_par" value="Professionnel">Professionnel</label>
+                <label class="radio-opt" onclick="setRadio(this,'travaux_par')"><input type="radio" name="travaux_par" value="Soi-même">Soi-même</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-grid col1">
+            <div class="field">
+              <label class="lbl">Description des travaux</label>
+              <textarea id="description_travaux" placeholder="Détaillez les travaux réalisés…" style="min-height:60px"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr class="div">
+      <!-- INFORMATIONS FINANCIÈRES CLÉS -->
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Informations financières — débloquent vos avantages</div>
+      <div class="info-grid">
+        <div class="ib-silver info-box">
+          <div class="ib-title">🏅 Silver — Valeur locative / Loyer</div>
+          <div class="field" style="margin-bottom:6px">
+            <label class="lbl" style="color:var(--blue)">Valeur locative cadastrale (€/an)</label>
+            <input type="number" id="valeur_locative" placeholder="1 200" min="0" oninput="calcNiveau()">
+            <span class="hint">Sur votre avis de taxe foncière</span>
+          </div>
+          <div class="field">
+            <label class="lbl" style="color:var(--blue)">Loyer mensuel actuel (€)</label>
+            <input type="number" id="loyer_mensuel" placeholder="850" min="0">
+          </div>
+        </div>
+        <div class="ib-neutral info-box">
+          <div class="ib-title">🏅 Silver — Copropriété & charges</div>
+          <div class="field">
+            <label class="lbl" style="color:var(--blue)">Copropriété ?</label>
+            <div class="radio-group">
+              <label class="radio-opt selected" onclick="setRadio(this,'is_copro');showCopro(false);calcNiveau()"><input type="radio" name="is_copro" value="Non">Non</label>
+              <label class="radio-opt" onclick="setRadio(this,'is_copro');showCopro(true);calcNiveau()"><input type="radio" name="is_copro" value="Oui">Oui</label>
+            </div>
+          </div>
+          <div class="field" style="margin-top:8px">
+            <label class="lbl" style="color:var(--blue)">Charges de copropriété (€/mois)</label>
+            <input type="number" id="charges_syndic" placeholder="150" min="0" oninput="calcNiveau()">
+            <span class="hint">Obligatoire dès Silver pour les biens en copropriété — entre dans le calcul du rendement net.</span>
+          </div>
+          <div class="field" style="margin-top:8px">
+            <label class="lbl">Nb de lots dans la copro</label>
+            <input type="number" id="nb_lots_copro" placeholder="12" min="1">
+          </div>
+        </div>
+        <div class="ib-gold info-box">
+          <div class="ib-title">🥇 Gold — Taxe foncière</div>
+          <div class="field">
+            <label class="lbl" style="color:#854F0B">Taxe foncière annuelle (€/an)</label>
+            <input type="number" id="taxe_fonciere_montant" placeholder="1 400" min="0" oninput="calcNiveau()">
+          </div>
+        </div>
+        <div class="ib-plat info-box">
+          <div class="ib-title">💎 Platinium — DPE</div>
+          <div class="field">
+            <label class="lbl" style="color:var(--teal)">Classe énergie (DPE)</label>
+            <select id="classe_dpe" onchange="calcNiveau();majScoreDossier()">
+              <option value="">Non renseigné</option>
+              <option>A</option><option>B</option><option>C</option>
+              <option>D</option><option>E</option><option>F</option><option>G</option>
+            </select>
+          </div>
+          <div class="field" style="margin-top:8px">
+            <label class="lbl" style="color:var(--teal)">Conso. (kWh/m²/an)</label>
+            <input type="number" id="conso_energie" placeholder="180" min="0">
+          </div>
+        </div>
+      </div>
+      <hr class="div">
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Ville *</label>
+          <input type="text" id="ville" placeholder="Toulouse">
+        </div>
+        <div class="field">
+          <label class="lbl">Code postal *</label>
+          <input type="text" id="code_postal" placeholder="31000" maxlength="5">
+        </div>
+      </div>
+      <div class="form-grid col1">
+        <div class="field">
+          <label class="lbl">Adresse exacte <span style="font-size:10px;color:var(--muted);text-transform:none;font-weight:400;letter-spacing:0">(visible Gold & Platinium uniquement)</span></label>
+          <input type="text" id="adresse" placeholder="12 rue des Lilas" oninput="majScoreDossier();calcNiveau()">
+        </div>
+      </div>
+      <div class="form-grid col1">
+        <div class="field">
+          <label class="lbl">Description *</label>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:10px;color:var(--muted)">Rédigez votre description ou laissez Hanaé le faire pour vous</span>
+            <button type="button" id="btn-hanae-desc" onclick="genererDescriptionHanae()" style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:linear-gradient(135deg,#1E7A62,#185FA5);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:opacity .15s;flex-shrink:0">
+              <span>🤖</span> <span id="btn-hanae-label">Générer avec Hanaé</span>
+            </button>
+          </div>
+          <textarea id="description" placeholder="Décrivez votre bien : état général, atouts, environnement, transports…" oninput="majScoreDossier()"></textarea>
+          <div id="hanae-desc-status" style="display:none;margin-top:6px;font-size:11px;padding:8px 12px;border-radius:6px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 : ÉQUIPEMENTS -->
+  <div class="section">
+    <div class="section-head" onclick="toggle('s2')">
+      <div class="sec-num num-std">2</div>
+      <div class="sec-ttl">Équipements & caractéristiques</div>
+      <span class="sec-badge b-std">Standard</span>
+      <span class="sec-arrow" id="arr-s2">▼</span>
+    </div>
+    <div class="sec-body" id="s2">
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Chauffage</label>
+          <select id="chauffage">
+            <option value="">Non précisé</option>
+            <option>Gaz individuel</option><option>Gaz collectif</option>
+            <option>Électrique</option><option>Pompe à chaleur</option>
+            <option>Fioul</option><option>Poêle à bois</option><option>Sans</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="lbl">Eau chaude</label>
+          <select id="eau_chaude">
+            <option value="">Non précisé</option>
+            <option>Individuelle</option><option>Collective</option><option>Chauffe-eau solaire</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Parking</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'parking')"><input type="radio" name="parking" value="Non">Non</label>
+            <label class="radio-opt" onclick="setRadio(this,'parking')"><input type="radio" name="parking" value="Box fermé">Box fermé</label>
+            <label class="radio-opt" onclick="setRadio(this,'parking')"><input type="radio" name="parking" value="Place ext.">Place ext.</label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">Extérieur</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'exterieur')"><input type="radio" name="exterieur" value="Aucun">Aucun</label>
+            <label class="radio-opt" onclick="setRadio(this,'exterieur')"><input type="radio" name="exterieur" value="Balcon">Balcon</label>
+            <label class="radio-opt" onclick="setRadio(this,'exterieur')"><input type="radio" name="exterieur" value="Terrasse">Terrasse</label>
+            <label class="radio-opt" onclick="setRadio(this,'exterieur')"><input type="radio" name="exterieur" value="Jardin">Jardin</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Cave / Grenier</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'cave')"><input type="radio" name="cave" value="Non">Non</label>
+            <label class="radio-opt" onclick="setRadio(this,'cave')"><input type="radio" name="cave" value="Cave">Cave</label>
+            <label class="radio-opt" onclick="setRadio(this,'cave')"><input type="radio" name="cave" value="Grenier">Grenier</label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">Ascenseur</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'ascenseur')"><input type="radio" name="ascenseur" value="Non">Non</label>
+            <label class="radio-opt" onclick="setRadio(this,'ascenseur')"><input type="radio" name="ascenseur" value="Oui">Oui</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Digicode / Interphone</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'digicode')"><input type="radio" name="digicode" value="Non">Non</label>
+            <label class="radio-opt" onclick="setRadio(this,'digicode')"><input type="radio" name="digicode" value="Digicode">Digicode</label>
+            <label class="radio-opt" onclick="setRadio(this,'digicode')"><input type="radio" name="digicode" value="Interphone">Interphone</label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">Piscine</label>
+          <div class="radio-group">
+            <label class="radio-opt selected" onclick="setRadio(this,'piscine')"><input type="radio" name="piscine" value="Non">Non</label>
+            <label class="radio-opt" onclick="setRadio(this,'piscine')"><input type="radio" name="piscine" value="Oui">Oui</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 : CONTACT -->
+  <div class="section">
+    <div class="section-head" onclick="toggle('s3')">
+      <div class="sec-num num-std">3</div>
+      <div class="sec-ttl">Coordonnées de contact <span style="font-size:11px;color:#C0392B;font-weight:500">— obligatoires</span></div>
+      <span class="sec-badge b-std">Standard</span>
+      <span class="sec-arrow open" id="arr-s3">▼</span>
+    </div>
+    <div class="sec-body open" id="s3">
+      <div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#712B13;line-height:1.5">
+        📞 Obligatoires pour publier. Visibles uniquement pour les acheteurs autorisés selon votre niveau.
+      </div>
+      <div class="form-grid col1">
+        <div class="field">
+          <label class="lbl">Nom / Prénom *</label>
+          <input type="text" id="nom_vendeur" placeholder="Jean Dupont">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Téléphone *</label>
+          <input type="tel" id="telephone" placeholder="06 12 34 56 78">
+        </div>
+        <div class="field">
+          <label class="lbl">Email *</label>
+          <input type="email" id="email_contact" placeholder="votre@email.fr">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 : PHOTOS -->
+  <div class="section">
+    <div class="section-head" onclick="toggle('s4')">
+      <div class="sec-num num-std">4</div>
+      <div class="sec-ttl">Photos du bien <span style="font-size:11px;color:#C0392B;font-weight:500">— 3 minimum obligatoires</span></div>
+      <span class="sec-badge b-std">Standard</span>
+      <span class="sec-arrow open" id="arr-s4">▼</span>
+    </div>
+    <div class="sec-body open" id="s4">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <div class="photos-limit-badge plb-standard" id="plb">📷 3 photos minimum obligatoires (Standard : max 3)</div>
+        <div id="photo-counter" style="font-size:12px;font-weight:600;color:#C0392B">0 / 3 minimum</div>
+      </div>
+      <div class="alerte-rouge" id="photos-warning">⚠️ Minimum 3 photos obligatoires pour publier</div>
+      <div class="photo-grid" id="photo-grid"></div>
+      <p class="hint" style="margin-top:8px">JPG, PNG — max 5 Mo par photo. La 1ère sera la photo principale.</p>
+    </div>
+  </div>
+
+  <!-- VISITE VIRTUELLE — Silver+ -->
+  <div class="section" id="section-vv" style="display:none">
+    <div class="section-head" onclick="toggle('s-vv')">
+      <div class="sec-num num-silver">🥽</div>
+      <div class="sec-ttl">Visite virtuelle <span class="sec-sub">→ disponible Silver et +</span></div>
+      <span class="sec-badge b-silver">Silver+</span>
+      <span class="sec-arrow" id="arr-s-vv">▼</span>
+    </div>
+    <div class="sec-body" id="s-vv">
+      <div class="vv-box">
+        <div class="vv-badge">🥽 Visite virtuelle</div>
+        <p style="font-size:12px;color:#085041;margin-bottom:12px;line-height:1.6">Permettez aux acheteurs et agents de visiter votre bien sans se déplacer. Un badge "Visite virtuelle" apparaît sur votre annonce.</p>
+
+        <div class="vv-tabs">
+          <button type="button" class="vv-tab active" id="vv-tab-lien" onclick="switchVVTab('lien')">🔗 Lien externe</button>
+          <button type="button" class="vv-tab" id="vv-tab-video" onclick="switchVVTab('video')">🎬 Uploader une vidéo</button>
+        </div>
+
+        <!-- Lien externe -->
+        <div id="vv-panel-lien">
+          <div class="field">
+            <label class="lbl">URL de visite virtuelle</label>
+            <input type="url" id="visite_virtuelle_url" placeholder="ex: https://my.matterport.com/show/?m=xxx ou lien YouTube" oninput="majScoreDossier()">
+            <span class="hint">Matterport, YouTube, Vimeo, Kuula, Google Street View…</span>
+          </div>
+          <div id="vv-preview" style="display:none;margin-top:8px;border-radius:8px;overflow:hidden;border:1px solid var(--line)"></div>
+        </div>
+
+        <!-- Upload vidéo -->
+        <div id="vv-panel-video" style="display:none">
+          <div class="field">
+            <label class="lbl">Vidéo de visite (MP4, max 100 Mo)</label>
+            <div class="upload-zone uz-silver" style="padding:20px" id="vv-upload-zone">
+              <input type="file" id="file-visite-video" accept="video/mp4,video/webm,video/mov" onchange="uploadVideoVisite(this)">
+              <div class="upload-icon">🎬</div>
+              <div class="upload-title">Glissez votre vidéo ici</div>
+              <div class="upload-sub">MP4, WebM, MOV — max 100 Mo</div>
+            </div>
+            <div id="vv-upload-progress" style="display:none;margin-top:8px">
+              <div style="background:var(--line);border-radius:4px;height:6px;overflow:hidden">
+                <div id="vv-progress-bar" style="height:100%;background:#1E7A62;width:0%;transition:width .3s;border-radius:4px"></div>
+              </div>
+              <div id="vv-progress-label" style="font-size:11px;color:var(--muted);margin-top:4px">Upload en cours…</div>
+            </div>
+            <div id="vv-video-preview" style="display:none;margin-top:8px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 : GOLD — JUSTIFICATIF TAXE FONCIÈRE -->
+  <div class="section">
+    <div class="section-head" onclick="toggle('s6')">
+      <div class="sec-num num-gold">5</div>
+      <div class="sec-ttl">Justificatif taxe foncière <span class="sec-sub">→ débloque Gold</span></div>
+      <span class="sec-badge b-gold">Gold</span>
+      <span class="sec-arrow" id="arr-s6">▼</span>
+    </div>
+    <div class="sec-body" id="s6">
+      <div class="unlock-info ui-gold">
+        <div class="ui-icon">🥇</div>
+        <div class="ui-txt">
+          <strong>Niveau Gold — Adresse exacte visible + Contact gratuit</strong>
+          Uploadez l'avis de taxe foncière. Le compte rendu de copropriété n'est pas requis pour Gold (facultatif, section « Autres documents »).
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:12px">
+        <label class="lbl">Avis de taxe foncière *
+          <span style="font-size:10px;font-weight:500;background:#E1F5EE;color:#1E7A62;padding:2px 8px;border-radius:20px;margin-left:6px">🔒 Document confidentiel — non transmis</span>
+        </label>
+        <div style="font-size:11px;color:#854F0B;background:#FAEEDA;border:1px solid #FAC775;border-radius:6px;padding:8px 10px;margin:6px 0;line-height:1.5">⚠️ <strong>Adresse exacte obligatoire</strong> — renseignez l'adresse du bien (section « Localisation ») avant d'uploader : elle permet de vérifier que le document correspond bien à ce logement.</div>
+        <div class="upload-zone uz-gold">
+          <input type="file" id="file-taxe" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadTaxe()">
+          <div class="upload-icon">🧾</div>
+          <div class="upload-title">Avis de taxe foncière</div>
+          <div class="upload-sub">Dernier avis d'imposition foncier — PDF ou image</div>
+        </div>
+        <div class="file-status fs-none" id="fs-taxe">📎 Aucun fichier sélectionné</div>
+        <div id="ocr-taxe-result" style="display:none;margin-top:10px;border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.7"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 : PLATINIUM — JUSTIFICATIF DPE -->
+  <div class="section">
+    <div class="section-head" onclick="toggle('s7')">
+      <div class="sec-num num-plat">6</div>
+      <div class="sec-ttl">Justificatif DPE — Diagnostic Énergétique <span class="sec-sub">→ débloque Platinium</span></div>
+      <span class="sec-badge b-plat">Platinium</span>
+      <span class="sec-arrow" id="arr-s7">▼</span>
+    </div>
+    <div class="sec-body" id="s7">
+      <div class="unlock-info ui-plat">
+        <div class="ui-icon">💎</div>
+        <div class="ui-txt">
+          <strong>Niveau Platinium — Mise en avant + Contact libre acheteurs & agents</strong>
+          Uploadez le rapport DPE officiel réalisé par un diagnostiqueur certifié.
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="lbl">Classe GES</label>
+          <select id="classe_ges">
+            <option value="">Non renseigné</option>
+            <option>A</option><option>B</option><option>C</option>
+            <option>D</option><option>E</option><option>F</option><option>G</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="lbl">Émissions GES (kg CO₂/m²/an)</label>
+          <input type="number" id="emission_ges" placeholder="35" min="0">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:4px">
+        <label class="lbl">Rapport DPE officiel *</label>
+        <div style="font-size:11px;color:#854F0B;background:#FAEEDA;border:1px solid #FAC775;border-radius:6px;padding:8px 10px;margin:6px 0;line-height:1.5">⚠️ <strong>Adresse exacte obligatoire</strong> — renseignez l'adresse du bien (section « Localisation ») avant d'uploader : elle permet de vérifier que le document correspond bien à ce logement.</div>
+        <div class="upload-zone uz-plat">
+          <input type="file" id="file-dpe" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc('dpe_doc','file-dpe','fs-dpe');calcNiveau()">
+          <div class="upload-icon">⚡</div>
+          <div class="upload-title">Rapport DPE</div>
+          <div class="upload-sub">DPE réalisé par un professionnel certifié — PDF</div>
+        </div>
+        <div class="file-status fs-none" id="fs-dpe">📎 Aucun fichier sélectionné</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTRES DOCUMENTS (facultatif) -->
+  <div class="section">
+    <div class="section-head" onclick="toggle('sautres')">
+      <div class="sec-num num-std">🗂️</div>
+      <div class="sec-ttl">Autres documents <span class="sec-sub">→ facultatif</span></div>
+      <span class="sec-arrow" id="arr-sautres">▼</span>
+    </div>
+    <div class="sec-body" id="sautres">
+      <div style="display:flex;gap:10px;align-items:flex-start;background:#F1EFE8;border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:12px">
+        <div style="font-size:18px">📎</div>
+        <div style="font-size:12px;line-height:1.6;color:var(--ink)"><strong>Documents complémentaires — facultatifs.</strong> Joignez des pièces utiles à l’analyse de votre bien (ex : compte rendu de copropriété, règlement de copropriété, diagnostics complémentaires, plan…). PDF ou image. <strong>Stockage confidentiel</strong> : visibles uniquement par les membres abonnés consultant votre dossier, jamais publics.</div>
+      </div>
+      <div class="field" style="margin-bottom:4px">
+        <label class="lbl">Joindre des documents (facultatif)</label>
+        <div class="upload-zone" style="border-color:var(--line)">
+          <input type="file" id="file-autres" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="addAutresDocs(this)">
+          <div class="upload-icon">🗂️</div>
+          <div class="upload-title">Déposer un ou plusieurs documents</div>
+          <div class="upload-sub">Ex : compte rendu de copropriété · règlement · diagnostics — PDF ou image</div>
+        </div>
+        <div id="autres-docs-list" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="submit-zone">
+    <div class="submit-niveau sn-standard" id="submit-niveau">
+      <div class="sn-icon" id="sn-icon">🏠</div>
+      <div class="sn-info">
+        <div class="sn-label" id="sn-label">Niveau Standard</div>
+        <div class="sn-desc" id="sn-desc">3 photos · Ville uniquement · Dossier 4,99 € · Contact vendeur 9,99 €</div>
+      </div>
+    </div>
+    <!-- CONSENTEMENT RGPD OBLIGATOIRE -->
+    <div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:16px;margin-bottom:10px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#1E7A62;margin-bottom:10px">🔒 Consentement obligatoire — RGPD</div>
+
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;line-height:1.6;color:#0F0F0E;margin-bottom:10px">
+        <input type="checkbox" id="consentement-vendeur" style="width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:#1E7A62;cursor:pointer" required>
+        <span><strong>J'autorise ImmoConnect à transmettre mes informations aux acheteurs et agents immo</strong> selon le niveau de visibilité de mon annonce (Standard, Silver, Gold ou Platinium). Ces informations incluent les caractéristiques de mon bien et mes coordonnées de contact.</span>
+      </label>
+
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;line-height:1.6;color:#0F0F0E;margin-bottom:10px">
+        <input type="checkbox" id="consentement-rgpd" style="width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:#1E7A62;cursor:pointer" required>
+        <span>J'ai lu et j'accepte la <a href="mentions-legales.html" style="color:#1E7A62;text-decoration:underline">Politique de confidentialité</a> et les <a href="cgu.html" style="color:#1E7A62;text-decoration:underline">CGU</a> d'ImmoConnect. Mes données sont traitées conformément au RGPD. Je peux exercer mes droits d'accès, rectification et suppression à tout moment.</span>
+      </label>
+
+      <div style="background:rgba(30,122,98,.08);border-radius:6px;padding:10px 12px;font-size:11px;color:#0F0F0E;line-height:1.65">
+        🛡️ <strong>Vos documents restent confidentiels.</strong> Les justificatifs que vous uploadez (taxe foncière, DPE, copropriété) ne sont jamais transmis directement aux acheteurs ou agents. Seul leur statut <em>"vérifié et attesté"</em> est visible. ImmoConnect agit en tant que tiers de confiance.
+      </div>
+    </div>
+    <!-- DÉCLARATION SUR L'HONNEUR -->
+    <div style="background:#FAEEDA;border:1px solid rgba(192,155,90,.3);border-radius:8px;padding:14px 16px;margin-bottom:10px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#854F0B;margin-bottom:10px">⚖️ Déclaration sur l'honneur</div>
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;line-height:1.6;color:#0F0F0E">
+        <input type="checkbox" id="declaration-honneur" style="width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:#C09B5A;cursor:pointer" required>
+        <span>
+          Je soussigné(e) <strong id="nom-vendeur-dsh">[votre nom]</strong> déclare sur l'honneur que toutes les informations renseignées dans ce formulaire sont exactes, sincères et complètes. Je certifie être propriétaire du bien ou mandaté pour le vendre. Toute fausse déclaration engage ma responsabilité civile et pénale.
+        </span>
+      </label>
+    </div>
+    <button class="btn-submit" id="btn-submit" onclick="soumettre()">Publier mon annonce</button>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL  = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+const BUCKET = 'immoconnect-docs';
+
+var niveau='standard', photos=[], docs={}, maxPhotos=3;
+var editAnnonceId=null, niveauExistant=null, statutExistant=null;
+
+function toggle(id){
+  var b=document.getElementById(id),a=document.getElementById('arr-'+id),o=b.classList.contains('open');
+  b.classList.toggle('open',!o);a.classList.toggle('open',!o);
+}
+function setRadio(el,name){
+  document.querySelectorAll('[name="'+name+'"]').forEach(function(r){r.closest('.radio-opt').classList.remove('selected');});
+  el.classList.add('selected');
+}
+function getRadio(name){
+  var s=document.querySelector('.radio-opt.selected input[name="'+name+'"]');
+  return s?s.value:'';
+}
+function showCopro(v){var el=document.getElementById('bloc-copro');if(el)el.style.display=v?'block':'none';}
+// ── ALERTES BAISSE DE PRIX ──
+async function envoyerAlertesBaissePrix(annonceId, ancienPrix, nouveauPrix, baissePct, bien) {
+  try {
+    // 1. Récupérer tous les utilisateurs qui suivent ce bien
+    var { data: suiveurs } = await db.from('suivi_biens').select('email, profil').eq('annonce_id', annonceId);
+
+    // 2. Récupérer aussi les acheteurs/agents qui ont déjà contacté ce vendeur
+    var { data: contacts } = await db.from('conversations')
+      .select('email_agent, email_vendeur')
+      .or('email_vendeur.eq.' + bien.email_contact + ',annonce_id.eq.' + annonceId);
+
+    // Fusionner les emails uniques
+    var emails = new Set();
+    (suiveurs || []).forEach(function(s) { emails.add(s.email + '|' + s.profil); });
+    (contacts || []).forEach(function(c) {
+      if (c.email_agent && c.email_agent !== bien.email_contact) emails.add(c.email_agent + '|agent');
+    });
+
+    // 3. Envoyer l\'alerte à chaque personne
+    for (var entry of emails) {
+      var parts = entry.split('|');
+      var emailDest = parts[0];
+      var profil = parts[1] || 'gratuit';
+      if (!emailDest) continue;
+
+      await db.functions.invoke('envoyer-email', {
+        body: {
+          type: 'baisse_prix',
+          to: emailDest,
+          subject: 'Baisse de prix -' + baissePct + '% sur un bien que vous suivez - ImmoConnect',
+          bien_titre: bien.titre || (bien.type_bien + ' ' + bien.ville),
+          ville: bien.ville || '',
+          surface: bien.surface || '',
+          type_bien: bien.type_bien || '',
+          ancien_prix: Math.round(ancienPrix),
+          nouveau_prix: Math.round(nouveauPrix),
+          baisse_pct: baissePct,
+          baisse_montant: Math.round(ancienPrix - nouveauPrix),
+          profil: profil,
+          lien: 'https://immoconnect-agence.fr/bien.html?id=' + annonceId
+        }
+      }).then(undefined, function(){});
+    }
+    console.log('Alertes baisse prix envoyées : ' + emails.size);
+  } catch(e) {
+    console.warn('Erreur alertes baisse prix:', e.message);
+  }
+}
+
+// ── GÉNÉRATION DESCRIPTION HANAÉ ──
+async function genererDescriptionHanae() {
+  var btn = document.getElementById('btn-hanae-desc');
+  var label = document.getElementById('btn-hanae-label');
+  var status = document.getElementById('hanae-desc-status');
+  var textarea = document.getElementById('description');
+
+  // Collecter les données du formulaire
+  var type = document.getElementById('type_bien').value;
+  var ville = document.getElementById('ville').value;
+  var cp = document.getElementById('code_postal') ? document.getElementById('code_postal').value : '';
+  var surface = document.getElementById('surface').value;
+  var nbPieces = document.getElementById('nb_pieces').value;
+  var nbChambres = document.getElementById('nb_chambres').value;
+  var etage = document.getElementById('etage').value;
+  var annee = document.getElementById('annee_construction').value;
+  var prix = document.getElementById('prix').value;
+  var parking = getRadio('parking') || 'Non';
+  var exterieur = getRadio('exterieur') || 'Aucun';
+  var cave = getRadio('cave') || 'Non';
+  var ascenseur = getRadio('ascenseur') || 'Non';
+  var piscine = getRadio('piscine') || 'Non';
+  var chauffage = document.getElementById('chauffage') ? document.getElementById('chauffage').value : '';
+  var dpe = document.getElementById('classe_dpe') ? document.getElementById('classe_dpe').value : '';
+  var negociable = getRadio('negociable') || 'Non';
+  var travaux = getRadio('travaux_bool') || 'Non';
+  var natureTravaux = document.getElementById('nature_travaux') ? document.getElementById('nature_travaux').value : '';
+  var descTravaux = document.getElementById('description_travaux') ? document.getElementById('description_travaux').value : '';
+
+  if (!type) {
+    status.style.display = 'block';
+    status.style.background = '#FAECE7';
+    status.style.color = '#712B13';
+    status.textContent = 'Sélectionnez au minimum le type de bien pour générer la description (renseignez la ville pour un meilleur résultat).';
+    return;
+  }
+
+  btn.disabled = true;
+  label.textContent = 'Génération en cours…';
+  status.style.display = 'none';
+
+  var prompt = `Tu es Hanaé, experte immobilière ImmoConnect. Rédige une description d\'annonce immobilière professionnelle, accrocheuse et complète en français, en 3-4 paragraphes (150-200 mots). Ton style : élégant, factuel, valorisant sans être excessif. NE commence PAS par "Découvrez" ou "Venez". Commence directement par les atouts du bien.
+
+BIEN :
+- Type : ${type}
+${ville ? '- Localisation : ' + ville + (cp ? ' (' + cp + ')' : '') + '\n' : ''}- Surface : ${surface || 'NC'} m²
+- Pièces : ${nbPieces || 'NC'}${nbChambres ? ' dont ' + nbChambres + ' chambres' : ''}
+${etage ? '- Étage : ' + etage + '\n' : ''}${annee ? '- Année construction : ' + annee + '\n' : ''}${prix ? '- Prix : ' + parseInt(prix).toLocaleString('fr-FR') + ' €' + (negociable === 'Oui' ? ' (négociable)' : '') + '\n' : ''}- Parking : ${parking}
+- Extérieur : ${exterieur}
+${cave !== 'Non' ? '- Cave : oui\n' : ''}${ascenseur !== 'Non' ? '- Ascenseur : oui\n' : ''}${piscine !== 'Non' ? '- Piscine : oui\n' : ''}${chauffage ? '- Chauffage : ' + chauffage + '\n' : ''}${dpe ? '- DPE : ' + dpe + '\n' : ''}${travaux === 'Oui' && natureTravaux ? '- Travaux réalisés : ' + natureTravaux + (descTravaux ? ' — ' + descTravaux : '') + '\n' : ''}
+Rédige uniquement la description, sans titre, sans bullet points.`;
+
+  try {
+    var { data, error } = await db.functions.invoke('generer-description', { body: { prompt: prompt } });
+    if (error) throw new Error(error.message);
+    var texte = data && data.description ? data.description : null;
+
+    if (texte) {
+      textarea.value = texte.trim();
+      status.style.display = 'block';
+      status.style.background = '#E1F5EE';
+      status.style.color = '#085041';
+      status.textContent = '✅ Description générée par Hanaé — vous pouvez la modifier librement.';
+      label.textContent = 'Régénérer';
+    } else {
+      throw new Error('Réponse vide');
+    }
+  } catch(e) {
+    status.style.display = 'block';
+    status.style.background = '#FAECE7';
+    status.style.color = '#712B13';
+    status.textContent = 'Erreur lors de la génération. Réessayez ou rédigez manuellement.';
+    label.textContent = 'Générer avec Hanaé';
+  }
+  btn.disabled = false;
+}
+
+// ── VISITE VIRTUELLE ──
+var visitVirtuelleVideoUrl = null;
+
+function switchVVTab(tab) {
+  document.getElementById('vv-tab-lien').className = 'vv-tab' + (tab==='lien'?' active':'');
+  document.getElementById('vv-tab-video').className = 'vv-tab' + (tab==='video'?' active':'');
+  document.getElementById('vv-panel-lien').style.display = tab==='lien' ? 'block' : 'none';
+  document.getElementById('vv-panel-video').style.display = tab==='video' ? 'block' : 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var urlInput = document.getElementById('visite_virtuelle_url');
+  if (urlInput) {
+    urlInput.addEventListener('input', function() {
+      var url = this.value.trim();
+      var preview = document.getElementById('vv-preview');
+      if (!url) { preview.style.display='none'; return; }
+
+      var html = '';
+      if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        var id = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        if (id) html = '<iframe width="100%" height="200" src="https://www.youtube.com/embed/'+id[1]+'" frameborder="0" allowfullscreen></iframe>';
+      } else if (url.includes('vimeo.com')) {
+        var vid = url.match(/vimeo\.com\/(\d+)/);
+        if (vid) html = '<iframe width="100%" height="200" src="https://player.vimeo.com/video/'+vid[1]+'" frameborder="0" allowfullscreen></iframe>';
+      } else if (url.includes('matterport.com')) {
+        html = '<iframe width="100%" height="200" src="'+url+'" frameborder="0" allowfullscreen></iframe>';
+      } else {
+        html = '<div style="padding:12px;font-size:12px;color:var(--teal)">✅ Lien sauvegardé : <a href="'+url+'" target="_blank" style="color:var(--teal)">Ouvrir</a></div>';
+      }
+      if (html) { preview.innerHTML=html; preview.style.display='block'; }
+    });
+  }
+});
+
+async function uploadVideoVisite(input) {
+  var file = input.files[0];
+  if (!file) return;
+  if (file.size > 100 * 1024 * 1024) { alert('Vidéo trop lourde — max 100 Mo.'); return; }
+
+  var progress = document.getElementById('vv-upload-progress');
+  var bar = document.getElementById('vv-progress-bar');
+  var label = document.getElementById('vv-progress-label');
+  var videoPreview = document.getElementById('vv-video-preview');
+
+  progress.style.display = 'block';
+  bar.style.width = '10%';
+  label.textContent = 'Préparation de l\'upload…';
+
+  try {
+    var { data: { session } } = await db.auth.getSession();
+    if (!session) { alert('Connectez-vous pour uploader une vidéo.'); return; }
+
+    var ext = file.name.split('.').pop();
+    var fileName = 'visite-' + session.user.id + '-' + Date.now() + '.' + ext;
+
+    bar.style.width = '30%';
+    label.textContent = 'Upload en cours…';
+
+    var { data, error } = await db.storage.from('videos').upload(fileName, file, {
+      contentType: file.type,
+      upsert: true
+    });
+
+    if (error) throw error;
+
+    bar.style.width = '100%';
+    label.textContent = 'Upload terminé !';
+
+    var { data: urlData } = db.storage.from('videos').getPublicUrl(fileName);
+    visitVirtuelleVideoUrl = urlData.publicUrl;
+
+    videoPreview.innerHTML = '<video src="'+visitVirtuelleVideoUrl+'" controls style="width:100%;border-radius:8px;margin-top:4px" preload="metadata"></video>'
+      + '<div style="font-size:11px;color:var(--teal);margin-top:4px">✅ Vidéo uploadée avec succès</div>';
+    videoPreview.style.display = 'block';
+
+    setTimeout(function(){ progress.style.display='none'; }, 1500);
+
+  } catch(e) {
+    label.textContent = 'Erreur : ' + e.message;
+    bar.style.background = 'var(--coral)';
+  }
+}
+
+// Afficher section visite virtuelle si Silver+
+function majSectionVV() {
+  var sectionVV = document.getElementById('section-vv');
+  if (sectionVV) {
+    sectionVV.style.display = (niveau !== 'standard') ? 'block' : 'none';
+  }
+}
+
+// ── MODE DE CONTACT ──
+// ── RESTRICTIONS MODE CONTACT SELON NIVEAU ──
+function majModeContact() {
+  var cardsAA = document.getElementById('mc-acheteurs_agents');
+  var cardsComp = document.getElementById('mc-comparatif');
+  var modeActuel = document.getElementById('mode_contact').value;
+  var infoNiveau = document.getElementById('mode-niveau-info');
+
+  if (niveau === 'standard') {
+    if (cardsAA) { cardsAA.classList.add('disabled'); cardsAA.onclick = function(){ afficherAlerteModeNiveau(); }; }
+    if (cardsComp) { cardsComp.classList.add('disabled'); cardsComp.onclick = function(){ afficherAlerteModeNiveau(); }; }
+    if (modeActuel !== 'acheteurs') { setModeContactSilent('acheteurs'); }
+    if (infoNiveau) {
+      infoNiveau.style.display = 'block';
+      infoNiveau.textContent = 'Niveau Standard : seul le mode Acheteurs & Investisseurs est disponible. Ajoutez votre valeur locative ou un bail pour passer Silver et débloquer les options agents.';
+      infoNiveau.style.background = '#F1EFE8';
+      infoNiveau.style.color = '#555';
+    }
+  } else {
+    if (cardsAA) { cardsAA.classList.remove('disabled'); cardsAA.onclick = function(){ setModeContact('acheteurs_agents'); }; }
+    if (cardsComp) { cardsComp.classList.remove('disabled'); cardsComp.onclick = function(){ setModeContact('comparatif'); }; }
+    if (infoNiveau) {
+      if (niveau === 'silver') {
+        infoNiveau.style.display = 'block';
+        infoNiveau.textContent = 'Niveau Silver : toutes les options de contact sont disponibles.';
+        infoNiveau.style.background = '#E6F1FB';
+        infoNiveau.style.color = '#185FA5';
+      } else if (niveau === 'gold') {
+        infoNiveau.style.display = 'block';
+        infoNiveau.textContent = 'Niveau Gold : toutes les options disponibles + adresse visible par tous.';
+        infoNiveau.style.background = '#FAEEDA';
+        infoNiveau.style.color = '#854F0B';
+      } else if (niveau === 'platinium') {
+        infoNiveau.style.display = 'block';
+        infoNiveau.textContent = 'Niveau Platinium : toutes les options disponibles + mise en avant prioritaire.';
+        infoNiveau.style.background = '#E1F5EE';
+        infoNiveau.style.color = '#085041';
+      }
+    }
+  }
+}
+
+function afficherAlerteModeNiveau() {
+  var msg = 'Ce mode est disponible à partir du niveau Silver. Ajoutez votre valeur locative ou un bail pour passer Silver et accéder aux options agents.';
+  alert(msg);
+}
+
+function setModeContactSilent(mode) {
+  document.getElementById('mode_contact').value = mode;
+  var cards = ['acheteurs', 'acheteurs_agents', 'comparatif'];
+  cards.forEach(function(m) {
+    var card = document.getElementById('mc-' + m);
+    if (!card) return;
+    card.className = 'mode-card' + (card.classList.contains('disabled') ? ' disabled' : '') + (m === mode ? ' selected-' + m : '');
+  });
+}
+
+function setModeContact(mode) {
+  // Vérifier si le mode est verrouillé (sélection Hanaé en cours)
+  if (window._modeVerrouille) {
+    alert('Le mode de contact est verrouillé car une sélection Hanaé est en cours. Il sera déverrouillé après la signature du mandat ou la clôture de l\'annonce.');
+    return;
+  }
+  document.getElementById('mode_contact').value = mode;
+  var cards = ['acheteurs', 'acheteurs_agents', 'comparatif'];
+  cards.forEach(function(m) {
+    var card = document.getElementById('mc-' + m);
+    if (!card) return;
+    card.className = 'mode-card' + (m === mode ? ' selected-' + m : '');
+  });
+}
+
+// Vérification bannissement vendeur au chargement
+async function verifierBannissementVendeur(email) {
+  if (!email || !supabase) return;
+  try {
+    const { data } = await supabase
+      .from('sanctions_vendeurs')
+      .select('type_sanction, fin_sanction, nb_infraction')
+      .eq('vendeur_email', email)
+      .gt('fin_sanction', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1);
+    if (data && data.length > 0) {
+      const sanction = data[0];
+      const fin = sanction.fin_sanction ? new Date(sanction.fin_sanction).toLocaleDateString('fr-FR') : null;
+      const msg = sanction.type_sanction === 'bannissement_permanent'
+        ? 'Votre compte est definitivement banni de la plateforme suite a plusieurs non-respects des engagements mandat. Contactez support@immoconnect-agence.fr pour contester.'
+        : 'Vous ne pouvez pas poster de nouvelle annonce avant le ' + fin + ' (sanction suite a non-signature de mandat).';
+      var banner = document.getElementById('bannissement-banner');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'bannissement-banner';
+        banner.style.cssText = 'background:#FAECE7;border:1px solid #F0997B;color:#712B13;padding:16px 20px;border-radius:8px;font-size:13px;margin-bottom:20px;line-height:1.6';
+        document.querySelector('.form-container, form, .container, body').prepend(banner);
+      }
+      banner.innerHTML = '<strong>Publication impossible</strong><br>' + msg;
+      // Désactiver le bouton de publication
+      var btnPublier = document.getElementById('btn-publier') || document.querySelector('button[type=submit]');
+      if (btnPublier) { btnPublier.disabled = true; btnPublier.style.opacity = '0.5'; }
+    }
+  } catch(e) {}
+}
+
+// Verrouillage mode si sélection Hanaé en cours
+async function verifierModeLock(annonce_id) {
+  if (!annonce_id || !supabase) return;
+  try {
+    const { data } = await supabase
+      .from('annonces_vendeurs')
+      .select('mode_contact_verrouille, statut_selection')
+      .eq('id', annonce_id)
+      .single();
+    if (data?.mode_contact_verrouille || data?.statut_selection === 'agent_choisi') {
+      window._modeVerrouille = true;
+      var info = document.getElementById('mode-niveau-info');
+      if (info) {
+        info.style.display = 'block';
+        info.style.background = '#FAEEDA';
+        info.style.color = '#854F0B';
+        info.textContent = 'Mode verrouille : une selection Hanaé est en cours. Vous pourrez modifier le mode après la signature du mandat.';
+      }
+      // Griser toutes les cartes mode
+      ['acheteurs', 'acheteurs_agents', 'comparatif'].forEach(function(m) {
+        var card = document.getElementById('mc-' + m);
+        if (card) { card.style.opacity = '0.5'; card.style.pointerEvents = 'none'; }
+      });
+    }
+  } catch(e) {}
+}
+
+function toggleTravaux(v){document.getElementById('bloc-travaux').style.display=v?'block':'none';}
+
+function calcNiveau(){
+  // Silver : valeur locative renseignée (déclarative). Gold/Platinium : documents VÉRIFIÉS + adresse exacte.
+  var isCopro=getRadio('is_copro')==='Oui';
+  var _chEl=document.getElementById('charges_syndic');
+  var aCharges=!!(_chEl && _chEl.value.trim()!=='');
+  var hasSilver=(+document.getElementById('valeur_locative').value>0) && (!isCopro || aCharges);
+  var hasTaxe=docs['taxe_fonciere_verifie']==='ok';
+  var hasDpe=docs['dpe_verifie']==='ok';
+  var aAdresse=!!(document.getElementById('adresse').value||'').trim();
+  var isCopro=getRadio('is_copro')==='Oui';
+  var n='standard';
+  if(hasSilver) n='silver';
+  if(hasSilver&&hasTaxe&&aAdresse) n='gold';                 // Gold : taxe foncière vérifiée + adresse (copro non requise)
+  if(hasSilver&&hasTaxe&&hasDpe&&aAdresse) n='platinium';    // Platinium : Gold + DPE vérifié
+  niveau=n; updateUI();
+}
+
+var NIV={
+  standard:{prog:25,pb:'pb-standard',icon:'🏠',label:'Annonce de base',desc:'3 photos · Ville seule · Ajoutez le loyer estimé pour être proposé aux investisseurs',benefit:'➜ Prochaine étape : indiquez la valeur locative (et les charges si copropriété) pour apparaître dans les recherches investisseurs.',sn:'sn-standard'},
+  silver:{prog:50,pb:'pb-silver',icon:'📈',label:'Annonce enrichie',desc:'Rendement affiché · Visible des investisseurs',benefit:'➜ Prochaine étape : adresse exacte + avis de taxe foncière vérifié = badge « Dossier vérifié ✓ » et photos illimitées.',sn:'sn-silver'},
+  gold:{prog:75,pb:'pb-gold',icon:'✓',label:'Dossier vérifié ✓',desc:'Photos illimitées · Adresse visible · Confiance acheteurs',benefit:'➜ Dernière étape : ajoutez votre DPE vérifié pour la visibilité maximale.',sn:'sn-gold'},
+  platinium:{prog:100,pb:'pb-platinium',icon:'✓✓',label:'Dossier vérifié + DPE ✓✓',desc:'Visibilité maximale · Mise en avant',benefit:'🎉 Dossier complet — votre annonce a la visibilité maximale.',sn:'sn-platinium'}
+};
+var KEYS=['standard','silver','gold','platinium'];
+
+function updateUI(){
+  var cfg=NIV[niveau],idx=KEYS.indexOf(niveau);
+  var bar=document.getElementById('prog');
+  bar.style.width=cfg.prog+'%';bar.className='progress-bar '+cfg.pb;
+  var nb=document.getElementById('niv-benefit');
+  if(nb) nb.innerHTML='<strong>'+cfg.label+'</strong> · '+cfg.benefit;
+  maxPhotos=(niveau==='gold'||niveau==='platinium')?9999:3;
+  var plb=document.getElementById('plb');
+  if(plb){
+    plb.textContent=(niveau==='gold'||niveau==='platinium')?'📷 Photos illimitées ('+cfg.label+') — 3 minimum obligatoires':'📷 3 photos max ('+cfg.label+') — 3 minimum obligatoires';
+    plb.className='photos-limit-badge plb-'+niveau;
+  }
+  renderPhotos();
+  document.getElementById('sn-icon').textContent=cfg.icon;
+  document.getElementById('sn-label').textContent=cfg.label;
+  document.getElementById('sn-desc').textContent=cfg.desc;
+  document.getElementById('submit-niveau').className='submit-niveau '+cfg.sn;
+  majScoreDossier();
+  majSectionVV();
+  majModeContact();
+}
+
+function majScoreDossier() {
+  var desc = document.getElementById('description') ? document.getElementById('description').value : '';
+  var surface = document.getElementById('surface') ? document.getElementById('surface').value : '';
+  var nbPieces = document.getElementById('nb_pieces') ? document.getElementById('nb_pieces').value : '';
+  var prix = document.getElementById('prix') ? document.getElementById('prix').value : '';
+  var annee = document.getElementById('annee_construction') ? document.getElementById('annee_construction').value : '';
+  var adresse = document.getElementById('adresse') ? document.getElementById('adresse').value : '';
+  var valeurLoc = document.getElementById('valeur_locative') ? document.getElementById('valeur_locative').value : '';
+  var loyer = document.getElementById('loyer_mensuel') ? document.getElementById('loyer_mensuel').value : '';
+  var taxe = document.getElementById('taxe_fonciere_montant') ? document.getElementById('taxe_fonciere_montant').value : '';
+  var dpe = document.getElementById('classe_dpe') ? document.getElementById('classe_dpe').value : '';
+  var isCopro = getRadio('is_copro') === 'Oui';
+
+  var criteres = [
+    { label:'Photos (3 min.)',          ok: photos.length >= 3,                   pts:10 },
+    { label:'Description rédigée',      ok: desc.length > 50,                     pts:10 },
+    { label:'Surface',                  ok: !!surface,                            pts:5  },
+    { label:'Nb de pièces',             ok: !!nbPieces,                           pts:5  },
+    { label:'Prix demandé',             ok: !!prix,                               pts:5  },
+    { label:'Année construction',       ok: !!annee,                              pts:5  },
+    { label:'Valeur locative / Loyer',  ok: !!valeurLoc || !!loyer,               pts:10 },
+    { label:'Taxe foncière',            ok: !!taxe || !!docs['taxe_fonciere_doc'],pts:15 },
+    { label:'DPE renseigné',            ok: !!dpe || !!docs['dpe_doc'],           pts:15 },
+    { label:'Adresse complète',         ok: !!adresse,                            pts:5  },
+  ];
+
+  var total = criteres.reduce(function(a,c){ return a+c.pts; }, 0);
+  var obtenu = criteres.filter(function(c){ return c.ok; }).reduce(function(a,c){ return a+c.pts; }, 0);
+  var score = Math.round(obtenu / total * 100);
+  var color = score >= 80 ? '#1E7A62' : score >= 50 ? '#D4732A' : '#C0392B';
+  var label = score >= 80 ? 'Excellent' : score >= 60 ? 'Bon' : score >= 40 ? 'Moyen' : 'Incomplet';
+
+  var wrap = document.getElementById('score-dossier-widget');
+  if (!wrap) return;
+
+  var itemsHtml = criteres.map(function(c) {
+    return '<div style="display:flex;align-items:center;gap:8px;font-size:11px;padding:3px 0">'
+      + '<div style="width:8px;height:8px;border-radius:50%;background:' + (c.ok?'#1E7A62':'#E8E6E0') + ';flex-shrink:0"></div>'
+      + '<span style="color:' + (c.ok?'#0F0F0E':'#888780') + '">' + c.label + '</span>'
+      + '<span style="margin-left:auto;font-size:10px;color:' + (c.ok?'#1E7A62':'#888780') + '">' + (c.ok?'+'+c.pts+'pts':'—') + '</span>'
+      + '</div>';
+  }).join('');
+
+  wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+    + '<div><div style="font-size:10px;font-weight:700;color:#888780;text-transform:uppercase;letter-spacing:.8px">Score de votre dossier</div>'
+    + '<div style="font-size:11px;color:#888780;margin-top:2px">Vu par les agents immobiliers</div></div>'
+    + '<div style="width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;border:3px solid '+color+';color:'+color+'">'+score+'</div>'
+    + '</div>'
+    + '<div style="height:6px;background:#E8E6E0;border-radius:3px;overflow:hidden;margin-bottom:4px">'
+    + '<div style="height:100%;width:'+score+'%;background:'+color+';border-radius:3px;transition:width .5s"></div></div>'
+    + '<div style="display:flex;justify-content:space-between;font-size:10px;color:#888780;margin-bottom:12px">'
+    + '<span>0</span><span style="color:'+color+';font-weight:600">'+label+' — '+score+'/100</span><span>100</span></div>'
+    + itemsHtml;
+}
+
+function renderPhotos(){
+  var g=document.getElementById('photo-grid'),h='';
+  photos.forEach(function(p,i){
+    h+='<div class="photo-thumb"><img src="'+p.url+'"><button class="photo-del" onclick="delPhoto('+i+')">✕</button></div>';
+  });
+  if(photos.length<maxPhotos){
+    h+='<label class="photo-add"><input type="file" accept="image/*" multiple onchange="addPhotos(this)"><span style="font-size:22px">＋</span><span>Ajouter</span></label>';
+  }
+  g.innerHTML=h;
+  var count=photos.length;
+  var counter=document.getElementById('photo-counter');
+  var warning=document.getElementById('photos-warning');
+  if(counter){counter.textContent=count+' / 3 minimum';counter.style.color=count>=3?'#1E7A62':'#C0392B';}
+  if(warning){warning.style.display=(count>0&&count<3)?'block':'none';}
+}
+function addPhotos(inp){
+  Array.from(inp.files).slice(0,maxPhotos-photos.length).forEach(function(f){photos.push({file:f,url:URL.createObjectURL(f)});});
+  renderPhotos();inp.value='';
+}
+function delPhoto(i){photos.splice(i,1);renderPhotos();}
+
+var autresDocs=[];
+function renderAutresDocs(){
+  var el=document.getElementById('autres-docs-list'); if(!el)return;
+  var h='';
+  for(var i=0;i<autresDocs.length;i++){
+    var nom=String(autresDocs[i].name).replace(/[<>]/g,'');
+    var tag=autresDocs[i].url?' \u2713':'';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;margin-top:6px;font-size:12px"><span>\uD83D\uDCC4 '+nom+tag+'</span><button type="button" onclick="delAutreDoc('+i+')" style="background:transparent;border:none;color:#C0392B;cursor:pointer;font-size:14px">\u2715</button></div>';
+  }
+  el.innerHTML=h;
+}
+function addAutresDocs(inp){
+  Array.from(inp.files).forEach(function(f){autresDocs.push({file:f,name:f.name});});
+  renderAutresDocs();inp.value='';
+}
+function delAutreDoc(i){autresDocs.splice(i,1);renderAutresDocs();}
+async function uploadAutresDocs(){
+  // SÉCURITÉ : bucket PRIVÉ documents-vendeurs — on stocke le chemin, jamais d'URL publique.
+  // La consultation passe par des URL signées (edge function doc-url), réservées aux abonnés.
+  var out=[];
+  for(var i=0;i<autresDocs.length;i++){
+    if(autresDocs[i].path){out.push({name:autresDocs[i].name,path:autresDocs[i].path});continue;}
+    var f=autresDocs[i].file,ext=(f.name.split('.').pop()||'pdf');
+    var path='autres/'+Date.now()+'_'+i+'.'+ext;
+    var up=await db.storage.from('documents-vendeurs').upload(path,f,{upsert:true});
+    if(!up.error){out.push({name:f.name,path:path});}
+  }
+  return out;
+}
+
+// ── GÉOCODAGE AUTOMATIQUE (Nominatim OpenStreetMap) ──
+async function geocoderAdresse(adresse, ville, codePostal) {
+  try {
+    var q = [adresse, ville, codePostal, 'France'].filter(Boolean).join(' ');
+    var url = 'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(q) + '&format=json&limit=1&countrycodes=fr';
+    var res = await fetch(url, { headers: { 'Accept-Language': 'fr' } });
+    var data = await res.json();
+    if (data && data[0]) {
+      return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+    }
+    // 2e tentative sans l\'adresse (juste ville + CP)
+    var q2 = [ville, codePostal, 'France'].filter(Boolean).join(' ');
+    var res2 = await fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(q2) + '&format=json&limit=1&countrycodes=fr');
+    var data2 = await res2.json();
+    if (data2 && data2[0]) {
+      return { lat: parseFloat(data2[0].lat), lon: parseFloat(data2[0].lon) };
+    }
+  } catch(e) {}
+  return null;
+}
+
+// ── MAJ NOM DÉCLARATION SUR L\'HONNEUR ──
+function majNomDsh() {
+  var nom = document.getElementById('nom_vendeur').value.trim();
+  var el = document.getElementById('nom-vendeur-dsh');
+  if (el) el.textContent = nom || '[votre nom]';
+}
+
+// ── UPLOAD TAXE FONCIÈRE + OCR CLAUDE API ──
+async function uploadTaxe() {
+  var file = document.getElementById('file-taxe').files[0];
+  var st = document.getElementById('fs-taxe');
+  var ocrResult = document.getElementById('ocr-taxe-result');
+  if (!file) return;
+  ocrResult.style.display = 'block';
+
+  // Adresse exacte requise AVANT vérification (pour contrôler que le document correspond au bien)
+  if (!(document.getElementById('adresse').value||'').trim()) {
+    document.getElementById('file-taxe').value = '';
+    st.className='file-status'; st.style.color='#C0392B'; st.textContent="\u26a0\ufe0f Renseignez d'abord l'adresse exacte du bien.";
+    ocrResult.style.background='#FAECE7'; ocrResult.style.border='1px solid #F5C4B3';
+    ocrResult.innerHTML="\u26a0\ufe0f <strong>Adresse exacte requise</strong> \u2014 indiquez l'adresse du bien plus haut, afin de vérifier que la taxe foncière correspond bien à ce logement.";
+    return;
+  }
+
+  // SÉCURITÉ : le justificatif n'est PAS stocké \u2014 lu à la volée pour l'OCR, puis abandonné.
+  docs['taxe_fonciere_doc'] = { local: true };
+  docs['taxe_fonciere_verifie'] = null;
+  st.className='file-status'; st.style.color=''; st.textContent='\u23f3 ' + file.name;
+  ocrResult.style.background='#F5F2EC'; ocrResult.style.border='1px solid #E8E6E0';
+  ocrResult.innerHTML='\u23f3 <strong>Vérification du document en cours\u2026</strong>';
+  calcNiveau();
+
+  try {
+    var b64 = await new Promise(function(resolve,reject){var r=new FileReader();r.onload=function(e){resolve(e.target.result.split(',')[1]);};r.onerror=reject;r.readAsDataURL(file);});
+    var mt = file.type==='application/pdf'?'application/pdf':(file.type||'image/jpeg');
+    var resp = await db.functions.invoke('ocr-documents', { body: { type:'valider_doc_vendeur', doc_type:'taxe_fonciere', image_base64:b64, media_type:mt, montant:document.getElementById('taxe_fonciere_montant').value, ville:document.getElementById('ville').value, adresse:document.getElementById('adresse').value, nom:document.getElementById('nom_vendeur').value } });
+    var rr = (resp && resp.data) || {};
+    if (rr.statut === 'ok') {
+      docs['taxe_fonciere_verifie'] = 'ok';
+      var ex = rr.extrait || {};
+      ocrResult.style.background='#E1F5EE'; ocrResult.style.border='1px solid #9FE1CB';
+      ocrResult.innerHTML='\u2705 <strong>Taxe foncière vérifiée</strong> \u2014 Montant : '+(ex.montant_trouve||'?')+' \u20ac · '+(ex.adresse_trouvee||'\u2014')+'<br><span style="font-size:11px;color:#1E7A62">\ud83d\udd12 Confidentiel \u2014 seul le statut « Vérifié » est affiché aux acheteurs.</span>';
+      st.className='file-status fs-ok'; st.style.color=''; st.textContent='\u2705 '+file.name;
+    } else if (rr.statut === 'litige') {
+      docs['taxe_fonciere_verifie'] = 'litige';
+      ocrResult.style.background='#FAEEDA'; ocrResult.style.border='1px solid #FAC775';
+      ocrResult.innerHTML='\u26a0\ufe0f <strong>Vérification manuelle requise</strong> \u2014 '+((rr.extrait&&rr.extrait.alerte)||"l'adresse ou le montant ne concordent pas")+'. Le niveau Gold n\'est pas débloqué automatiquement.';
+      st.style.color='#854F0B'; st.textContent='\u26a0\ufe0f '+file.name;
+    } else {
+      docs['taxe_fonciere_doc'] = null; docs['taxe_fonciere_verifie'] = null;
+      document.getElementById('file-taxe').value='';
+      ocrResult.style.background='#FAECE7'; ocrResult.style.border='1px solid #F5C4B3';
+      ocrResult.innerHTML='\u274c <strong>Document non reconnu</strong> \u2014 ce document ne semble pas être un avis de taxe foncière correspondant à ce bien.';
+      st.style.color='#C0392B'; st.textContent='\u274c Document refusé';
+    }
+  } catch(e) {
+    docs['taxe_fonciere_verifie'] = 'litige';
+    ocrResult.innerHTML='\u26a0\ufe0f Vérification indisponible \u2014 le document sera contrôlé à la publication.';
+  }
+  calcNiveau();
+}
+
+async function uploadDoc(champ,inputId,statusId){
+  var file=document.getElementById(inputId).files[0];
+  var st=document.getElementById(statusId);
+  if(!file)return;
+  var DT={valeur_locative_doc:'valeur_locative',copro_doc:'copro',dpe_doc:'dpe'};
+  var docType=DT[champ]||champ;
+  var verifKey=docType+'_verifie';
+
+  // DPE (niveau Platinium) : adresse exacte requise avant vérification
+  if ((docType==='dpe'||docType==='copro') && !(document.getElementById('adresse').value||'').trim()) {
+    document.getElementById(inputId).value='';
+    st.className='file-status'; st.style.color='#C0392B'; st.textContent="\u26a0\ufe0f Renseignez d'abord l'adresse exacte du bien.";
+    return;
+  }
+
+  docs[champ]={local:true}; docs[verifKey]=null;
+  st.className='file-status'; st.style.color=''; st.textContent='\u23f3 Vérification\u2026';
+  calcNiveau();
+  try{
+    var b64=await new Promise(function(res,rej){var r=new FileReader();r.onload=function(e){res(e.target.result.split(',')[1]);};r.onerror=rej;r.readAsDataURL(file);});
+    var mt=file.type==='application/pdf'?'application/pdf':(file.type||'image/jpeg');
+    var resp=await db.functions.invoke('ocr-documents',{body:{type:'valider_doc_vendeur',doc_type:docType,image_base64:b64,media_type:mt,ville:document.getElementById('ville').value,adresse:document.getElementById('adresse').value,nom:document.getElementById('nom_vendeur').value,classe_dpe:(document.getElementById('classe_dpe')?document.getElementById('classe_dpe').value:'')}});
+    var rr=(resp&&resp.data)||{};
+    if(rr.statut==='ok'){docs[verifKey]='ok';st.className='file-status fs-ok';st.style.color='';st.textContent='\u2705 Document vérifié \u2014 '+file.name;}
+    else if(rr.statut==='litige'){docs[verifKey]='litige';st.className='file-status';st.style.color='#854F0B';st.textContent='\u26a0\ufe0f À vérifier ('+((rr.extrait&&rr.extrait.alerte)||'concordance incomplète')+') \u2014 niveau non débloqué.';}
+    else{docs[verifKey]=null;docs[champ]=null;document.getElementById(inputId).value='';st.className='file-status';st.style.color='#C0392B';st.textContent='\u274c Document non reconnu.';}
+  }catch(e){docs[verifKey]='litige';st.style.color='#854F0B';st.textContent='\u26a0\ufe0f Vérification indisponible \u2014 contrôle à la publication.';}
+  calcNiveau();
+}
+
+// ── ALERTES AGENTS NOUVEAU BIEN ──
+async function envoyerAlertesAgents(bien, niveau) {
+  try {
+    // Définir quels forfaits reçoivent l\'alerte selon le niveau
+    // Silver  → tous les forfaits (starter, pro, expert, platinium)
+    // Gold    → pro, expert, platinium
+    // Platinium → expert, platinium (en premier), puis pro avec délai
+    var forfaitsEligibles = {
+      silver:    ['starter','pro','expert','platinium'],
+      gold:      ['pro','expert','platinium'],
+      platinium: ['expert','platinium']
+    };
+
+    var forfaits = forfaitsEligibles[niveau] || [];
+    var delais = {
+      platinium: 0,    // H+0
+      expert:    1,    // J+1
+      pro:       2,    // J+2
+      starter:   4     // J+4
+    };
+
+    // Appeler la Edge Function Supabase
+    await db.functions.invoke('alerter-agents', {
+      body: {
+        type: 'nouveau_bien',
+        niveau: niveau,
+        forfaits_eligibles: forfaits,
+        delais: delais,
+        bien: {
+          titre: bien.titre || bien.type_bien + ' · ' + bien.ville,
+          type: bien.type_bien,
+          ville: bien.ville,
+          code_postal: bien.code_postal,
+          surface: bien.surface,
+          prix: bien.prix,
+          nb_pieces: bien.nb_pieces,
+          niveau_vendeur: niveau
+        }
+      }
+    });
+    console.log('Alertes agents envoyées pour niveau:', niveau);
+  } catch(e) {
+    console.warn('Alertes agents:', e.message);
+  }
+}
+
+async function uploadPhotos(){
+  var urls=[];
+  for(var i=0;i<photos.length;i++){
+    if(photos[i].existante){urls.push(photos[i].existante);continue;} // photo déjà en ligne (édition)
+    var f=photos[i].file,ext=f.name.split('.').pop();
+    var path='vendeurs/photos/'+Date.now()+'_'+i+'.'+ext;
+    var {error}=await db.storage.from(BUCKET).upload(path,f,{upsert:true});
+    if(!error){var {data:pub}=db.storage.from(BUCKET).getPublicUrl(path);urls.push(pub.publicUrl);}
+  }
+  return urls;
+}
+
+async function soumettre(){
+  // Vérifier consentements RGPD
+  var consent1 = document.getElementById('consentement-vendeur');
+  var consent2 = document.getElementById('consentement-rgpd');
+  if (!consent1 || !consent1.checked) {
+    showToast('Vous devez autoriser la transmission de vos informations pour publier.','err');
+    return;
+  }
+  if (!consent2 || !consent2.checked) {
+    showToast('Vous devez accepter la politique de confidentialité pour continuer.','err');
+    return;
+  }
+  var dsh = document.getElementById('declaration-honneur');
+  if (!dsh || !dsh.checked) {
+    showToast('Vous devez signer la déclaration sur l\'honneur pour publier.','err');
+    return;
+  }
+  var btn=document.getElementById('btn-submit');
+  var required={type_bien:'Type de bien',statut_occupation:"Statut d'occupation",mode_contact:'Mode de contact',titre:'Titre',description:'Description',surface:'Surface',nb_pieces:'Nb de pièces',prix:'Prix',ville:'Ville',code_postal:'Code postal',nom_vendeur:'Nom / Prénom',telephone:'Téléphone',email_contact:'Email'};
+  var missing=[];
+  Object.keys(required).forEach(function(id){
+    var v=document.getElementById(id).value;
+    if(!v||!v.trim()){document.getElementById(id).style.borderColor='#C0392B';missing.push(required[id]);}
+    else document.getElementById(id).style.borderColor='';
+  });
+  var emailVal=document.getElementById('email_contact').value;
+  if(emailVal&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)){document.getElementById('email_contact').style.borderColor='#C0392B';if(missing.indexOf('Email invalide')===-1)missing.push('Email invalide');}
+  var telVal=document.getElementById('telephone').value.replace(/\s/g,'');
+  if(telVal&&!/^(\+33|0)[1-9][0-9]{8}$/.test(telVal)){document.getElementById('telephone').style.borderColor='#C0392B';if(missing.indexOf('Téléphone invalide')===-1)missing.push('Téléphone invalide');}
+  var warn=document.getElementById('photos-warning');
+  if(photos.length<3){if(warn)warn.style.display='block';missing.push('3 photos minimum (actuellement : '+photos.length+')');}
+  else{if(warn)warn.style.display='none';}
+  if(missing.length){showToast('⚠️ '+missing[0],'err');return;}
+
+  btn.disabled=true;btn.textContent='Publication en cours…';
+  showToast('Upload des photos…','info');
+  var photoUrls=await uploadPhotos();
+  var autresDocsUrls=await uploadAutresDocs();
+
+  var payload={
+    nom_vendeur:document.getElementById('nom_vendeur').value,
+    telephone:document.getElementById('telephone').value,
+    email_contact:document.getElementById('email_contact').value,
+    type_bien:document.getElementById('type_bien').value,
+    statut_occupation:document.getElementById('statut_occupation').value,
+    titre:document.getElementById('titre').value,
+    description:document.getElementById('description').value,
+    surface:+document.getElementById('surface').value||null,
+    nb_pieces:+document.getElementById('nb_pieces').value||null,
+    nb_chambres:+document.getElementById('nb_chambres').value||null,
+    etage:+document.getElementById('etage').value||null,
+    nb_etages:+document.getElementById('nb_etages').value||null,
+    annee_construction:+document.getElementById('annee_construction').value||null,
+    prix:+document.getElementById('prix').value||null,
+    date_achat:document.getElementById('date_achat').value||null,
+    negociable:getRadio('negociable')==='Oui',
+    travaux:getRadio('travaux_bool')==='Oui',
+    nature_travaux:document.getElementById('nature_travaux').value||null,
+    annee_travaux:+document.getElementById('annee_travaux').value||null,
+    montant_travaux:+document.getElementById('montant_travaux').value||null,
+    travaux_par:getRadio('travaux_par')||null,
+    description_travaux:document.getElementById('description_travaux').value||null,
+    ville:document.getElementById('ville').value,
+    code_postal:document.getElementById('code_postal').value,
+    adresse:document.getElementById('adresse').value,
+    chauffage:document.getElementById('chauffage').value,
+    eau_chaude:document.getElementById('eau_chaude').value,
+    parking:getRadio('parking'),
+    exterieur:getRadio('exterieur'),
+    cave:getRadio('cave'),
+    ascenseur:getRadio('ascenseur')==='Oui',
+    digicode:getRadio('digicode'),
+    piscine:getRadio('piscine')==='Oui',
+    photos_urls:photoUrls,
+    autres_documents:autresDocsUrls,
+    photo_principale:photoUrls[0]||null,
+    valeur_locative:+document.getElementById('valeur_locative').value||null,
+    loyer_mensuel:+document.getElementById('loyer_mensuel').value||null,
+    valeur_locative_doc_url:null, // justificatif non stocke (securite)
+    charges_syndic:+document.getElementById('charges_syndic').value||null,
+    nb_lots_copro:+document.getElementById('nb_lots_copro').value||null,
+    taxe_fonciere_montant:+document.getElementById('taxe_fonciere_montant').value||null,
+    // taxe_fonciere_verifie : géré côté serveur (ocr-documents) + revue admin — non écrit ici
+    // URL du document taxe foncière stockée côté serveur uniquement — non transmise aux acheteurs/agents
+    is_copropriete:getRadio('is_copro')==='Oui',
+    copro_doc_url:null, // justificatif non stocke (securite)
+    classe_dpe:document.getElementById('classe_dpe').value,
+    conso_energie:+document.getElementById('conso_energie').value||null,
+    classe_ges:document.getElementById('classe_ges').value,
+    emission_ges:+document.getElementById('emission_ges').value||null,
+    dpe_doc_url:null, // justificatif non stocke (securite)
+    niveau_vendeur:niveau,
+    statut_annonce:'en_attente',
+    latitude: null,
+    longitude: null,
+    created_at:new Date().toISOString()
+  };
+
+  // Géocodage automatique — transparent pour le vendeur
+  btn.textContent = '📍 Géolocalisation…';
+  var adresse = document.getElementById('adresse').value;
+  var ville   = document.getElementById('ville').value;
+  var cp      = document.getElementById('code_postal').value;
+  var coords  = await geocoderAdresse(adresse, ville, cp);
+  if (coords) {
+    payload.latitude  = coords.lat;
+    payload.longitude = coords.lon;
+  }
+
+  btn.textContent = '⏳ Publication…';
+  // Vérifier si c\'est une mise à jour de prix (mode édition)
+  var urlParams = new URLSearchParams(window.location.search);
+  var editId = urlParams.get('edit');
+  var ancienPrix = 0;
+
+  if (editId) {
+    // Sécurité : seul le propriétaire connecté peut mettre à jour
+    var {data:{session:sessEdit}}=await db.auth.getSession();
+    var {data:proprio}=await db.from('annonces_vendeurs').select('email_contact').eq('id',editId).single();
+    if(!sessEdit||!proprio||(proprio.email_contact||'').toLowerCase()!==sessEdit.user.email.toLowerCase()){
+      alert("Modification refusée : cette annonce n'appartient pas à votre compte.");
+      btn.textContent=origText;btn.disabled=false;return;
+    }
+    delete payload.created_at; // on conserve la date de publication d'origine
+    if(statutExistant) payload.statut_annonce=statutExistant; // pas de dépublication à l'édition
+    // Le niveau acquis (documents déjà vérifiés) n'est pas perdu si aucun nouveau doc
+    var ordre={standard:0,silver:1,gold:2,platinium:3};
+    if((ordre[niveau]||0)<(ordre[niveauExistant]||0)) payload.niveau_vendeur=niveauExistant;
+    // Mode édition — vérifier si le prix a baissé
+    var { data: ancienBien } = await db.from('annonces_vendeurs').select('prix, prix_initial').eq('id', editId).single();
+    ancienPrix = ancienBien ? (ancienBien.prix || 0) : 0;
+    var nouveauPrix = parseFloat(payload.prix) || 0;
+    var isPrixInitialSet = ancienBien && ancienBien.prix_initial;
+
+    // Définir le prix initial si c\'est la première modification
+    if (!isPrixInitialSet && ancienPrix > 0) payload.prix_initial = ancienPrix;
+
+    var { data:insertData, error } = await db.from('annonces_vendeurs').update(payload).eq('id', editId).select('id').single();
+    if (!error && nouveauPrix > 0 && ancienPrix > 0 && nouveauPrix < ancienPrix) {
+      // BAISSE DE PRIX DÉTECTÉE
+      var baissePct = Math.round((ancienPrix - nouveauPrix) / ancienPrix * 100);
+      if (baissePct >= 1) { // Seuil minimum 1%
+        await db.rpc('enregistrer_baisse_prix', { p_annonce_id: editId, p_nouveau_prix: nouveauPrix, p_ancien_prix: ancienPrix }).then(undefined, function(){});
+        await envoyerAlertesBaissePrix(editId, ancienPrix, nouveauPrix, baissePct, payload);
+      }
+      // Re-modération du contenu modifié (asynchrone, sans bloquer le vendeur)
+      try{ db.functions.invoke('moderer-annonce',{body:{annonce_id:editId}}); }catch(e){}
+      if(false){
+      }
+    }
+  } else {
+    // Nouvelle annonce — enregistrer le prix initial
+    payload.prix_initial = parseFloat(payload.prix) || 0;
+    var {data:insertData, error}=await db.from('annonces_vendeurs').insert([payload]).select('id').single();
+  }
+  if(error){showToast('Erreur : '+error.message,'err');btn.disabled=false;btn.textContent='Publier mon annonce';return;}
+  showToast('✅ Annonce publiée — '+NIV[niveau].label,'ok');
+  btn.textContent='✓ Annonce publiée';
+
+  // Ajouter l\'id du bien dans le payload pour les alertes
+  if (insertData) payload.id = insertData.id;
+
+  // Validation OCR des documents (serveur) → pose les drapeaux *_verifie → recalcul niveau_valide
+  if (insertData && insertData.id) {
+    btn.textContent = '🔍 Vérification des documents…';
+    await validerDocumentsAnnonce(insertData.id);
+    btn.textContent = '✓ Annonce publiée';
+  }
+
+  // Envoyer alertes agents si Silver, Gold ou Platinium
+  if (['silver','gold','platinium'].includes(niveau)) {
+    await envoyerAlertesAgents(payload, niveau);
+  }
+}
+
+// ── VALIDATION OCR DES DOCUMENTS VENDEUR (serveur) ────────────────────
+function fileToB64(file){
+  return new Promise(function(resolve,reject){
+    var r=new FileReader();
+    r.onload=function(e){resolve(e.target.result.split(',')[1]);};
+    r.onerror=reject;
+    r.readAsDataURL(file);
+  });
+}
+
+// Appelle ocr-documents (valider_doc_vendeur) pour chaque document fourni.
+// Pose les drapeaux *_verifie → le trigger SQL recalcule niveau_valide → notif.
+async function validerDocumentsAnnonce(annonceId){
+  if(!annonceId) return;
+  var ville      = (document.getElementById('ville')||{}).value || '';
+  var nom        = (document.getElementById('nom_vendeur')||{}).value || '';
+  var adresse    = (document.getElementById('adresse')||{}).value || '';
+  var montantTaxe= (document.getElementById('taxe_fonciere_montant')||{}).value || '';
+  var valeurLoc  = (document.getElementById('valeur_locative')||{}).value || '';
+  var classeDpe  = (document.getElementById('classe_dpe')||{}).value || '';
+
+  var aValider = [
+    { input:'file-taxe',       doc_type:'taxe_fonciere',   montant:montantTaxe },
+    { input:'file-copro',      doc_type:'copro',           montant:'' },
+    { input:'file-dpe',        doc_type:'dpe',             montant:'' }
+  ];
+
+  var taches = aValider.map(async function(d){
+    var el = document.getElementById(d.input);
+    var file = el && el.files && el.files[0];
+    if(!file) return null; // pas de nouveau document pour ce type → on ne touche pas son drapeau
+    try{
+      var b64 = await fileToB64(file);
+      var mediaType = file.type === 'application/pdf' ? 'application/pdf' : 'image/jpeg';
+      var res = await db.functions.invoke('ocr-documents', { body: {
+        type: 'valider_doc_vendeur',
+        annonce_id: annonceId,
+        doc_type: d.doc_type,
+        image_base64: b64,
+        media_type: mediaType,
+        ville: ville, adresse: adresse, nom: nom, montant: d.montant, classe_dpe: classeDpe
+      }});
+      if(res && res.error) console.warn('Validation '+d.doc_type+' :', res.error.message);
+      return res ? res.data : null;
+    }catch(e){
+      console.warn('Validation '+d.doc_type+' :', e && e.message);
+      return null;
+    }
+  });
+
+  await Promise.allSettled(taches);
+}
+
+function showToast(msg,type){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast t-'+type+' show';
+  setTimeout(function(){t.classList.remove('show');},3500);
+}
+
+renderPhotos();renderAutresDocs();updateUI();
+
+/* ══ MODE ÉDITION : pré-remplissage gratuit de l'annonce du vendeur ══ */
+function setVal(id,v){var e=document.getElementById(id);if(e&&v!=null&&v!=='')e.value=v;}
+function setRadio(name,v){if(v==null)return;var lst=document.querySelectorAll('input[name="'+name+'"]');for(var i=0;i<lst.length;i++){if(lst[i].value===String(v))lst[i].checked=true;}}
+function boolRadio(name,b){if(b===true)setRadio(name,'Oui');else if(b===false)setRadio(name,'Non');}
+async function chargerEdition(){
+  try{
+    var pid=new URLSearchParams(window.location.search).get('edit');
+    if(!pid) return;
+    var {data:{session}}=await db.auth.getSession();
+    if(!session||!session.user||!session.user.email){
+      alert('Connectez-vous pour modifier votre annonce.');
+      window.location.href='connexion.html?redirect='+encodeURIComponent('questionnaire-vendeur.html?edit='+pid);return;
+    }
+    var {data:a,error}=await db.from('annonces_vendeurs').select('*').eq('id',pid).single();
+    if(error||!a){alert('Annonce introuvable.');return;}
+    if((a.email_contact||'').toLowerCase()!==session.user.email.toLowerCase()){
+      alert("Cette annonce n'appartient pas à votre compte.");window.location.href='dashboard-vendeur.html';return;
+    }
+    editAnnonceId=pid; niveauExistant=a.niveau_vendeur||'standard'; statutExistant=a.statut_annonce||null;
+    // Champs texte / nombre / select
+    ['nom_vendeur','telephone','email_contact','type_bien','statut_occupation','titre','description','surface','nb_pieces','nb_chambres','etage','nb_etages','annee_construction','prix','date_achat','nature_travaux','annee_travaux','montant_travaux','description_travaux','ville','code_postal','adresse','chauffage','eau_chaude','valeur_locative','loyer_mensuel','charges_syndic','nb_lots_copro','taxe_fonciere_montant','conso_energie','classe_dpe','classe_ges','emission_ges','mode_contact']
+      .forEach(function(k){setVal(k,a[k]);});
+    // Radios booléens / chaînes
+    boolRadio('negociable',a.negociable);boolRadio('travaux_bool',a.travaux);boolRadio('ascenseur',a.ascenseur);boolRadio('piscine',a.piscine);boolRadio('is_copro',a.is_copropriete);
+    setRadio('parking',a.parking);setRadio('exterieur',a.exterieur);setRadio('cave',a.cave);setRadio('digicode',a.digicode);setRadio('travaux_par',a.travaux_par);
+    // Photos déjà en ligne → préservées (supprimables d'un clic)
+    var pu=a.photos_urls;if(typeof pu==='string'){try{pu=JSON.parse(pu);}catch(e){pu=[];}}
+    (Array.isArray(pu)?pu:[]).slice(0,maxPhotos).forEach(function(u){photos.push({existante:u,url:u});});
+    renderPhotos();
+    // Autres documents déjà déposés → préservés
+    var ad=a.autres_documents;if(typeof ad==='string'){try{ad=JSON.parse(ad);}catch(e){ad=[];}}
+    (Array.isArray(ad)?ad:[]).forEach(function(d){if(d)autresDocs.push(d);});
+    renderAutresDocs();
+    updateUI();
+    // Bandeau d'information
+    var b=document.createElement('div');
+    b.style.cssText='background:#FFF8EC;border:1px solid var(--gold);border-radius:10px;padding:12px 16px;margin:0 auto 18px;max-width:760px;font-size:13px';
+    b.innerHTML='✏️ <strong>Modification de votre annonce</strong> — vos informations sont préchargées. Modifiez ce que vous souhaitez puis validez en bas de page. C\'est gratuit, comme toujours.';
+    var pg=document.querySelector('.page')||document.body;pg.insertBefore(b,pg.firstChild);
+  }catch(e){console.warn('Edition:',e);}
+}
+chargerEdition();
+</script>
+<script>
+(function() {
+  var consent = localStorage.getItem('ic_cookie_consent');
+  if (!consent) {
+    var b = document.createElement('div');
+    b.id = 'cookie-banner';
+    b.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1C1C1A;border-top:1px solid rgba(255,255,255,.1);padding:16px 32px;font-family:Outfit,sans-serif';
+    b.innerHTML = '<div style="max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;font-weight:500;color:#FAFAF7;margin-bottom:4px">🍪 Cookies & confidentialité</div><div style="font-size:12px;color:rgba(250,250,247,.6);line-height:1.6">ImmoConnect utilise des cookies strictement nécessaires. Aucun cookie publicitaire. <a href=\"mentions-legales.html\" style=\"color:#C09B5A\">En savoir plus</a></div></div><div style="display:flex;gap:10px;flex-shrink:0"><button onclick=\"icRefuser()\" style=\"padding:9px 20px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(250,250,247,.7);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer\">Refuser</button><button onclick=\"icAccepter()\" style=\"padding:9px 20px;border-radius:8px;border:none;background:#C09B5A;color:#1C1C1A;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer\">Accepter</button></div></div>';
+    document.body.appendChild(b);
+  }
+})();
+function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
+function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
+</script>
+<script src="feedback.js" defer></script>
+</body>
+</html>

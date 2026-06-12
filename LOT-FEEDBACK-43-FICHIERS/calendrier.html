@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Calendrier de visites</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:20px;align-items:center;flex:1;margin-left:24px}
+.nav-links a{text-decoration:none;color:#888780;font-size:13px}
+.nav-links a:hover{color:#fff}
+
+.page{max-width:900px;margin:0 auto;padding:32px 24px 80px}
+.page-title{font-size:22px;font-weight:500;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
+
+/* TABS */
+.tabs{display:flex;gap:4px;background:rgba(15,15,14,.06);border-radius:var(--r);padding:4px;margin-bottom:24px;width:fit-content}
+.tab{padding:8px 20px;border-radius:8px;border:none;background:transparent;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);font-family:'Outfit',sans-serif;transition:all .15s}
+.tab.active{background:var(--warm);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.panel{display:none}.panel.active{display:block}
+
+/* CALENDRIER */
+.cal-wrap{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:20px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line)}
+.cal-month{font-size:15px;font-weight:500}
+.cal-nav{display:flex;gap:8px}
+.btn-cal-nav{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.btn-cal-nav:hover{border-color:var(--ink);color:var(--ink)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-day-name{text-align:center;padding:10px 4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--line)}
+.cal-day{min-height:80px;padding:8px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);cursor:pointer;transition:background .15s;position:relative}
+.cal-day:nth-child(7n){border-right:none}
+.cal-day.other-month{background:var(--bg);opacity:.4}
+.cal-day.today .day-num{background:var(--ink);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center}
+.cal-day.has-dispo{background:#E1F5EE}
+.cal-day.has-dispo:hover{background:#C8EDDF}
+.cal-day.past{opacity:.3;cursor:not-allowed}
+.cal-day.selected{background:#E6F1FB;border:2px solid var(--blue)}
+.day-num{font-size:13px;font-weight:500;margin-bottom:4px;width:24px;height:24px;display:flex;align-items:center;justify-content:center}
+.day-slots{display:flex;flex-direction:column;gap:2px}
+.day-slot{font-size:10px;padding:2px 5px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot-libre{background:#E1F5EE;color:var(--teal)}
+.slot-reserve{background:#FAEEDA;color:#854F0B}
+.slot-pris{background:#F1EFE8;color:var(--muted)}
+
+/* SIDEBAR DISPO */
+.cal-layout{display:grid;grid-template-columns:1fr 280px;gap:16px}
+.sidebar{display:flex;flex-direction:column;gap:12px}
+.sidebar-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.sidebar-title{font-size:13px;font-weight:600;margin-bottom:12px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+label.lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+input,select{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink);outline:none;width:100%}
+input:focus,select:focus{border-color:var(--ink)}
+.btn-main{width:100%;padding:10px;border-radius:8px;border:none;background:var(--ink);color:#fff;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer}
+.btn-main:hover{opacity:.85}
+.btn-main.teal{background:var(--teal)}
+.btn-main.blue{background:var(--blue)}
+
+/* CRÉNEAUX */
+.creneaux-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.creneau-item{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px}
+.creneau-heure{font-size:13px;font-weight:500;flex:1}
+.creneau-statut{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+.cs-libre{background:#E1F5EE;color:var(--teal)}
+.cs-reserve{background:#FAEEDA;color:#854F0B}
+.btn-del{width:24px;height:24px;border-radius:4px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:14px}
+.btn-del:hover{color:#C0392B}
+
+/* RÉSERVATION */
+.resa-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:14px}
+.resa-date{background:var(--ink);color:#fff;border-radius:8px;padding:8px 12px;text-align:center;flex-shrink:0;min-width:56px}
+.resa-day{font-size:18px;font-weight:500}
+.resa-mon{font-size:10px;text-transform:uppercase;letter-spacing:.5px;opacity:.7}
+.resa-info{flex:1}
+.resa-titre{font-size:13px;font-weight:500;margin-bottom:3px}
+.resa-meta{font-size:11px;color:var(--muted)}
+.resa-badge{font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;flex-shrink:0}
+.rb-att{background:#FAEEDA;color:#854F0B}
+.rb-ok{background:#E1F5EE;color:var(--teal)}
+.rb-ref{background:#FAECE7;color:#993C1D}
+.btn-confirm{padding:7px 14px;border-radius:8px;border:none;background:var(--teal);color:#fff;font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;margin-right:6px}
+.btn-refuser{padding:7px 14px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;color:var(--muted)}
+
+.badge-silver{background:#E6F1FB;color:var(--blue)}
+.badge-gold{background:#FAEEDA;color:#854F0B}
+.badge-platinium{background:#E1F5EE;color:var(--teal)}
+.restriction-box{background:#FAEEDA;border:1px solid rgba(192,155,90,.3);border-radius:8px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#633806;line-height:1.6}
+
+.spin{width:24px;height:24px;border:3px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin:40px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:700px){.cal-layout{grid-template-columns:1fr}.cal-day{min-height:56px}}
+</style>
+<style>
+/* Bandeau supérieur unifié — fond blanc, texte foncé (override global) */
+nav{background:#fff!important;border-bottom:1px solid #E8E6E0!important}
+nav .nav-logo{color:#0F0F0E!important}
+nav .nav-logo span{color:#C09B5A!important}
+nav a{color:#0F0F0E!important}
+nav a:hover{color:#C09B5A!important}
+nav .nav-out{color:#0F0F0E!important;border-color:#0F0F0E!important}
+nav .nav-link{margin-right:18px}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-links">
+    <a href="connexion.html">Mon espace</a>
+    <a href="messagerie.html">💬 Messagerie</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-title">📅 Calendrier de visites</div>
+  <div class="page-sub">Gérez vos disponibilités et confirmez les demandes de visite.</div>
+
+  <div id="loading"><div class="spin"></div></div>
+  <div id="main-content" style="display:none"></div>
+</div>
+
+<script>
+const SB_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const { createClient } = supabase;
+const db = createClient(SB_URL, SB_KEY);
+
+var currentUser = null;
+var currentRole = 'vendeur';
+var currentNiveau = 'standard';
+var currentDate = new Date();
+var selectedDate = null;
+var disponibilites = {};
+var reservations = [];
+var annonces = [];
+
+(async function() {
+  var { data: { session } } = await db.auth.getSession();
+  if (!session) { window.location.href = 'connexion.html'; return; }
+  currentUser = session.user;
+  var meta = currentUser.user_metadata || {};
+  var profils = meta.profils || ['vendeur'];
+  currentRole = profils.includes('agent') ? 'agent' : 'vendeur';
+
+  // Charger annonces du vendeur pour avoir le niveau
+  if (currentRole === 'vendeur') {
+    var { data: ann } = await db.from('annonces_vendeurs')
+      .select('id,titre,ville,type_bien,niveau_vendeur,surface')
+      .eq('email_contact', currentUser.email)
+      .eq('statut_annonce', 'publiee');
+    annonces = ann || [];
+    currentNiveau = annonces.length > 0 ? (annonces[0].niveau_vendeur || 'standard') : 'standard';
+  }
+
+  await chargerDisponibilites();
+  await chargerReservations();
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('main-content').style.display = 'block';
+  afficherContenu();
+})();
+
+async function chargerDisponibilites() {
+  var { data } = await db.from('disponibilites_visites')
+    .select('*').eq('email_vendeur', currentUser.email);
+  disponibilites = {};
+  (data || []).forEach(function(d) {
+    if (!disponibilites[d.date]) disponibilites[d.date] = [];
+    disponibilites[d.date].push(d);
+  });
+}
+
+async function chargerReservations() {
+  var field = currentRole === 'vendeur' ? 'email_vendeur' : 'email_acheteur';
+  var { data } = await db.from('reservations_visites')
+    .select('*, disponibilites_visites(date, heure_debut, heure_fin, annonce_id, annonces_vendeurs(titre, ville, type_bien, surface))')
+    .eq(field, currentUser.email)
+    .order('created_at', { ascending: false });
+  reservations = data || [];
+}
+
+function afficherContenu() {
+  var html = '';
+
+  if (currentRole === 'vendeur' && ['standard'].includes(currentNiveau)) {
+    html += '<div class="restriction-box">🔒 Le calendrier de visites est disponible à partir du niveau <strong>Silver</strong>. <a href="forfaits.html" style="color:var(--teal)">Passer Silver →</a></div>';
+    document.getElementById('main-content').innerHTML = html;
+    return;
+  }
+
+  // Tabs
+  html += '<div class="tabs">';
+  html += '<button class="tab active" id="tab-cal" onclick="switchTab(\'cal\')">📅 Mes disponibilités</button>';
+  html += '<button class="tab" id="tab-resa" onclick="switchTab(\'resa\')">🗓 Demandes de visite</button>';
+  if (currentRole === 'vendeur') html += '<button class="tab" id="tab-mandat" onclick="switchTab(\'mandat\')">🤝 Mandat exclusif</button>';
+  html += '</div>';
+
+  // Panel calendrier
+  html += '<div class="panel active" id="panel-cal">';
+  html += '<div class="cal-layout">';
+  html += '<div>' + buildCalendrier() + '</div>';
+  html += '<div class="sidebar">' + buildSidebar() + '</div>';
+  html += '</div></div>';
+
+  // Panel réservations
+  html += '<div class="panel" id="panel-resa">' + buildReservations() + '</div>';
+
+  // Panel mandat
+  if (currentRole === 'vendeur') {
+    html += '<div class="panel" id="panel-mandat">' + buildMandat() + '</div>';
+  }
+
+  document.getElementById('main-content').innerHTML = html;
+}
+
+// ── CALENDRIER ──
+function buildCalendrier() {
+  var mois = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  var jours = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  var today = new Date();
+  var y = currentDate.getFullYear(), m = currentDate.getMonth();
+  var firstDay = new Date(y, m, 1).getDay();
+  firstDay = firstDay === 0 ? 6 : firstDay - 1;
+  var daysInMonth = new Date(y, m+1, 0).getDate();
+  var daysInPrev = new Date(y, m, 0).getDate();
+
+  var h = '<div class="cal-wrap">';
+  h += '<div class="cal-header">';
+  h += '<div class="cal-month">' + mois[m] + ' ' + y + '</div>';
+  h += '<div class="cal-nav">';
+  h += '<button class="btn-cal-nav" onclick="navMois(-1)">‹</button>';
+  h += '<button class="btn-cal-nav" onclick="navMois(1)">›</button>';
+  h += '</div></div>';
+  h += '<div class="cal-grid">';
+  jours.forEach(function(j){ h += '<div class="cal-day-name">' + j + '</div>'; });
+
+  // Jours du mois précédent
+  for (var i = firstDay - 1; i >= 0; i--) {
+    h += '<div class="cal-day other-month"><div class="day-num">' + (daysInPrev - i) + '</div></div>';
+  }
+
+  // Jours du mois
+  for (var d = 1; d <= daysInMonth; d++) {
+    var dateStr = y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    var isToday = today.getDate()===d && today.getMonth()===m && today.getFullYear()===y;
+    var isPast = new Date(dateStr) < new Date(today.toDateString());
+    var hasDispo = disponibilites[dateStr] && disponibilites[dateStr].length > 0;
+    var isSelected = selectedDate === dateStr;
+
+    var cls = 'cal-day';
+    if (isToday) cls += ' today';
+    if (isPast) cls += ' past';
+    if (hasDispo) cls += ' has-dispo';
+    if (isSelected) cls += ' selected';
+
+    h += '<div class="' + cls + '"' + (!isPast ? ' onclick="selectDate(\'' + dateStr + '\')"' : '') + '>';
+    h += '<div class="day-num">' + d + '</div>';
+
+    if (hasDispo && !isPast) {
+      h += '<div class="day-slots">';
+      disponibilites[dateStr].slice(0,2).forEach(function(s) {
+        var statut = s.statut === 'reserve' ? 'slot-reserve' : 'slot-libre';
+        h += '<div class="day-slot ' + statut + '">' + s.heure_debut + '</div>';
+      });
+      if (disponibilites[dateStr].length > 2) h += '<div class="day-slot slot-pris">+' + (disponibilites[dateStr].length-2) + '</div>';
+      h += '</div>';
+    }
+    h += '</div>';
+  }
+
+  // Jours du mois suivant
+  var totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+  for (var n = 1; n <= totalCells - firstDay - daysInMonth; n++) {
+    h += '<div class="cal-day other-month"><div class="day-num">' + n + '</div></div>';
+  }
+
+  h += '</div></div>';
+  return h;
+}
+
+function buildSidebar() {
+  var h = '';
+
+  if (selectedDate) {
+    var dateObj = new Date(selectedDate + 'T12:00:00');
+    var opts = { weekday:'long', day:'numeric', month:'long' };
+    h += '<div class="sidebar-card">';
+    h += '<div class="sidebar-title">📅 ' + dateObj.toLocaleDateString('fr-FR', opts) + '</div>';
+
+    if (currentRole === 'vendeur') {
+      // Ajouter un créneau
+      h += '<div class="field"><label class="lbl">Annonce</label><select id="sel-annonce">';
+      annonces.forEach(function(a) {
+        h += '<option value="' + a.id + '">' + (a.type_bien||'Bien') + ' · ' + a.ville + '</option>';
+      });
+      h += '</select></div>';
+      h += '<div class="field" style="display:flex;gap:8px">';
+      h += '<div style="flex:1"><label class="lbl">Début</label><input type="time" id="heure-debut" value="10:00"></div>';
+      h += '<div style="flex:1"><label class="lbl">Fin</label><input type="time" id="heure-fin" value="11:00"></div>';
+      h += '</div>';
+      h += '<button class="btn-main teal" onclick="ajouterCreneau()">+ Ajouter ce créneau</button>';
+    }
+
+    // Créneaux du jour
+    var slots = disponibilites[selectedDate] || [];
+    if (slots.length > 0) {
+      h += '<div class="creneaux-list">';
+      slots.forEach(function(s) {
+        h += '<div class="creneau-item">';
+        h += '<div class="creneau-heure">⏰ ' + s.heure_debut + ' – ' + s.heure_fin + '</div>';
+        h += '<div class="creneau-statut ' + (s.statut==='reserve'?'cs-reserve':'cs-libre') + '">' + (s.statut==='reserve'?'Réservé':'Libre') + '</div>';
+        if (currentRole === 'vendeur' && s.statut === 'libre') {
+          h += '<button class="btn-del" onclick="supprimerCreneau(\'' + s.id + '\')">×</button>';
+        }
+        h += '</div>';
+      });
+      h += '</div>';
+    } else {
+      h += '<div style="font-size:12px;color:var(--muted);margin-top:10px">Aucun créneau pour ce jour.</div>';
+    }
+    h += '</div>';
+  } else {
+    h += '<div class="sidebar-card">';
+    h += '<div class="sidebar-title">Comment ça marche ?</div>';
+    h += '<div style="font-size:12px;color:var(--muted);line-height:1.8">';
+    if (currentRole === 'vendeur') {
+      h += '1. Cliquez sur un jour du calendrier<br>2. Ajoutez vos créneaux disponibles<br>3. Les acheteurs et agents pourront réserver<br>4. Vous confirmez chaque demande';
+    } else {
+      h += '1. Cliquez sur un jour vert<br>2. Choisissez un créneau disponible<br>3. Le vendeur confirme votre visite<br>4. Vous recevez un email de confirmation';
+    }
+    h += '</div></div>';
+  }
+
+  // Légende
+  h += '<div class="sidebar-card">';
+  h += '<div class="sidebar-title">Légende</div>';
+  h += '<div style="display:flex;flex-direction:column;gap:6px;font-size:12px">';
+  h += '<div style="display:flex;align-items:center;gap:8px"><div style="width:14px;height:14px;background:#E1F5EE;border-radius:3px"></div>Créneau disponible</div>';
+  h += '<div style="display:flex;align-items:center;gap:8px"><div style="width:14px;height:14px;background:#FAEEDA;border-radius:3px"></div>Créneau réservé</div>';
+  h += '</div></div>';
+
+  return h;
+}
+
+function buildReservations() {
+  var h = '<div style="margin-bottom:16px">';
+  if (!reservations.length) {
+    h += '<div style="text-align:center;padding:40px;color:var(--muted);background:var(--warm);border:1px solid var(--line);border-radius:var(--r)">Aucune demande de visite pour le moment.</div>';
+    h += '</div>';
+    return h;
+  }
+
+  var mois = ['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
+  reservations.forEach(function(r) {
+    var dispo = r.disponibilites_visites;
+    var bien = dispo && dispo.annonces_vendeurs;
+    var dateStr = dispo ? dispo.date : '';
+    var dateObj = dateStr ? new Date(dateStr + 'T12:00:00') : null;
+
+    h += '<div class="resa-card">';
+    if (dateObj) {
+      h += '<div class="resa-date"><div class="resa-day">' + dateObj.getDate() + '</div><div class="resa-mon">' + mois[dateObj.getMonth()] + '</div></div>';
+    }
+    h += '<div class="resa-info">';
+    h += '<div class="resa-titre">' + (bien ? (bien.type_bien||'Bien') + ' · ' + (bien.surface||'—') + 'm² · ' + (bien.ville||'') : (r.bien_label || '—')) + '</div>';
+    h += '<div class="resa-meta">⏰ ' + (dispo ? dispo.heure_debut + ' – ' + dispo.heure_fin : (r.creneau_souhaite || 'Créneau à convenir'));
+    h += ' · ' + (currentRole === 'vendeur' ? '👤 ' + (r.nom_acheteur ? r.nom_acheteur + ' · ' : '') + (r.email_acheteur||'') : '🏠 ' + (r.email_vendeur||'')) + '</div>';
+    if (r.message) h += '<div class="resa-meta" style="margin-top:4px;font-style:italic">"' + r.message + '"</div>';
+    h += '</div>';
+
+    var statut = r.statut || 'en_attente';
+    var badgeCls = statut === 'confirme' ? 'rb-ok' : statut === 'refuse' ? 'rb-ref' : 'rb-att';
+    var badgeTxt = statut === 'confirme' ? '✅ Confirmé' : statut === 'refuse' ? '❌ Refusé' : '⏳ En attente';
+    h += '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">';
+    h += '<div class="resa-badge ' + badgeCls + '">' + badgeTxt + '</div>';
+    if (currentRole === 'vendeur' && statut === 'en_attente') {
+      h += '<div><button class="btn-confirm" onclick="confirmerVisite(\'' + r.id + '\')">Confirmer</button>';
+      h += '<button class="btn-refuser" onclick="refuserVisite(\'' + r.id + '\')">Refuser</button></div>';
+    }
+    h += '</div></div>';
+  });
+  h += '</div>';
+  return h;
+}
+
+function buildMandat() {
+  var h = '';
+  h += '<div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:14px 16px;margin-bottom:20px;font-size:13px;line-height:1.7">';
+  h += '🤝 <strong>Mandat exclusif</strong> — Confiez la vente de votre bien à un agent Expert ou Platinium ImmoConnect. Votre annonce sera marquée "Sous mandat exclusif" et l\'agent disposera de votre dossier complet pour proposer le bien à sa clientèle.';
+  h += '</div>';
+
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
+
+  // Formulaire mandat
+  h += '<div class="sidebar-card">';
+  h += '<div class="sidebar-title">Choisir un agent</div>';
+
+  h += '<div class="field"><label class="lbl">Mon annonce</label><select id="mandat-annonce">';
+  annonces.forEach(function(a) {
+    if (['silver','gold','platinium'].includes(a.niveau_vendeur)) {
+      h += '<option value="' + a.id + '">' + (a.type_bien||'Bien') + ' · ' + a.ville + '</option>';
+    }
+  });
+  h += '</select></div>';
+
+  h += '<div class="field"><label class="lbl">Agent ImmoConnect (Expert ou Platinium)</label>';
+  h += '<select id="mandat-agent-select"><option value="">Chargement…</option></select></div>';
+
+  h += '<div style="text-align:center;color:var(--muted);font-size:12px;margin:8px 0">— ou —</div>';
+
+  h += '<div class="field"><label class="lbl">Email d\'un agent que vous connaissez</label>';
+  h += '<input type="email" id="mandat-agent-email" placeholder="agent@exemple.fr"></div>';
+
+  h += '<div class="field"><label class="lbl">Durée du mandat</label>';
+  h += '<select id="mandat-duree">';
+  h += '<option value="1">1 mois</option>';
+  h += '<option value="2">2 mois</option>';
+  h += '<option value="3" selected>3 mois (par défaut)</option>';
+  h += '<option value="6">6 mois</option>';
+  h += '<option value="12">12 mois</option>';
+  h += '</select></div>';
+
+  h += '<button class="btn-main" onclick="creerMandat()">Confier le mandat →</button>';
+  h += '</div>';
+
+  // Info droite
+  h += '<div class="sidebar-card">';
+  h += '<div class="sidebar-title">Ce que ça implique</div>';
+  h += '<div style="font-size:12px;color:var(--muted);line-height:1.9">';
+  h += '✅ L\'agent reçoit votre dossier complet immédiatement<br>';
+  h += '✅ Votre annonce est marquée "Sous mandat exclusif"<br>';
+  h += '✅ L\'agent peut proposer le bien à sa clientèle<br>';
+  h += '✅ Vous restez propriétaire du dossier<br>';
+  h += '✅ Résiliable à tout moment dans votre espace<br><br>';
+  h += '⚠️ Seuls les agents <strong>Expert</strong> et <strong>Platinium</strong> peuvent recevoir un mandat exclusif<br><br>';
+  h += '💶 Si l\'agent vend votre bien, il prend sa commission habituelle.';
+  h += '</div></div>';
+
+  h += '</div>';
+  return h;
+}
+
+// ── ACTIONS ──
+function navMois(dir) {
+  currentDate.setMonth(currentDate.getMonth() + dir);
+  selectedDate = null;
+  afficherContenu();
+}
+
+function selectDate(dateStr) {
+  selectedDate = dateStr;
+  afficherContenu();
+}
+
+async function ajouterCreneau() {
+  var annonceId = document.getElementById('sel-annonce').value;
+  var debut = document.getElementById('heure-debut').value;
+  var fin = document.getElementById('heure-fin').value;
+  if (!debut || !fin || debut >= fin) { alert('Horaires invalides.'); return; }
+
+  await db.from('disponibilites_visites').insert({
+    email_vendeur: currentUser.email,
+    annonce_id: annonceId,
+    date: selectedDate,
+    heure_debut: debut,
+    heure_fin: fin,
+    statut: 'libre'
+  });
+  await chargerDisponibilites();
+  afficherContenu();
+}
+
+async function supprimerCreneau(id) {
+  if (!confirm('Supprimer ce créneau ?')) return;
+  await db.from('disponibilites_visites').delete().eq('id', id);
+  await chargerDisponibilites();
+  afficherContenu();
+}
+
+async function confirmerVisite(id) {
+  await db.from('reservations_visites').update({ statut: 'confirme' }).eq('id', id);
+
+  var resa = reservations.find(function(r){ return r.id === id; });
+  if (resa) {
+    var dispo = resa.disponibilites_visites;
+    var bienA = dispo && dispo.annonces_vendeurs;
+    if (dispo && dispo.annonce_id) {
+      await db.rpc('incrementer_visites', { annonce_uuid: dispo.annonce_id }).then(undefined, function(){});
+    }
+    var bienLabel = bienA ? ((bienA.type_bien||'Bien') + ' · ' + (bienA.ville||'')) : (resa.bien_label || 'votre visite');
+    var creneau = dispo ? (dispo.date + ' · ' + dispo.heure_debut + ' – ' + dispo.heure_fin) : (resa.creneau_souhaite || '');
+    var aid = (dispo && dispo.annonce_id) || resa.annonce_id;
+    if (resa.email_acheteur) {
+      await db.functions.invoke('envoyer-email', { body: { type: 'visite_confirmee', to: resa.email_acheteur, subject: '✅ Visite confirmée — ImmoConnect', bien: bienLabel, creneau: creneau, lien: aid ? ('https://immoconnect-agence.fr/bien.html?id=' + aid) : 'https://immoconnect-agence.fr' } }).then(undefined, function(){});
+    }
+  }
+
+  await chargerReservations();
+  afficherContenu();
+}
+
+async function refuserVisite(id) {
+  await db.from('reservations_visites').update({ statut: 'refuse' }).eq('id', id);
+  var resa = reservations.find(function(r){ return r.id === id; });
+  if (resa && resa.email_acheteur) {
+    var dispo = resa.disponibilites_visites;
+    var bienA = dispo && dispo.annonces_vendeurs;
+    var bienLabel = bienA ? ((bienA.type_bien||'Bien') + ' · ' + (bienA.ville||'')) : (resa.bien_label || 'votre visite');
+    var creneau = dispo ? (dispo.date + ' · ' + dispo.heure_debut + ' – ' + dispo.heure_fin) : (resa.creneau_souhaite || '');
+    var aid = (dispo && dispo.annonce_id) || resa.annonce_id;
+    await db.functions.invoke('envoyer-email', { body: { type: 'visite_refusee', to: resa.email_acheteur, subject: 'Votre demande de visite — ImmoConnect', bien: bienLabel, creneau: creneau, lien: aid ? ('https://immoconnect-agence.fr/bien.html?id=' + aid) : 'https://immoconnect-agence.fr' } }).then(undefined, function(){});
+  }
+  await chargerReservations();
+  afficherContenu();
+}
+
+async function creerMandat() {
+  var annonceId = document.getElementById('mandat-annonce').value;
+  var agentSelect = document.getElementById('mandat-agent-select').value;
+  var agentEmail = document.getElementById('mandat-agent-email').value.trim();
+  var duree = parseInt(document.getElementById('mandat-duree').value) || 3;
+  var emailFinal = agentEmail || agentSelect;
+
+  if (!annonceId) { alert('Choisissez une annonce.'); return; }
+  if (!emailFinal) { alert('Choisissez ou saisissez un agent.'); return; }
+
+  var dateFin = new Date();
+  dateFin.setMonth(dateFin.getMonth() + duree);
+
+  await db.from('mandats_exclusifs').insert({
+    annonce_id: annonceId,
+    email_vendeur: currentUser.email,
+    email_agent: emailFinal,
+    duree_mois: duree,
+    date_debut: new Date().toISOString(),
+    date_fin: dateFin.toISOString(),
+    statut: 'actif'
+  });
+
+  await db.from('annonces_vendeurs')
+    .update({ sous_mandat_exclusif: true })
+    .eq('id', annonceId);
+
+  alert('✅ Mandat exclusif créé pour ' + duree + ' mois ! L\'agent ' + emailFinal + ' a été notifié.');
+  afficherContenu();
+}
+
+function switchTab(t) {
+  ['cal','resa','mandat'].forEach(function(id) {
+    var tab = document.getElementById('tab-' + id);
+    var panel = document.getElementById('panel-' + id);
+    if (tab) tab.classList.toggle('active', id === t);
+    if (panel) { panel.classList.toggle('active', id === t); }
+  });
+}
+
+// Charger agents Expert/Platinium au chargement
+async function chargerAgentsDispos() {
+  var { data } = await db.from('auth.users').select('email, raw_user_meta_data').limit(50);
+}
+</script>
+<script>
+(function() {
+  var consent = localStorage.getItem('ic_cookie_consent');
+  if (!consent) {
+    var b = document.createElement('div');
+    b.id = 'cookie-banner';
+    b.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1C1C1A;border-top:1px solid rgba(255,255,255,.1);padding:16px 32px;font-family:Outfit,sans-serif';
+    b.innerHTML = '<div style="max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;font-weight:500;color:#FAFAF7;margin-bottom:4px">🍪 Cookies & confidentialité</div><div style="font-size:12px;color:rgba(250,250,247,.6);line-height:1.6">ImmoConnect utilise des cookies strictement nécessaires. Aucun cookie publicitaire. <a href=\"mentions-legales.html\" style=\"color:#C09B5A\">En savoir plus</a></div></div><div style="display:flex;gap:10px;flex-shrink:0"><button onclick=\"icRefuser()\" style=\"padding:9px 20px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(250,250,247,.7);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer\">Refuser</button><button onclick=\"icAccepter()\" style=\"padding:9px 20px;border-radius:8px;border:none;background:#C09B5A;color:#1C1C1A;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer\">Accepter</button></div></div>';
+    document.body.appendChild(b);
+  }
+})();
+function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
+function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
+</script>
+<script src="feedback.js" defer></script>
+</body>
+</html>

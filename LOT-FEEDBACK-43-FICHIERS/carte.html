@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Carte des biens</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;height:100vh;display:flex;flex-direction:column}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 24px;flex-shrink:0;z-index:1000}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none;margin-right:24px}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:20px;align-items:center;flex:1}
+.nav-links a{text-decoration:none;color:#888780;font-size:13px}
+.nav-links a:hover{color:#fff}
+.nav-gold{padding:6px 14px;background:var(--gold);color:var(--ink)!important;border-radius:4px;font-weight:500}
+
+/* LAYOUT */
+.carte-layout{display:flex;flex:1;overflow:hidden}
+
+/* PANNEAU FILTRES */
+.filtres{width:300px;flex-shrink:0;background:var(--warm);border-right:1px solid var(--line);overflow-y:auto;display:flex;flex-direction:column}
+.filtres-header{padding:16px;border-bottom:1px solid var(--line);flex-shrink:0}
+.filtres-title{font-size:14px;font-weight:600;margin-bottom:2px}
+.filtres-sub{font-size:11px;color:var(--muted)}
+.filtres-body{padding:16px;flex:1;overflow-y:auto}
+.filter-group{margin-bottom:16px}
+.filter-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px;display:block}
+.filter-row{display:flex;gap:8px}
+input[type=number],select{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-family:'Outfit',sans-serif;font-size:12px;color:var(--ink);outline:none;width:100%}
+input[type=number]:focus,select:focus{border-color:var(--ink)}
+.filter-chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:5px 10px;border-radius:20px;border:1px solid var(--line);background:var(--bg);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s;color:var(--muted)}
+.chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip.active.teal{background:var(--teal);border-color:var(--teal)}
+.chip.active.blue{background:var(--blue);border-color:var(--blue)}
+.chip.active.gold{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+
+/* COUCHES */
+.couche-toggle{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);margin-bottom:8px}
+.couche-info{display:flex;align-items:center;gap:8px}
+.couche-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.couche-name{font-size:12px;font-weight:500}
+.couche-count{font-size:10px;color:var(--muted)}
+.toggle-sw{width:36px;height:20px;border-radius:10px;background:#D3D1C7;border:none;cursor:pointer;position:relative;flex-shrink:0;transition:background .2s}
+.toggle-sw.on{background:var(--teal)}
+.toggle-sw.on.blue{background:var(--blue)}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle-sw.on .toggle-thumb{transform:translateX(16px)}
+
+.btn-filter{width:100%;padding:10px;border-radius:8px;border:none;background:var(--ink);color:#fff;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;margin-top:8px}
+.btn-filter:hover{opacity:.85}
+.btn-reset{width:100%;padding:8px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;margin-top:6px}
+
+/* RÉSULTATS */
+.resultats-bar{padding:10px 16px;border-top:1px solid var(--line);background:var(--bg);font-size:12px;color:var(--muted);flex-shrink:0}
+
+/* CARTE */
+.carte-wrap{flex:1;position:relative}
+#map{width:100%;height:100%}
+
+/* POPUP */
+.popup-bien{font-family:'Outfit',sans-serif;min-width:200px}
+.popup-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;margin-bottom:8px;display:inline-block}
+.pb-standard{background:#F1EFE8;color:#555}
+.pb-silver{background:#E6F1FB;color:var(--blue)}
+.pb-gold{background:#FAEEDA;color:#854F0B}
+.pb-platinium{background:#E1F5EE;color:var(--teal)}
+
+.popup-titre{font-size:13px;font-weight:600;margin-bottom:4px;color:var(--ink)}
+.popup-meta{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:8px}
+.popup-prix{font-size:16px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.popup-pm2{font-size:11px;color:var(--muted)}
+.popup-btn{display:block;margin-top:10px;padding:7px 14px;background:var(--teal);color:#fff;border-radius:6px;font-size:12px;font-weight:500;text-align:center;text-decoration:none}
+
+/* LÉGENDE */
+.legende{position:absolute;bottom:20px;left:20px;background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:12px 14px;z-index:500;font-size:11px}
+.legende-item{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.legende-item:last-child{margin-bottom:0}
+.leg-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;border:2px solid rgba(0,0,0,.15)}
+
+/* LOADING */
+.map-loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:24px 32px;text-align:center;z-index:600;font-size:13px;color:var(--muted)}
+.spin{width:24px;height:24px;border:3px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:700px){
+  .filtres{width:100%;height:auto;max-height:45vh;border-right:none;border-bottom:1px solid var(--line)}
+  .carte-layout{flex-direction:column}
+}
+</style>
+<style>
+/* Bandeau supérieur unifié — fond blanc, texte foncé (override global) */
+nav{background:#fff!important;border-bottom:1px solid #E8E6E0!important}
+nav .nav-logo{color:#0F0F0E!important}
+nav .nav-logo span{color:#C09B5A!important}
+nav a{color:#0F0F0E!important}
+nav a:hover{color:#C09B5A!important}
+nav .nav-out{color:#0F0F0E!important;border-color:#0F0F0E!important}
+nav .nav-link{margin-right:18px}
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:12px;right:12px;z-index:1100;background:#fff;border:1px solid #E8E6E0;border-radius:6px;padding:7px 12px;font-family:inherit;font-size:14px;font-weight:600;color:#0F0F0E;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.08)">Immo<span style="color:#C09B5A">Connect</span></a>
+<div class="carte-layout">
+
+  <!-- FILTRES -->
+  <div class="filtres">
+    <div class="filtres-header">
+      <div class="filtres-title">🗺️ Carte des biens</div>
+      <div class="filtres-sub">Filtres + couches de données</div>
+    </div>
+
+    <div class="filtres-body">
+
+      <!-- COUCHES -->
+      <div class="filter-group">
+        <label class="filter-label">Biens affichés</label>
+        <div class="couche-toggle">
+          <div class="couche-info">
+            <div class="couche-dot" style="background:#1E7A62"></div>
+            <div>
+              <div class="couche-name">Biens ImmoConnect</div>
+              <div class="couche-count" id="count-immo">— annonces</div>
+            </div>
+          </div>
+          <button class="toggle-sw on" id="toggle-immo" onclick="toggleCouche('immo')"><div class="toggle-thumb"></div></button>
+        </div>
+
+      </div>
+
+      <!-- TYPE DE BIEN -->
+      <div class="filter-group">
+        <label class="filter-label">Type de bien</label>
+        <div class="filter-chips">
+          <div class="chip active" data-filter="type" data-val="tous" onclick="setChip(this,'type')">Tous</div>
+          <div class="chip" data-filter="type" data-val="Appartement" onclick="setChip(this,'type')">Appartement</div>
+          <div class="chip" data-filter="type" data-val="Maison" onclick="setChip(this,'type')">Maison</div>
+          <div class="chip" data-filter="type" data-val="Terrain" onclick="setChip(this,'type')">Terrain</div>
+        </div>
+      </div>
+
+      <!-- BUDGET -->
+      <div class="filter-group">
+        <label class="filter-label">Budget (€)</label>
+        <div class="filter-row">
+          <input type="number" id="prix-min" placeholder="Min" min="0" step="10000">
+          <input type="number" id="prix-max" placeholder="Max" min="0" step="10000">
+        </div>
+      </div>
+
+      <!-- SURFACE -->
+      <div class="filter-group">
+        <label class="filter-label">Surface (m²)</label>
+        <div class="filter-row">
+          <input type="number" id="surf-min" placeholder="Min" min="0" step="10">
+          <input type="number" id="surf-max" placeholder="Max" min="0" step="10">
+        </div>
+      </div>
+
+      <!-- PIÈCES -->
+      <div class="filter-group">
+        <label class="filter-label">Pièces minimum</label>
+        <div class="filter-chips">
+          <div class="chip active" data-filter="pieces" data-val="0" onclick="setChip(this,'pieces')">Tous</div>
+          <div class="chip" data-filter="pieces" data-val="1" onclick="setChip(this,'pieces')">1+</div>
+          <div class="chip" data-filter="pieces" data-val="2" onclick="setChip(this,'pieces')">2+</div>
+          <div class="chip" data-filter="pieces" data-val="3" onclick="setChip(this,'pieces')">3+</div>
+          <div class="chip" data-filter="pieces" data-val="4" onclick="setChip(this,'pieces')">4+</div>
+          <div class="chip" data-filter="pieces" data-val="5" onclick="setChip(this,'pieces')">5+</div>
+        </div>
+      </div>
+
+      <!-- NIVEAU VENDEUR -->
+      <div class="filter-group">
+        <label class="filter-label">Niveau dossier</label>
+        <div class="filter-chips">
+          <div class="chip active" data-filter="niveau" data-val="tous" onclick="setChip(this,'niveau')">Tous</div>
+          <div class="chip" data-filter="niveau" data-val="silver" onclick="setChip(this,'niveau')">Silver</div>
+          <div class="chip" data-filter="niveau" data-val="gold" onclick="setChip(this,'niveau')">Gold</div>
+          <div class="chip" data-filter="niveau" data-val="platinium" onclick="setChip(this,'niveau')">Platinium</div>
+        </div>
+      </div>
+
+      <button class="btn-filter" onclick="appliquerFiltres()">Appliquer les filtres</button>
+      <button class="btn-reset" onclick="resetFiltres()">Réinitialiser</button>
+    </div>
+
+    <div class="resultats-bar" id="resultats-bar">Chargement…</div>
+  </div>
+
+  <!-- CARTE -->
+  <div class="carte-wrap">
+    <div class="map-loading" id="map-loading">
+      <div class="spin"></div>
+      Chargement de la carte…
+    </div>
+    <div id="map"></div>
+    <div class="legende">
+      <div class="legende-item"><div class="leg-dot" style="background:#1E7A62"></div>Bien ImmoConnect</div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SB_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const { createClient } = supabase;
+const db = createClient(SB_URL, SB_KEY);
+
+var map, layerImmo;
+var allBiens = [];
+var coucheImmo = true;
+var filtres = { type:'tous', prixMin:0, prixMax:0, surfMin:0, surfMax:0, pieces:0, niveau:'tous' };
+
+// ── INIT CARTE ──
+map = L.map('map', { center:[46.5, 2.5], zoom:6, zoomControl:true });
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',
+  maxZoom:19
+}).addTo(map);
+
+layerImmo = L.layerGroup().addTo(map);
+
+
+// ── ICÔNES ──
+function makeIcon(color, size) {
+  size = size || 12;
+  return L.divIcon({
+    className: '',
+    html: '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+color+';border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 4px rgba(0,0,0,.3)"></div>',
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2]
+  });
+}
+
+var iconImmo = {
+  standard:  makeIcon('#888780', 14),
+  silver:    makeIcon('#185FA5', 14),
+  gold:      makeIcon('#C09B5A', 16),
+  platinium: makeIcon('#1E7A62', 18)
+};
+
+// ── CHARGER BIENS IMMOCONNECT ──
+async function chargerBiens() {
+  var { data } = await db.from('annonces_vendeurs')
+    .select('id,titre,type_bien,surface,nb_pieces,prix,ville,code_postal,adresse,latitude,longitude,niveau_vendeur,statut_annonce')
+    .eq('statut_annonce', 'publiee')
+    .not('latitude', 'is', null)
+    .not('longitude', 'is', null);
+
+  allBiens = data || [];
+  document.getElementById('count-immo').textContent = allBiens.length + ' annonces';
+  afficherBiens(allBiens);
+}
+
+// ── AFFICHER BIENS ──
+function afficherBiens(biens) {
+  layerImmo.clearLayers();
+  biens.forEach(function(b) {
+    if (!b.latitude || !b.longitude) return;
+    var niv = b.niveau_vendeur || 'standard';
+    var icon = iconImmo[niv] || iconImmo.standard;
+    var marker = L.marker([b.latitude, b.longitude], { icon: icon });
+
+    var badgeClass = 'pb-' + niv;
+    var prixFmt = b.prix ? Math.round(b.prix).toLocaleString('fr-FR') + ' €' : '—';
+    var pm2 = b.prix && b.surface ? Math.round(b.prix/b.surface).toLocaleString('fr-FR') + ' €/m²' : '';
+
+    // Incrémenter vue au clic
+    marker.on('popupopen', function() {
+      db.rpc('incrementer_vues', { annonce_uuid: b.id }).then(function(){}).then(undefined, function(){});
+    });
+
+    marker.bindPopup(
+      '<div class="popup-bien">' +
+      '<span class="popup-badge ' + badgeClass + '">' + niv.charAt(0).toUpperCase()+niv.slice(1) + '</span>' +
+      '<div class="popup-titre">' + (b.titre || b.type_bien + ' · ' + b.ville) + '</div>' +
+      '<div class="popup-meta">' +
+        (b.surface ? b.surface + ' m²' : '') +
+        (b.nb_pieces ? ' · ' + b.nb_pieces + ' pièces' : '') +
+        '<br>📍 ' + (b.adresse ? b.adresse + ', ' : '') + (b.ville || '') +
+      '</div>' +
+      '<div class="popup-prix">' + prixFmt + '</div>' +
+      (pm2 ? '<div class="popup-pm2">' + pm2 + '</div>' : '') +
+      '<a href="bien.html?id=' + b.id + '" class="popup-btn" style="background:#0F0F0E">Voir le dossier →</a>' +
+      ((['silver','gold','platinium'].includes(b.niveau_vendeur)) ?
+        '<a href="calendrier.html" class="popup-btn" style="background:#C09B5A;color:#0F0F0E;margin-top:6px">📅 Réserver une visite</a>' : '') +
+      '</div>',
+      { maxWidth: 240 }
+    );
+    layerImmo.addLayer(marker);
+  });
+  majResultats();
+}
+
+// ── FILTRES ──
+function setChip(el, group) {
+  document.querySelectorAll('[data-filter="'+group+'"]').forEach(function(c){ c.classList.remove('active'); });
+  el.classList.add('active');
+  filtres[group === 'type' ? 'type' : group === 'pieces' ? 'pieces' : 'niveau'] = el.getAttribute('data-val');
+}
+
+function appliquerFiltres() {
+  filtres.prixMin = +document.getElementById('prix-min').value || 0;
+  filtres.prixMax = +document.getElementById('prix-max').value || 0;
+  filtres.surfMin = +document.getElementById('surf-min').value || 0;
+  filtres.surfMax = +document.getElementById('surf-max').value || 0;
+
+  var filtered = allBiens.filter(function(b) {
+    if (filtres.type !== 'tous' && b.type_bien !== filtres.type) return false;
+    if (filtres.prixMin > 0 && b.prix < filtres.prixMin) return false;
+    if (filtres.prixMax > 0 && b.prix > filtres.prixMax) return false;
+    if (filtres.surfMin > 0 && b.surface < filtres.surfMin) return false;
+    if (filtres.surfMax > 0 && b.surface > filtres.surfMax) return false;
+    if (+filtres.pieces > 0 && b.nb_pieces < +filtres.pieces) return false;
+    if (filtres.niveau !== 'tous' && b.niveau_vendeur !== filtres.niveau) return false;
+    return true;
+  });
+
+  afficherBiens(filtered);
+}
+
+function resetFiltres() {
+  filtres = { type:'tous', prixMin:0, prixMax:0, surfMin:0, surfMax:0, pieces:0, niveau:'tous' };
+  document.getElementById('prix-min').value = '';
+  document.getElementById('prix-max').value = '';
+  document.getElementById('surf-min').value = '';
+  document.getElementById('surf-max').value = '';
+  document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
+  document.querySelectorAll('[data-val="tous"], [data-val="0"]').forEach(function(c){ c.classList.add('active'); });
+  afficherBiens(allBiens);
+}
+
+// ── TOGGLE COUCHE IMMO ──
+function toggleCouche(couche) {
+  var btn = document.getElementById('toggle-immo');
+  coucheImmo = !coucheImmo;
+  btn.classList.toggle('on', coucheImmo);
+  if (coucheImmo) map.addLayer(layerImmo); else map.removeLayer(layerImmo);
+}
+
+function majResultats() {
+  var nb = layerImmo.getLayers().length;
+  document.getElementById('resultats-bar').textContent = nb + ' bien' + (nb > 1 ? 's' : '') + ' affiché' + (nb > 1 ? 's' : '') + ' sur la carte';
+}
+
+// ── GÉOCODER les biens sans coordonnées ──
+async function geocoderBien(bien) {
+  if (bien.latitude && bien.longitude) return bien;
+  var q = encodeURIComponent((bien.adresse || '') + ' ' + (bien.ville || '') + ' ' + (bien.code_postal || '') + ' France');
+  try {
+    var res = await fetch('https://nominatim.openstreetmap.org/search?q=' + q + '&format=json&limit=1');
+    var data = await res.json();
+    if (data && data[0]) {
+      bien.latitude = parseFloat(data[0].lat);
+      bien.longitude = parseFloat(data[0].lon);
+    }
+  } catch(e) {}
+  return bien;
+}
+
+// ── INIT ──
+(async function() {
+  await chargerBiens();
+
+  // Géocoder les biens sans coordonnées
+  var sansCoords = allBiens.filter(function(b){ return !b.latitude || !b.longitude; });
+  for (var i = 0; i < Math.min(sansCoords.length, 20); i++) {
+    await geocoderBien(sansCoords[i]);
+    await new Promise(function(r){ setTimeout(r, 200); }); // respecter rate limit Nominatim
+  }
+  afficherBiens(allBiens);
+
+  // Si des biens ont des coordonnées, centrer la carte dessus
+  var avecCoords = allBiens.filter(function(b){ return b.latitude && b.longitude; });
+  if (avecCoords.length > 0) {
+    var bounds = L.latLngBounds(avecCoords.map(function(b){ return [b.latitude, b.longitude]; }));
+    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
+  }
+
+  document.getElementById('map-loading').style.display = 'none';
+
+  })();
+</script>
+<script>
+(function() {
+  var consent = localStorage.getItem('ic_cookie_consent');
+  if (!consent) {
+    var b = document.createElement('div');
+    b.id = 'cookie-banner';
+    b.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1C1C1A;border-top:1px solid rgba(255,255,255,.1);padding:16px 32px;font-family:Outfit,sans-serif';
+    b.innerHTML = '<div style="max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;font-weight:500;color:#FAFAF7;margin-bottom:4px">🍪 Cookies & confidentialité</div><div style="font-size:12px;color:rgba(250,250,247,.6);line-height:1.6">ImmoConnect utilise des cookies strictement nécessaires. Aucun cookie publicitaire. <a href=\"mentions-legales.html\" style=\"color:#C09B5A\">En savoir plus</a></div></div><div style="display:flex;gap:10px;flex-shrink:0"><button onclick=\"icRefuser()\" style=\"padding:9px 20px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(250,250,247,.7);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer\">Refuser</button><button onclick=\"icAccepter()\" style=\"padding:9px 20px;border-radius:8px;border:none;background:#C09B5A;color:#1C1C1A;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer\">Accepter</button></div></div>';
+    document.body.appendChild(b);
+  }
+})();
+function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
+function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
+</script>
+<script src="feedback.js" defer></script>
+</body>
+</html>

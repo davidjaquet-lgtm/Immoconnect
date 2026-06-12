@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">Blog Hanaé — Analyse immobilière par ville — ImmoConnect</title>
+<meta name="description" id="page-desc" content="Analyses et conseils immobiliers par Hanaé, l'IA d'ImmoConnect. Prix au m², tendances de marché, conseils pour vendre et acheter dans les principales villes françaises.">
+<meta name="keywords" content="blog immobilier, prix immobilier, analyse marché, conseils vente, acheter appartement maison">
+<meta property="og:title" content="Blog Hanaé — Conseils et analyses immobilières — ImmoConnect">
+<meta property="og:description" content="Analyses de marché, prix DVF réels, conseils pour vendre et acheter. Par Hanaé, l'IA d'ImmoConnect.">
+<meta property="og:type" content="website">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0F0F0E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--teal-l:#E1F5EE;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--warm);border-bottom:1px solid var(--line);height:54px;display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:100}
+.nav-logo{text-decoration:none;display:flex;align-items:center;margin-right:auto}
+.nav-links{display:flex;gap:24px;align-items:center;margin-left:auto}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:13px;transition:color .2s}
+.nav-links a:hover{color:var(--ink)}
+.nav-active{color:var(--ink)!important;font-weight:500;border-bottom:2px solid var(--gold);padding-bottom:2px}
+.nav-out{padding:7px 16px;border:1px solid var(--line);color:var(--ink);border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;white-space:nowrap}
+.nav-out:hover{background:var(--bg)}
+.container{max-width:1000px;margin:0 auto;padding:32px 16px}
+/* HERO */
+.hero{text-align:center;padding:48px 0 32px}
+.hero-tag{font-size:11px;font-weight:600;color:var(--teal);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
+.hero-titre{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:400;line-height:1.2;margin-bottom:12px}
+.hero-titre em{font-style:italic;color:var(--gold)}
+.hero-sub{font-size:14px;color:var(--muted);max-width:520px;margin:0 auto;line-height:1.7}
+/* FILTRES VILLES */
+.filtres{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0;justify-content:center}
+.filtre-btn{padding:7px 16px;border-radius:20px;border:1px solid var(--line);background:transparent;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;color:var(--ink);transition:all .2s}
+.filtre-btn:hover,.filtre-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+/* ARTICLE CARD */
+.articles-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:32px}
+.article-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:box-shadow .2s;display:flex;flex-direction:column}
+.article-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.article-img{height:140px;background:linear-gradient(135deg,#0F1F19,#1E3D2F);display:flex;align-items:center;justify-content:center;font-size:36px;position:relative}
+.article-ville-badge{position:absolute;bottom:8px;left:12px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px;backdrop-filter:blur(4px)}
+.article-body{padding:14px 16px;flex:1;display:flex;flex-direction:column}
+.article-tag{font-size:10px;font-weight:600;color:var(--teal);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.article-titre{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;line-height:1.3;margin-bottom:8px;flex:1}
+.article-excerpt{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px}
+.article-meta{font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:space-between}
+.article-pm2{font-size:13px;font-weight:500;color:var(--teal)}
+/* ARTICLE COMPLET */
+.article-full{display:none;background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:32px;margin-bottom:24px;max-width:720px;margin-left:auto;margin-right:auto}
+.article-full.visible{display:block}
+.article-full-header{margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.article-full-titre{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:400;line-height:1.2;margin-bottom:8px}
+.article-full-meta{font-size:12px;color:var(--muted)}
+.article-full-body{font-size:14px;line-height:1.9;color:#333}
+.article-full-body h2{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;margin:24px 0 10px}
+.article-full-body h3{font-size:15px;font-weight:500;margin:18px 0 8px}
+.article-full-body p{margin-bottom:14px}
+.article-full-body strong{font-weight:600;color:var(--ink)}
+.article-full-body .data-box{background:var(--bg);border-radius:8px;padding:16px;margin:16px 0;font-size:13px}
+.btn-back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:20px;background:none;border:none;font-family:'Outfit',sans-serif}
+.btn-back:hover{color:var(--ink)}
+/* GENERER */
+.generer-section{background:linear-gradient(135deg,#0F1F19,#1A3528);border-radius:var(--r);padding:28px;text-align:center;margin-bottom:24px}
+.generer-titre{font-size:18px;font-weight:400;color:#fff;margin-bottom:6px}
+.generer-sub{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:20px}
+.ville-select{padding:10px 16px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:13px;font-family:'Outfit',sans-serif;margin-right:8px;outline:none}
+.ville-select option{background:#0F0F0E;color:#fff}
+.btn-generer{padding:10px 20px;background:var(--gold);color:var(--ink);border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif}
+.btn-generer:disabled{background:rgba(255,255,255,.2);color:rgba(255,255,255,.4);cursor:not-allowed}
+/* LOADING */
+.loading-article{display:none;text-align:center;padding:40px}
+.loading-article.visible{display:block}
+.typing-dots span{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold);margin:0 3px;animation:typing 1.2s infinite}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes typing{0%,80%,100%{transform:scale(0);opacity:.4}40%{transform:scale(1);opacity:1}}
+/* EMPTY */
+.empty{text-align:center;padding:40px;color:var(--muted)}
+/* RESPONSIVE */
+@media(max-width:700px){.articles-grid{grid-template-columns:1fr}.hero-titre{font-size:28px}}
+</style>
+<style>
+/* Bandeau supérieur unifié — fond blanc, texte foncé (override global) */
+nav{background:#fff!important;border-bottom:1px solid #E8E6E0!important}
+nav .nav-logo{color:#0F0F0E!important}
+nav .nav-logo span{color:#C09B5A!important}
+nav a{color:#0F0F0E!important}
+nav a:hover{color:#C09B5A!important}
+nav .nav-out{color:#0F0F0E!important;border-color:#0F0F0E!important}
+nav .nav-link{margin-right:18px}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="logo-immoconnect.png" alt="ImmoConnect" style="height:38px;width:auto;object-fit:contain;vertical-align:middle">
+    <span style="font-size:22px;font-weight:600;color:#0F0F0E;margin-left:8px">Immo<span style="color:#C09B5A">Connect</span></span>
+  </a>
+  <div class="nav-links" style="margin-left:auto;display:flex;gap:24px;align-items:center">
+    <a href="forfaits.html">Forfaits</a>
+    <a href="questionnaire-vendeur.html">Vendre</a>
+    <a href="questionnaire-acheteur.html">Acheter</a>
+    <a href="forfaits.html">Agents immo</a>
+    <a href="blog.html" class="nav-active">Blog</a>
+    <a href="connexion.html" class="nav-out">Mon espace</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">🤖 Par Hanaé · IA ImmoConnect</div>
+    <h1 class="hero-titre">Le blog immobilier<br>qui <em>dit la vérité</em></h1>
+    <p class="hero-sub">Analyses de marché basées sur les données DVF officielles. Prix réels, tendances, conseils pour vendre ou acheter au meilleur prix.</p>
+  </div>
+
+  <!-- FILTRES -->
+  <div class="filtres" id="filtres">
+    <button class="filtre-btn active" onclick="filtrer('tous',this)">Tous</button>
+    <button class="filtre-btn" onclick="filtrer('toulouse',this)">Toulouse</button>
+    <button class="filtre-btn" onclick="filtrer('paris',this)">Paris</button>
+    <button class="filtre-btn" onclick="filtrer('lyon',this)">Lyon</button>
+    <button class="filtre-btn" onclick="filtrer('bordeaux',this)">Bordeaux</button>
+    <button class="filtre-btn" onclick="filtrer('marseille',this)">Marseille</button>
+    <button class="filtre-btn" onclick="filtrer('montpellier',this)">Montpellier</button>
+    <button class="filtre-btn" onclick="filtrer('nantes',this)">Nantes</button>
+    <button class="filtre-btn" onclick="filtrer('lille',this)">Lille</button>
+  </div>
+
+  <!-- ARTICLE COMPLET -->
+  <div class="article-full" id="article-full">
+    <button class="btn-back" onclick="fermerArticle()">← Retour au blog</button>
+    <div class="article-full-header">
+      <div class="article-tag" id="af-tag"></div>
+      <h2 class="article-full-titre" id="af-titre"></h2>
+      <div class="article-full-meta" id="af-meta"></div>
+    </div>
+    <div class="article-full-body" id="af-body"></div>
+    <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line);display:flex;gap:10px;flex-wrap:wrap">
+      <a id="af-ville-link" href="#" style="padding:9px 18px;background:var(--teal);color:#fff;border-radius:8px;font-size:13px;font-weight:500;text-decoration:none">Voir le marché →</a>
+      <a href="questionnaire-vendeur.html" style="padding:9px 18px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:13px;text-decoration:none;color:var(--ink)">Publier mon bien</a>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-article" id="loading-article">
+    <div class="typing-dots"><span></span><span></span><span></span></div>
+    <div style="margin-top:12px;font-size:13px;color:var(--muted)">Hanaé rédige l'article avec les données DVF en temps réel…</div>
+  </div>
+
+  <!-- GRILLE ARTICLES -->
+  <div class="articles-grid" id="articles-grid">
+    <div class="empty" style="grid-column:1/-1">Chargement des articles…</div>
+  </div>
+
+  <!-- GÉNÉRER UN ARTICLE -->
+  <div class="generer-section">
+    <div class="generer-titre">Générer un article pour une ville</div>
+    <div class="generer-sub">Hanaé analyse les données DVF réelles et rédige une analyse de marché en 30 secondes</div>
+    <select class="ville-select" id="ville-select">
+      <option value="toulouse">Toulouse</option>
+      <option value="paris">Paris</option>
+      <option value="lyon">Lyon</option>
+      <option value="marseille">Marseille</option>
+      <option value="bordeaux">Bordeaux</option>
+      <option value="montpellier">Montpellier</option>
+      <option value="nice">Nice</option>
+      <option value="nantes">Nantes</option>
+      <option value="strasbourg">Strasbourg</option>
+      <option value="lille">Lille</option>
+      <option value="rennes">Rennes</option>
+      <option value="grenoble">Grenoble</option>
+      <option value="annecy">Annecy</option>
+      <option value="brest">Brest</option>
+      <option value="montauban">Montauban</option>
+      <option value="albi">Albi</option>
+    </select>
+    <select class="ville-select" id="type-select">
+      <option value="marche">Analyse de marché</option>
+      <option value="vendre">Conseils pour vendre</option>
+      <option value="acheter">Conseils pour acheter</option>
+      <option value="investir">Guide investissement</option>
+    </select>
+    <button class="btn-generer" id="btn-generer" onclick="genererArticle()">✨ Générer avec Hanaé</button>
+  </div>
+
+</div>
+
+<script src="/pwa.js"></script>
+<script>
+const SB_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const { createClient } = supabase;
+const db = createClient(SB_URL, SB_KEY);
+
+var articles = [];
+var filtreActif = 'tous';
+
+var VILLES_CP = {
+  toulouse:'31000',paris:'75001',lyon:'69001',marseille:'13001',bordeaux:'33000',
+  montpellier:'34000',nice:'06000',nantes:'44000',strasbourg:'67000',lille:'59000',
+  rennes:'35000',grenoble:'38000',annecy:'74000',brest:'29200',montauban:'82000',albi:'81000'
+};
+
+var VILLES_EMOJI = {
+  toulouse:'🌹',paris:'🗼',lyon:'🦁',marseille:'⛵',bordeaux:'🍷',
+  montpellier:'☀️',nice:'💎',nantes:'🦢',strasbourg:'🥨',lille:'🍺',
+  rennes:'⚓',grenoble:'🏔️',annecy:'🏞️',brest:'🌊',montauban:'🌾',albi:'🏛️'
+};
+
+// ── CHARGER LES ARTICLES DEPUIS SUPABASE ─────────────────────────────
+window.addEventListener('DOMContentLoaded', async function() {
+  try {
+    var { data, error } = await db.from('blog_articles')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(12);
+
+    if (error) throw error;
+    articles = data || [];
+  } catch(e) {
+    console.warn('Erreur chargement articles:', e);
+    articles = [];
+  }
+
+  if (articles.length === 0) {
+    document.getElementById('articles-grid').innerHTML = '<div class="empty" style="grid-column:1/-1">Aucun article encore — utilisez le générateur ci-dessous pour créer votre premier article !</div>';
+  } else {
+    afficherArticles(articles);
+  }
+});
+
+// ── AFFICHER LES ARTICLES ─────────────────────────────────────────────
+function afficherArticles(liste) {
+  var grid = document.getElementById('articles-grid');
+  var filtres = filtreActif === 'tous' ? liste : liste.filter(function(a){ return a.ville === filtreActif; });
+
+  if (filtres.length === 0) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1">Aucun article pour cette ville — générez-en un !</div>';
+    return;
+  }
+
+  grid.innerHTML = filtres.map(function(a) {
+    var emoji = VILLES_EMOJI[a.ville] || '🏠';
+    var date = new Date(a.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    var typeLabel = { marche: 'Analyse marché', vendre: 'Conseils vente', acheter: 'Conseils achat', investir: 'Investissement' };
+    return '<div class="article-card" onclick="ouvrirArticle(\'' + a.id + '\')">'
+      + '<div class="article-img">' + emoji
+      + '<span class="article-ville-badge">' + (a.ville.charAt(0).toUpperCase() + a.ville.slice(1)) + '</span>'
+      + '</div>'
+      + '<div class="article-body">'
+      + '<div class="article-tag">' + (typeLabel[a.type_article] || 'Analyse') + '</div>'
+      + '<div class="article-titre">' + a.titre + '</div>'
+      + '<div class="article-excerpt">' + (a.excerpt || '') + '</div>'
+      + '<div class="article-meta">'
+      + '<span>' + date + '</span>'
+      + (a.pm2_median ? '<span class="article-pm2">' + a.pm2_median.toLocaleString('fr-FR') + '€/m²</span>' : '')
+      + '</div>'
+      + '</div></div>';
+  }).join('');
+}
+
+// ── FILTRER ───────────────────────────────────────────────────────────
+function filtrer(ville, btn) {
+  filtreActif = ville;
+  document.querySelectorAll('.filtre-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  afficherArticles(articles);
+}
+
+// ── OUVRIR UN ARTICLE ─────────────────────────────────────────────────
+function ouvrirArticle(id) {
+  var a = articles.find(function(x){ return x.id === id; });
+  if (!a) return;
+
+  var typeLabel = { marche: 'Analyse marché', vendre: 'Conseils vente', acheter: 'Conseils achat', investir: 'Investissement' };
+  var date = new Date(a.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  var villeNom = a.ville.charAt(0).toUpperCase() + a.ville.slice(1);
+
+  document.getElementById('af-tag').textContent = (typeLabel[a.type_article] || 'Analyse') + ' · ' + villeNom;
+  document.getElementById('af-titre').textContent = a.titre;
+  document.getElementById('af-meta').textContent = 'Par Hanaé · ImmoConnect · ' + date + (a.pm2_median ? ' · Prix médian : ' + a.pm2_median.toLocaleString('fr-FR') + '€/m²' : '');
+  document.getElementById('af-body').innerHTML = a.contenu_html || '<p>' + (a.contenu || '') + '</p>';
+  document.getElementById('af-ville-link').href = 'ville.html?ville=' + a.ville;
+
+  document.getElementById('article-full').classList.add('visible');
+  document.getElementById('article-full').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('articles-grid').style.display = 'none';
+  document.getElementById('filtres').style.display = 'none';
+}
+
+function fermerArticle() {
+  document.getElementById('article-full').classList.remove('visible');
+  document.getElementById('articles-grid').style.display = 'grid';
+  document.getElementById('filtres').style.display = 'flex';
+}
+
+// ── GÉNÉRER UN ARTICLE ────────────────────────────────────────────────
+async function genererArticle() {
+  var ville = document.getElementById('ville-select').value;
+  var type = document.getElementById('type-select').value;
+  var btn = document.getElementById('btn-generer');
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Génération…';
+  document.getElementById('loading-article').classList.add('visible');
+  document.getElementById('articles-grid').style.display = 'none';
+  document.getElementById('article-full').classList.remove('visible');
+
+  try {
+    var res = await fetch(SB_URL + '/functions/v1/blog-hanae', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY
+      },
+      body: JSON.stringify({ ville: ville, type: type })
+    });
+
+    var data = await res.json();
+    console.log('blog-hanae response:', JSON.stringify(data));
+
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' — ' + (data.error || data.message || JSON.stringify(data)));
+    if (data.error) throw new Error(data.error);
+
+    // Recharger les articles
+    var { data: newArticles } = await db.from('blog_articles')
+      .select('*')
+      .eq('publie', true)
+      .order('created_at', { ascending: false })
+      .limit(12);
+
+    articles = newArticles || [];
+    document.getElementById('loading-article').classList.remove('visible');
+    document.getElementById('articles-grid').style.display = 'grid';
+    afficherArticles(articles);
+
+    // Ouvrir le nouvel article
+    if (data.article_id) {
+      setTimeout(function() { ouvrirArticle(data.article_id); }, 300);
+    }
+
+    btn.disabled = false;
+    btn.textContent = '✨ Générer avec Hanaé';
+
+  } catch(e) {
+    document.getElementById('loading-article').classList.remove('visible');
+    document.getElementById('articles-grid').style.display = 'grid';
+    afficherArticles(articles);
+    // Afficher l'erreur détaillée
+    var msg = e.message || 'Erreur inconnue';
+    document.getElementById('articles-grid').innerHTML = '<div class="empty" style="grid-column:1/-1;color:#E24B4A">❌ ' + msg + '<br><small style="color:#888;margin-top:8px;display:block">Vérifiez que la table blog_articles existe dans Supabase et que la edge function blog-hanae est déployée avec Verify JWT OFF.</small></div>';
+    btn.disabled = false;
+    btn.textContent = '✨ Générer avec Hanaé';
+  }
+}
+
+// ── DÉMO : générer silencieusement si table vide ───────────────────────
+async function genererArticlesDemoSilencieux() {
+  var grid = document.getElementById('articles-grid');
+  grid.innerHTML = '<div class="empty" style="grid-column:1/-1">Aucun article encore — utilisez le générateur ci-dessous pour créer votre premier article !</div>';
+}
+</script>
+
+<script src="feedback.js" defer></script>
+</body>
+</html>

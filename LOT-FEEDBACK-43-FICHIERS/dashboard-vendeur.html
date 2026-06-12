@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0F0F0E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ImmoConnect">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<title>Mon espace vendeur — ImmoConnect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--teal-light:#E1F5EE;--blue:#185FA5;--blue-light:#E6F1FB;--amber:#D4732A;--amber-light:#FEF3E7;--red:#A32D2D;--red-light:#FCEBEB;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;min-height:100vh}
+/* NAV */
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none;margin-right:auto}
+.nav-logo span{color:var(--gold)}
+.nav-btn{padding:7px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:'Outfit',sans-serif;text-decoration:none}
+.nav-secondary{background:rgba(255,255,255,.1);color:#fff}
+.nav-primary{background:var(--gold);color:var(--ink)}
+/* LAYOUT */
+.container{max-width:1100px;margin:0 auto;padding:24px 16px}
+/* LOADING */
+#loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:200}
+.loading-inner{text-align:center}
+.spin{width:36px;height:36px;border:3px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* HEADER VENDEUR */
+.vendeur-header{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px}
+.vendeur-avatar{width:48px;height:48px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;color:#fff}
+.vendeur-nom{font-size:16px;font-weight:500}
+.vendeur-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.realtime-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite;display:inline-block;margin-right:5px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+/* STATS GLOBALES */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:16px;text-align:center;position:relative;overflow:hidden}
+.kpi-n{font-size:28px;font-weight:500;line-height:1}
+.kpi-l{font-size:11px;color:var(--muted);margin-top:4px}
+.kpi-trend{font-size:10px;margin-top:4px;font-weight:500}
+.kpi-trend.up{color:var(--teal)}
+.kpi-trend.down{color:var(--red)}
+.kpi-bar{position:absolute;bottom:0;left:0;height:3px;background:var(--teal);transition:width .5s ease}
+/* SECTIONS */
+.section{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);margin-bottom:16px;overflow:hidden}
+.section-head{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.section-title{font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px}
+.section-body{padding:16px 20px}
+/* ANNONCE CARD */
+.annonce-card{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:12px}
+.annonce-card:last-child{margin-bottom:0}
+.ann-head{padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;background:var(--bg)}
+.ann-head:hover{background:#F0EDE6}
+.ann-photo{width:56px;height:56px;border-radius:6px;object-fit:cover;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.ann-info{flex:1;min-width:0}
+.ann-titre{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ann-localisation{font-size:11px;color:var(--muted);margin-top:2px}
+.ann-prix{font-size:14px;font-weight:500;color:var(--teal);flex-shrink:0}
+.ann-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line)}
+.ann-kpi{background:var(--warm);padding:12px;text-align:center}
+.ann-kpi-n{font-size:18px;font-weight:500}
+.ann-kpi-l{font-size:10px;color:var(--muted);margin-top:2px}
+/* STATUT BADGES */
+.statut{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.s-actif{background:var(--teal-light);color:var(--teal)}
+.s-en_attente{background:#F1EFE8;color:var(--muted)}
+.s-top3_pret{background:var(--blue-light);color:var(--blue)}
+.s-ouverte{background:var(--amber-light);color:var(--amber)}
+.s-vendu{background:#E1F5EE;color:#085041}
+.s-expire{background:var(--red-light);color:var(--red)}
+/* FENETRE 48H */
+.fenetre-box{background:var(--amber-light);border:1px solid #E8C27A;border-radius:8px;padding:14px 16px;margin-top:12px}
+.fenetre-titre{font-size:12px;font-weight:500;color:#633806;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.countdown{font-size:24px;font-weight:500;color:#854F0B;font-family:monospace;letter-spacing:2px}
+.countdown-lbl{font-size:10px;color:#854F0B;margin-top:2px}
+.candidats-bar-wrap{background:#E8C27A;border-radius:4px;height:6px;margin-top:8px;overflow:hidden}
+.candidats-bar{height:100%;border-radius:4px;background:#854F0B;transition:width .5s}
+/* HISTORIQUE PRIX */
+.prix-timeline{display:flex;flex-direction:column;gap:6px}
+.prix-item{display:flex;align-items:center;gap:10px;font-size:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+.prix-item:last-child{border-bottom:none}
+.prix-date{color:var(--muted);min-width:80px}
+.prix-val{font-weight:500}
+.prix-delta{font-size:10px;font-weight:500;margin-left:4px}
+.prix-delta.neg{color:var(--red)}
+.prix-delta.pos{color:var(--teal)}
+/* RAPPORTS VISITE */
+.rapport-item{padding:10px 0;border-bottom:1px solid var(--line);font-size:12px}
+.rapport-item:last-child{border-bottom:none}
+.rapport-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
+.interet-badge{font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px}
+.i-tres_interesse{background:var(--teal-light);color:var(--teal)}
+.i-interesse{background:var(--blue-light);color:var(--blue)}
+.i-mitige{background:var(--amber-light);color:var(--amber)}
+.i-non_interesse{background:var(--red-light);color:var(--red)}
+/* VISITES CALENDRIER */
+.visite-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:12px}
+.visite-item:last-child{border-bottom:none}
+.visite-date-box{background:var(--bg);border-radius:6px;padding:6px 10px;text-align:center;flex-shrink:0;min-width:52px}
+.visite-jour{font-size:16px;font-weight:500;line-height:1}
+.visite-mois{font-size:9px;color:var(--muted);text-transform:uppercase}
+.visite-statut{font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;flex-shrink:0}
+.vs-confirme{background:var(--teal-light);color:var(--teal)}
+.vs-en_attente{background:#F1EFE8;color:var(--muted)}
+.vs-annule{background:var(--red-light);color:var(--red)}
+/* GRAPHIQUE VUES */
+.chart-bars{display:flex;align-items:flex-end;gap:4px;height:80px;margin-top:8px}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.chart-bar{width:100%;background:var(--teal);border-radius:3px 3px 0 0;min-height:2px;transition:height .4s ease}
+.chart-bar-lbl{font-size:9px;color:var(--muted);white-space:nowrap}
+.chart-bar-val{font-size:10px;font-weight:500;color:var(--ink)}
+/* ALERTE PRIX */
+.alerte-prix{background:var(--amber-light);border:1px solid #E8C27A;border-radius:8px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px}
+.alerte-icon{font-size:20px;flex-shrink:0;margin-top:2px}
+.alerte-body{flex:1;font-size:12px;line-height:1.6}
+.alerte-btn{margin-top:8px;padding:6px 12px;background:#854F0B;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif}
+/* MODIFIER PRIX */
+.prix-form{display:flex;gap:8px;margin-top:10px;align-items:center}
+.prix-input{flex:1;padding:8px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:'Outfit',sans-serif;background:var(--bg)}
+.prix-btn{padding:8px 16px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif}
+/* NIVEAU BADGE */
+.niveau{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.n-standard{background:#F1EFE8;color:var(--muted)}
+.n-silver{background:var(--blue-light);color:var(--blue)}
+.n-gold{background:var(--amber-light);color:#854F0B}
+.n-platinium{background:var(--teal-light);color:var(--teal)}
+/* CONSEILS */
+.conseil-item{display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--bg);border-radius:8px;margin-bottom:8px;font-size:12px;line-height:1.6}
+.conseil-item:last-child{margin-bottom:0}
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px}
+.empty-icon{font-size:36px;margin-bottom:8px}
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:12px 18px;border-radius:8px;font-size:13px;z-index:999;display:none;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+/* MODALE PRIX */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:none;align-items:center;justify-content:center}
+.modal-box{background:var(--warm);border-radius:var(--r);padding:24px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-titre{font-size:16px;font-weight:500;margin-bottom:16px}
+/* RESPONSIVE */
+@media(max-width:600px){.kpi-grid{grid-template-columns:1fr 1fr}.ann-kpis{grid-template-columns:1fr 1fr}.vendeur-header{flex-wrap:wrap}}
+</style>
+<style>
+/* Bandeau supérieur unifié — fond blanc, texte foncé (override global) */
+nav{background:#fff!important;border-bottom:1px solid #E8E6E0!important}
+nav .nav-logo{color:#0F0F0E!important}
+nav .nav-logo span{color:#C09B5A!important}
+nav a{color:#0F0F0E!important}
+nav a:hover{color:#C09B5A!important}
+nav .nav-out{color:#0F0F0E!important;border-color:#0F0F0E!important}
+nav .nav-link{margin-right:18px}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo"><img src="logo-immoconnect.png" alt="ImmoConnect" style="height:38px;width:auto;object-fit:contain;vertical-align:middle"><span style="font-size:22px;font-weight:600;color:#0F0F0E;margin-left:8px">Immo<span style="color:#C09B5A">Connect</span></span></a>
+  <a href="questionnaire-vendeur.html" class="nav-btn nav-secondary">+ Publier un bien</a>
+  <a href="blog.html" class="nav-btn nav-secondary" style="text-decoration:none">Blog</a>
+  <button onclick="toggleNotifications()" title="Notifications" class="nav-btn nav-secondary" style="position:relative;margin-right:4px">🔔<span id="notif-badge" style="display:none;position:absolute;top:-6px;right:-6px;background:#A32D2D;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;line-height:16px;border-radius:8px;padding:0 3px;text-align:center">0</span></button>
+  <button class="nav-btn nav-primary" onclick="deconnexion()">Déconnexion</button>
+</nav>
+
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="loading-inner">
+    <div class="spin"></div>
+    <div style="font-size:13px;color:var(--muted)">Chargement de votre espace…</div>
+  </div>
+</div>
+
+<div class="container" id="main-content" style="display:none">
+
+  <!-- BANNIÈRE NOTIFICATION NIVEAU -->
+  <div id="notif-banner" style="display:none;align-items:center;gap:14px;background:linear-gradient(90deg,#FAEEDA,#FEFDFB);border:1px solid var(--gold);border-radius:12px;padding:16px 18px;margin-bottom:18px">
+    <div style="font-size:26px;flex-shrink:0">🎉</div>
+    <div style="flex:1;min-width:0">
+      <div id="notif-banner-titre" style="font-weight:600;font-size:15px;color:var(--ink)"></div>
+      <div id="notif-banner-msg" style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:2px"></div>
+    </div>
+    <button onclick="fermerBanner()" title="Fermer" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;flex-shrink:0;align-self:flex-start;line-height:1">×</button>
+  </div>
+
+  <!-- HEADER VENDEUR -->
+  <div class="vendeur-header">
+    <div class="vendeur-avatar" id="vendeur-initiale">V</div>
+    <div style="flex:1">
+      <div class="vendeur-nom" id="vendeur-nom">Chargement…</div>
+      <div class="vendeur-sub"><span class="realtime-dot"></span>Données en temps réel · <span id="derniere-maj">—</span></div>
+    </div>
+    <a href="questionnaire-vendeur.html" style="padding:9px 16px;background:var(--teal);color:#fff;border-radius:8px;font-size:13px;font-weight:500;text-decoration:none">+ Nouveau bien</a>
+  </div>
+
+  <!-- KPIs GLOBAUX -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-n" id="kpi-annonces">—</div>
+      <div class="kpi-l">🏠 Annonces actives</div>
+      <div class="kpi-bar" id="bar-annonces" style="width:0%"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-n" id="kpi-vues">—</div>
+      <div class="kpi-l">👁 Vues totales</div>
+      <div class="kpi-bar" id="bar-vues" style="width:60%;background:var(--blue)"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-n" id="kpi-contacts">—</div>
+      <div class="kpi-l">💬 Contacts reçus</div>
+      <div class="kpi-bar" id="bar-contacts" style="width:40%;background:var(--amber)"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-n" id="kpi-visites">—</div>
+      <div class="kpi-l">🗓 Visites planifiées</div>
+      <div class="kpi-bar" id="bar-visites" style="width:20%"></div>
+    </div>
+  </div>
+
+  <!-- ANNONCES -->
+  <div class="section" id="section-annonces">
+    <div class="section-head">
+      <span class="section-title">🏠 Mes annonces</span>
+      <span style="font-size:12px;color:var(--muted)" id="nb-annonces-lbl">Chargement…</span>
+    </div>
+    <div class="section-body" id="annonces-container">
+      <div class="empty"><div class="loading-spin" style="width:24px;height:24px;border:2px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 8px"></div>Chargement…</div>
+    </div>
+  </div>
+
+  <!-- RAPPORTS DE VISITE -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">📋 Rapports de visite</span>
+      <span style="font-size:12px;color:var(--muted)" id="nb-rapports-lbl"></span>
+    </div>
+    <div class="section-body" id="rapports-container">
+      <div class="empty"><div class="empty-icon">📋</div>Aucun rapport de visite pour l'instant</div>
+    </div>
+  </div>
+
+  <!-- CONSEILS HANAÉ -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">🤖 Conseils de Hanaé</span>
+    </div>
+    <div class="section-body" id="conseils-container">
+      <div class="empty"><div class="loading-spin" style="width:24px;height:24px;border:2px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 8px"></div>Analyse en cours…</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODALE MODIFIER PRIX -->
+<div class="modal-overlay" id="modal-prix">
+  <div class="modal-box">
+    <div class="modal-titre">Modifier le prix de vente</div>
+    <input type="hidden" id="modal-annonce-id">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Prix actuel : <strong id="modal-prix-actuel">—</strong></div>
+    <label style="font-size:12px;display:block;margin-bottom:6px">Nouveau prix (€)</label>
+    <input type="number" id="modal-nouveau-prix" placeholder="Ex: 220000" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:'Outfit',sans-serif;background:var(--bg);margin-bottom:16px">
+    <div style="display:flex;gap:8px">
+      <button onclick="fermerModalPrix()" style="flex:1;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:13px;cursor:pointer;font-family:'Outfit',sans-serif;background:transparent">Annuler</button>
+      <button onclick="confirmerChangementPrix()" style="flex:2;padding:10px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif">Enregistrer le nouveau prix</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const { createClient } = supabase;
+const db = createClient(SB_URL, SB_KEY);
+
+var currentUser = null;
+var annoncesData = [];
+var realtimeChannel = null;
+var countdownTimers = {};
+var notifications = [];
+
+// ── INIT ──────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async function() {
+  var { data: { session } } = await db.auth.getSession();
+  if (!session) { window.location.href = 'connexion.html'; return; }
+  currentUser = session.user;
+
+  var meta = currentUser.user_metadata || {};
+  var profils = meta.profils || [];
+  if (!profils.includes('vendeur') && !profils.includes('admin')) {
+    window.location.href = 'connexion.html';
+    return;
+  }
+
+  // Infos vendeur
+  var nom = (meta.prenom || '') + ' ' + (meta.nom || meta.full_name || currentUser.email.split('@')[0]);
+  document.getElementById('vendeur-nom').textContent = nom.trim() || currentUser.email;
+  document.getElementById('vendeur-initiale').textContent = (nom.trim()[0] || 'V').toUpperCase();
+
+  // Charger les données
+  await Promise.all([
+    chargerAnnonces(),
+    chargerRapports(),
+    chargerNotifications()
+  ]);
+
+  // Supabase Realtime
+  activerRealtime();
+
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('main-content').style.display = 'block';
+
+  majDerniereMaj();
+});
+
+// ── CHARGER ANNONCES ──────────────────────────────────────────────────
+async function chargerAnnonces() {
+  var { data: annonces } = await db.from('annonces_vendeurs')
+    .select('*')
+    .eq('email_contact', currentUser.email)
+    .order('created_at', { ascending: false });
+
+  annoncesData = annonces || [];
+  majKPIsGlobaux(annoncesData);
+  afficherAnnonces(annoncesData);
+  genererConseils(annoncesData);
+}
+
+// ── CHARGER RAPPORTS ─────────────────────────────────────────────────
+async function chargerRapports() {
+  var { data: rapports } = await db.from('rapports_visites')
+    .select('*')
+    .eq('vendeur_email', currentUser.email)
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  afficherRapports(rapports || []);
+}
+
+// ── KPIs GLOBAUX ──────────────────────────────────────────────────────
+function majKPIsGlobaux(annonces) {
+  var actives = annonces.filter(function(a){ return a.statut === 'actif' || a.statut_annonce === 'publiee'; });
+  var totalVues = annonces.reduce(function(s,a){ return s+(a.nb_vues||0); }, 0);
+  var totalContacts = annonces.reduce(function(s,a){ return s+(a.nb_contacts||0); }, 0);
+  var totalVisites = annonces.reduce(function(s,a){ return s+(a.nb_visites||0); }, 0);
+
+  document.getElementById('kpi-annonces').textContent = actives.length;
+  document.getElementById('kpi-vues').textContent = totalVues.toLocaleString('fr-FR');
+  document.getElementById('kpi-contacts').textContent = totalContacts;
+  document.getElementById('kpi-visites').textContent = totalVisites;
+  document.getElementById('nb-annonces-lbl').textContent = annonces.length + ' bien(s) au total';
+
+  // Barres proportionnelles
+  var maxVues = Math.max(totalVues, 1);
+  document.getElementById('bar-annonces').style.width = Math.min(actives.length * 20, 100) + '%';
+  document.getElementById('bar-vues').style.width = Math.min(totalVues / maxVues * 100, 100) + '%';
+  document.getElementById('bar-contacts').style.width = Math.min(totalContacts * 10, 100) + '%';
+  document.getElementById('bar-visites').style.width = Math.min(totalVisites * 15, 100) + '%';
+}
+
+// ── AFFICHER ANNONCES ─────────────────────────────────────────────────
+function afficherAnnonces(annonces) {
+  var container = document.getElementById('annonces-container');
+
+  if (!annonces.length) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">🏠</div>Aucune annonce publiée<br><a href="questionnaire-vendeur.html" style="color:var(--teal);font-weight:500;margin-top:8px;display:inline-block">Publier mon premier bien →</a></div>';
+    return;
+  }
+
+  container.innerHTML = annonces.map(function(a) {
+    var prixFmt = a.prix ? Math.round(a.prix).toLocaleString('fr-FR') + '€' : '—';
+    var titre = a.titre || ((a.type_bien || 'Bien') + (a.surface ? ' ' + a.surface + 'm²' : '') + ' — ' + (a.ville || ''));
+    var statut = a.statut_annonce || a.statut || 'actif';
+    var niveau = a.niveau_valide || a.niveau_vendeur || 'standard';
+    var fenetreActive = a.fenetre_statut === 'ouverte' && a.fenetre_candidature_cloture_le;
+
+    // Historique prix
+    var historique = [];
+    try { historique = JSON.parse(a.historique_prix || '[]'); } catch(e){}
+
+    // Expiration
+    var joursRestants = '';
+    if (a.date_expiration) {
+      var diff = Math.ceil((new Date(a.date_expiration) - new Date()) / (1000*60*60*24));
+      joursRestants = diff > 0 ? diff + 'j avant expiration' : 'Expirée';
+    }
+
+    // Calcul taux contact
+    var tauxContact = a.nb_vues > 0 ? Math.round((a.nb_contacts||0) / a.nb_vues * 100) : 0;
+
+    return '<div class="annonce-card" id="card-' + a.id + '">'
+      + '<div class="ann-head" onclick="toggleAnnonce(\'' + a.id + '\')">'
+      + '<div class="ann-photo">' + (a.photo_principale ? '<img src="'+a.photo_principale+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px">' : '🏠') + '</div>'
+      + '<div class="ann-info">'
+      + '<div class="ann-titre">' + titre + '</div>'
+      + '<div class="ann-localisation">'
+      + '<span class="statut s-' + statut + '">' + libellStatut(statut) + '</span>'
+      + ' <span class="niveau n-' + niveau + '">' + niveau + '</span>'
+      + (joursRestants ? ' <span style="font-size:10px;color:var(--muted)">· ' + joursRestants + '</span>' : '')
+      + '</div>'
+      + '</div>'
+      + '<div>'
+      + '<div class="ann-prix">' + prixFmt + '</div>'
+      + '<div style="font-size:10px;color:var(--muted);text-align:right">' + (a.surface ? Math.round(a.prix/a.surface).toLocaleString('fr-FR') + '€/m²' : '') + '</div>'
+      + '</div>'
+      + '</div>'
+
+      // KPIs annonce
+      + '<div class="ann-kpis">'
+      + '<div class="ann-kpi"><div class="ann-kpi-n">' + (a.nb_vues||0) + '</div><div class="ann-kpi-l">👁 Vues</div></div>'
+      + '<div class="ann-kpi"><div class="ann-kpi-n">' + (a.nb_contacts||0) + '</div><div class="ann-kpi-l">💬 Contacts</div></div>'
+      + '<div class="ann-kpi"><div class="ann-kpi-n">' + (a.nb_visites||0) + '</div><div class="ann-kpi-l">🗓 Visites</div></div>'
+      + '<div class="ann-kpi"><div class="ann-kpi-n">' + tauxContact + '%</div><div class="ann-kpi-l">🎯 Taux contact</div></div>'
+      + '</div>'
+
+      // Détail expandable
+      + '<div id="detail-' + a.id + '" style="display:none;border-top:1px solid var(--line)">'
+      + '<div style="padding:16px">'
+
+      // Fenêtre candidature si active
+      + (fenetreActive ? '<div class="fenetre-box" id="fenetre-' + a.id + '">'
+        + '<div class="fenetre-titre">⏱️ Fenêtre de candidature ouverte</div>'
+        + '<div class="countdown" id="countdown-' + a.id + '">--:--:--</div>'
+        + '<div class="countdown-lbl">jusqu\'à la clôture</div>'
+        + '<div style="font-size:11px;color:#633806;margin-top:6px">' + (a.nb_candidatures || 0) + ' agent(s) candidat(s) jusqu\'ici</div>'
+        + '</div>' : '')
+
+      // Modifier le prix
+      + '<div style="margin-top:12px">'
+      + '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Prix de vente</div>'
+      + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
+      + '<span style="font-size:20px;font-weight:500">' + prixFmt + '</span>'
+      + (a.prix_initial && a.prix_initial !== a.prix ? '<span style="font-size:11px;text-decoration:line-through;color:var(--muted)">' + Math.round(a.prix_initial).toLocaleString('fr-FR') + '€</span>' : '')
+      + '<button onclick="ouvrirModalPrix(\'' + a.id + '\',' + (a.prix||0) + ')" style="padding:6px 12px;background:var(--bg);border:1px solid var(--line);border-radius:6px;font-size:11px;cursor:pointer;font-family:Outfit,sans-serif">Modifier le prix</button>'
+      + '<a href="questionnaire-vendeur.html?edit=' + a.id + '" style="padding:6px 12px;background:var(--ink);color:#fff;border-radius:6px;font-size:11px;text-decoration:none;font-family:Outfit,sans-serif">\u270f\ufe0f Modifier l\'annonce</a>'
+      + '</div>'
+      + '</div>'
+
+      // Historique prix
+      + (historique.length > 0 ? '<div style="margin-top:12px">'
+        + '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Historique des prix</div>'
+        + '<div class="prix-timeline">'
+        + historique.slice(-5).reverse().map(function(h, i) {
+            var delta = i < historique.length-1 ? Math.round((h.prix - historique[historique.length-2-i].prix) / historique[historique.length-2-i].prix * 100) : null;
+            return '<div class="prix-item"><span class="prix-date">' + new Date(h.date).toLocaleDateString('fr-FR') + '</span>'
+              + '<span class="prix-val">' + Math.round(h.prix).toLocaleString('fr-FR') + '€</span>'
+              + (delta ? '<span class="prix-delta ' + (delta < 0 ? 'neg' : 'pos') + '">' + (delta > 0 ? '+' : '') + delta + '%</span>' : '')
+              + '</div>';
+          }).join('')
+        + '</div></div>' : '')
+
+      // Lien fiche bien
+      + '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">'
+      + '<a href="bien.html?id=' + a.id + '" target="_blank" style="padding:7px 14px;background:var(--teal);color:#fff;border-radius:7px;text-decoration:none;font-size:12px;font-weight:500">Voir la fiche</a>'
+      + '<a href="rapport-hanae.html?id=' + a.id + '" style="padding:7px 14px;background:var(--bg);border:1px solid var(--line);border-radius:7px;text-decoration:none;font-size:12px">Rapport Hanaé</a>'
+      + '<button onclick="partagerAnnonce(\'' + a.id + '\')" style="padding:7px 14px;background:var(--bg);border:1px solid var(--line);border-radius:7px;font-size:12px;cursor:pointer;font-family:Outfit,sans-serif">🔗 Partager</button>'
+      + '</div>'
+
+      + '</div></div>'
+      + '</div>';
+  }).join('');
+
+  // Démarrer les comptes à rebours
+  annonces.forEach(function(a) {
+    if (a.fenetre_statut === 'ouverte' && a.fenetre_candidature_cloture_le) {
+      demarrerCountdown(a.id, a.fenetre_candidature_cloture_le);
+    }
+  });
+}
+
+// ── COUNTDOWN TEMPS RÉEL ─────────────────────────────────────────────
+function demarrerCountdown(annonceId, clotureLe) {
+  if (countdownTimers[annonceId]) clearInterval(countdownTimers[annonceId]);
+  var cloture = new Date(clotureLe).getTime();
+
+  function maj() {
+    var reste = cloture - Date.now();
+    var el = document.getElementById('countdown-' + annonceId);
+    if (!el) { clearInterval(countdownTimers[annonceId]); return; }
+
+    if (reste <= 0) {
+      el.textContent = 'Clôturée';
+      clearInterval(countdownTimers[annonceId]);
+      return;
+    }
+
+    var h = Math.floor(reste / 3600000);
+    var m = Math.floor((reste % 3600000) / 60000);
+    var s = Math.floor((reste % 60000) / 1000);
+    el.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }
+
+  maj();
+  countdownTimers[annonceId] = setInterval(maj, 1000);
+}
+
+// ── TOGGLE DÉTAIL ANNONCE ─────────────────────────────────────────────
+function toggleAnnonce(id) {
+  var el = document.getElementById('detail-' + id);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+// ── AFFICHER RAPPORTS ─────────────────────────────────────────────────
+function afficherRapports(rapports) {
+  var container = document.getElementById('rapports-container');
+  document.getElementById('nb-rapports-lbl').textContent = rapports.length + ' rapport(s)';
+
+  if (!rapports.length) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">📋</div>Aucun rapport de visite reçu pour l\'instant.<br><span style="font-size:11px;margin-top:4px;display:block">Les agents mandatés vous envoient un rapport après chaque visite.</span></div>';
+    return;
+  }
+
+  var labels = { tres_interesse: 'Très intéressé', interesse: 'Intéressé', mitige: 'Mitigé', non_interesse: 'Non intéressé' };
+  var recommLabels = { maintenir_prix: 'Maintenir le prix', baisser_prix: 'Baisser le prix', valorisation: 'Mise en valeur', negociation_possible: 'Négociation possible', visite_supplémentaire: 'Nouvelles visites', retrait_temporaire: 'Retrait temporaire' };
+
+  container.innerHTML = rapports.map(function(r) {
+    var dateStr = r.visite_date ? new Date(r.visite_date).toLocaleDateString('fr-FR') : new Date(r.created_at).toLocaleDateString('fr-FR');
+    return '<div class="rapport-item">'
+      + '<div class="rapport-head">'
+      + '<span style="font-weight:500;font-size:13px">' + dateStr + '</span>'
+      + '<span class="interet-badge i-' + r.interet + '">' + (labels[r.interet] || r.interet) + '</span>'
+      + '</div>'
+      + (r.acheteur_profil ? '<div style="color:var(--muted);margin-bottom:3px">👤 ' + r.acheteur_profil + '</div>' : '')
+      + (r.acheteur_budget_fourchette ? '<div style="color:var(--muted);margin-bottom:3px">💶 Budget : ' + r.acheteur_budget_fourchette + '</div>' : '')
+      + (r.offre_potentielle ? '<div style="color:var(--teal);font-weight:500;margin-bottom:3px">💰 Offre envisagée : ' + Math.round(r.offre_potentielle).toLocaleString('fr-FR') + '€</div>' : '')
+      + '<div style="color:var(--ink);line-height:1.5;margin-top:4px">' + (r.commentaire_agent || '') + '</div>'
+      + (r.recommandation ? '<div style="margin-top:6px;font-size:11px;background:var(--blue-light);color:var(--blue);padding:4px 8px;border-radius:6px;display:inline-block">📋 ' + (recommLabels[r.recommandation] || r.recommandation) + '</div>' : '')
+      + '</div>';
+  }).join('');
+}
+
+// ── CONSEILS HANAÉ ────────────────────────────────────────────────────
+function genererConseils(annonces) {
+  var container = document.getElementById('conseils-container');
+  var conseils = [];
+
+  var actives = annonces.filter(function(a){ return a.statut === 'actif' || a.statut_annonce === 'publiee'; });
+
+  if (!actives.length) {
+    container.innerHTML = '<div class="conseil-item">💡 <div>Publiez votre premier bien pour recevoir les conseils personnalisés de Hanaé.</div></div>';
+    return;
+  }
+
+  actives.forEach(function(a) {
+    var titre = a.titre || ((a.type_bien||'Bien') + ' ' + (a.ville||''));
+    var tauxContact = a.nb_vues > 10 ? Math.round((a.nb_contacts||0) / a.nb_vues * 100) : null;
+
+    // Conseil sur le taux de contact
+    if (tauxContact !== null && tauxContact < 2) {
+      conseils.push({ icon: '⚠️', msg: '<strong>' + titre + '</strong> : taux de contact faible (' + tauxContact + '%). Pensez à enrichir la description ou ajouter des photos.' });
+    } else if (tauxContact !== null && tauxContact > 10) {
+      conseils.push({ icon: '🎉', msg: '<strong>' + titre + '</strong> : excellent taux de contact (' + tauxContact + '%) ! Votre annonce est très attractive.' });
+    }
+
+    // Conseil sur le niveau documentaire
+    if ((a.niveau_valide || 'standard') === 'standard' && (a.niveau_demande || 'standard') !== 'standard') {
+      conseils.push({ icon: '📄', msg: '<strong>' + titre + '</strong> : complétez vos documents pour passer au niveau ' + (a.niveau_demande || 'supérieur') + ' et bénéficier d\'une meilleure visibilité.' });
+    }
+
+    // Conseil sur la fenêtre candidature
+    if (a.fenetre_statut === 'ouverte') {
+      conseils.push({ icon: '⏱️', msg: '<strong>' + titre + '</strong> : fenêtre de candidature ouverte. Les agents peuvent postuler jusqu\'à la clôture.' });
+    }
+
+    if (a.fenetre_statut === 'scored' || a.statut_selection === 'top3_pret') {
+      conseils.push({ icon: '🏆', msg: '<strong>' + titre + '</strong> : le top 3 des agents est prêt ! Consultez les candidatures pour choisir votre agent.' });
+    }
+
+    // Conseil sur l'expiration
+    if (a.date_expiration) {
+      var jours = Math.ceil((new Date(a.date_expiration) - new Date()) / (1000*60*60*24));
+      if (jours > 0 && jours < 15) {
+        conseils.push({ icon: '📅', msg: '<strong>' + titre + '</strong> : votre annonce expire dans ' + jours + ' jours. Pensez à la renouveler.' });
+      }
+    }
+
+    // Pas de visite mais contacts
+    if ((a.nb_contacts||0) > 2 && (a.nb_visites||0) === 0) {
+      conseils.push({ icon: '📸', msg: '<strong>' + titre + '</strong> : des contacts mais pas encore de visite. Activez le calendrier de visites pour faciliter la prise de rendez-vous.' });
+    }
+  });
+
+  // Conseil général si pas d'annonces en mode agents
+  var sansModeAgents = actives.filter(function(a){ return a.mode_contact === 'acheteurs'; });
+  if (sansModeAgents.length > 0 && actives.length === sansModeAgents.length) {
+    conseils.push({ icon: '🤝', msg: 'Vous n\'avez pas encore activé le mode agents. Passez en mode "Je choisis mon agent" ou "Comparatif" pour bénéficier de l\'expertise des professionnels.' });
+  }
+
+  if (!conseils.length) {
+    conseils.push({ icon: '✅', msg: 'Tout va bien ! Vos annonces sont bien configurées. Hanaé vous alertera dès qu\'une action est nécessaire.' });
+  }
+
+  container.innerHTML = conseils.map(function(c) {
+    return '<div class="conseil-item"><span>' + c.icon + '</span><div>' + c.msg + '</div></div>';
+  }).join('');
+}
+
+// ── MODIFIER PRIX ─────────────────────────────────────────────────────
+function ouvrirModalPrix(annonceId, prixActuel) {
+  document.getElementById('modal-annonce-id').value = annonceId;
+  document.getElementById('modal-prix-actuel').textContent = Math.round(prixActuel).toLocaleString('fr-FR') + '€';
+  document.getElementById('modal-nouveau-prix').value = '';
+  document.getElementById('modal-prix').style.display = 'flex';
+}
+
+function fermerModalPrix() {
+  document.getElementById('modal-prix').style.display = 'none';
+}
+
+async function confirmerChangementPrix() {
+  var annonceId = document.getElementById('modal-annonce-id').value;
+  var nouveauPrix = parseFloat(document.getElementById('modal-nouveau-prix').value);
+
+  if (!nouveauPrix || nouveauPrix < 1000) { showToast('Prix invalide'); return; }
+
+  var annonce = annoncesData.find(function(a){ return a.id === annonceId; });
+  if (!annonce) return;
+
+  // Mettre à jour l'historique des prix
+  var historique = [];
+  try { historique = JSON.parse(annonce.historique_prix || '[]'); } catch(e) {}
+  historique.push({ prix: nouveauPrix, date: new Date().toISOString() });
+
+  var { error } = await db.from('annonces_vendeurs')
+    .update({
+      prix: nouveauPrix,
+      historique_prix: JSON.stringify(historique),
+      nb_baisses: (annonce.nb_baisses||0) + (nouveauPrix < annonce.prix ? 1 : 0)
+    })
+    .eq('id', annonceId)
+    .eq('email_contact', currentUser.email);
+
+  if (error) { showToast('Erreur : ' + error.message); return; }
+
+  fermerModalPrix();
+  showToast('Prix mis à jour ✅');
+  await chargerAnnonces();
+}
+
+// ── PARTAGER ──────────────────────────────────────────────────────────
+function partagerAnnonce(annonceId) {
+  var url = 'https://immoconnect-agence.fr/bien.html?id=' + annonceId;
+  navigator.clipboard.writeText(url).then(function() {
+    showToast('Lien copié dans le presse-papier ! 🔗');
+  });
+}
+
+// ── SUPABASE REALTIME ─────────────────────────────────────────────────
+function activerRealtime() {
+  realtimeChannel = db.channel('dashboard-vendeur-' + currentUser.id)
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'annonces_vendeurs',
+      filter: 'email_contact=eq.' + currentUser.email
+    }, function(payload) {
+      console.log('Realtime update:', payload.eventType);
+      majDerniereMaj();
+      chargerAnnonces();
+      showToast('📊 Statistiques mises à jour');
+    })
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'rapports_visites',
+      filter: 'vendeur_email=eq.' + currentUser.email
+    }, function(payload) {
+      console.log('Nouveau rapport:', payload.new);
+      chargerRapports();
+      showToast('📋 Nouveau rapport de visite reçu !');
+    })
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'notifications_vendeur',
+      filter: 'vendeur_email=eq.' + currentUser.email
+    }, function(payload) {
+      console.log('Nouvelle notification:', payload.new);
+      notifications.unshift(payload.new);
+      majBadge();
+      afficherBanner(payload.new);
+      showToast('🎉 ' + (payload.new.titre || 'Nouvelle notification'));
+    })
+    .subscribe();
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────
+function libellStatut(s) {
+  var l = { actif: '● Actif', publiee: '● Publié', brouillon: '○ Brouillon', vendu: '✓ Vendu', expiree: '× Expiré', expire: '× Expiré', suspendu: '⏸ Suspendu' };
+  return l[s] || s;
+}
+
+function majDerniereMaj() {
+  document.getElementById('derniere-maj').textContent = 'Mis à jour à ' + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ── NOTIFICATIONS NIVEAU (bannière + badge) ───────────────────────────
+async function chargerNotifications() {
+  try {
+    var { data, error } = await db.from('notifications_vendeur')
+      .select('*')
+      .eq('vendeur_email', currentUser.email)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    if (error) throw error;
+    notifications = data || [];
+  } catch(e) {
+    console.warn('Erreur chargement notifications:', e);
+    notifications = [];
+  }
+  majBadge();
+  // Affiche automatiquement la dernière notification non lue
+  var derniereNonLue = notifications.find(function(n){ return !n.lu; });
+  if (derniereNonLue) afficherBanner(derniereNonLue);
+}
+
+function majBadge() {
+  var badge = document.getElementById('notif-badge');
+  if (!badge) return;
+  var nb = notifications.filter(function(n){ return !n.lu; }).length;
+  if (nb > 0) { badge.textContent = nb > 9 ? '9+' : String(nb); badge.style.display = 'block'; }
+  else { badge.style.display = 'none'; }
+}
+
+function afficherBanner(notif) {
+  if (!notif) return;
+  document.getElementById('notif-banner-titre').textContent = notif.titre || '';
+  document.getElementById('notif-banner-msg').textContent = notif.message || '';
+  document.getElementById('notif-banner').style.display = 'flex';
+}
+
+function fermerBanner() {
+  document.getElementById('notif-banner').style.display = 'none';
+  marquerNotificationsLues();
+}
+
+// Clic sur la cloche : réaffiche la dernière notif puis marque tout comme lu
+async function toggleNotifications() {
+  var cible = notifications.find(function(n){ return !n.lu; }) || notifications[0];
+  if (cible) { afficherBanner(cible); }
+  else { showToast('Aucune notification pour le moment.'); }
+  await marquerNotificationsLues();
+}
+
+async function marquerNotificationsLues() {
+  var nonLues = notifications.filter(function(n){ return !n.lu; });
+  if (nonLues.length === 0) { majBadge(); return; }
+  try {
+    await db.from('notifications_vendeur')
+      .update({ lu: true })
+      .eq('vendeur_email', currentUser.email)
+      .eq('lu', false);
+    notifications.forEach(function(n){ n.lu = true; });
+  } catch(e) {
+    console.warn('Erreur maj notifications lues:', e);
+  }
+  majBadge();
+}
+
+function showToast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(function(){ el.style.display = 'none'; }, 3000);
+}
+
+async function deconnexion() {
+  if (realtimeChannel) await db.removeChannel(realtimeChannel);
+  Object.values(countdownTimers).forEach(clearInterval);
+  await db.auth.signOut();
+  window.location.href = 'connexion.html';
+}
+
+// Fermer modale en cliquant en dehors
+document.getElementById('modal-prix').addEventListener('click', function(e) {
+  if (e.target === this) fermerModalPrix();
+});
+</script>
+<script src="/pwa.js"></script>
+<script src="feedback.js" defer></script>
+</body>
+</html>

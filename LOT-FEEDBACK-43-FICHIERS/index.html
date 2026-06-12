@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ImmoConnect — Vendre ou acheter un bien immobilier sans commission</title>
+<meta name="description" content="ImmoConnect met en relation vendeurs, acheteurs et agents immobiliers. Publiez votre annonce gratuitement, recevez les candidatures des meilleurs agents locaux et vendez au meilleur prix.">
+<meta name="keywords" content="vendre maison, acheter appartement, agent immobilier, plateforme immobilière, estimation immobilière gratuite">
+<meta property="og:title" content="ImmoConnect — La plateforme immobilière qui change tout">
+<meta property="og:description" content="Vendez votre bien gratuitement et choisissez le meilleur agent parmi les candidatures. 100% digital, 0 commission cachée.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ImmoConnect">
+<meta property="og:url" content="https://immoconnect-agence.fr/index.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ImmoConnect — La plateforme immobilière qui change tout">
+<meta name="twitter:description" content="Vendez votre bien gratuitement et choisissez le meilleur agent parmi les candidatures. 100% digital, 0 commission cachée.">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0F0F0E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ImmoConnect">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0E8;
+    --warm-white: #FAFAF7;
+    --charcoal: #1C1C1A;
+    --stone: #8A8478;
+    --gold: #B89A5E;
+    --gold-light: #D4B87A;
+    --terracotta: #C4785A;
+    --sage: #7A9B8A;
+    --border: rgba(28,28,26,0.1);
+    --shadow: 0 4px 40px rgba(28,28,26,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--warm-white);
+    color: var(--charcoal);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(250,250,247,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px; font-weight: 600;
+    letter-spacing: -0.5px; color: var(--charcoal);
+  }
+  .logo span { color: var(--gold); }
+  .nav-links { display: flex; gap: 32px; align-items: center; }
+  .nav-links a {
+    text-decoration: none; color: var(--stone);
+    font-size: 14px; font-weight: 400;
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--charcoal); }
+  .btn-nav {
+    padding: 10px 24px; background: var(--charcoal);
+    color: var(--cream) !important; border-radius: 2px;
+    font-size: 13px !important; font-weight: 500 !important;
+    transition: background .2s !important;
+  }
+  .btn-nav:hover { background: var(--gold) !important; color: var(--charcoal) !important; }
+  .btn-nav-gold {
+    padding: 10px 24px; background: var(--gold);
+    color: var(--charcoal) !important; border-radius: 2px;
+    font-size: 13px !important; font-weight: 500 !important;
+    transition: background .2s !important; text-decoration: none;
+  }
+  .btn-nav-gold:hover { background: var(--charcoal) !important; color: var(--cream) !important; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: grid; grid-template-columns: 1fr 1fr;
+    padding-top: 80px;
+  }
+  .hero-left {
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 80px 48px 80px 80px;
+    background: var(--cream);
+    position: relative; overflow: hidden;
+  }
+  .hero-left::before {
+    content: '';
+    position: absolute; top: -80px; right: -80px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(184,154,94,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-eyebrow {
+    font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 20px; font-weight: 500;
+  }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(44px, 5vw, 68px);
+    font-weight: 300; line-height: 1.1;
+    color: var(--charcoal); margin-bottom: 24px;
+  }
+  .hero-title em { font-style: italic; color: var(--gold); }
+  .hero-sub {
+    font-size: 16px; color: var(--stone);
+    line-height: 1.7; max-width: 420px; margin-bottom: 48px;
+    font-weight: 300;
+  }
+  .hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; }
+  .hero-paths { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:560px; }
+  .hero-path { display:flex; flex-direction:column; gap:4px; padding:16px 14px; background:var(--charcoal); color:var(--cream); border-radius:4px; text-decoration:none; transition:all .25s; border:1.5px solid var(--charcoal); }
+  .hero-path:hover { background:var(--gold); border-color:var(--gold); color:var(--charcoal); transform:translateY(-2px); }
+  .hp-ico { font-size:20px; }
+  .hp-name { font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; letter-spacing:.3px; }
+  .hp-sub { font-size:11px; opacity:.75; line-height:1.4; }
+  @media (max-width:640px){ .hero-paths{grid-template-columns:1fr;} }
+  .hanae-teaser { margin-top:22px; max-width:560px; background:rgba(184,154,94,.08); border:1px solid rgba(184,154,94,.35); border-radius:6px; padding:14px 16px; }
+  .ht-label { font-size:12px; font-weight:600; color:var(--charcoal); margin-bottom:8px; }
+  .ht-row { display:flex; gap:8px; }
+  .ht-row input { flex:1; padding:11px 12px; border:1px solid rgba(28,28,26,.25); border-radius:3px; font-family:'DM Sans',sans-serif; font-size:13px; background:#fff; }
+  .ht-row button { padding:11px 16px; background:var(--charcoal); color:var(--cream); border:none; border-radius:3px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; cursor:pointer; transition:all .25s; white-space:nowrap; }
+  .ht-row button:hover { background:var(--gold); color:var(--charcoal); }
+  .ht-result { margin-top:10px; font-size:13px; line-height:1.6; color:var(--charcoal); }
+  .ht-result .ht-price { font-size:20px; font-weight:600; }
+  .ht-result a { color:#1E7A62; font-weight:600; text-decoration:none; }
+  .btn-primary {
+    padding: 16px 36px; background: var(--charcoal);
+    color: var(--cream); border: none; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all .25s; letter-spacing: 0.3px;
+  }
+  .btn-primary:hover { background: var(--gold); color: var(--charcoal); transform: translateY(-1px); }
+  .btn-outline {
+    padding: 16px 36px; background: transparent;
+    color: var(--charcoal); border: 1.5px solid var(--charcoal);
+    border-radius: 2px; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500; cursor: pointer; transition: all .25s;
+  }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-1px); }
+
+  .hero-right {
+    position: relative; overflow: hidden;
+    background: var(--charcoal);
+  }
+  .hero-image-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    height: 100%; gap: 3px;
+  }
+  .hero-img-cell {
+    overflow: hidden; position: relative;
+    background: var(--stone);
+  }
+  .hero-img-cell img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform .5s ease; opacity: 0.85;
+  }
+  .hero-img-cell:hover img { transform: scale(1.04); opacity: 1; }
+  .hero-img-cell:first-child { grid-row: span 2; }
+  .img-label {
+    position: absolute; bottom: 12px; left: 12px;
+    background: rgba(250,250,247,0.92); backdrop-filter: blur(4px);
+    padding: 4px 10px; border-radius: 1px;
+    font-size: 11px; color: var(--charcoal); letter-spacing: 0.5px;
+  }
+  .hero-stat-badge {
+    position: absolute; top: 24px; right: 24px; z-index: 2;
+    background: var(--gold); padding: 16px 20px;
+    border-radius: 2px; text-align: center;
+  }
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px; font-weight: 300; color: var(--charcoal);
+    line-height: 1;
+  }
+  .stat-label { font-size: 10px; color: var(--charcoal); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px; }
+
+  /* ── SEARCH BAR ── */
+  .search-section {
+    padding: 0 80px;
+    margin-top: -1px;
+    background: var(--charcoal);
+  }
+  .search-bar {
+    display: flex; align-items: center;
+    background: var(--warm-white); border-radius: 2px;
+    padding: 6px 6px 6px 24px;
+    gap: 12px;
+    box-shadow: var(--shadow);
+  }
+  .search-tabs {
+    display: flex; gap: 0; margin-bottom: 0;
+    background: var(--charcoal); padding: 0 80px;
+    padding-top: 32px;
+  }
+  .search-tab {
+    padding: 12px 28px; font-size: 13px; font-weight: 500;
+    cursor: pointer; color: var(--stone); border-radius: 2px 2px 0 0;
+    border: none; background: rgba(255,255,255,0.06); margin-right: 4px;
+    font-family: 'DM Sans', sans-serif; transition: all .2s;
+    letter-spacing: 0.3px;
+  }
+  .search-tab.active { background: var(--warm-white); color: var(--charcoal); }
+  .search-tab:hover:not(.active) { background: rgba(255,255,255,0.12); color: var(--cream); }
+
+  .search-field {
+    flex: 1; display: flex; align-items: center; gap: 8px;
+    border-right: 1px solid var(--border); padding-right: 16px;
+  }
+  .search-field:last-of-type { border-right: none; }
+  .search-field svg { color: var(--stone); flex-shrink: 0; }
+  .search-field select, .search-field input {
+    border: none; background: transparent; outline: none;
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: var(--charcoal); width: 100%; cursor: pointer;
+  }
+  .search-field label {
+    display: block; font-size: 10px; color: var(--stone);
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px;
+  }
+  .btn-search {
+    padding: 14px 28px; background: var(--gold); color: var(--charcoal);
+    border: none; border-radius: 1px; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500; cursor: pointer; transition: all .2s;
+    white-space: nowrap; letter-spacing: 0.3px;
+  }
+  .btn-search:hover { background: var(--gold-light); }
+
+  /* ── LISTINGS ── */
+  .listings-section { padding: 80px; }
+  .section-header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 48px;
+  }
+  .section-eyebrow {
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 12px; font-weight: 500;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 4vw, 48px); font-weight: 300;
+    line-height: 1.15;
+  }
+  .section-title em { font-style: italic; }
+  .view-all {
+    font-size: 13px; color: var(--stone); text-decoration: none;
+    border-bottom: 1px solid var(--border); padding-bottom: 2px;
+    transition: color .2s, border-color .2s;
+  }
+  .view-all:hover { color: var(--gold); border-color: var(--gold); }
+
+  .listings-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  .listing-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 2px; overflow: hidden;
+    transition: transform .3s, box-shadow .3s;
+    cursor: pointer;
+  }
+  .listing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(28,28,26,0.12);
+  }
+  .card-image {
+    position: relative; height: 220px; overflow: hidden;
+    background: var(--cream);
+  }
+  .card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
+  .listing-card:hover .card-image img { transform: scale(1.04); }
+  .card-badge {
+    position: absolute; top: 16px; left: 16px;
+    padding: 4px 12px; border-radius: 1px;
+    font-size: 10px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  .badge-vente { background: var(--charcoal); color: var(--cream); }
+  .badge-vente { background: var(--sage); color: white; }
+  .badge-neuf { background: var(--terracotta); color: white; }
+  .card-fav {
+    position: absolute; top: 16px; right: 16px;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(250,250,247,0.9); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s; font-size: 16px;
+  }
+  .card-fav:hover { background: white; }
+  .card-body { padding: 20px 24px 24px; }
+  .card-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px; font-weight: 300;
+    color: var(--charcoal); margin-bottom: 6px;
+  }
+  .card-price span { font-size: 16px; }
+  .card-title {
+    font-size: 15px; font-weight: 500; margin-bottom: 6px;
+    color: var(--charcoal);
+  }
+  .card-location {
+    font-size: 13px; color: var(--stone);
+    display: flex; align-items: center; gap: 4px; margin-bottom: 16px;
+  }
+  .card-features {
+    display: flex; gap: 16px;
+    padding-top: 16px; border-top: 1px solid var(--border);
+  }
+  .feature {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--stone);
+  }
+  .feature-icon { font-size: 14px; }
+  .card-agent {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 24px; background: var(--cream);
+    border-top: 1px solid var(--border);
+  }
+  .agent-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--gold); display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: var(--charcoal); flex-shrink: 0;
+  }
+  .agent-info { flex: 1; }
+  .agent-name { font-size: 12px; font-weight: 500; color: var(--charcoal); }
+  .agent-role { font-size: 11px; color: var(--stone); }
+  .btn-contact-sm {
+    padding: 6px 14px; background: transparent;
+    border: 1px solid var(--border); border-radius: 1px;
+    font-size: 11px; cursor: pointer; color: var(--charcoal);
+    font-family: 'DM Sans', sans-serif; transition: all .2s;
+    letter-spacing: 0.3px;
+  }
+  .btn-contact-sm:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── HOW IT WORKS ── */
+  .how-section {
+    padding: 80px;
+    background: var(--charcoal);
+    display: block;
+  }
+  .how-intro {
+    text-align: center; margin-bottom: 40px;
+  }
+  .how-text .section-eyebrow { color: var(--gold); }
+  .how-text .section-title { color: var(--cream); }
+  .how-text .section-title em { color: var(--gold-light); }
+
+  /* PROFIL TABS */
+  .profil-tabs {
+    display: flex; justify-content: center; gap: 8px;
+    margin-bottom: 48px; flex-wrap: wrap;
+  }
+  .profil-tab {
+    padding: 10px 24px; border-radius: 40px;
+    border: 1px solid rgba(255,255,255,.15);
+    background: transparent; color: rgba(250,250,247,.55);
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    cursor: pointer; transition: all .2s; font-weight: 500;
+  }
+  .profil-tab:hover { border-color: rgba(255,255,255,.4); color: var(--cream); }
+  .profil-tab.active { background: var(--gold); border-color: var(--gold); color: var(--charcoal); }
+
+  /* PROFIL PANELS */
+  .profil-panel { display: none; }
+  .profil-panel.active { display: block; }
+
+  /* CARDS ARGUMENTS */
+  .args-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+  }
+  .arg-card {
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 12px; padding: 24px;
+    transition: background .2s;
+  }
+  .arg-card:hover { background: rgba(255,255,255,.08); }
+  .arg-num {
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .arg-icon { font-size: 28px; margin-bottom: 10px; }
+  .arg-title {
+    font-size: 15px; font-weight: 600; color: var(--cream);
+    margin-bottom: 8px; line-height: 1.3;
+  }
+  .arg-desc {
+    font-size: 13px; color: rgba(250,250,247,.55);
+    line-height: 1.65;
+  }
+  .arg-tag {
+    display: inline-block; margin-top: 12px;
+    font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: 20px;
+    background: rgba(184,154,94,.15); color: var(--gold);
+  }
+
+  /* ── STATS ── */
+  .stats-section {
+    padding: 60px 80px;
+    background: var(--gold);
+    display: flex; justify-content: space-around; align-items: center;
+  }
+  .stat-item { text-align: center; }
+  .stat-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px; font-weight: 300; color: var(--charcoal);
+    line-height: 1; margin-bottom: 8px;
+  }
+  .stat-desc { font-size: 13px; color: rgba(28,28,26,0.6); letter-spacing: 0.5px; }
+  .stat-divider { width: 1px; height: 60px; background: rgba(28,28,26,0.2); }
+
+  /* ── AGENTS ── */
+  .agents-section { padding: 80px; background: var(--cream); }
+  .agents-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+    margin-top: 48px;
+  }
+  .agent-card {
+    background: var(--warm-white); border: 1px solid var(--border);
+    border-radius: 2px; padding: 28px 24px; text-align: center;
+    transition: transform .3s, box-shadow .3s; cursor: pointer;
+  }
+  .agent-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .agent-photo {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--terracotta) 100%);
+    margin: 0 auto 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px; font-weight: 400; color: white;
+  }
+  .agent-card-name { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
+  .agent-card-spec { font-size: 12px; color: var(--stone); margin-bottom: 16px; letter-spacing: 0.5px; }
+  .agent-rating { display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 6px; }
+  .stars { color: var(--gold); font-size: 12px; }
+  .rating-num { font-size: 12px; color: var(--stone); }
+  .agent-deals { font-size: 11px; color: var(--stone); letter-spacing: 0.5px; }
+  .btn-agent {
+    margin-top: 16px; width: 100%; padding: 10px;
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 1px; font-family: 'DM Sans', sans-serif;
+    font-size: 12px; cursor: pointer; color: var(--charcoal);
+    transition: all .2s; letter-spacing: 0.3px;
+  }
+  .btn-agent:hover { border-color: var(--gold); background: var(--gold); color: var(--charcoal); }
+
+  /* ── CTA ── */
+  .cta-section {
+    padding: 100px 80px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+    align-items: center; background: var(--warm-white);
+    border-top: 1px solid var(--border);
+  }
+  .cta-block {
+    padding: 48px; border: 1px solid var(--border); border-radius: 2px;
+    position: relative; overflow: hidden;
+  }
+  .cta-block.dark {
+    background: var(--charcoal); border-color: var(--charcoal);
+  }
+  .cta-block::before {
+    content: ''; position: absolute;
+    bottom: -40px; right: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(184,154,94,0.2) 0%, transparent 70%);
+  }
+  .cta-icon { font-size: 36px; margin-bottom: 20px; }
+  .cta-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px; font-weight: 300; margin-bottom: 12px;
+  }
+  .cta-block.dark .cta-title { color: var(--cream); }
+  .cta-desc { font-size: 14px; color: var(--stone); line-height: 1.7; margin-bottom: 28px; }
+  .cta-block.dark .cta-desc { color: rgba(250,250,247,0.55); }
+  .btn-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 28px; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all .25s; letter-spacing: 0.3px; border: none;
+  }
+  .btn-cta.light { background: var(--charcoal); color: var(--cream); }
+  .btn-cta.light:hover { background: var(--gold); color: var(--charcoal); }
+  .btn-cta.gold { background: var(--gold); color: var(--charcoal); }
+  .btn-cta.gold:hover { background: var(--gold-light); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--charcoal); color: rgba(250,250,247,0.5);
+    padding: 48px 80px 32px;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px;
+  }
+  .footer-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px; color: var(--cream); margin-bottom: 12px;
+  }
+  .footer-logo span { color: var(--gold); }
+  .footer-desc { font-size: 13px; line-height: 1.7; max-width: 280px; }
+  .footer-col h4 { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+  .footer-col a { display: block; font-size: 13px; color: rgba(250,250,247,0.5); text-decoration: none; margin-bottom: 10px; transition: color .2s; }
+  .footer-col a:hover { color: var(--cream); }
+  .footer-bottom {
+    background: var(--charcoal); padding: 20px 80px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-bottom p { font-size: 12px; color: rgba(250,250,247,0.3); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(28,28,26,0.7); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--warm-white); border-radius: 4px;
+    width: 90%; max-width: 520px; max-height: 90vh; overflow-y: auto;
+    animation: modalIn .3s ease;
+  }
+  @keyframes modalIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+  .modal-header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; }
+  .modal-close {
+    width: 36px; height: 36px; border: 1px solid var(--border);
+    background: none; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; transition: all .2s;
+  }
+  .modal-close:hover { border-color: var(--charcoal); }
+  .modal-body { padding: 28px 32px 32px; }
+  .modal-tabs { display: flex; gap: 0; margin-bottom: 28px; border-bottom: 1px solid var(--border); }
+  .modal-tab {
+    padding: 10px 20px; font-size: 13px; cursor: pointer;
+    border: none; background: none; font-family: 'DM Sans', sans-serif;
+    color: var(--stone); border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: all .2s;
+  }
+  .modal-tab.active { color: var(--charcoal); border-bottom-color: var(--gold); }
+  .form-group { margin-bottom: 20px; }
+  .form-group label { display: block; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--stone); margin-bottom: 8px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 12px 16px;
+    border: 1px solid var(--border); border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--charcoal);
+    background: var(--warm-white); outline: none; transition: border-color .2s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--gold); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group textarea { resize: vertical; min-height: 90px; }
+  .btn-submit {
+    width: 100%; padding: 14px; background: var(--charcoal);
+    color: var(--cream); border: none; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: background .2s; letter-spacing: 0.3px;
+    margin-top: 8px;
+  }
+  .btn-submit:hover { background: var(--gold); color: var(--charcoal); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero-eyebrow { animation: fadeUp .6s ease both; }
+  .hero-title { animation: fadeUp .7s ease .1s both; }
+  .hero-sub { animation: fadeUp .7s ease .2s both; }
+  .hero-ctas { animation: fadeUp .7s ease .3s both; }
+
+  @media (max-width: 1100px) {
+    .hero { grid-template-columns: 1fr; min-height: auto; }
+    .hero-right { height: 400px; }
+    .listings-grid { grid-template-columns: repeat(2, 1fr); }
+    .agents-grid { grid-template-columns: repeat(2, 1fr); }
+    .how-section { display: block; }
+    .cta-section { grid-template-columns: 1fr; }
+    footer { grid-template-columns: 1fr 1fr; }
+    nav, .listings-section, .agents-section, .search-section, .search-tabs,
+    .how-section, .stats-section, .cta-section, .footer-bottom { padding-left: 32px; padding-right: 32px; }
+    .hero-left { padding: 60px 32px; }
+  }
+  .hw-tab { display:none; }
+  .hw-tab.visible { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media(max-width:600px){ .hw-tab.visible { grid-template-columns:1fr; } }
+
+  @media (max-width: 700px) {
+    .listings-grid, .agents-grid { grid-template-columns: 1fr; }
+    .stats-section { flex-direction: column; gap: 32px; }
+    .stat-divider { display: none; }
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    footer { grid-template-columns: 1fr; gap: 32px; }
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo"><img src="logo-immoconnect.png" alt="ImmoConnect" style="height:38px;width:auto;object-fit:contain;vertical-align:middle"><span style="font-size:22px;font-weight:600;color:#0F0F0E;margin-left:8px">Immo<span style="color:#C09B5A">Connect</span></span></div>
+  <div class="nav-links">
+    <a href="forfaits.html">Forfaits</a>
+    <a href="questionnaire-vendeur.html" class="btn-nav-gold">Vendre</a>
+    <a href="questionnaire-acheteur.html">Acheter</a>
+    <a href="forfaits.html" onclick="localStorage.setItem('ic_tab','agents')">Agents immo</a>
+    <a href="blog.html">Blog</a>
+    <a href="calendrier.html">📅</a><a href="messagerie.html">💬</a><a href="connexion.html" class="btn-nav">Se connecter</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow">L'immobilier en direct, sans commission d'agence</div>
+    <h1 class="hero-title">
+      Vendez sans agence.<br><em>Achetez en direct.</em>
+    </h1>
+    <p class="hero-sub">
+      Annonce et estimation IA gratuites pour les vendeurs. Prix affichés en clair pour les acheteurs. Rendement et fiscalité calculés pour les investisseurs.
+    </p>
+    <div class="hero-paths">
+      <a class="hero-path" href="questionnaire-vendeur.html">
+        <span class="hp-ico">🏠</span>
+        <span class="hp-name">Je vends</span>
+        <span class="hp-sub">Annonce gratuite · estimation IA offerte</span>
+      </a>
+      <a class="hero-path" href="carte.html">
+        <span class="hp-ico">🔑</span>
+        <span class="hp-name">J'achète</span>
+        <span class="hp-sub">Contact direct vendeur · prix en clair</span>
+      </a>
+      <a class="hero-path" href="questionnaire-acheteur.html">
+        <span class="hp-ico">📈</span>
+        <span class="hp-name">J'investis</span>
+        <span class="hp-sub">Rendement net et fiscalité calculés</span>
+      </a>
+    </div>
+    <!-- PROP 4 : teaser Hanaé — la valeur avant l'inscription -->
+    <div class="hanae-teaser">
+      <div class="ht-label">🤖 Hanaé — estimez votre bien gratuitement, en 1 minute, sans inscription</div>
+      <div class="ht-row">
+        <input type="text" id="ht-cp" maxlength="5" inputmode="numeric" placeholder="Code postal (ex : 33260)" onkeydown="if(event.key==='Enter')htEstimer()">
+        <button onclick="htEstimer()" id="ht-btn">Estimer mon bien →</button>
+      </div>
+      <div id="ht-result" class="ht-result" style="display:none"></div>
+    </div>
+  </div>
+  <div class="hero-right" style="background:#1C1C1A;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;">
+    <!-- Fond subtil -->
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 60% 40%, rgba(184,154,94,0.08) 0%, transparent 65%);pointer-events:none"></div>
+
+    <!-- CAROUSEL -->
+    <div id="video-carousel" style="position:relative;width:100%;overflow:hidden;">
+
+      <!-- Track glissant -->
+      <div id="carousel-track" style="display:flex;transition:transform .4s cubic-bezier(.4,0,.2,1);will-change:transform;">
+
+        <!-- Slide 1 — Thao -->
+        <div class="carousel-slide" data-video-wrap style="flex:0 0 100%;position:relative;padding:24px;">
+          <div style="position:relative;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+            <video id="vendeur-hero-video" poster="https://zxxhyefajfwqcxcfxpmg.supabase.co/storage/v1/object/public/videos/poster-thao.jpg.png" src="https://zxxhyefajfwqcxcfxpmg.supabase.co/storage/v1/object/public/videos/video%20vendeur.mp4" playsinline preload="metadata" style="width:100%;display:block;cursor:pointer;opacity:0.95;background:#1C1C1A" onclick="playCarouselVideo(this)"></video>
+            <div class="video-overlay" style="position:absolute;inset:0;background:rgba(28,28,26,0.15);cursor:pointer" onclick="playCarouselVideo(document.getElementById('vendeur-hero-video'))">
+              <div style="position:absolute;top:18%;left:22%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;background:rgba(184,154,94,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 30px rgba(0,0,0,0.6)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#1C1C1A"><polygon points="6,3 20,12 6,21"/></svg>
+              </div>
+            </div>
+            <div style="position:absolute;bottom:12px;left:14px;background:rgba(28,28,26,0.85);backdrop-filter:blur(8px);border:1px solid rgba(184,154,94,0.3);border-radius:6px;padding:5px 12px;font-family:'DM Sans',sans-serif">
+              <div style="font-size:12px;color:#FAFAF7;font-weight:500">Thao — Conseiller IA</div>
+              <div style="font-size:10px;color:rgba(250,250,247,.55)">Comment vendre sur ImmoConnect</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 2 — Hanaé (centre / défaut) -->
+        <div class="carousel-slide" data-video-wrap style="flex:0 0 100%;position:relative;padding:24px;">
+          <div style="position:relative;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+            <video id="hanae-hero-video" poster="https://zxxhyefajfwqcxcfxpmg.supabase.co/storage/v1/object/public/videos/poster-hanae.jpg.png" src="https://zxxhyefajfwqcxcfxpmg.supabase.co/storage/v1/object/public/videos/videoagents.mp4" playsinline preload="metadata" style="width:100%;display:block;cursor:pointer;opacity:0.95;background:#1C1C1A" onclick="playCarouselVideo(this)"></video>
+            <div class="video-overlay" style="position:absolute;inset:0;background:rgba(28,28,26,0.15);cursor:pointer" onclick="playCarouselVideo(document.getElementById('hanae-hero-video'))">
+              <div style="position:absolute;top:18%;left:22%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;background:rgba(184,154,94,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 30px rgba(0,0,0,0.6)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#1C1C1A"><polygon points="6,3 20,12 6,21"/></svg>
+              </div>
+            </div>
+            <div style="position:absolute;bottom:12px;left:14px;background:rgba(28,28,26,0.85);backdrop-filter:blur(8px);border:1px solid rgba(184,154,94,0.35);border-radius:6px;padding:5px 12px;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif">
+              <div style="width:6px;height:6px;border-radius:50%;background:#B89A5E;animation:pulseDot 2s infinite"></div>
+              <span style="font-size:12px;color:#FAFAF7">Hanaé — Conseillère ImmoConnect</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 3 — Mewen -->
+        <div class="carousel-slide" data-video-wrap style="flex:0 0 100%;position:relative;padding:24px;">
+          <div style="position:relative;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+            <video id="mewen-hero-video" poster="https://zxxhyefajfwqcxcfxpmg.supabase.co/storage/v1/object/public/videos/poster-mewen.jpg.png" src="https://zxxhyefajfwqcxcfxpmg.supabase.co/storage/v1/object/public/videos/INVESTISSEURS.mp4" playsinline preload="metadata" style="width:100%;display:block;cursor:pointer;opacity:0.95;background:#1C1C1A" onclick="playCarouselVideo(this)"></video>
+            <!-- Bouton play positionné en haut à gauche sur le visage -->
+            <div class="video-overlay" style="position:absolute;inset:0;background:rgba(28,28,26,0.15);cursor:pointer" onclick="playCarouselVideo(document.getElementById('mewen-hero-video'))">
+              <div style="position:absolute;top:18%;left:22%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;background:rgba(184,154,94,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 30px rgba(0,0,0,0.6)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#1C1C1A"><polygon points="6,3 20,12 6,21"/></svg>
+              </div>
+            </div>
+            <div style="position:absolute;bottom:12px;left:14px;background:rgba(28,28,26,0.85);backdrop-filter:blur(8px);border:1px solid rgba(184,154,94,0.3);border-radius:6px;padding:5px 12px;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif">
+              <div style="width:6px;height:6px;border-radius:50%;background:#B89A5E;animation:pulseDot 2s infinite"></div>
+              <div>
+                <div style="font-size:12px;color:#FAFAF7;font-weight:500">Mewen</div>
+                <div style="font-size:10px;color:rgba(250,250,247,.55)">Agent immobilier ImmoConnect</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /track -->
+
+      <!-- Flèches navigation -->
+      <button id="carousel-prev" onclick="carouselNav(-1)" style="position:absolute;left:6px;top:50%;transform:translateY(-50%);z-index:10;width:34px;height:34px;border-radius:50%;background:rgba(28,28,26,0.8);border:1px solid rgba(184,154,94,0.4);color:#FAFAF7;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)">‹</button>
+      <button id="carousel-next" onclick="carouselNav(1)" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);z-index:10;width:34px;height:34px;border-radius:50%;background:rgba(28,28,26,0.8);border:1px solid rgba(184,154,94,0.4);color:#FAFAF7;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)">›</button>
+
+      <!-- Indicateurs -->
+      <div id="carousel-dots" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:10">
+        <div class="cdot" onclick="carouselGo(0)" style="width:6px;height:6px;border-radius:50%;background:rgba(184,154,94,0.4);cursor:pointer;transition:all .2s"></div>
+        <div class="cdot active-dot" onclick="carouselGo(1)" style="width:18px;height:6px;border-radius:3px;background:#B89A5E;cursor:pointer;transition:all .2s"></div>
+        <div class="cdot" onclick="carouselGo(2)" style="width:6px;height:6px;border-radius:50%;background:rgba(184,154,94,0.4);cursor:pointer;transition:all .2s"></div>
+      </div>
+
+    </div><!-- /carousel -->
+  </div>
+</section>
+<style>
+  @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(0.8)} }
+</style>
+<script>
+  // ── CAROUSEL ──
+  var carouselIndex = 1; // Hanaé au centre par défaut
+  var carouselTotal = 3;
+  var carouselDragging = false;
+  var carouselStartX = 0;
+
+  function carouselRender() {
+    var track = document.getElementById('carousel-track');
+    if (track) track.style.transform = 'translateX(-' + (carouselIndex * 100) + '%)';
+    var dots = document.querySelectorAll('.cdot');
+    dots.forEach(function(d, i) {
+      if (i === carouselIndex) {
+        d.style.width = '18px'; d.style.height = '6px'; d.style.borderRadius = '3px'; d.style.background = '#B89A5E';
+      } else {
+        d.style.width = '6px'; d.style.height = '6px'; d.style.borderRadius = '50%'; d.style.background = 'rgba(184,154,94,0.4)';
+      }
+    });
+  }
+
+  function carouselNav(dir) {
+    // Stopper toutes les vidéos en cours
+    document.querySelectorAll('#carousel-track video').forEach(function(v) {
+      v.pause(); v.currentTime = 0;
+      var wrap = v.closest('[data-video-wrap]');
+      if (wrap) { var ov = wrap.querySelector('.video-overlay'); if (ov) ov.style.display = ''; }
+    });
+    carouselIndex = Math.max(0, Math.min(carouselTotal - 1, carouselIndex + dir));
+    carouselRender();
+    collapseAllVideos();
+  }
+
+  function carouselGo(idx) {
+    document.querySelectorAll('#carousel-track video').forEach(function(v) {
+      v.pause(); v.currentTime = 0;
+    });
+    carouselIndex = idx;
+    carouselRender();
+    collapseAllVideos();
+  }
+
+  // Swipe tactile
+  var carouselTrackEl = document.getElementById('carousel-track');
+  if (carouselTrackEl) {
+    carouselTrackEl.addEventListener('touchstart', function(e) { carouselStartX = e.touches[0].clientX; });
+    carouselTrackEl.addEventListener('touchend', function(e) {
+      var diff = carouselStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 40) carouselNav(diff > 0 ? 1 : -1);
+    });
+  }
+
+  // ── LECTEUR PLEIN ÉCRAN ──
+  var videoExpanded = null;
+
+  function playCarouselVideo(vid) {
+    if (vid.paused) { expandVideo(vid); } else { collapseVideo(vid); }
+  }
+
+  function toggleHanaeVideo(vid) { playCarouselVideo(vid); }
+
+  function expandVideo(vid) {
+    var carousel = document.getElementById('video-carousel');
+    var myWrap = vid.closest('[data-video-wrap]');
+    var myOverlay = myWrap ? myWrap.querySelector('.video-overlay') : null;
+
+    // Masquer les flèches et dots
+    var prev = document.getElementById('carousel-prev');
+    var next = document.getElementById('carousel-next');
+    var dotsEl = document.getElementById('carousel-dots');
+    if (prev) prev.style.display = 'none';
+    if (next) next.style.display = 'none';
+    if (dotsEl) dotsEl.style.display = 'none';
+
+    // Masquer l\'overlay play
+    if (myOverlay) myOverlay.style.display = 'none';
+
+    // Bouton retour
+    if (!document.getElementById('btn-retour-video')) {
+      var btn = document.createElement('button');
+      btn.id = 'btn-retour-video';
+      btn.innerHTML = '← Retour';
+      btn.style.cssText = 'position:absolute;top:12px;left:12px;z-index:99;background:rgba(28,28,26,0.85);color:#FAFAF7;border:1px solid rgba(184,154,94,0.4);border-radius:6px;padding:6px 14px;font-size:12px;font-family:DM Sans,sans-serif;cursor:pointer;backdrop-filter:blur(8px)';
+      btn.onclick = function() { collapseVideo(vid); };
+      carousel.appendChild(btn);
+    }
+
+    vid.play();
+    videoExpanded = vid;
+    vid.onended = function() { collapseVideo(vid); };
+  }
+
+  function collapseVideo(vid) {
+    var prev = document.getElementById('carousel-prev');
+    var next = document.getElementById('carousel-next');
+    var dotsEl = document.getElementById('carousel-dots');
+    if (prev) prev.style.display = '';
+    if (next) next.style.display = '';
+    if (dotsEl) dotsEl.style.display = '';
+
+    var myWrap = vid.closest('[data-video-wrap]');
+    var myOverlay = myWrap ? myWrap.querySelector('.video-overlay') : null;
+    if (myOverlay) myOverlay.style.display = '';
+
+    var btn = document.getElementById('btn-retour-video');
+    if (btn) btn.remove();
+
+    vid.pause();
+    vid.currentTime = 0;
+    videoExpanded = null;
+  }
+
+  function collapseAllVideos() {
+    document.querySelectorAll('#carousel-track video').forEach(function(v) {
+      if (!v.paused) collapseVideo(v);
+    });
+  }
+
+  // Init carousel sur Hanaé (slide 1)
+  carouselRender();
+</script>
+
+<!-- SEARCH -->
+<div class="search-tabs">
+  <button class="search-tab active" onclick="setTab(this,'Acheter')">Acheter</button>
+  
+  
+
+</div>
+<div class="search-section">
+  <div class="search-bar">
+    <div class="search-field">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      <div style="flex:1">
+        <label>Localisation</label>
+        <input type="text" placeholder="Ville, quartier, code postal…">
+      </div>
+    </div>
+    <div class="search-field" style="max-width:160px">
+      <div style="flex:1">
+        <label>Type de bien</label>
+        <select>
+          <option>Tous</option>
+          <option>Appartement</option>
+          <option>Maison</option>
+          <option>Villa</option>
+          <option>Terrain</option>
+          <option>Local commercial</option>
+        </select>
+      </div>
+    </div>
+    <div class="search-field" style="max-width:180px">
+      <div style="flex:1">
+        <label>Budget max</label>
+        <select>
+          <option>Sans limite</option>
+          <option>200 000 €</option>
+          <option>350 000 €</option>
+          <option>500 000 €</option>
+          <option>750 000 €</option>
+          <option>1 000 000 €</option>
+          <option>2 000 000 €</option>
+        </select>
+      </div>
+    </div>
+    <div class="search-field" style="max-width:140px; border-right:none">
+      <div style="flex:1">
+        <label>Pièces min.</label>
+        <select>
+          <option>Indifférent</option>
+          <option>1 pièce</option>
+          <option>2 pièces</option>
+          <option>3 pièces</option>
+          <option>4 pièces</option>
+          <option>5+ pièces</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-search" onclick="showListings()">Rechercher →</button>
+  </div>
+</div>
+
+<!-- LISTINGS -->
+<section class="listings-section" id="listings">
+  <div class="section-header">
+    <div>
+      <div class="section-eyebrow">Sélection du moment</div>
+      <h2 class="section-title">Biens <em>à la une</em></h2>
+    </div>
+    <a href="#" class="view-all">Voir tous les biens →</a>
+  </div>
+  <div class="listings-grid" id="listingsGrid">
+    <!-- Cards injected by JS -->
+  </div>
+</section>
+
+<!-- STATS -->
+
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <div class="stat-number">100%</div>
+    <div class="stat-desc">Gratuit pour les vendeurs — 4 niveaux</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <div class="stat-number">60 pts</div>
+    <div class="stat-desc">Seuil qualité Hanaé — seuls les meilleurs agents sont présentés</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <div class="stat-number">H+0</div>
+    <div class="stat-desc">Alertes agents Premium dès la publication du bien</div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section style="padding:80px;background:#1C1C1A">
+  <div style="text-align:center;margin-bottom:40px">
+    <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#B89A5E;margin-bottom:12px;font-weight:500">Pourquoi ImmoConnect</div>
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4vw,44px);font-weight:300;color:#FAFAF7">La plateforme qui <em style="color:#D4B87A">change la donne</em></h2>
+  </div>
+
+  <div style="display:flex;justify-content:center;gap:8px;margin-bottom:40px;flex-wrap:wrap">
+    <button id="btn-vendeurs" onclick="switchTab('vendeurs')" style="padding:10px 24px;border-radius:40px;background:#B89A5E;border:none;color:#1C1C1A;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">🏠 Vendeurs</button>
+    <button id="btn-acheteurs" onclick="switchTab('acheteurs')" style="padding:10px 24px;border-radius:40px;background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(250,250,247,.6);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">🔍 Acheteurs</button>
+    <button id="btn-investisseurs" onclick="switchTab('investisseurs')" style="padding:10px 24px;border-radius:40px;background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(250,250,247,.6);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">📈 Investisseurs</button>
+    <button id="btn-agents" onclick="switchTab('agents')" style="padding:10px 24px;border-radius:40px;background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(250,250,247,.6);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">🤝 Agents immo</button>
+  </div>
+
+  <div style="max-width:900px;margin:0 auto">
+
+    <!-- VENDEURS -->
+    <div id="tab-vendeurs" class="hw-tab visible">
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">01</div>
+        <div style="font-size:28px;margin-bottom:10px">⚡</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Publiez gratuitement en 10 minutes</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Un dossier, une fois. Hanaé IA rédige votre annonce automatiquement. Ajoutez vos photos et documents. Pas de mandat, pas de commission d'avance. 4 niveaux de dossier — tous gratuits.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(30,122,98,.2);color:#5DCAA5">100% gratuit</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">02</div>
+        <div style="font-size:28px;margin-bottom:10px">🎛️</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Vous choisissez qui peut vous contacter</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">3 modes dès le niveau Silver : acheteurs & investisseurs uniquement, acheteurs + agents libres, ou ImmoConnect sélectionne les 3 meilleurs agents via l'algorithme Hanaé. Vous restez maître.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">3 options de contact</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">03</div>
+        <div style="font-size:28px;margin-bottom:10px">🏆</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Hanaé IA sélectionne les 3 meilleurs agents</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Tous les agents candidatent sur 100 points : expérience locale, réputation, cohérence d'estimation, stratégie. Seuil qualité 60/100. Seuls les meilleurs vous sont présentés avec un comparatif automatique.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Scoring IA · seuil 60/100</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">04</div>
+        <div style="font-size:28px;margin-bottom:10px">🚀</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Plus complet = plus visible = plus rapide</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Standard : ville + 3 photos + prix. Platinium : adresse exacte, DPE, rapport Hanaé IA, mise en avant prioritaire, alertes agents dès H+0. Plus votre dossier est complet, plus vous attirez les bons profils.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">4 niveaux gratuits</span>
+      </div>
+    </div>
+
+    <!-- ACHETEURS -->
+    <div id="tab-acheteurs" class="hw-tab">
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">01</div>
+        <div style="font-size:28px;margin-bottom:10px">👁️</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Prix, ville, surface, pièces — visibles gratuitement</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Toutes les annonces sont accessibles sans inscription : prix affiché en clair, ville, surface, type de bien, nombre de pièces. Alertes email quotidiennes incluses. Cherchez sans rien payer.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(30,122,98,.2);color:#5DCAA5">Accès gratuit</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">02</div>
+        <div style="font-size:28px;margin-bottom:10px">📂</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Dossier complet à 4,99€ — sans contacter le vendeur</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Adresse exacte, toutes les photos, rapport Hanaé IA complet (DVF, prix/m², analyse de marché). Analysez un bien en profondeur avant de décider de contacter — sans engagement.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(212,115,42,.15);color:#F0A060">Dossier · 4,99€</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">03</div>
+        <div style="font-size:28px;margin-bottom:10px">💬</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Contact vendeur à 9,99€ — dossier complet inclus</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Le contact à 9,99€ débloque automatiquement le dossier complet ET vous met en relation directe avec le vendeur. 1 contact offert gratuitement chaque semaine — équivalent à cette option.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(212,115,42,.15);color:#F0A060">Contact · 9,99€ · 1/sem offert</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">04</div>
+        <div style="font-size:28px;margin-bottom:10px">🔔</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Alertes en temps réel sur vos critères</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Dès qu'un bien compatible avec votre projet est publié, vous êtes alerté immédiatement. Les vendeurs Platinium peuvent aussi vous contacter directement si votre profil correspond à leur bien.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(30,122,98,.2);color:#5DCAA5">Matching automatique</span>
+      </div>
+    </div>
+
+    <!-- INVESTISSEURS -->
+    <div id="tab-investisseurs" class="hw-tab">
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">01</div>
+        <div style="font-size:28px;margin-bottom:10px">🎯</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Matching automatique sur le rendement net</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Définissez votre rendement minimum, votre budget et votre stratégie (LMNP, nu, colocation…). ImmoConnect vous alerte uniquement sur les biens compatibles. Vous ne voyez que les opportunités rentables.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Matching rendement · 29,99€/mois</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">02</div>
+        <div style="font-size:28px;margin-bottom:10px">📊</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Dossier complet accessible sur tous les biens</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Adresse exacte, photos, rapport Hanaé IA inclus d'emblée sur tous les biens. Prix DVF, indice Notaires-INSEE, carte des loyers, rendement brut et net. Des chiffres officiels, pas du marketing.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">DVF + INSEE + Loyers</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">03</div>
+        <div style="font-size:28px;margin-bottom:10px">🧮</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Simulateur financier complet intégré</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Capacité d'emprunt en temps réel (loyers à 90% comme les banques), cashflow après crédit, fiscalité LMNP ou micro-foncier, TRI sur 10-20 ans, comparaison location vide vs meublé vs courte durée.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Calcul bancaire réel</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">04</div>
+        <div style="font-size:28px;margin-bottom:10px">📩</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">5 contacts vendeurs offerts par semaine</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Contactez directement jusqu'à 5 vendeurs par semaine inclus dans l'abonnement. Les vendeurs Platinium peuvent aussi vous contacter en priorité. Contact supplémentaire à seulement 1,99€.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(30,122,98,.2);color:#5DCAA5">5 contacts/sem · supp. 1,99€</span>
+      </div>
+    </div>
+
+    <!-- AGENTS -->
+    <div id="tab-agents" class="hw-tab">
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">01</div>
+        <div style="font-size:28px;margin-bottom:10px">📁</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Dossiers vendeurs complets dès la publication</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Photos, DPE, taxe foncière, rapport Hanaé IA — tout est constitué avant que vous contactiez. Mandat simple signé via Docage en 5 minutes. Présentez le bien à vos acheteurs immédiatement.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Mandat simple en 5 min</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">02</div>
+        <div style="font-size:28px;margin-bottom:10px">🔔</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Alertes selon votre forfait — agissez en premier</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Premium alerté H+0 dès la publication. Pro à H+4. Starter à H+12. Pay per use sans alerte. Agissez avant vos concurrents sur les meilleurs dossiers Silver, Gold et Platinium.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(24,95,165,.2);color:#7EB8FF">H+0 · H+4 · H+12</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">03</div>
+        <div style="font-size:28px;margin-bottom:10px">🏆</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Candidatez — prouvez votre valeur avant le mandat</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Mode comparatif : candidatez à 9,99€ (mandat de vente ou acheteur en portefeuille). Hanaé score chaque candidat sur 100 points. Seuil qualité 60/100. Les 3 meilleurs présentés au vendeur.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(184,154,94,.15);color:#B89A5E">Candidature · 9,99€</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B89A5E;margin-bottom:10px">04</div>
+        <div style="font-size:28px;margin-bottom:10px">📈</div>
+        <div style="font-size:15px;font-weight:600;color:#FAFAF7;margin-bottom:8px">Publiez vos mandats — matching automatique gratuit</div>
+        <div style="font-size:13px;color:rgba(250,250,247,.55);line-height:1.65">Déclarez vos mandats vendeurs et vos acheteurs en portefeuille. ImmoConnect croise automatiquement avec les annonces compatibles et vous alerte dès qu'un bien correspond. Zéro prospection à froid.</div>
+        <span style="display:inline-block;margin-top:12px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(30,122,98,.2);color:#5DCAA5">Matching mandats gratuit</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+  function switchTab(t) {
+    var ids = ['vendeurs','acheteurs','investisseurs','agents'];
+    ids.forEach(function(id) {
+      var tab = document.getElementById('tab-' + id);
+      var btn = document.getElementById('btn-' + id);
+      if (id === t) {
+        tab.classList.add('visible');
+        btn.style.background = '#B89A5E';
+        btn.style.color = '#1C1C1A';
+        btn.style.border = 'none';
+      } else {
+        tab.classList.remove('visible');
+        btn.style.background = 'transparent';
+        btn.style.color = 'rgba(250,250,247,.6)';
+        btn.style.border = '1px solid rgba(255,255,255,.2)';
+      }
+    });
+  }
+  </script>
+</section>
+
+
+<section class="agents-section" id="agents">
+  <div class="section-header">
+    <div>
+      <div class="section-eyebrow">Réseau d'agents partenaires</div>
+      <h2 class="section-title">Agents — dossiers prêts, <em>zéro prospection</em></h2>
+    </div>
+    <a href="forfaits.html" onclick="localStorage.setItem('ic_tab','agents')" class="view-all">Voir les forfaits agents →</a>
+  </div>
+  <div class="agents-grid" id="agentsGrid"></div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-block">
+    <div class="cta-icon">🔍</div>
+    <h3 class="cta-title">Acheteur ou investisseur ?</h3>
+    <p class="cta-desc">Prix, ville, surface et pièces visibles gratuitement sur toutes les annonces. Débloquez le dossier complet à 4,99€ ou contactez le vendeur à 9,99€ — 1 contact offert par semaine. Investisseur : matching automatique sur rendement net dès 29,99€/mois.</p>
+    <button class="btn-cta light" onclick="window.location.href='questionnaire-acheteur.html'">Déposer mon projet →</button>
+  </div>
+  <div class="cta-block dark">
+    <div class="cta-icon">🏡</div>
+    <h3 class="cta-title" style="color:var(--cream)">Vous souhaitez vendre ?</h3>
+    <p class="cta-desc">Publiez gratuitement. Choisissez votre mode : acheteurs uniquement, agents libres, ou laissez Hanaé IA sélectionner les 3 meilleurs agents du secteur pour vous. Sans mandat forcé. Sans commission d'avance.</p>
+    <button class="btn-cta gold" onclick="window.location.href='questionnaire-vendeur.html'">Publier mon bien →</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<!-- SECTION CARTE -->
+<section style="padding:80px;background:var(--warm-white);border-top:1px solid var(--border)">
+  <div class="section-header">
+    <div>
+      <div class="section-eyebrow">Carte interactive</div>
+      <h2 class="section-title">Biens à vendre <em>sur la carte</em></h2>
+    </div>
+    <a href="carte.html" class="view-all">Ouvrir la carte complète →</a>
+  </div>
+  <p style="font-size:14px;color:var(--stone);margin-bottom:24px;line-height:1.7;max-width:600px">
+    Visualisez tous les biens ImmoConnect sur la carte. Filtrez par type de bien, budget, surface, nombre de pièces ou niveau de dossier (Standard, Silver, Gold, Platinium).
+  </p>
+  <div style="border-radius:12px;overflow:hidden;border:1px solid var(--border);position:relative;height:420px">
+    <iframe src="carte.html" style="width:100%;height:100%;border:none" title="Carte des biens ImmoConnect"></iframe>
+    <div style="position:absolute;inset:0;pointer-events:none;border-radius:12px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)"></div>
+  </div>
+  <div style="display:flex;gap:24px;margin-top:16px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--stone)">
+      <div style="width:12px;height:12px;border-radius:50%;background:#1E7A62;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 3px rgba(0,0,0,.2)"></div>
+      Biens ImmoConnect à vendre
+    </div>
+    <a href="carte.html" style="margin-left:auto;font-size:12px;color:var(--stone);text-decoration:none;display:flex;align-items:center;gap:4px">Plein écran →</a>
+  </div>
+</section>
+
+<footer>
+  <div>
+    <div class="footer-logo"><img src="logo-immoconnect.png" alt="ImmoConnect" style="height:38px;width:auto;object-fit:contain;vertical-align:middle"><span style="font-size:22px;font-weight:600;color:#0F0F0E;margin-left:8px">Immo<span style="color:#C09B5A">Connect</span></span></div>
+    <p class="footer-desc">La plateforme qui redonne le pouvoir au vendeur. Publiez gratuitement, choisissez vos contacts, laissez Hanaé IA sélectionner les meilleurs agents pour vous.</p>
+  </div>
+  <div class="footer-col">
+    <h4>Acheter</h4>
+    <a href="prix-immobilier-gironde.html">Prix immobilier en Gironde</a>
+    <a href="questionnaire-acheteur.html">Appartements</a>
+    <a href="questionnaire-acheteur.html">Maisons</a>
+    <a href="questionnaire-acheteur.html">Villas</a>
+    <a href="questionnaire-acheteur.html">Terrains</a>
+  </div>
+  <div class="footer-col">
+    <h4>Vendre</h4>
+    <a href="questionnaire-vendeur.html">Estimer mon bien</a>
+    <a href="questionnaire-vendeur.html">Mettre en vente</a>
+  </div>
+  <div class="footer-col">
+    <h4>ImmoConnect</h4>
+    <a href="a-propos.html">À propos</a>
+    <a href="mailto:contact@immoconnect-agence.fr">Contact</a>
+    <a href="cgu.html">CGU</a>
+    <a href="mentions-legales.html">Mentions légales</a>
+    <a href="confidentialite.html">Confidentialité</a>
+    <a href="faq.html">FAQ</a>
+  </div>
+</footer>
+<div class="footer-bottom">
+  <p>© 2026 ImmoConnect. Tous droits réservés.</p>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Mon projet</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tabs">
+        <button class="modal-tab active" onclick="switchModalTab(this,'acheter')">🏠 Acheter</button>
+        <button class="modal-tab" onclick="switchModalTab(this,'vendre')">💶 Vendre</button>
+        <button class="modal-tab" onclick="switchModalTab(this,'contact')">📞 Contact agent</button>
+      </div>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+const SB_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const { createClient } = supabase;
+const db = createClient(SB_URL, SB_KEY);
+
+const agents = [
+  { init:'SM', name:'Sophie Martin', spec:'Côte d\'Azur · Luxe', rating:4.9, deals:87 },
+  { init:'MD', name:'Marc Dubois', spec:'Lyon · Neuf', rating:4.8, deals:143 },
+  { init:'CB', name:'Claire Bernard', spec:'Paris · Investissement', rating:5.0, deals:62 },
+  { init:'AR', name:'Antoine Roux', spec:'Bordeaux · Maisons', rating:4.7, deals:201 },
+];
+
+// ── RENDER LISTINGS ──
+async function renderListings() {
+  const grid = document.getElementById('listingsGrid');
+  let annonces = [];
+  try {
+    const { data } = await db.from('annonces_vendeurs')
+      .select('id, titre, type_bien, ville, code_postal, prix, surface, nb_pieces, nb_chambres, photo_principale, niveau_valide')
+      .eq('statut_annonce', 'publiee')
+      .order('created_at', { ascending: false })
+      .limit(6);
+    annonces = data || [];
+  } catch (e) { annonces = []; }
+
+  if (annonces.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px 20px;color:#888780;font-size:14px">Aucun bien publié pour le moment.<br><a href="questionnaire-vendeur.html" style="color:#1E7A62;font-weight:500;margin-top:8px;display:inline-block">Publier gratuitement votre bien →</a></div>';
+    return;
+  }
+
+  grid.innerHTML = annonces.map(function(a) {
+    var prix = a.prix ? Number(a.prix).toLocaleString('fr-FR') : 'Prix NC';
+    var ville = (a.ville || '') + (a.code_postal ? ', ' + a.code_postal : '');
+    var niveau = ({ silver:'🥈', gold:'🥇', platinium:'💎' })[a.niveau_valide] || '';
+    var img = a.photo_principale
+      ? '<img src="' + a.photo_principale + '" alt="">'
+      : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#E8E6E0,#F5F2EC);font-size:42px">🏠</div>';
+    return '<a href="bien.html?id=' + a.id + '" class="listing-card" style="text-decoration:none;color:inherit;display:block">'
+      + '<div class="card-image">' + img + '<div class="card-badge badge-vente">À vendre</div></div>'
+      + '<div class="card-body">'
+      + '<div class="card-price">' + prix + ' <span>€</span></div>'
+      + '<div class="card-title">' + (niveau ? niveau + ' ' : '') + (a.titre || (a.type_bien || 'Bien')) + '</div>'
+      + '<div class="card-location">📍 ' + ville + '</div>'
+      + '<div class="card-features">'
+      + '<div class="feature"><span class="feature-icon">🛏</span>' + (a.nb_chambres != null ? a.nb_chambres : '?') + ' ch.</div>'
+      + '<div class="feature"><span class="feature-icon">📐</span>' + (a.surface != null ? a.surface : '?') + ' m²</div>'
+      + '<div class="feature"><span class="feature-icon">🏠</span>' + (a.nb_pieces != null ? a.nb_pieces : '?') + ' pièces</div>'
+      + '</div></div></a>';
+  }).join('');
+}
+
+// ── RENDER AGENTS ──
+async function renderAgents() {
+  const section = document.getElementById('agents');
+  const grid = document.getElementById('agentsGrid');
+  let agents = [];
+  try {
+    const { data } = await db.from('agents_validation')
+      .select('nom, prenom, agence, note_moyenne, nb_notations, secteurs')
+      .eq('statut', 'valide')
+      .order('note_moyenne', { ascending: false })
+      .limit(4);
+    agents = data || [];
+  } catch (e) { agents = []; }
+
+  if (agents.length === 0) { if (section) section.style.display = 'none'; return; }
+
+  grid.innerHTML = agents.map(function(a) {
+    var prenom = a.prenom || '', nom = a.nom || '';
+    var init = ((prenom[0]||'') + (nom[0]||'')).toUpperCase() || 'AG';
+    var name = (prenom + ' ' + nom).trim() || 'Agent';
+    var spec = a.agence || (Array.isArray(a.secteurs) ? a.secteurs.join(' · ') : (a.secteurs || 'Agent ImmoConnect'));
+    var rating = (a.note_moyenne != null) ? a.note_moyenne : '—';
+    var deals = a.nb_notations ? (a.nb_notations + ' avis') : 'Nouveau';
+    return '<div class="agent-card">'
+      + '<div class="agent-photo">' + init + '</div>'
+      + '<div class="agent-card-name">' + name + '</div>'
+      + '<div class="agent-card-spec">' + spec + '</div>'
+      + '<div class="agent-rating"><span class="stars">★★★★★</span><span class="rating-num">' + rating + '</span></div>'
+      + '<div class="agent-deals">' + deals + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+// ── TABS ──
+function setTab(el, label) {
+  document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function showListings() {
+  document.getElementById('listings').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── MODAL ──
+const modalForms = {
+  acheter: `
+    <div class="form-row">
+      <div class="form-group"><label>Prénom</label><input type="text" placeholder="Marie"></div>
+      <div class="form-group"><label>Nom</label><input type="text" placeholder="Dupont"></div>
+    </div>
+    <div class="form-group"><label>Email</label><input type="email" placeholder="marie@email.com"></div>
+    <div class="form-group"><label>Téléphone</label><input type="tel" placeholder="06 12 34 56 78"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Localisation souhaitée</label><input type="text" placeholder="Paris, Lyon…"></div>
+      <div class="form-group"><label>Budget max</label><select><option>500 000 €</option><option>350 000 €</option><option>750 000 €</option><option>1 000 000 €</option><option>Sans limite</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Type de bien</label><select><option>Appartement</option><option>Maison</option><option>Villa</option><option>Tous</option></select></div>
+      <div class="form-group"><label>Pièces min.</label><select><option>2</option><option>3</option><option>4</option><option>5+</option></select></div>
+    </div>
+    <div class="form-group"><label>Informations complémentaires</label><textarea placeholder="Étage, jardin, parking, délai d\'achat…"></textarea></div>
+    <button class="btn-submit" onclick="submitForm()">Envoyer mon projet →</button>
+  `,
+  vendre: `
+    <div class="form-row">
+      <div class="form-group"><label>Prénom</label><input type="text" placeholder="Jean"></div>
+      <div class="form-group"><label>Nom</label><input type="text" placeholder="Martin"></div>
+    </div>
+    <div class="form-group"><label>Email</label><input type="email" placeholder="jean@email.com"></div>
+    <div class="form-group"><label>Téléphone</label><input type="tel" placeholder="06 98 76 54 32"></div>
+    <div class="form-group"><label>Adresse du bien</label><input type="text" placeholder="12 rue de la Paix, 75001 Paris"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Type de bien</label><select><option>Appartement</option><option>Maison</option><option>Villa</option><option>Terrain</option></select></div>
+      <div class="form-group"><label>Superficie (m²)</label><input type="number" placeholder="85"></div>
+    </div>
+    <div class="form-group"><label>Votre estimation (optionnel)</label><input type="text" placeholder="Ex: 400 000 €"></div>
+    <div class="form-group"><label>Commentaires</label><textarea placeholder="État du bien, travaux réalisés, charges…"></textarea></div>
+    <button class="btn-submit" onclick="submitForm()">Demander une estimation →</button>
+  `,
+  contact: `
+    <div class="form-row">
+      <div class="form-group"><label>Prénom</label><input type="text" placeholder="Votre prénom"></div>
+      <div class="form-group"><label>Nom</label><input type="text" placeholder="Votre nom"></div>
+    </div>
+    <div class="form-group"><label>Email</label><input type="email" placeholder="votre@email.com"></div>
+    <div class="form-group"><label>Téléphone</label><input type="tel" placeholder="06 XX XX XX XX"></div>
+    <div class="form-group"><label>Disponibilités</label><select><option>Matin (8h–12h)</option><option>Après-midi (12h–18h)</option><option>Soir (18h–20h)</option><option>Week-end</option></select></div>
+    <div class="form-group"><label>Message</label><textarea placeholder="Décrivez votre projet ou votre question…"></textarea></div>
+    <button class="btn-submit" onclick="submitForm()">Envoyer le message →</button>
+  `
+};
+
+let currentTab = 'acheter';
+
+function openModal(type = 'acheter') {
+  currentTab = type;
+  document.getElementById('modalTitle').textContent = type === 'acheter' ? 'Mon projet achat' : type === 'vendre' ? 'Estimer & vendre' : 'Contacter un agent';
+  document.getElementById('modalContent').innerHTML = modalForms[type];
+  document.querySelectorAll('.modal-tab').forEach(t => {
+    t.classList.toggle('active', t.getAttribute('onclick').includes(`'${type}'`));
+  });
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function switchModalTab(el, type) {
+  document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentTab = type;
+  document.getElementById('modalContent').innerHTML = modalForms[type];
+}
+
+function submitForm() {
+  const btn = document.querySelector('.btn-submit');
+  btn.textContent = '✓ Envoyé ! Nous vous contactons sous 24h';
+  btn.style.background = 'var(--sage)';
+  btn.style.color = 'white';
+  btn.disabled = true;
+  setTimeout(closeModal, 2200);
+}
+
+// ── HEART TOGGLE ──
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('card-fav')) {
+    e.target.textContent = e.target.textContent === '♡' ? '♥' : '♡';
+    e.target.style.color = e.target.textContent === '♥' ? 'var(--terracotta)' : '';
+  }
+});
+
+// ── INIT ──
+renderListings();
+renderAgents();
+
+// Onglets supprimés — navigation par ancres CSS
+</script>
+<!-- BANDEAU COOKIES RGPD -->
+<div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--charcoal,#1C1C1A);border-top:1px solid rgba(255,255,255,.1);padding:16px 32px;font-family:'Outfit',sans-serif">
+  <div style="max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+    <div style="flex:1;min-width:280px">
+      <div style="font-size:14px;font-weight:500;color:#FAFAF7;margin-bottom:4px">🍪 Cookies & confidentialité</div>
+      <div style="font-size:12px;color:rgba(250,250,247,.6);line-height:1.6">
+        ImmoConnect utilise des cookies strictement nécessaires au fonctionnement du service (authentification, session). Aucun cookie publicitaire. <a href="mentions-legales.html" style="color:#C09B5A;text-decoration:underline">En savoir plus</a>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-shrink:0;flex-wrap:wrap">
+      <button onclick="refuserCookies()" style="padding:9px 20px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(250,250,247,.7);font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer">Refuser</button>
+      <button onclick="accepterCookies()" style="padding:9px 20px;border-radius:8px;border:none;background:#C09B5A;color:#1C1C1A;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer">Accepter</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var consent = localStorage.getItem('ic_cookie_consent');
+  if (!consent) {
+    document.getElementById('cookie-banner').style.display = 'block';
+  }
+})();
+
+function accepterCookies() {
+  localStorage.setItem('ic_cookie_consent', 'accepted');
+  localStorage.setItem('ic_cookie_date', new Date().toISOString());
+  document.getElementById('cookie-banner').style.display = 'none';
+}
+
+function refuserCookies() {
+  localStorage.setItem('ic_cookie_consent', 'refused');
+  localStorage.setItem('ic_cookie_date', new Date().toISOString());
+  document.getElementById('cookie-banner').style.display = 'none';
+}
+</script>
+
+<script src="/pwa.js"></script>
+<script>
+function htEstimer(){
+  var cp=(document.getElementById('ht-cp').value||'').trim();
+  var out=document.getElementById('ht-result');
+  if(!/^\d{5}$/.test(cp)){ out.style.display='block'; out.innerHTML='Entrez un code postal \u00e0 5 chiffres.'; return; }
+  window.location.href='estimation.html?cp='+cp;
+}
+</script>
+<script src="feedback.js" defer></script>
+</body>
+</html>

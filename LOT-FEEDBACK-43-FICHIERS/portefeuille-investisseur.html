@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Mon portefeuille investisseur</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--coral:#C4785A;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:24px;align-items:center;flex:1;margin-left:32px}
+.nav-links a{text-decoration:none;color:#888780;font-size:13px}
+.page{max-width:1100px;margin:0 auto;padding:24px 24px 80px}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.page-title{font-size:22px;font-weight:500}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;border:none;transition:all .15s}
+.btn-primary{background:var(--teal);color:#fff}
+.btn-primary:hover{background:#085041}
+.btn-outline{background:var(--warm);border:1px solid var(--line);color:var(--ink)}
+.btn-outline:hover{border-color:var(--ink)}
+.btn-excel{background:#1D6F42;color:#fff}
+.btn-excel:hover{background:#155232}
+.tabs{display:flex;gap:4px;background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:20px;width:fit-content}
+.tab{padding:8px 18px;border-radius:7px;border:none;background:transparent;font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;color:var(--muted)}
+.tab.active{background:var(--ink);color:#fff}
+.panel{display:none}.panel.active{display:block}
+.card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:10px}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+.stat-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:14px;text-align:center}
+.stat-n{font-size:24px;font-weight:400;color:var(--ink)}
+.stat-l{font-size:11px;color:var(--muted);margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 12px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--line);background:var(--bg)}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg)}
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
+.badge-teal{background:#E1F5EE;color:#085041}
+.badge-amber{background:#FAEEDA;color:#854F0B}
+.badge-red{background:#FAECE7;color:#712B13}
+.badge-gray{background:#F1EFE8;color:#555}
+.empty{text-align:center;padding:48px 24px;color:var(--muted)}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.comp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:16px}
+.comp-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;position:relative}
+.comp-card.selected{border-color:var(--teal);border-width:2px}
+.comp-header{padding:12px 14px;border-bottom:1px solid var(--line);background:var(--bg)}
+.comp-row{display:flex;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--line);font-size:12px}
+.comp-row:last-child{border-bottom:none}
+.comp-label{color:var(--muted)}
+.comp-val{font-weight:500;color:var(--ink)}
+.comp-best{color:var(--teal);font-weight:600}
+.comp-worst{color:var(--coral)}
+.checkbox-bien{position:absolute;top:10px;right:10px;width:18px;height:18px;cursor:pointer;accent-color:var(--teal)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;display:none;z-index:1000}
+</style>
+<style>
+/* Bandeau supérieur unifié — fond blanc, texte foncé (override global) */
+nav{background:#fff!important;border-bottom:1px solid #E8E6E0!important}
+nav .nav-logo{color:#0F0F0E!important}
+nav .nav-logo span{color:#C09B5A!important}
+nav a{color:#0F0F0E!important}
+nav a:hover{color:#C09B5A!important}
+nav .nav-out{color:#0F0F0E!important;border-color:#0F0F0E!important}
+nav .nav-link{margin-right:18px}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-links">
+    <a href="carte.html">Rechercher</a>
+    <a href="questionnaire-acheteur.html">Mon projet</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Mon portefeuille investisseur</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">Biens suivis et analyses de rendement</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline" onclick="window.location.href='carte.html'">+ Ajouter un bien</button>
+      <button class="btn btn-excel" onclick="exporterExcel()" id="btn-export">
+        <span style="margin-right:4px">📥</span> Export Excel
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats globales -->
+  <div class="stat-grid" id="stats-globales">
+    <div class="stat-card"><div class="stat-n" id="stat-nb">—</div><div class="stat-l">Biens suivis</div></div>
+    <div class="stat-card"><div class="stat-n" id="stat-valeur">—</div><div class="stat-l">Valeur totale</div></div>
+    <div class="stat-card"><div class="stat-n" id="stat-rdt-moy" style="color:var(--teal)">—</div><div class="stat-l">Rendement moy.</div></div>
+    <div class="stat-card"><div class="stat-n" id="stat-rdt-best" style="color:var(--gold)">—</div><div class="stat-l">Meilleur rendement</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('liste',this)">Liste</button>
+    <button class="tab" onclick="showTab('comparateur',this)">Comparateur</button>
+  </div>
+
+  <!-- LISTE -->
+  <div id="tab-liste" class="panel active">
+    <div class="card" style="padding:0;overflow:hidden">
+      <table id="table-biens">
+        <thead>
+          <tr>
+            <th>Bien</th>
+            <th>Prix</th>
+            <th>Surface</th>
+            <th>Prix/m²</th>
+            <th>Loyer est.</th>
+            <th>Rdt brut</th>
+            <th>Rdt net</th>
+            <th>DPE</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-biens">
+          <tr><td colspan="9"><div class="empty"><div class="empty-icon">⏳</div>Chargement...</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- COMPARATEUR -->
+  <div id="tab-comparateur" class="panel">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Sélectionnez jusqu'à 3 biens pour les comparer côte à côte.</div>
+    <div class="comp-grid" id="comp-cards"></div>
+    <div id="comp-tableau" style="display:none">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Comparaison détaillée</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table id="table-comparaison">
+          <thead><tr id="comp-thead"></tr></thead>
+          <tbody id="comp-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const { createClient } = supabase;
+const db = createClient(SB_URL, SB_KEY);
+
+var currentUser = null;
+var biens = [];
+var selectionComp = [];
+
+(async function() {
+  var { data: { user } } = await db.auth.getUser();
+  if (!user) { window.location.href = 'connexion.html'; return; }
+  currentUser = user;
+  await chargerPortefeuille();
+})();
+
+async function chargerPortefeuille() {
+  var { data } = await db.from('suivi_biens')
+    .select('*, annonces_vendeurs(id, titre, type_bien, surface, prix, ville, code_postal, classe_dpe, nb_pieces, loyer_mensuel, charges_mensuelles, taxe_fonciere, created_at)')
+    .eq('email', currentUser.email)
+    .order('created_at', { ascending: false });
+
+  biens = (data || []).map(function(s) {
+    var b = s.annonces_vendeurs || {};
+    var prix = parseFloat(b.prix) || 0;
+    var surface = parseFloat(b.surface) || 0;
+    var loyer = parseFloat(b.loyer_mensuel) || 0;
+    var charges = parseFloat(b.charges_mensuelles) || 0;
+    var taxe = parseFloat(b.taxe_fonciere) || 0;
+    var prixM2 = surface > 0 ? Math.round(prix / surface) : 0;
+    var rdtBrut = (prix > 0 && loyer > 0) ? (loyer * 12 / prix * 100) : 0;
+    var rdtNet = (prix > 0 && loyer > 0) ? ((loyer * 12 - charges * 12 - taxe) / prix * 100) : 0;
+    return { ...b, suivi_id: s.id, prix, surface, loyer, charges, taxe, prixM2, rdtBrut, rdtNet };
+  });
+
+  afficherStats();
+  afficherListe();
+  afficherComparateur();
+}
+
+function afficherStats() {
+  document.getElementById('stat-nb').textContent = biens.length;
+  var valeurTotale = biens.reduce(function(s, b){ return s + b.prix; }, 0);
+  document.getElementById('stat-valeur').textContent = valeurTotale > 0 ? Math.round(valeurTotale/1000) + 'K €' : '—';
+  var rdts = biens.filter(function(b){ return b.rdtBrut > 0; }).map(function(b){ return b.rdtBrut; });
+  document.getElementById('stat-rdt-moy').textContent = rdts.length ? (rdts.reduce(function(s,v){return s+v;},0)/rdts.length).toFixed(1)+'%' : '—';
+  document.getElementById('stat-rdt-best').textContent = rdts.length ? Math.max.apply(null,rdts).toFixed(1)+'%' : '—';
+}
+
+function dpeColor(dpe) {
+  var colors = {A:'#0D7A5F',B:'#3A9E6A',C:'#8CC63F',D:'#F9C52A',E:'#F4831F',F:'#E64C2A',G:'#C0392B'};
+  return colors[dpe] || '#888780';
+}
+
+function afficherListe() {
+  var tbody = document.getElementById('tbody-biens');
+  if (!biens.length) {
+    tbody.innerHTML = '<tr><td colspan="9"><div class="empty"><div class="empty-icon">📊</div><div style="font-size:14px;margin-bottom:6px">Aucun bien dans votre portefeuille</div><div style="font-size:12px">Suivez des biens depuis la carte pour les analyser ici</div></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = biens.map(function(b) {
+    var rdtBadge = b.rdtBrut >= 6 ? 'badge-teal' : b.rdtBrut >= 4 ? 'badge-amber' : b.rdtBrut > 0 ? 'badge-red' : 'badge-gray';
+    return '<tr>'
+      + '<td><div style="font-weight:500">' + (b.titre || b.type_bien || '—') + '</div><div style="font-size:11px;color:var(--muted)">' + (b.ville || '—') + '</div></td>'
+      + '<td>' + (b.prix ? Math.round(b.prix).toLocaleString('fr-FR') + ' €' : '—') + '</td>'
+      + '<td>' + (b.surface ? b.surface + ' m²' : '—') + '</td>'
+      + '<td>' + (b.prixM2 ? b.prixM2.toLocaleString('fr-FR') + ' €' : '—') + '</td>'
+      + '<td>' + (b.loyer ? b.loyer.toLocaleString('fr-FR') + ' €/mois' : '<span style="color:var(--muted);font-size:11px">Non renseigné</span>') + '</td>'
+      + '<td>' + (b.rdtBrut > 0 ? '<span class="badge ' + rdtBadge + '">' + b.rdtBrut.toFixed(1) + '%</span>' : '—') + '</td>'
+      + '<td>' + (b.rdtNet > 0 ? b.rdtNet.toFixed(1) + '%' : '—') + '</td>'
+      + '<td>' + (b.classe_dpe ? '<span style="font-weight:600;color:' + dpeColor(b.classe_dpe) + '">' + b.classe_dpe + '</span>' : '—') + '</td>'
+      + '<td style="white-space:nowrap">'
+      + '<a href="bien.html?id=' + b.id + '" style="font-size:11px;color:var(--teal);text-decoration:none;margin-right:8px">Voir →</a>'
+      + '<button onclick="retirerBien(\'' + b.id + '\')" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer">Retirer</button>'
+      + '</td></tr>';
+  }).join('');
+}
+
+function afficherComparateur() {
+  var container = document.getElementById('comp-cards');
+  container.innerHTML = biens.slice(0, 6).map(function(b) {
+    var isSelected = selectionComp.includes(b.id);
+    return '<div class="comp-card ' + (isSelected ? 'selected' : '') + '" id="comp-card-' + b.id + '">'
+      + '<input type="checkbox" class="checkbox-bien" ' + (isSelected ? 'checked' : '') + ' onchange="toggleComp(\'' + b.id + '\',this.checked)">'
+      + '<div class="comp-header">'
+      + '<div style="font-size:13px;font-weight:500;padding-right:24px">' + (b.titre || b.type_bien || '—') + '</div>'
+      + '<div style="font-size:11px;color:var(--muted)">' + (b.ville || '—') + '</div>'
+      + '</div>'
+      + '<div class="comp-row"><span class="comp-label">Prix</span><span class="comp-val">' + (b.prix ? Math.round(b.prix).toLocaleString('fr-FR') + ' €' : '—') + '</span></div>'
+      + '<div class="comp-row"><span class="comp-label">Surface</span><span class="comp-val">' + (b.surface || '—') + ' m²</span></div>'
+      + '<div class="comp-row"><span class="comp-label">Prix/m²</span><span class="comp-val">' + (b.prixM2 ? b.prixM2.toLocaleString('fr-FR') + ' €' : '—') + '</span></div>'
+      + '<div class="comp-row"><span class="comp-label">Rdt brut</span><span class="comp-val ' + (b.rdtBrut >= 6 ? 'comp-best' : b.rdtBrut > 0 && b.rdtBrut < 4 ? 'comp-worst' : '') + '">' + (b.rdtBrut > 0 ? b.rdtBrut.toFixed(1) + '%' : '—') + '</span></div>'
+      + '<div class="comp-row"><span class="comp-label">DPE</span><span style="font-weight:600;color:' + dpeColor(b.classe_dpe) + '">' + (b.classe_dpe || '—') + '</span></div>'
+      + '</div>';
+  }).join('') + (biens.length === 0 ? '<div class="empty"><div class="empty-icon">📊</div>Aucun bien à comparer</div>' : '');
+}
+
+function toggleComp(id, checked) {
+  if (checked && selectionComp.length >= 3) {
+    showToast('Maximum 3 biens à comparer');
+    document.querySelector('#comp-card-' + id + ' .checkbox-bien').checked = false;
+    return;
+  }
+  if (checked) { selectionComp.push(id); }
+  else { selectionComp = selectionComp.filter(function(x){ return x !== id; }); }
+  document.querySelectorAll('.comp-card').forEach(function(card) {
+    var bid = card.id.replace('comp-card-', '');
+    card.classList.toggle('selected', selectionComp.includes(bid));
+  });
+  afficherTableauComparaison();
+}
+
+function afficherTableauComparaison() {
+  var tableau = document.getElementById('comp-tableau');
+  if (selectionComp.length < 2) { tableau.style.display = 'none'; return; }
+  tableau.style.display = 'block';
+  var selected = biens.filter(function(b){ return selectionComp.includes(b.id); });
+  var criteres = [
+    { label: 'Prix demandé', fn: function(b){ return b.prix ? Math.round(b.prix).toLocaleString('fr-FR') + ' €' : '—'; }, numFn: function(b){ return b.prix; }, bestMin: true },
+    { label: 'Surface', fn: function(b){ return b.surface ? b.surface + ' m²' : '—'; }, numFn: function(b){ return b.surface; }, bestMax: true },
+    { label: 'Prix/m²', fn: function(b){ return b.prixM2 ? b.prixM2.toLocaleString('fr-FR') + ' €' : '—'; }, numFn: function(b){ return b.prixM2; }, bestMin: true },
+    { label: 'Loyer mensuel', fn: function(b){ return b.loyer ? b.loyer.toLocaleString('fr-FR') + ' €' : '—'; }, numFn: function(b){ return b.loyer; }, bestMax: true },
+    { label: 'Rendement brut', fn: function(b){ return b.rdtBrut > 0 ? b.rdtBrut.toFixed(1) + '%' : '—'; }, numFn: function(b){ return b.rdtBrut; }, bestMax: true },
+    { label: 'Rendement net', fn: function(b){ return b.rdtNet > 0 ? b.rdtNet.toFixed(1) + '%' : '—'; }, numFn: function(b){ return b.rdtNet; }, bestMax: true },
+    { label: 'DPE', fn: function(b){ return b.classe_dpe || '—'; }, numFn: null },
+    { label: 'Nb pièces', fn: function(b){ return b.nb_pieces || '—'; }, numFn: function(b){ return b.nb_pieces; }, bestMax: true }
+  ];
+
+  var thead = '<th style="font-size:11px;color:var(--muted);padding:10px 12px;background:var(--bg)">Critère</th>';
+  selected.forEach(function(b){ thead += '<th style="font-size:12px;padding:10px 12px;background:var(--bg)">' + (b.titre || b.type_bien || '—') + '<div style="font-size:10px;font-weight:400;color:var(--muted)">' + (b.ville || '') + '</div></th>'; });
+  document.getElementById('comp-thead').innerHTML = thead;
+
+  var tbody = criteres.map(function(c) {
+    var vals = selected.map(function(b){ return c.numFn ? c.numFn(b) : null; });
+    var best = c.numFn ? (c.bestMax ? Math.max.apply(null, vals.filter(Boolean)) : Math.min.apply(null, vals.filter(Boolean))) : null;
+    var cells = selected.map(function(b) {
+      var val = c.fn(b);
+      var num = c.numFn ? c.numFn(b) : null;
+      var isBest = best !== null && num === best && vals.filter(Boolean).length > 1;
+      return '<td style="padding:8px 12px;border-bottom:1px solid var(--line);font-size:13px' + (isBest ? ';color:var(--teal);font-weight:500' : '') + '">' + val + (isBest ? ' ✓' : '') + '</td>';
+    }).join('');
+    return '<tr><td style="padding:8px 12px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted);background:var(--bg)">' + c.label + '</td>' + cells + '</tr>';
+  }).join('');
+  document.getElementById('comp-tbody').innerHTML = tbody;
+}
+
+async function retirerBien(id) {
+  if (!confirm('Retirer ce bien de votre portefeuille ?')) return;
+  var b = biens.find(function(x){ return x.id === id; });
+  if (!b) return;
+  await db.from('suivi_biens').delete().eq('annonce_id', id).eq('email', currentUser.email);
+  biens = biens.filter(function(x){ return x.id !== id; });
+  selectionComp = selectionComp.filter(function(x){ return x !== id; });
+  afficherStats();
+  afficherListe();
+  afficherComparateur();
+  showToast('Bien retiré du portefeuille');
+}
+
+function exporterExcel() {
+  if (!biens.length) { showToast('Aucun bien à exporter'); return; }
+  var data = biens.map(function(b) {
+    return {
+      'Référence': b.id ? b.id.substring(0, 8) : '—',
+      'Type de bien': b.type_bien || '—',
+      'Titre': b.titre || '—',
+      'Ville': b.ville || '—',
+      'Code postal': b.code_postal || '—',
+      'Prix (€)': b.prix || '',
+      'Surface (m²)': b.surface || '',
+      'Prix/m² (€)': b.prixM2 || '',
+      'Nb pièces': b.nb_pieces || '',
+      'Loyer mensuel (€)': b.loyer || '',
+      'Charges mensuelles (€)': b.charges || '',
+      'Taxe foncière (€)': b.taxe || '',
+      'Rendement brut (%)': b.rdtBrut > 0 ? b.rdtBrut.toFixed(2) : '',
+      'Rendement net (%)': b.rdtNet > 0 ? b.rdtNet.toFixed(2) : '',
+      'DPE': b.classe_dpe || '—',
+      'Lien': 'https://immoconnect-agence.fr/bien.html?id=' + b.id
+    };
+  });
+
+  var ws = XLSX.utils.json_to_sheet(data);
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Portefeuille');
+
+  // Style colonnes
+  ws['!cols'] = [
+    {wch:10},{wch:18},{wch:30},{wch:15},{wch:12},
+    {wch:12},{wch:12},{wch:12},{wch:10},{wch:16},
+    {wch:18},{wch:16},{wch:18},{wch:16},{wch:6},{wch:50}
+  ];
+
+  var date = new Date().toLocaleDateString('fr-FR').replace(/\//g, '-');
+  XLSX.writeFile(wb, 'portefeuille-immoconnect-' + date + '.xlsx');
+  showToast('Export Excel téléchargé');
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(function(){ t.style.display = 'none'; }, 2500);
+}
+
+function showTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(function(p){ p.style.display = 'none'; p.classList.remove('active'); });
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('tab-' + id).style.display = 'block';
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+<script src="feedback.js" defer></script>
+</body>
+</html>

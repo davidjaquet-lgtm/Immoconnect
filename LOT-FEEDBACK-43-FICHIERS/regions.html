@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Régions, Abonnements & Pitch Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0F0F0E;--ink2:#3A3A38;--muted:#8C8B86;
+  --bg:#F5F2EC;--warm:#FEFDFB;--line:rgba(15,15,14,.08);
+  --gold:#C09B5A;--gold2:#E2C07A;--gold-bg:rgba(192,155,90,.08);
+  --teal:#1E7A62;--teal-bg:rgba(30,122,98,.08);
+  --rose:#C0392B;--rose-bg:rgba(192,57,43,.08);
+  --amber:#D4732A;--purple:#6B3FA0;--slate:#2C3E6A;--r:4px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden}
+.shell{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:240px;min-width:240px;background:var(--ink);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.sb-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-logo-text{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#fff}
+.sb-logo-text span{color:var(--gold2)}
+.sb-tagline{font-size:10px;color:rgba(255,255,255,.25);letter-spacing:2px;text-transform:uppercase;margin-top:3px}
+.sb-nav{flex:1;padding:14px 10px;overflow-y:auto}
+.sb-section{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.2);padding:10px 10px 4px;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--r);color:rgba(255,255,255,.5);font-size:13px;cursor:pointer;transition:all .15s;margin-bottom:1px;border-left:2px solid transparent}
+.sb-item:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.85)}
+.sb-item.active{background:var(--gold-bg);color:var(--gold2);border-left-color:var(--gold)}
+.sb-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;background:var(--gold);color:var(--ink);border-radius:20px;font-size:10px;font-weight:700;padding:1px 7px}
+.sb-badge.rose{background:var(--rose)!important;color:#fff}
+.sb-badge.teal{background:var(--teal)!important;color:#fff}
+.sb-footer{padding:14px;border-top:1px solid rgba(255,255,255,.05)}
+.sb-user{display:flex;align-items:center;gap:9px;padding:8px;background:rgba(255,255,255,.04);border-radius:var(--r)}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--amber));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--ink);flex-shrink:0}
+.sb-name{font-size:12px;font-weight:500;color:#fff}
+.sb-role{font-size:10px;color:rgba(255,255,255,.3)}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:56px;min-height:56px;background:var(--warm);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 28px;gap:14px;flex-shrink:0}
+.topbar-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;flex:1}
+.topbar-title em{font-style:italic;color:var(--gold)}
+.content{flex:1;overflow-y:auto;padding:24px 28px}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px}
+.page{display:none;animation:fadeUp .25s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;border:none;letter-spacing:.2px}
+.btn-primary{background:var(--ink);color:#fff}
+.btn-primary:hover{background:var(--gold);color:var(--ink)}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink2)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-gold{background:var(--gold);color:var(--ink)}
+.btn-gold:hover{background:var(--gold2)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-teal{background:var(--teal-bg);color:var(--teal);border:1px solid rgba(30,122,98,.2)}
+.btn-teal:hover{background:var(--teal);color:#fff}
+.btn-danger{background:var(--rose-bg);color:var(--rose);border:1px solid rgba(192,57,43,.2)}
+.btn-purple{background:rgba(107,63,160,.1);color:var(--purple);border:1px solid rgba(107,63,160,.2)}
+.btn-purple:hover{background:var(--purple);color:#fff}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.kpi{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi.gold::after{background:var(--gold)}
+.kpi.teal::after{background:var(--teal)}
+.kpi.rose::after{background:var(--rose)}
+.kpi.purple::after{background:var(--purple)}
+.kpi-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:600}
+.kpi-value{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;line-height:1;margin-bottom:3px}
+.kpi-sub{font-size:11px;color:var(--muted)}
+.kpi-icon{position:absolute;right:14px;top:14px;font-size:24px;opacity:.1}
+
+/* SECTION */
+.section-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600}
+.section-title em{font-style:italic;color:var(--gold)}
+
+/* CHIP */
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.chip-gold{background:var(--gold-bg);color:#9A7A38}
+.chip-teal{background:var(--teal-bg);color:var(--teal)}
+.chip-rose{background:var(--rose-bg);color:var(--rose)}
+.chip-purple{background:rgba(107,63,160,.1);color:var(--purple)}
+.chip-muted{background:rgba(140,139,134,.1);color:var(--muted)}
+.chip-amber{background:rgba(212,115,42,.1);color:var(--amber)}
+.chip-slate{background:rgba(44,62,106,.1);color:var(--slate)}
+
+/* ══════════════════════════════════════
+   PAGE RÉGIONS
+══════════════════════════════════════ */
+.regions-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.region-card{background:var(--warm);border:1px solid var(--line);border-radius:8px;overflow:hidden;transition:transform .2s,box-shadow .2s;cursor:pointer}
+.region-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(15,15,14,.08)}
+.region-card-top{padding:16px 18px 14px;position:relative}
+.region-card-top::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.rc-open .region-card-top::before{background:var(--teal)}
+.rc-limited .region-card-top::before{background:var(--amber)}
+.rc-full .region-card-top::before{background:var(--rose)}
+.rc-coming .region-card-top::before{background:var(--muted)}
+.region-name{font-size:15px;font-weight:600;margin-bottom:3px}
+.region-dept{font-size:11px;color:var(--muted);margin-bottom:10px}
+.region-slots{margin-bottom:10px}
+.slots-bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:4px}
+.slots-fill{height:100%;border-radius:3px;transition:width .4s}
+.rc-open .slots-fill{background:var(--teal)}
+.rc-limited .slots-fill{background:var(--amber)}
+.rc-full .slots-fill{background:var(--rose)}
+.slots-text{font-size:11px;color:var(--muted);display:flex;justify-content:space-between}
+.slots-text strong{color:var(--ink);font-weight:600}
+.region-stats{display:flex;gap:12px}
+.rstat{font-size:11px;color:var(--muted)}
+.rstat strong{color:var(--ink);font-weight:600;display:block;font-size:14px}
+.region-card-foot{padding:10px 18px;border-top:1px solid var(--line);background:var(--bg);display:flex;align-items:center;justify-content:space-between}
+.region-status-badge{font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 10px;border-radius:20px}
+.status-open{background:var(--teal-bg);color:var(--teal)}
+.status-limited{background:rgba(212,115,42,.1);color:var(--amber)}
+.status-full{background:var(--rose-bg);color:var(--rose)}
+.status-coming{background:rgba(140,139,134,.1);color:var(--muted)}
+
+/* URGENCY BANNER */
+.urgency-banner{
+  background:linear-gradient(135deg,var(--ink) 0%,#1A1A18 100%);
+  border-radius:8px;padding:20px 24px;margin-bottom:24px;
+  display:flex;align-items:center;gap:20px;
+  position:relative;overflow:hidden;
+}
+.urgency-banner::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(192,155,90,.2) 0%,transparent 70%)}
+.ub-icon{font-size:28px;flex-shrink:0}
+.ub-content{flex:1}
+.ub-title{font-size:15px;font-weight:600;color:#fff;margin-bottom:3px}
+.ub-sub{font-size:12px;color:rgba(255,255,255,.45)}
+.ub-action{flex-shrink:0}
+
+/* ══════════════════════════════════════
+   PRICING PLANS
+══════════════════════════════════════ */
+.plans-switch{display:flex;gap:4px;background:var(--line);border-radius:20px;padding:3px;margin-bottom:28px;width:fit-content}
+.plan-switch-btn{padding:7px 20px;border-radius:18px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all .2s;font-family:'Outfit',sans-serif}
+.plan-switch-btn.active{background:var(--warm);color:var(--ink);box-shadow:0 1px 4px rgba(15,15,14,.08)}
+
+/* PLAN CARDS */
+.plans-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.plan-card{background:var(--warm);border:1px solid var(--line);border-radius:8px;overflow:hidden;position:relative;transition:transform .2s,box-shadow .2s}
+.plan-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(15,15,14,.1)}
+.plan-card.featured{border-color:var(--gold);border-width:2px}
+.plan-card.featured::before{content:'⭐ Recommandé';position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--ink);font-size:10px;font-weight:700;padding:3px 12px;border-radius:0 0 8px 8px;letter-spacing:.5px;white-space:nowrap}
+.plan-head{padding:22px 20px 16px;border-bottom:1px solid var(--line);text-align:center}
+.plan-icon{font-size:28px;margin-bottom:8px}
+.plan-name{font-size:14px;font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.plan-price{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--gold);line-height:1;margin-bottom:2px}
+.plan-price span{font-size:14px;font-family:'Outfit',sans-serif;font-weight:400;color:var(--muted)}
+.plan-tagline{font-size:11px;color:var(--muted);margin-top:4px}
+.plan-body{padding:16px 18px}
+.plan-feature{display:flex;align-items:flex-start;gap:8px;margin-bottom:9px;font-size:12.5px;line-height:1.4}
+.plan-feature::before{content:'✓';color:var(--teal);font-weight:700;flex-shrink:0;margin-top:1px}
+.plan-feature.no::before{content:'✗';color:rgba(140,139,134,.4)}
+.plan-feature.no{color:var(--muted)}
+.plan-foot{padding:14px 18px;border-top:1px solid var(--line)}
+.plan-cta{width:100%;padding:10px;border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;border:none;letter-spacing:.3px}
+.plan-cta-outline{background:transparent;border:1px solid var(--line);color:var(--ink2)}
+.plan-cta-outline:hover{border-color:var(--gold);color:var(--gold)}
+.plan-cta-gold{background:var(--gold);color:var(--ink)}
+.plan-cta-gold:hover{background:var(--gold2)}
+.plan-cta-dark{background:var(--ink);color:#fff}
+.plan-cta-dark:hover{background:var(--gold);color:var(--ink)}
+
+/* PLAN COMPARISON TABLE */
+.compare-table{width:100%;border-collapse:collapse;background:var(--warm);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:24px}
+.compare-table th{padding:11px 14px;text-align:center;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line);font-weight:600}
+.compare-table th:first-child{text-align:left}
+.compare-table td{padding:11px 14px;font-size:13px;text-align:center;border-bottom:1px solid var(--line);color:var(--ink2)}
+.compare-table td:first-child{text-align:left;font-weight:500;color:var(--ink)}
+.compare-table tr:last-child td{border-bottom:none}
+.compare-table tr:hover td{background:var(--gold-bg)}
+.ct-yes{color:var(--teal);font-weight:700}
+.ct-no{color:rgba(140,139,134,.4);font-size:16px}
+.ct-featured{background:rgba(192,155,90,.04)}
+
+/* ══════════════════════════════════════
+   PAGE PITCH / ARGUMENTATION
+══════════════════════════════════════ */
+.pitch-hero{
+  background:var(--ink);border-radius:12px;padding:40px 44px;
+  margin-bottom:24px;position:relative;overflow:hidden;
+}
+.pitch-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(192,155,90,.18) 0%,transparent 70%)}
+.pitch-hero::after{content:'';position:absolute;bottom:-40px;left:10%;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(30,122,98,.12) 0%,transparent 70%)}
+.ph-eyebrow{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold2);margin-bottom:12px;font-weight:600}
+.ph-title{font-family:'Playfair Display',serif;font-size:clamp(24px,3vw,36px);font-weight:700;color:#fff;line-height:1.15;margin-bottom:10px;position:relative;z-index:1}
+.ph-title em{font-style:italic;color:var(--gold2)}
+.ph-sub{font-size:14px;color:rgba(255,255,255,.5);line-height:1.7;max-width:500px;position:relative;z-index:1}
+
+/* ARGUMENT CARDS */
+.args-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px}
+.arg-card{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:20px 22px;position:relative;overflow:hidden}
+.arg-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
+.arg-card.c1::before{background:var(--gold)}
+.arg-card.c2::before{background:var(--teal)}
+.arg-card.c3::before{background:var(--purple)}
+.arg-card.c4::before{background:var(--rose)}
+.arg-card.c5::before{background:var(--amber)}
+.arg-card.c6::before{background:var(--slate)}
+.arg-icon{font-size:24px;margin-bottom:10px}
+.arg-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.arg-text{font-size:13px;color:var(--muted);line-height:1.65}
+.arg-punch{margin-top:10px;padding:8px 12px;background:var(--bg);border-radius:var(--r);font-size:12px;font-weight:600;color:var(--ink);font-style:italic}
+
+/* OBJECTION SECTION */
+.objections{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.objection{background:var(--warm);border:1px solid var(--line);border-radius:8px;overflow:hidden;cursor:pointer}
+.obj-header{display:flex;align-items:center;gap:12px;padding:14px 18px}
+.obj-q-icon{font-size:18px;flex-shrink:0}
+.obj-q{font-size:13px;font-weight:600;flex:1;color:var(--rose)}
+.obj-toggle{font-size:14px;color:var(--muted);transition:transform .2s}
+.obj-answer{display:none;padding:0 18px 14px 50px;font-size:13px;color:var(--muted);line-height:1.7;border-top:1px solid var(--line)}
+.obj-answer.open{display:block}
+.obj-toggle.open{transform:rotate(180deg)}
+
+/* SCRIPT DE VENTE */
+.script-box{background:var(--ink);border-radius:8px;overflow:hidden;margin-bottom:24px}
+.script-head{padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between}
+.script-title{font-size:13px;font-weight:600;color:#fff}
+.script-tag{font-size:10px;background:rgba(192,155,90,.15);color:var(--gold2);padding:3px 10px;border-radius:20px;letter-spacing:.5px}
+.script-body{padding:20px}
+.script-step{display:flex;gap:14px;margin-bottom:18px}
+.script-step:last-child{margin-bottom:0}
+.ss-phase{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold2);font-weight:600;width:70px;flex-shrink:0;padding-top:2px}
+.ss-text{font-size:13px;color:rgba(255,255,255,.7);line-height:1.7;flex:1;padding:10px 14px;background:rgba(255,255,255,.04);border-radius:var(--r);border-left:2px solid rgba(192,155,90,.3)}
+.ss-text strong{color:#fff}
+
+/* SCARCITY WIDGET */
+.scarcity-widget{background:linear-gradient(135deg,rgba(192,57,43,.08) 0%,rgba(212,115,42,.08) 100%);border:1px solid rgba(192,57,43,.2);border-radius:8px;padding:20px 24px;margin-bottom:24px;display:flex;gap:20px;align-items:center}
+.sw-left{flex:1}
+.sw-title{font-size:15px;font-weight:700;color:var(--rose);margin-bottom:6px}
+.sw-text{font-size:13px;color:var(--muted);line-height:1.6}
+.sw-right{text-align:center;flex-shrink:0}
+.sw-num{font-family:'Playfair Display',serif;font-size:44px;font-weight:700;color:var(--rose);line-height:1}
+.sw-label{font-size:11px;color:var(--muted)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(15,15,14,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--warm);border-radius:10px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;animation:modalUp .25s ease}
+@keyframes modalUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.modal-head{padding:20px 24px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--warm);z-index:1}
+.modal-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600}
+.modal-close{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:none;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.modal-close:hover{background:var(--ink);color:#fff}
+.modal-body{padding:20px 24px 24px}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:7px}
+.toast{background:var(--ink);color:#fff;padding:11px 16px;border-radius:var(--r);font-size:13px;display:flex;align-items:center;gap:9px;min-width:260px;box-shadow:0 8px 32px rgba(15,15,14,.25);animation:toastIn .25s ease}
+.toast.success{border-left:3px solid var(--teal)}
+.toast.info{border-left:3px solid var(--gold)}
+@keyframes toastIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+
+/* RESPONSIVE */
+@media(max-width:1100px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .plans-grid{grid-template-columns:repeat(2,1fr)}
+  .regions-grid{grid-template-columns:repeat(2,1fr)}
+  .args-grid{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .sidebar{display:none}
+  .content{padding:16px}
+}
+</style>
+<style>
+/* Bandeau supérieur unifié — fond blanc, texte foncé (override global) */
+nav{background:#fff!important;border-bottom:1px solid #E8E6E0!important}
+nav .nav-logo{color:#0F0F0E!important}
+nav .nav-logo span{color:#C09B5A!important}
+nav a{color:#0F0F0E!important}
+nav a:hover{color:#C09B5A!important}
+nav .nav-out{color:#0F0F0E!important;border-color:#0F0F0E!important}
+nav .nav-link{margin-right:18px}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-text">Immo<span>Connect</span></div>
+    <div class="sb-tagline">Admin · Régions</div>
+  </div>
+  <nav style="background:#0F0F0E;height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100;gap:0">
+  <a href="index.html" style="font-size:18px;font-weight:600;color:#fff;text-decoration:none;margin-right:32px;font-family:'Outfit',sans-serif">Immo<span style="color:#C09B5A">Connect</span></a>
+  <div style="display:flex;gap:24px;align-items:center;flex:1">
+    <a href="forfaits.html" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Forfaits</a>
+    <a href="questionnaire-vendeur.html" style="text-decoration:none;padding:7px 16px;background:#C09B5A;color:#0F0F0E;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif">Vendre</a>
+    <a href="questionnaire-acheteur.html" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Acheter</a>
+    <a href="index.html#agents" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Agents immo</a>
+  </div>
+  <a href="index.html" style="text-decoration:none;padding:8px 20px;border:1px solid #444;color:#fff;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif;transition:all .2s" onmouseover="this.style.borderColor='#C09B5A';this.style.color='#C09B5A'" onmouseout="this.style.borderColor='#444';this.style.color='#fff'">Accueil</a>
+</nav>
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="sb-avatar">IC</div>
+      <div><div class="sb-name">ImmoConnect</div><div class="sb-role">Admin · Occitanie</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-title" id="topbarTitle">Carte des <em>régions</em></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost btn-sm" onclick="toast('Export CSV téléchargé','info')">⬇ Exporter</button>
+      <button class="btn btn-gold btn-sm" onclick="openModal('addRegion')">+ Ouvrir une région</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+<!-- ═══════════════════════════════════
+     PAGE : RÉGIONS
+═══════════════════════════════════ -->
+<div class="page active" id="page-regions">
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi gold"><div class="kpi-icon">🗺</div><div class="kpi-label">Régions actives</div><div class="kpi-value">4</div><div class="kpi-sub">sur 13 régions FR</div></div>
+    <div class="kpi teal"><div class="kpi-icon">🏢</div><div class="kpi-label">Agents abonnés</div><div class="kpi-value">23</div><div class="kpi-sub">49€ à 199€/mois</div></div>
+    <div class="kpi rose"><div class="kpi-icon">⏳</div><div class="kpi-label">Liste d'attente</div><div class="kpi-value">7</div><div class="kpi-sub">agents en attente</div></div>
+    <div class="kpi purple"><div class="kpi-icon">💶</div><div class="kpi-label">MRR total</div><div class="kpi-value">1 847€</div><div class="kpi-sub">revenus récurrents</div></div>
+  </div>
+
+  <!-- Urgency banner -->
+  <div class="urgency-banner">
+    <div class="ub-icon">🔥</div>
+    <div class="ub-content">
+      <div class="ub-title">Occitanie — Plus que 2 places disponibles sur 10</div>
+      <div class="ub-sub">7 agents en liste d'attente. Envisagez d'augmenter le plafond ou de passer en liste fermée.</div>
+    </div>
+    <div class="ub-action">
+      <button class="btn btn-gold btn-sm" onclick="openModal('manageRegion')">Gérer les places →</button>
+    </div>
+  </div>
+
+  <!-- Régions grid -->
+  <div class="section-row">
+    <div class="section-title">Gestion des <em>régions</em></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost btn-sm" onclick="filterRegions('all')">Toutes</button>
+      <button class="btn btn-teal btn-sm" onclick="filterRegions('open')">Ouvertes</button>
+      <button class="btn btn-ghost btn-sm" onclick="filterRegions('full')">Complètes</button>
+    </div>
+  </div>
+
+  <div class="regions-grid" id="regionsGrid"></div>
+</div>
+
+<!-- ═══════════════════════════════════
+     PAGE : PLANS AGENTS
+═══════════════════════════════════ -->
+<div class="page" id="page-agents-plan">
+
+  <div class="urgency-banner" style="margin-bottom:24px">
+    <div class="ub-icon">💡</div>
+    <div class="ub-content">
+      <div class="ub-title">Pourquoi limiter le nombre d'agents par région ?</div>
+      <div class="ub-sub">Moins d'agents = plus de leads par agent = agents plus satisfaits = moins de churn = meilleur bouche-à-oreille. La rareté est votre meilleur argument de vente.</div>
+    </div>
+  </div>
+
+  <!-- Plans switch -->
+  <div class="plans-switch">
+    <button class="plan-switch-btn active" onclick="switchBilling('monthly',this)">Mensuel</button>
+    <button class="plan-switch-btn" onclick="switchBilling('annual',this)">Annuel <span style="font-size:10px;background:var(--teal-bg);color:var(--teal);padding:1px 6px;border-radius:10px;margin-left:4px">-20%</span></button>
+  </div>
+
+  <!-- 4 plans agents -->
+  <div class="plans-grid" id="agentPlansGrid">
+    <!-- Injecté par JS -->
+  </div>
+
+  <!-- Tableau comparatif -->
+  <div class="section-row"><div class="section-title">Comparatif <em>détaillé</em></div></div>
+  <table class="compare-table">
+    <thead>
+      `).join('');
+}
+
+function renderWaitlist() {
+  const planChips = {Starter:'chip-muted',Pro:'chip-gold','Expert':'chip-teal',Platinium:'chip-purple'};
+  document.getElementById('waitlistTbody').innerHTML = WAITLIST.map(w => `
+    <tr style="cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--rose-bg)'" onmouseout="this.style.background=''">
+      <td style="padding:13px 16px;border-bottom:1px solid var(--line)"><div style="font-weight:600;font-size:13px">${w.name}</div><div style="font-size:11px;color:var(--muted)">${w.email}</div></td>
+      <td style="padding:13px 16px;border-bottom:1px solid var(--line);font-size:13px">${w.region}</td>
+      <td style="padding:13px 16px;border-bottom:1px solid var(--line)"><span class="chip ${planChips[w.plan]||'chip-muted'}">${w.plan}</span></td>
+      <td style="padding:13px 16px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)">${w.date}</td>
+      <td style="padding:13px 16px;border-bottom:1px solid var(--line)"><button class="btn btn-teal btn-sm" onclick="toast('Email de notification envoyé à ${w.name}','success')">✉ Notifier</button></td>
+    </tr>`).join('');
+}
+
+/* ══════════ NAV ══════════ */
+const titles = {
+  regions:'Carte des <em>régions</em>',
+  'agents-plan':'Plans <em>agents</em>',
+  'buyers-plan':'Plans <em>acheteurs</em>',
+  pitch:'Pitch & Argumentation <em>agents</em>',
+  'agents-list':'Agents <em>abonnés</em>',
+  waitlist:'Liste d\'<em>attente</em>',
+};
+
+function goTo(page, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.getElementById('topbarTitle').innerHTML = titles[page] || page;
+  if (el) el.classList.add('active');
+  if (page==='agents-plan') renderAgentPlans();
+  if (page==='buyers-plan') renderBuyerPlans();
+  if (page==='agents-list') renderAgentsList();
+  if (page==='waitlist') renderWaitlist();
+}
+
+/* ══════════ OBJECTIONS ══════════ */
+function toggleObj(el) {
+  const answer = el.querySelector('.obj-answer');
+  const toggle = el.querySelector('.obj-toggle');
+  answer.classList.toggle('open');
+  toggle.classList.toggle('open');
+}
+
+/* ══════════ MODAL ══════════ */
+const modalContents = {
+  addRegion: {
+    title:'Ouvrir une nouvelle région',
+    body:`<div style="display:flex;flex-direction:column;gap:14px">
+      <div><label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px">Région</label>
+      <select style="width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:13px;background:var(--bg)">
+        ${REGIONS.filter(r=>r.status==='coming').map(r=>`<option>${r.name}</option>`).join('')}
+      </select></div>
+      <div><label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px">Nombre de places max</label>
+      <input type="number" value="10" min="3" max="20" style="width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:13px;background:var(--bg)"></div>
+      <button class="btn btn-gold" style="width:100%;justify-content:center" onclick="toast('Région activée avec succès !','success');closeModal()">✓ Activer cette région</button>
+    </div>`
+  },
+  manageRegion: {
+    title:'Gérer les places — Occitanie',
+    body:`<div style="display:flex;flex-direction:column;gap:16px">
+      <div style="background:var(--rose-bg);border:1px solid rgba(192,57,43,.2);border-radius:var(--r);padding:12px 14px;font-size:13px;color:var(--rose)">
+        ⚠️ 8 agents sur 10 places. 7 agents en liste d'attente.
+      </div>
+      <div><label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px">Augmenter le plafond à</label>
+      <input type="number" value="12" min="10" max="25" style="width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:13px;background:var(--bg)"></div>
+      <div><label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px">Action sur la liste d'attente</label>
+      <button class="btn btn-teal" style="width:100%;justify-content:center;margin-bottom:8px" onclick="toast('7 agents notifiés par email !','success');closeModal()">✉ Notifier les 7 agents en attente</button>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="toast('Liste fermée — plus d\\'inscriptions','info');closeModal()">🔒 Fermer la liste d'attente</button></div>
+    </div>`
+  },
+  addAgent: {
+    title:'Ajouter un agent manuellement',
+    body:`<div style="display:flex;flex-direction:column;gap:12px">
+      <div class="fg-row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">Prénom</label><input type="text" placeholder="Marie" style="width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:13px;background:var(--bg)"></div>
+        <div><label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">Nom</label><input type="text" placeholder="Dupont" style="width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:13px;background:var(--bg)"></div>
+      </div>
+      <div><label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">Email</label><input type="email" placeholder="marie@agence.fr" style="width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:13px;background:var(--bg)"></div>
+      <div class="fg-row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">Région</label><select style="width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:13px;background:var(--bg)">${REGIONS.filter(r=>r.status!=='coming').map(r=>`<option>${r.name}</option>`).join('')}</select></div>
+        <div><label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">Plan</label><select style="width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:13px;background:var(--bg)"><option>Starter — 49€/mois</option><option>Pro — 99€/mois</option><option>Expert — 149€/mois</option><option>Platinium — 199€/mois</option></select></div>
+      </div>
+      <div style="display:flex;gap:3px;background:var(--line);border-radius:20px;padding:3px;width:fit-content;margin-top:4px">
+        <button style="padding:6px 14px;border-radius:16px;background:var(--warm);border:none;font-size:12px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif">Essai gratuit 1 mois</button>
+        <button style="padding:6px 14px;border-radius:16px;background:transparent;border:none;font-size:12px;color:var(--muted);cursor:pointer;font-family:'Outfit',sans-serif">Abonnement direct</button>
+      </div>
+      <button class="btn btn-gold" style="width:100%;justify-content:center;margin-top:6px" onclick="toast('Agent ajouté et email de bienvenue envoyé !','success');closeModal()">✓ Ajouter l'agent</button>
+    </div>`
+  }
+};
+
+function openModal(key, regionId) {
+  if (key === 'region' && regionId) {
+    const r = REGIONS.find(x => x.id === regionId);
+    if (!r) return;
+    document.getElementById('modalTitle').textContent = r.name + ' — Détails';
+    document.getElementById('modalBody').innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div style="background:var(--bg);border-radius:var(--r);padding:12px;text-align:center"><div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--gold)">${r.used}</div><div style="font-size:10px;color:var(--muted)">Agents actifs</div></div>
+          <div style="background:var(--bg);border-radius:var(--r);padding:12px;text-align:center"><div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--teal)">${r.leads}</div><div style="font-size:10px;color:var(--muted)">Leads/mois</div></div>
+          <div style="background:var(--bg);border-radius:var(--r);padding:12px;text-align:center"><div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--purple)">${r.mrr}€</div><div style="font-size:10px;color:var(--muted)">MRR</div></div>
+        </div>
+        <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px">Places utilisées : ${r.used} / ${r.slots}</div>
+        <div style="height:8px;background:var(--line);border-radius:4px;overflow:hidden"><div style="height:100%;width:${Math.round(r.used/r.slots*100)}%;background:${r.status==='full'?'var(--rose)':r.status==='limited'?'var(--amber)':'var(--teal)'};border-radius:4px"></div></div></div>
+        <div style="font-size:13px;color:var(--muted)">Départements : ${r.dept}</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-teal btn-sm" onclick="toast('Agents de ${r.name} notifiés','success');closeModal()">✉ Notifier les agents</button>
+          <button class="btn btn-ghost btn-sm" onclick="toast('Export ${r.name} téléchargé','info');closeModal()">⬇ Exporter</button>
+          ${r.status==='coming'?`<button class="btn btn-gold btn-sm" onclick="toast('${r.name} activée !','success');closeModal()">Activer la région</button>`:''}
+        </div>
+      </div>`;
+  } else if (modalContents[key]) {
+    document.getElementById('modalTitle').textContent = modalContents[key].title;
+    document.getElementById('modalBody').innerHTML = modalContents[key].body;
+  }
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+function closeModalOutside(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+
+/* ══════════ TOAST ══════════ */
+function toast(msg, type='info') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${type==='success'?'✅':'ℹ️'}</span><span>${msg}</span>`;
+  document.getElementById('toastWrap').appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transition='.3s'; }, 3500);
+  setTimeout(() => t.remove(), 3800);
+}
+
+/* ══════════ INIT ══════════ */
+renderRegions();
+renderAgentPlans();
+renderBuyerPlans();
+renderAgentsList();
+renderWaitlist();
+</script>
+<script src="feedback.js" defer></script>
+</body>
+</html>

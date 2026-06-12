@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rejoindre ImmoConnect en tant qu'agent immobilier — Candidature</title>
+<meta name="description" content="Devenez partenaire ImmoConnect. Accédez à des mandats qualifiés, candidatez sur les biens de votre secteur et développez votre chiffre d'affaires. Inscription gratuite.">
+<meta name="keywords" content="devenir agent immobilier partenaire, rejoindre réseau immobilier, mandats immobiliers, agent indépendant">
+<meta property="og:title" content="Rejoignez le réseau ImmoConnect">
+<meta property="og:description" content="Accédez à des vendeurs qualifiés dans votre secteur. Algorithme de scoring transparent. Candidatez sur les biens qui vous correspondent.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ImmoConnect">
+<meta property="og:url" content="https://immoconnect-agence.fr/candidature-agent.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Rejoignez le réseau ImmoConnect">
+<meta name="twitter:description" content="Accédez à des vendeurs qualifiés dans votre secteur. Algorithme de scoring transparent. Candidatez sur les biens qui vous correspondent.">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--amber:#D4732A;--coral:#C0392B;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:24px;align-items:center;flex:1;margin-left:32px}
+.nav-links a{text-decoration:none;color:#888780;font-size:13px}
+
+/* PAGE */
+.page{max-width:720px;margin:0 auto;padding:32px 24px 80px}
+
+/* BIEN HEADER */
+.bien-header{background:var(--ink);border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px}
+.bien-photo{width:64px;height:64px;border-radius:8px;object-fit:cover;background:rgba(255,255,255,.1);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px}
+.bien-info{flex:1}
+.bien-titre{font-size:16px;font-weight:500;color:#FAFAF7;margin-bottom:4px}
+.bien-meta{font-size:12px;color:rgba(250,250,247,.5);line-height:1.7}
+.bien-prix{font-size:18px;font-weight:300;color:var(--gold);margin-left:auto;white-space:nowrap}
+
+/* TIMER */
+.timer-box{background:#FAEEDA;border:1px solid rgba(192,155,90,.3);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:14px}
+.timer-icon{font-size:22px;flex-shrink:0}
+.timer-label{font-size:12px;color:#633806;line-height:1.6}
+.timer-count{font-size:18px;font-weight:600;color:#854F0B;font-variant-numeric:tabular-nums}
+
+/* FLUX SELECTOR */
+.flux-wrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.flux-card{border:2px solid var(--line);border-radius:12px;padding:18px;cursor:pointer;transition:all .2s;background:var(--warm)}
+.flux-card:hover{border-color:var(--muted)}
+.flux-card.selected-A{border-color:var(--blue);background:#E6F1FB}
+.flux-card.selected-B{border-color:var(--teal);background:#E1F5EE}
+.flux-icon{font-size:26px;margin-bottom:8px}
+.flux-name{font-size:13px;font-weight:600;margin-bottom:4px}
+.flux-desc{font-size:11px;color:var(--muted);line-height:1.6}
+.flux-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.8px;margin-top:6px}
+
+/* SECTIONS */
+.section{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:22px;margin-bottom:14px}
+.section-title{font-size:13px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-icon{width:26px;height:26px;border-radius:7px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:13px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+label.lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+input,select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink);outline:none;transition:border .15s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--ink)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field-hint{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5}
+
+/* SCORE PREVIEW */
+.score-box{background:var(--bg);border-radius:8px;padding:14px 16px;margin-top:12px}
+.score-row{display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:6px}
+.score-row:last-child{margin-bottom:0}
+.score-bar-wrap{flex:1;height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:2px;background:var(--teal);transition:width .4s}
+.score-pts-lbl{font-size:10px;color:var(--muted);min-width:48px;text-align:right}
+.score-total-row{display:flex;align-items:baseline;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.score-total-num{font-size:28px;font-weight:500}
+.score-total-lbl{font-size:12px;color:var(--muted)}
+
+/* ESTIMATION */
+.estimation-note{background:#FAEEDA;border:1px solid rgba(192,155,90,.25);border-radius:8px;padding:10px 14px;font-size:11px;color:#633806;line-height:1.6;margin-bottom:12px}
+
+/* BOXES */
+.info-box{background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:11px 14px;font-size:12px;color:#085041;line-height:1.6;margin-bottom:12px}
+.warn-box{background:#FAEEDA;border:1px solid rgba(192,155,90,.3);border-radius:8px;padding:11px 14px;font-size:12px;color:#633806;line-height:1.6;margin-bottom:12px}
+.err-box{background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:11px 14px;font-size:12px;color:#712B13;line-height:1.6;margin-bottom:12px}
+
+/* PAIEMENT */
+.paiement-box{background:var(--ink);border-radius:12px;padding:22px 24px;margin-top:8px}
+.paiement-title{font-size:14px;font-weight:500;color:#FAFAF7;margin-bottom:4px}
+.paiement-sub{font-size:12px;color:rgba(250,250,247,.4);margin-bottom:18px;line-height:1.5}
+.paiement-amount{font-size:36px;font-weight:300;color:#FAFAF7;margin-bottom:4px}
+.paiement-desc{font-size:11px;color:rgba(250,250,247,.4);margin-bottom:20px}
+.paiement-items{display:flex;flex-direction:column;gap:6px;margin-bottom:20px}
+.paiement-item{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(250,250,247,.6)}
+.paiement-item-check{color:var(--teal);font-size:12px}
+
+/* BOUTONS */
+.btn-submit{width:100%;padding:14px;border-radius:8px;border:none;background:var(--amber);color:#fff;font-family:'Outfit',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:opacity .15s}
+.btn-submit:hover{opacity:.85}
+.btn-submit:disabled{opacity:.4;cursor:not-allowed}
+.btn-payer{width:100%;padding:14px;border-radius:8px;border:none;background:var(--gold);color:var(--ink);font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.btn-payer:hover{opacity:.85}
+.btn-payer:disabled{opacity:.4;cursor:not-allowed}
+.btn-secondary{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(250,250,247,.6);font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;margin-top:8px}
+
+/* STEPS */
+.steps-nav{display:flex;gap:0;margin-bottom:24px}
+.step-n{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+.step-n::before{content:'';position:absolute;top:13px;left:-50%;width:100%;height:2px;background:var(--line);z-index:0}
+.step-n:first-child::before{display:none}
+.step-circle{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);background:var(--warm);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--muted);position:relative;z-index:1;transition:all .3s}
+.step-circle.active{border-color:var(--amber);background:var(--amber);color:#fff}
+.step-circle.done{border-color:var(--teal);background:var(--teal);color:#fff}
+.step-lbl{font-size:10px;color:var(--muted);margin-top:5px;text-align:center}
+.step-lbl.active{color:var(--amber)}
+
+/* CONFIRMATION */
+.confetti{text-align:center;padding:24px 0 16px}
+.confetti-icon{font-size:44px;margin-bottom:14px}
+.recap-card{background:var(--bg);border-radius:8px;padding:14px 16px;margin:14px 0}
+.recap-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)}
+.recap-row:last-child{border-bottom:none}
+.recap-lbl{color:var(--muted)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:11px 24px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;display:none}
+.toast.ok{background:#1E7A62;color:#fff}
+.toast.err{background:#C0392B;color:#fff}
+.spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* NON CONNECTE */
+.non-connecte{text-align:center;padding:40px 24px;background:var(--warm);border:1px solid var(--line);border-radius:12px}
+
+@media(max-width:600px){.grid2{grid-template-columns:1fr}.flux-wrap{grid-template-columns:1fr}.bien-prix{display:none}}
+</style>
+<style>
+/* Bandeau supérieur unifié — fond blanc, texte foncé (override global) */
+nav{background:#fff!important;border-bottom:1px solid #E8E6E0!important}
+nav .nav-logo{color:#0F0F0E!important}
+nav .nav-logo span{color:#C09B5A!important}
+nav a{color:#0F0F0E!important}
+nav a:hover{color:#C09B5A!important}
+nav .nav-out{color:#0F0F0E!important;border-color:#0F0F0E!important}
+nav .nav-link{margin-right:18px}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><img src="logo-immoconnect.png" alt="ImmoConnect" style="height:38px;width:auto;object-fit:contain;vertical-align:middle"><span style="font-size:22px;font-weight:600;color:#0F0F0E;margin-left:8px">Immo<span style="color:#C09B5A">Connect</span></span></a>
+  <div class="nav-links">
+    <a href="connexion.html">Mon espace</a>
+    <a href="comment-ca-marche-agents.html">Comment ca marche</a>
+  </div>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rejoindre ImmoConnect en tant qu'agent immobilier — Candidature</title>
+<meta name="description" content="Devenez partenaire ImmoConnect. Accédez à des mandats qualifiés, candidatez sur les biens de votre secteur et développez votre chiffre d'affaires. Inscription gratuite.">
+<meta name="keywords" content="devenir agent immobilier partenaire, rejoindre réseau immobilier, mandats immobiliers, agent indépendant">
+<meta property="og:title" content="Rejoignez le réseau ImmoConnect">
+<meta property="og:description" content="Accédez à des vendeurs qualifiés dans votre secteur. Algorithme de scoring transparent. Candidatez sur les biens qui vous correspondent.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ImmoConnect">
+<meta property="og:url" content="https://immoconnect-agence.fr/candidature-agent.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Rejoignez le réseau ImmoConnect">
+<meta name="twitter:description" content="Accédez à des vendeurs qualifiés dans votre secteur. Algorithme de scoring transparent. Candidatez sur les biens qui vous correspondent.">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--amber:#D4732A;--coral:#C0392B;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:24px;align-items:center;flex:1;margin-left:32px}
+.nav-links a{text-decoration:none;color:#888780;font-size:13px}
+
+/* PAGE */
+.page{max-width:720px;margin:0 auto;padding:32px 24px 80px}
+
+/* BIEN HEADER */
+.bien-header{background:var(--ink);border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px}
+.bien-photo{width:64px;height:64px;border-radius:8px;object-fit:cover;background:rgba(255,255,255,.1);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px}
+.bien-info{flex:1}
+.bien-titre{font-size:16px;font-weight:500;color:#FAFAF7;margin-bottom:4px}
+.bien-meta{font-size:12px;color:rgba(250,250,247,.5);line-height:1.7}
+.bien-prix{font-size:18px;font-weight:300;color:var(--gold);margin-left:auto;white-space:nowrap}
+
+/* TIMER */
+.timer-box{background:#FAEEDA;border:1px solid rgba(192,155,90,.3);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:14px}
+.timer-icon{font-size:22px;flex-shrink:0}
+.timer-label{font-size:12px;color:#633806;line-height:1.6}
+.timer-count{font-size:18px;font-weight:600;color:#854F0B;font-variant-numeric:tabular-nums}
+
+/* FLUX SELECTOR */
+.flux-wrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.flux-card{border:2px solid var(--line);border-radius:12px;padding:18px;cursor:pointer;transition:all .2s;background:var(--warm)}
+.flux-card:hover{border-color:var(--muted)}
+.flux-card.selected-A{border-color:var(--blue);background:#E6F1FB}
+.flux-card.selected-B{border-color:var(--teal);background:#E1F5EE}
+.flux-icon{font-size:26px;margin-bottom:8px}
+.flux-name{font-size:13px;font-weight:600;margin-bottom:4px}
+.flux-desc{font-size:11px;color:var(--muted);line-height:1.6}
+.flux-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.8px;margin-top:6px}
+
+/* SECTIONS */
+.section{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:22px;margin-bottom:14px}
+.section-title{font-size:13px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-icon{width:26px;height:26px;border-radius:7px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:13px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+label.lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+input,select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink);outline:none;transition:border .15s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--ink)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field-hint{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5}
+
+/* SCORE PREVIEW */
+.score-box{background:var(--bg);border-radius:8px;padding:14px 16px;margin-top:12px}
+.score-row{display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:6px}
+.score-row:last-child{margin-bottom:0}
+.score-bar-wrap{flex:1;height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:2px;background:var(--teal);transition:width .4s}
+.score-pts-lbl{font-size:10px;color:var(--muted);min-width:48px;text-align:right}
+.score-total-row{display:flex;align-items:baseline;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.score-total-num{font-size:28px;font-weight:500}
+.score-total-lbl{font-size:12px;color:var(--muted)}
+
+/* ESTIMATION */
+.estimation-note{background:#FAEEDA;border:1px solid rgba(192,155,90,.25);border-radius:8px;padding:10px 14px;font-size:11px;color:#633806;line-height:1.6;margin-bottom:12px}
+
+/* BOXES */
+.info-box{background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:11px 14px;font-size:12px;color:#085041;line-height:1.6;margin-bottom:12px}
+.warn-box{background:#FAEEDA;border:1px solid rgba(192,155,90,.3);border-radius:8px;padding:11px 14px;font-size:12px;color:#633806;line-height:1.6;margin-bottom:12px}
+.err-box{background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:11px 14px;font-size:12px;color:#712B13;line-height:1.6;margin-bottom:12px}
+
+/* PAIEMENT */
+.paiement-box{background:var(--ink);border-radius:12px;padding:22px 24px;margin-top:8px}
+.paiement-title{font-size:14px;font-weight:500;color:#FAFAF7;margin-bottom:4px}
+.paiement-sub{font-size:12px;color:rgba(250,250,247,.4);margin-bottom:18px;line-height:1.5}
+.paiement-amount{font-size:36px;font-weight:300;color:#FAFAF7;margin-bottom:4px}
+.paiement-desc{font-size:11px;color:rgba(250,250,247,.4);margin-bottom:20px}
+.paiement-items{display:flex;flex-direction:column;gap:6px;margin-bottom:20px}
+.paiement-item{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(250,250,247,.6)}
+.paiement-item-check{color:var(--teal);font-size:12px}
+
+/* BOUTONS */
+.btn-submit{width:100%;padding:14px;border-radius:8px;border:none;background:var(--amber);color:#fff;font-family:'Outfit',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:opacity .15s}
+.btn-submit:hover{opacity:.85}
+.btn-submit:disabled{opacity:.4;cursor:not-allowed}
+.btn-payer{width:100%;padding:14px;border-radius:8px;border:none;background:var(--gold);color:var(--ink);font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.btn-payer:hover{opacity:.85}
+.btn-payer:disabled{opacity:.4;cursor:not-allowed}
+.btn-secondary{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(250,250,247,.6);font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;margin-top:8px}
+
+/* STEPS */
+.steps-nav{display:flex;gap:0;margin-bottom:24px}
+.step-n{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+.step-n::before{content:'';position:absolute;top:13px;left:-50%;width:100%;height:2px;background:var(--line);z-index:0}
+.step-n:first-child::before{display:none}
+.step-circle{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);background:var(--warm);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--muted);position:relative;z-index:1;transition:all .3s}
+.step-circle.active{border-color:var(--amber);background:var(--amber);color:#fff}
+.step-circle.done{border-color:var(--teal);background:var(--teal);color:#fff}
+.step-lbl{font-size:10px;color:var(--muted);margin-top:5px;text-align:center}
+.step-lbl.active{color:var(--amber)}
+
+/* CONFIRMATION */
+.confetti{text-align:center;padding:24px 0 16px}
+.confetti-icon{font-size:44px;margin-bottom:14px}
+.recap-card{background:var(--bg);border-radius:8px;padding:14px 16px;margin:14px 0}
+.recap-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)}
+.recap-row:last-child{border-bottom:none}
+.recap-lbl{color:var(--muted)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:11px 24px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;display:none}
+.toast.ok{background:#1E7A62;color:#fff}
+.toast.err{background:#C0392B;color:#fff}
+.spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* NON CONNECTE */
+.non-connecte{text-align:center;padding:40px 24px;background:var(--warm);border:1px solid var(--line);border-radius:12px}
+
+@media(max-width:600px){.grid2{grid-template-columns:1fr}.flux-wrap{grid-template-columns:1fr}.bien-prix{display:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><img src="logo-immoconnect.png" alt="ImmoConnect" style="height:38px;width:auto;object-fit:contain;vertical-align:middle"><span style="font-size:22px;font-weight:600;color:#0F0F0E;margin-left:8px">Immo<span style="color:#C09B5A">Connect</span></span></a>
+  <div class="nav-links">
+    <a href="connexion.html">Mon espace</a>
+    <a href="comment-ca-marche-agents.html">Comment ca marche</a>
+  </div>
+  <a href="blog.html" style="color:rgba(255,255,255,.6);text-decoration:none;font-size:13px;padding:0 8px">Blog</a>
+</nav>
+
+<div class="page">
+
+  <!-- STEPS -->
+  <div class="steps-nav">
+    <div class="step-n"><div class="step-circle active" id="sc1">1</div><div class="step-lbl active" id="sl1">Flux</div></div>
+    <div class="step-n"><div class="step-circle" id="sc2">2</div><div class="step-lbl" id="sl2">Proposition</div></div>
+    <div class="step-n"><div class="step-circle" id="sc3">3</div><div class="step-lbl" id="sl3">Paiement</div></div>
+    <div class="step-n"><div class="step-circle" id="sc4">4</div><div class="step-lbl" id="sl4">Confirmation</div></div>
+  </div>
+
+  <!-- BIEN HEADER -->
+  <div class="bien-header" id="bien-header">
+    <div class="bien-photo">🏠</div>
+    <div class="bien-info">
+      <div class="bien-titre" id="bien-titre">Chargement...</div>
+      <div class="bien-meta" id="bien-meta">—</div>
+    </div>
+    <div class="bien-prix" id="bien-prix">—</div>
+  </div>
+
+  <!-- TIMER -->
+  <div class="timer-box">
+    <div class="timer-icon">⏱</div>
+    <div style="flex:1">
+      <div class="timer-label">Fenetre de candidature — <strong>48 heures</strong> pour postuler</div>
+      <div class="timer-count" id="timer-count">Calcul en cours...</div>
+    </div>
+  </div>
+
+  <!-- CONTENU PAR ETAPE -->
+  <div id="step1">
+    <!-- CHOIX DU FLUX -->
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Choisissez votre type de candidature</div>
+    <div class="flux-wrap" id="flux-cards">
+      <div class="flux-card" id="flux-mandat" onclick="selectFlux('mandat')">
+        <div class="flux-icon">🎯</div>
+        <div class="flux-name" style="color:#185FA5">Je veux accompagner la vente</div>
+        <div class="flux-desc">Vous pensez pouvoir vendre ce bien. Vous proposez votre strategie, vos honoraires et votre estimation du marche.</div>
+        <div class="flux-badge" style="background:#E6F1FB;color:#185FA5">Mandat de vente</div>
+      </div>
+      <div class="flux-card" id="flux-portefeuille" onclick="selectFlux('portefeuille')">
+        <div class="flux-icon">👥</div>
+        <div class="flux-name" style="color:#1E7A62">J'ai un acheteur en portefeuille</div>
+        <div class="flux-desc">Vous avez un acheteur en portefeuille compatible. Vous declarez son profil pour prouver la pertinence de votre candidature.</div>
+        <div class="flux-badge" style="background:#E1F5EE;color:#1E7A62">Acheteur en portefeuille</div>
+      </div>
+    </div>
+
+    <div class="estimation-note">
+      💡 <strong>Estimation confidentielle</strong> — L'estimation de prix Hanae est utilisee par l'algorithme de scoring mais jamais communiquee aux agents. L'agent retenu evaluera le bien de maniere optimale lors de la visite.
+    </div>
+
+    <div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:10px;padding:14px 18px;margin-bottom:16px">
+      <div style="font-size:12px;font-weight:600;color:#712B13;margin-bottom:6px">⚠️ Important — Lisez avant de candidater</div>
+      <div style="font-size:12px;color:#712B13;line-height:1.8">
+        <div style="margin-bottom:4px">• Votre candidature est soumise a un <strong>seuil de qualite de 60 points</strong>. En dessous de ce seuil, votre profil ne sera pas presente au vendeur.</div>
+        <div style="margin-bottom:4px">• Si les 3 meilleurs scores sont tous inferieurs a 60 pts, le vendeur <strong>ne sera pas oblige de vous choisir</strong> et pourra attendre de nouvelles candidatures.</div>
+        <div style="margin-bottom:4px">• Des agents non-candidats ayant un meilleur profil peuvent etre alertes et vous depasser dans le classement.</div>
+        <div>• Le paiement de 9,99 € est dû dès l'envoi de la candidature, quel que soit le résultat. Aucun remboursement n'est prévu, ni pour les candidats non retenus dans le top 3, ni pour ceux non choisis par le vendeur.</div>
+      </div>
+    </div>
+
+    <button class="btn-submit" id="btn-next-1" onclick="goStep(2)" disabled>Continuer avec ce flux →</button>
+  </div>
+
+  <!-- ETAPE 2 — PROPOSITION -->
+  <div id="step2" style="display:none">
+
+    <!-- FLUX A -->
+    <div id="form-flux-mandat" style="display:none">
+      <div class="section">
+        <div class="section-title"><div class="section-icon">📊</div>Votre strategie de vente</div>
+        <div class="field">
+          <label class="lbl">Votre estimation du prix de marche *</label>
+          <input type="number" id="estimation-agent" placeholder="ex: 285000" oninput="majScorePreview()">
+          <div class="field-hint">Votre estimation sera comparee a l'analyse DVF du secteur. Soyez aussi precis que possible.</div>
+        </div>
+        <div class="field">
+          <label class="lbl">Vos honoraires proposes *</label>
+          <select id="honoraires-A" onchange="majScorePreview()">
+            <option value="">Selectionner</option>
+            <option value="2-3">2% a 3% TTC</option>
+            <option value="3-4">3% a 4% TTC</option>
+            <option value="4-5">4% a 5% TTC</option>
+            <option value="5+">Plus de 5% TTC</option>
+            <option value="fixe">Honoraires fixes (preciser dans le message)</option>
+          </select>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:12px 14px;margin-bottom:12px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Services proposés <span style="font-weight:400;font-style:italic">(informatif pour le vendeur)</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="field" style="margin:0">
+              <label class="lbl">Photographe professionnel</label>
+              <select id="photographe-option">
+                <option value="non">Non inclus</option>
+                <option value="inclus">Inclus dans mes honoraires</option>
+                <option value="offert_exclusif">Offert si mandat exclusif</option>
+                <option value="option">Option payante</option>
+              </select>
+              <input type="text" id="photographe-prix" placeholder="Prix si option (ex: 250€ HT)" style="margin-top:6px;font-size:12px;display:none">
+            </div>
+            <div class="field" style="margin:0">
+              <label class="lbl">Visite virtuelle 3D</label>
+              <select id="visite-virtuelle-option">
+                <option value="non">Non inclus</option>
+                <option value="inclus">Inclus dans mes honoraires</option>
+                <option value="offert_exclusif">Offert si mandat exclusif</option>
+                <option value="option">Option payante</option>
+              </select>
+              <input type="text" id="visite-virtuelle-prix" placeholder="Prix si option (ex: 350€ HT)" style="margin-top:6px;font-size:12px;display:none">
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">Votre approche pour ce bien <span style="font-size:10px;color:var(--muted);font-weight:400">(présenté au vendeur, non scoré)</span></label>
+          <textarea id="strategie-A" rows="4" placeholder="Décrivez votre approche : mise en avant du bien, réseau d'acheteurs, points forts à valoriser..."></textarea>
+          <div class="field-hint">Ce texte est transmis directement au vendeur pour l'aider à vous connaître. Il n'entre pas dans le calcul de votre score.</div>
+        </div>
+        
+    </div>
+
+    <!-- FLUX B -->
+    <div id="form-flux-portefeuille" style="display:none">
+      <div class="section">
+        <div class="section-title"><div class="section-icon">👤</div>Profil de votre acheteur</div>
+        <div class="info-box">Votre acheteur reste anonyme. Seuls son budget, type de bien et secteur sont utilises pour evaluer la pertinence de votre candidature.</div>
+        <div class="grid2">
+          <div class="field">
+            <label class="lbl">Budget maximum (EUR) *</label>
+            <input type="number" id="acheteur-budget" placeholder="ex: 300000" oninput="majScorePreview()">
+          </div>
+          <div class="field">
+            <label class="lbl">Type de bien recherche</label>
+            <select id="acheteur-type" onchange="majScorePreview()">
+              <option value="">Indifferent</option>
+              <option>Appartement</option>
+              <option>Maison</option>
+              <option>Terrain</option>
+              <option>Commerce</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label class="lbl">Surface minimum (m2)</label>
+            <input type="number" id="acheteur-surface" placeholder="ex: 70" oninput="majScorePreview()">
+          </div>
+          <div class="field">
+            <label class="lbl">Secteur recherche</label>
+            <input type="text" id="acheteur-secteur" placeholder="ex: Tarbes, Pau...">
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">Mandat de recherche déclaré <span style="color:#1E7A62;font-size:10px;font-weight:600;margin-left:4px">+15 pts si lié</span></label>
+          <select id="mandat-recherche" onchange="majScorePreview(); toggleMandatSelect(this.value)">
+            <option value="non">Non — déclaration sur honneur uniquement</option>
+            <option value="charger">Lier un mandat de recherche de mon dashboard (+15 pts)</option>
+          </select>
+          <div class="field-hint">En liant un mandat de recherche déclaré dans votre dashboard, vous obtenez automatiquement +15 pts et signalez un acheteur réel au vendeur.</div>
+        </div>
+        <div id="select-mandat-wrap" style="display:none;margin-top:8px">
+          <div class="field">
+            <label class="lbl">Choisir le mandat de recherche</label>
+            <select id="mandat-id-select" onchange="majScorePreview()">
+              <option value="">Chargement...</option>
+            </select>
+            <div id="mandat-detail-preview" style="margin-top:6px;font-size:11px;color:var(--muted);background:var(--bg);border-radius:6px;padding:6px 10px;display:none"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">Message au vendeur *</label>
+          <textarea id="message-vendeur-B" rows="3" placeholder="Presentez votre acheteur sans le nommer : profil, motivation, capacite financiere confirmee..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCORE PREVIEW -->
+    <div class="section" id="score-section" style="display:none">
+      <div class="section-title"><div class="section-icon">🏆</div>Estimation de votre score</div>
+      <div class="score-box" id="score-preview-box"></div>
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button class="btn-submit" style="flex:0 0 120px;background:var(--bg);color:var(--ink);border:1px solid var(--line)" onclick="goStep(1)">← Retour</button>
+      <button class="btn-submit" id="btn-next-2" style="flex:1" onclick="goStep(3)">Continuer vers le paiement →</button>
+    </div>
+  </div>
+
+  <!-- ETAPE 3 — PAIEMENT -->
+  <div id="step3" style="display:none">
+    <div class="paiement-box">
+      <div class="paiement-title">Finaliser votre candidature</div>
+      <div class="paiement-sub">Paiement securise — traitement immediat</div>
+      <div class="paiement-amount">9,99 <span style="font-size:18px;font-weight:400">€</span></div>
+      <div class="paiement-desc">par candidature · sans abonnement</div>
+      <div class="paiement-items">
+        <div class="paiement-item"><span class="paiement-item-check">✓</span>Votre candidature transmise au systeme de scoring</div>
+        <div class="paiement-item"><span class="paiement-item-check">✓</span>Score calcule automatiquement par Hanae IA</div>
+        <div class="paiement-item"><span class="paiement-item-check">✓</span>Si selectionne : contact vendeur + mandat automatique</div>
+        <div class="paiement-item"><span class="paiement-item-check">✓</span>Si non selectionne : score detaille + conseil Hanae</div>
+        <div class="paiement-item"><span class="paiement-item-check">✓</span>Score détaillé + conseil Hanaé si non sélectionné</div>
+      </div>
+
+      <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:14px;margin-bottom:16px">
+        <div style="font-size:11px;font-weight:600;color:rgba(250,250,247,.4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Recapitulatif</div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(250,250,247,.6);margin-bottom:6px">
+          <span>Bien</span><span id="recap-bien" style="color:#FAFAF7">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(250,250,247,.6);margin-bottom:6px">
+          <span>Type</span><span id="recap-flux" style="color:#FAFAF7">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(250,250,247,.6)">
+          <span>Score estime</span><span id="recap-score" style="color:var(--gold);font-weight:600">—</span>
+        </div>
+      </div>
+
+      <button class="btn-payer" id="btn-payer" onclick="payer()">Payer 9,99 € et soumettre ma candidature</button>
+      <button class="btn-secondary" onclick="goStep(2)">← Modifier ma proposition</button>
+    </div>
+  </div>
+
+  <!-- ETAPE 4 — CONFIRMATION -->
+  <div id="step4" style="display:none">
+    <div class="section">
+      <div class="confetti">
+        <div class="confetti-icon">🎯</div>
+        <div style="font-size:20px;font-weight:500;margin-bottom:8px">Candidature envoyee !</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7;max-width:400px;margin:0 auto">Votre proposition a ete transmise. L'algorithme Hanae calcule votre score et comparera tous les candidats a la cloture des 48h.</div>
+      </div>
+      <div class="recap-card">
+        <div class="recap-row"><span class="recap-lbl">Bien</span><span id="conf-bien">—</span></div>
+        <div class="recap-row"><span class="recap-lbl">Type</span><span id="conf-flux">—</span></div>
+        <div class="recap-row"><span class="recap-lbl">Score estime</span><span id="conf-score" style="color:var(--teal);font-weight:600">—</span></div>
+        <div class="recap-row"><span class="recap-lbl">Paiement</span><span style="color:var(--teal)">9,99 € confirme</span></div>
+        <div class="recap-row"><span class="recap-lbl">Resultat</span><span style="color:var(--amber)">Sous 48h apres cloture</span></div>
+      </div>
+      <div class="info-box">
+        <strong>Et maintenant ?</strong><br>
+        Le vendeur recevra le comparatif des 3 meilleurs agents dans 48h. Vous serez notifie par email du resultat avec votre score detaille et des conseils personnalises de Hanae.
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <a href="connexion.html" class="btn-submit" style="flex:1;text-align:center;text-decoration:none;display:block">Mon espace agent →</a>
+        <a href="index.html" class="btn-submit" style="flex:1;text-align:center;text-decoration:none;display:block;background:var(--bg);color:var(--ink);border:1px solid var(--line)">Voir les annonces</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+// Affichage dynamique des prix photographe/visite virtuelle
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'photographe-option') {
+    document.getElementById('photographe-prix').style.display = e.target.value === 'option' ? 'block' : 'none';
+  }
+  if (e.target.id === 'visite-virtuelle-option') {
+    document.getElementById('visite-virtuelle-prix').style.display = e.target.value === 'option' ? 'block' : 'none';
+  }
+});
+
+const SUPABASE_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+var flux = null;
+var bien = null;
+var currentUser = null;
+var annonceId = null;
+var scoreEstime = 0;
+
+// ── INIT ──
+(async function() {
+  var params = new URLSearchParams(window.location.search);
+  annonceId = params.get('annonce');
+  if (!annonceId) { showToast('Annonce non specifiee.', 'err'); return; }
+
+  var { data: { user } } = await db.auth.getUser();
+  currentUser = user;
+
+  if (!user) {
+    document.getElementById('step1').innerHTML = '<div class="non-connecte"><div style="font-size:32px;margin-bottom:12px">🔐</div><div style="font-size:16px;font-weight:500;margin-bottom:8px">Connexion requise</div><div style="font-size:13px;color:var(--muted);margin-bottom:20px">Vous devez etre connecte en tant qu\'agent pour candidater.</div><a href="connexion.html?redirect=candidature-agent.html%3Fannonce%3D' + annonceId + '" style="display:inline-block;background:var(--amber);color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:500">Se connecter</a></div>';
+    return;
+  }
+
+  var meta = user.user_metadata || {};
+  if (!meta.profils || !meta.profils.includes('agent')) {
+    showToast('Acces reserve aux agents immobiliers inscrits.', 'err');
+    return;
+  }
+
+  await chargerBien();
+  demarrerTimer();
+})();
+
+async function chargerBien() {
+  var { data, error } = await db.from('annonces_vendeurs').select('*').eq('id', annonceId).single();
+  if (error || !data) { showToast('Bien introuvable.', 'err'); return; }
+  bien = data;
+
+  var titre = data.titre || ((data.type_bien || 'Bien') + ' ' + (data.surface || '') + 'm2');
+  var meta = (data.surface ? data.surface + 'm2' : '') + (data.nb_pieces ? ' · ' + data.nb_pieces + ' pieces' : '') + ' · ' + (data.ville || '');
+  var prix = data.prix ? Math.round(data.prix).toLocaleString('fr-FR') + ' €' : '—';
+  var niv = data.niveau_vendeur || data.niveau || '';
+  var nivColors = { silver:'#185FA5', gold:'#854F0B', platinium:'#1E7A62' };
+
+  document.getElementById('bien-titre').textContent = titre;
+  document.getElementById('bien-meta').textContent = meta;
+  document.getElementById('bien-prix').textContent = prix;
+  document.getElementById('recap-bien').textContent = titre;
+  document.getElementById('conf-bien').textContent = titre;
+}
+
+// ── TIMER 48H ──
+function demarrerTimer() {
+  if (!bien || !bien.created_at) return;
+  var deadline = new Date(new Date(bien.created_at).getTime() + 48 * 3600000);
+
+  function tick() {
+    var now = new Date();
+    var diff = deadline - now;
+    if (diff <= 0) {
+      document.getElementById('timer-count').textContent = 'Fenetre de candidature fermee';
+      document.getElementById('btn-next-1') && (document.getElementById('btn-next-1').disabled = true);
+      return;
+    }
+    var h = Math.floor(diff / 3600000);
+    var m = Math.floor((diff % 3600000) / 60000);
+    var s = Math.floor((diff % 60000) / 1000);
+    document.getElementById('timer-count').textContent =
+      'Il reste ' + h + 'h ' + (m < 10 ? '0' : '') + m + 'min ' + (s < 10 ? '0' : '') + s + 's';
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// ── NAVIGATION ETAPES ──
+function goStep(n) {
+  if (n === 2 && !validerStep1()) return;
+  if (n === 3 && !validerStep2()) return;
+
+  for (var i = 1; i <= 4; i++) {
+    var s = document.getElementById('step' + i);
+    if (s) s.style.display = i === n ? 'block' : 'none';
+    var sc = document.getElementById('sc' + i);
+    var sl = document.getElementById('sl' + i);
+    if (sc) sc.className = 'step-circle' + (i < n ? ' done' : i === n ? ' active' : '');
+    if (sl) sl.className = 'step-lbl' + (i === n ? ' active' : '');
+  }
+
+  if (n === 3) {
+    document.getElementById('recap-flux').textContent = flux === 'mandat' ? 'Mandat de vente' : 'Acheteur en portefeuille';
+    document.getElementById('recap-score').textContent = scoreEstime + '/100';
+    document.getElementById('conf-flux').textContent = flux === 'mandat' ? 'Mandat de vente' : 'Acheteur en portefeuille';
+    document.getElementById('conf-score').textContent = scoreEstime + '/100';
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── CHOIX FLUX ──
+function selectFlux(f) {
+  flux = f;
+  document.getElementById('flux-A').className = 'flux-card' + (f === 'mandat' ? ' selected-A' : '');
+  document.getElementById('flux-B').className = 'flux-card' + (f === 'portefeuille' ? ' selected-B' : '');
+  document.getElementById('btn-next-1').disabled = false;
+  document.getElementById('form-flux-A').style.display = f === 'mandat' ? 'block' : 'none';
+  document.getElementById('form-flux-B').style.display = f === 'portefeuille' ? 'block' : 'none';
+}
+
+// ── VALIDATIONS ──
+function validerStep1() {
+  if (!flux) { showToast('Choisissez un flux de candidature.', 'err'); return false; }
+  return true;
+}
+
+function validerStep2() {
+  if (flux === 'mandat') {
+    var estimation = document.getElementById('estimation-agent').value;
+    var honoraires = document.getElementById('honoraires-A').value;
+    var strategie = document.getElementById('strategie-A').value;
+    if (!estimation) { showToast('Renseignez votre estimation de prix.', 'err'); return false; }
+    if (!honoraires) { showToast('Selectionner vos honoraires.', 'err'); return false; }
+    if (!strategie || strategie.length < 80) { showToast('Strategie trop courte (80 caracteres minimum).', 'err'); return false; }
+  } else {
+    var budget = document.getElementById('acheteur-budget').value;
+    var message = document.getElementById('message-vendeur-B').value;
+    if (!budget || parseFloat(budget) <= 0) { showToast('Renseignez le budget de votre acheteur.', 'err'); return false; }
+    if (!message) { showToast('Renseignez votre message au vendeur.', 'err'); return false; }
+  }
+  return true;
+}
+
+// ── SCORE PREVIEW ──
+function majScorePreview() {
+  var section = document.getElementById('score-section');
+  var box = document.getElementById('score-preview-box');
+  if (!flux) return;
+  section.style.display = 'block';
+
+  var meta = currentUser ? (currentUser.user_metadata || {}) : {};
+  var nbVentes = parseInt(meta.nb_ventes_locales || 0);
+  var delai = parseInt(meta.delai_moyen_vente || 0);
+  var taux = parseInt(meta.taux_vente_prix || 0);
+
+  // Score commun
+  var scoreExp = nbVentes >= 10 ? 20 : nbVentes >= 5 ? 14 : nbVentes >= 2 ? 8 : nbVentes >= 1 ? 4 : 0;
+  var scoreEst = 10; // valeur neutre (estimation confidentielle)
+  var scoreRep = 5;  // neutre si pas d'avis
+  var scoreProfil = 0;
+  if (meta.presentation && meta.presentation.length > 50) scoreProfil += 2;
+  if (meta.honoraires_fourchette) scoreProfil++;
+  if (meta.nb_ventes_12m > 0) scoreProfil++;
+  if (meta.rayon_intervention > 0) scoreProfil++;
+
+  var items = [
+    { label: 'Experience locale', val: scoreExp, max: 20 },
+    { label: 'Coherence estimation', val: scoreEst, max: 15 },
+    { label: 'Reputation & avis', val: scoreRep, max: 10 },
+    { label: 'Profil complet', val: scoreProfil, max: 5 },
+  ];
+  var total = scoreExp + scoreEst + scoreRep + scoreProfil;
+
+  if (flux === 'mandat') {
+    var strategie = document.getElementById('strategie-A').value || '';
+    var honoraires = document.getElementById('honoraires-A').value || '';
+    var marketing = 0;
+    if (strategie.length > 100) marketing += 8; else if (strategie.length > 50) marketing += 4;
+    if (honoraires) marketing += 6;
+    if ((meta.nb_ventes_12m || 0) >= 10) marketing += 6; else if ((meta.nb_ventes_12m || 0) >= 5) marketing += 3;
+    marketing = Math.min(20, marketing);
+    var scoreDelai = delai > 0 && delai <= 30 ? 15 : delai <= 45 ? 12 : delai <= 60 ? 8 : delai <= 90 ? 4 : 5;
+    var scoreTaux = taux >= 98 ? 15 : taux >= 95 ? 10 : taux >= 90 ? 6 : taux > 0 ? 3 : 5;
+    items.push(
+      { label: 'Strategie marketing', val: marketing, max: 20 },
+      { label: 'Delai de vente', val: scoreDelai, max: 15 },
+      { label: 'Taux au prix affiche', val: scoreTaux, max: 15 }
+    );
+    total += marketing + scoreDelai + scoreTaux;
+  } else {
+    var budget = parseFloat(document.getElementById('acheteur-budget').value) || 0;
+    var bienPrix = bien ? parseFloat(bien.prix) || 0 : 0;
+    var bienSurface = bien ? parseFloat(bien.surface) || 0 : 0;
+    var acqSurface = parseFloat(document.getElementById('acheteur-surface').value) || 0;
+    var acqType = document.getElementById('acheteur-type').value || '';
+    var bienType = bien ? (bien.type_bien || '').toLowerCase() : '';
+    var mandatRechVal = document.getElementById('mandat-recherche').value;
+    var mandatRech = mandatRechVal === 'charger' && document.getElementById('mandat-id-select') && document.getElementById('mandat-id-select').value ? true : false;
+
+    var pertinence = 0;
+    if (budget > 0 && bienPrix > 0) { var r = bienPrix / budget; pertinence += r <= 0.9 ? 10 : r <= 1.0 ? 8 : 0; }
+    if (!acqType || acqType === 'Indifferent') pertinence += 5;
+    else if (bienType.includes(acqType.toLowerCase())) pertinence += 5;
+    else pertinence += 3;
+    if (acqSurface > 0 && bienSurface > 0) { pertinence += bienSurface / acqSurface >= 1 ? 10 : bienSurface / acqSurface >= 0.85 ? 6 : 0; } else pertinence += 5;
+    pertinence = Math.min(25, pertinence);
+    var scoreMandat = mandatRech ? 15 : 0;
+    var scoreHisto = nbVentes >= 5 ? 10 : nbVentes >= 2 ? 6 : nbVentes >= 1 ? 3 : 0;
+    items.push(
+      { label: 'Pertinence acheteur', val: pertinence, max: 25 },
+      { label: 'Mandat de recherche', val: scoreMandat, max: 15 },
+      { label: 'Historique similaire', val: scoreHisto, max: 10 }
+    );
+    total += pertinence + scoreMandat + scoreHisto;
+  }
+
+  if ((meta.forfait_agent || '') === 'premium') total = Math.min(100, total + 10);
+  scoreEstime = total;
+
+  var html = items.map(function(it) {
+    var pct = Math.round(it.val / it.max * 100);
+    return '<div class="score-row">'
+      + '<span style="flex:1;color:var(--muted)">' + it.label + '</span>'
+      + '<div class="score-bar-wrap"><div class="score-bar-fill" style="width:' + pct + '%"></div></div>'
+      + '<span class="score-pts-lbl">' + it.val + '/' + it.max + '</span>'
+      + '</div>';
+  }).join('');
+
+  var col = total >= 60 ? 'var(--teal)' : total >= 45 ? 'var(--amber)' : 'var(--coral)';
+  var lbl = total >= 60 ? 'Bon — au-dessus du seuil de 60 pts, vous serez present au vendeur'
+          : total >= 45 ? 'Insuffisant — en dessous du seuil de 60 pts, votre profil risque de ne pas etre presente'
+          : 'Faible — vous ne serez probablement pas presente au vendeur';
+  html += '<div class="score-total-row"><div class="score-total-num" style="color:' + col + '">' + total + '</div><div class="score-total-lbl">/100 — ' + lbl + '</div></div>';
+
+  // Avertissement si sous le seuil
+  if (total < 60) {
+    html += '<div style="background:#FAECE7;border-radius:6px;padding:10px 12px;margin-top:10px;font-size:11px;color:#712B13;line-height:1.6">'
+      + '⚠️ Votre score estime est en dessous du seuil de 60 pts. Votre candidature ne sera probablement pas presentee au vendeur. '
+      + 'Completez votre profil (ventes locales, delai moyen, taux au prix) pour ameliorer votre score avant de candidater.'
+      + '</div>';
+  }
+  box.innerHTML = html;
+}
+
+// Afficher/masquer upload mandat
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'mandat-recherche') {
+    // upload-mandat-wrap géré par toggleMandatSelect
+    majScorePreview();
+  }
+});
+
+// ── PAIEMENT ──
+async function payer() {
+  var btn = document.getElementById('btn-payer');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>Traitement...';
+
+  try {
+    // 1. Enregistrer la candidature en base (statut: en_attente_paiement)
+    var payload = {
+      annonce_id: annonceId,
+      agent_email: currentUser.email,
+      flux: flux,
+      statut: 'en_attente',
+      paiement_statut: 'en_attente',
+      paiement_montant: 9.99,
+      score_total: scoreEstime
+    };
+
+    if (flux === 'mandat') {
+      payload.honoraires_proposes = document.getElementById('honoraires-A').value;
+      payload.message_vendeur = document.getElementById('message-vendeur-A').value;
+      payload.estimation_agent = parseFloat(document.getElementById('estimation-agent').value) || null;
+      payload.strategie_agent = document.getElementById('strategie-A').value;
+    } else {
+      payload.acheteur_budget = parseFloat(document.getElementById('acheteur-budget').value) || null;
+      payload.acheteur_type = document.getElementById('acheteur-type').value;
+      payload.acheteur_surface = parseFloat(document.getElementById('acheteur-surface').value) || null;
+      payload.acheteur_secteur = document.getElementById('acheteur-secteur').value;
+      var mandatVal = document.getElementById('mandat-recherche').value;
+      var mandatIdEl = document.getElementById('mandat-id-select');
+      var mandatId = (mandatVal === 'charger' && mandatIdEl && mandatIdEl.value) ? mandatIdEl.value : null;
+      payload.acheteur_mandat_recherche = mandatId ? true : false;
+      payload.acheteur_mandat_recherche_id = mandatId || null;
+      payload.message_vendeur = document.getElementById('message-vendeur-B').value;
+    }
+
+    var { data: cand, error: candErr } = await db.from('candidatures_agents').insert(payload).select().single();
+    if (candErr) throw candErr;
+
+    // 2. Ici viendrait l'appel Stripe (à intégrer quand Stripe est ouvert)
+    // Pour l'instant on simule le paiement accepté
+    await db.from('candidatures_agents').update({ paiement_statut: 'paye' }).eq('id', cand.id);
+
+    // 3. Déclencher le scorer si assez de candidatures
+    await db.functions.invoke('scorer-candidatures', { body: { annonce_id: annonceId } }).then(undefined, function(){});
+
+    goStep(4);
+
+  } catch(e) {
+    showToast('Erreur : ' + (e.message || 'Reessayez.'), 'err');
+    btn.disabled = false;
+    btn.innerHTML = 'Payer 9,99 € et soumettre ma candidature';
+  }
+}
+
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+  t.style.display = 'block';
+  setTimeout(function(){ t.style.display = 'none'; }, 4000);
+}
+</script>
+
+<script src="feedback.js" defer></script>
+</body>
+</html>

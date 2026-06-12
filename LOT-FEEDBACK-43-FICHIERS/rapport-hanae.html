@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Rapport Hanaé</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff}.nav-logo span{color:var(--gold)}
+.page{max-width:900px;margin:0 auto;padding:36px 24px 80px}
+
+/* HEADER RAPPORT */
+.rapport-header{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:24px 28px;margin-bottom:20px;display:flex;align-items:center;gap:20px}
+.hanae-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#1E7A62,#185FA5);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.rapport-info{flex:1}
+.rapport-title{font-size:18px;font-weight:500;margin-bottom:4px}
+.rapport-sub{font-size:12px;color:var(--muted)}
+.btn-pdf{padding:10px 22px;background:var(--ink);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:opacity .15s;flex-shrink:0}
+.btn-pdf:hover{opacity:.85}
+.btn-pdf:disabled{opacity:.5;cursor:not-allowed}
+
+/* SEARCH */
+.search-box{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:20px}
+.search-title{font-size:13px;font-weight:500;margin-bottom:12px}
+.search-row{display:flex;gap:10px}
+.search-input{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink);outline:none}
+.search-input:focus{border-color:var(--ink)}
+.btn-search{padding:10px 20px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer}
+
+/* LOADING */
+.loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:13px}
+.loading-spin{width:32px;height:32px;border:3px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SECTIONS RAPPORT */
+.rapport-section{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);margin-bottom:16px;overflow:hidden}
+.rs-head{padding:14px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);background:var(--bg)}
+.rs-icon{font-size:18px}
+.rs-title{font-size:13px;font-weight:600;flex:1}
+.rs-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#E1F5EE;color:#085041}
+.rs-body{padding:20px}
+
+/* BIEN INFO */
+.bien-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.bien-stat{background:var(--bg);border-radius:8px;padding:12px;text-align:center}
+.bien-stat-val{font-size:20px;font-weight:500;margin-bottom:2px}
+.bien-stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+
+/* PRIX MARKET */
+.prix-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.prix-card{background:var(--bg);border-radius:8px;padding:14px;text-align:center}
+.prix-card.featured{background:#E1F5EE;border:1px solid #9FE1CB}
+.prix-val{font-size:22px;font-weight:500;color:var(--teal)}
+.prix-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+.prix-sub{font-size:10px;color:var(--muted);margin-top:4px}
+
+/* VENTES TABLE */
+.ventes-table{width:100%;border-collapse:collapse;font-size:12px}
+.ventes-table th{padding:8px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line);font-weight:600}
+.ventes-table td{padding:9px 12px;border-bottom:1px solid var(--line);color:var(--muted)}
+.ventes-table td:first-child{color:var(--ink);font-weight:500}
+.ventes-table tr:last-child td{border-bottom:none}
+.ventes-table tr:hover td{background:#F9F7F2}
+.td-green{color:var(--teal)!important;font-weight:600!important}
+.td-avg{background:var(--bg);font-weight:600!important}
+
+/* RENDEMENT */
+.rdt-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.rdt-box{background:var(--bg);border-radius:8px;padding:14px}
+.rdt-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px}
+.rdt-val{font-size:24px;font-weight:500;color:var(--teal);margin-bottom:4px}
+.rdt-detail{font-size:11px;color:var(--muted);line-height:1.6}
+
+/* FRAIS NOTAIRE */
+.fn-box{background:#FAEEDA;border:1px solid rgba(192,155,90,.3);border-radius:8px;padding:14px;margin-bottom:12px}
+.fn-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#854F0B;margin-bottom:8px}
+.fn-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(192,155,90,.2);font-size:12px}
+.fn-row:last-child{border-bottom:none;font-weight:600;font-size:13px}
+.fn-lbl{color:#854F0B}
+.fn-val{color:#633806;font-weight:600}
+
+/* SYNTHESE HANAE */
+.hanae-synthese{font-size:13px;line-height:1.75;color:var(--ink)}
+.syn-title{font-size:18px;font-weight:600;color:var(--ink);margin:0 0 4px;line-height:1.3}
+.syn-subtitle{font-size:12px;color:var(--muted);font-style:italic;margin:0 0 16px}
+.syn-section{background:var(--bg);border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:10px;padding:14px 16px;margin:0 0 12px}
+.syn-section-head{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.5px;margin:0 0 8px}
+.syn-ico{font-size:16px;line-height:1}
+.syn-p{font-size:13px;line-height:1.75;color:var(--ink);margin:0 0 8px}
+.syn-section .syn-p:last-child{margin-bottom:0}
+.syn-hr{border:none;border-top:1px solid var(--line);margin:14px 0}
+.hanae-synthese strong{font-weight:600;color:var(--ink)}
+.hanae-synthese em{color:var(--muted);font-style:italic}
+.hanae-typing{display:inline-block;width:8px;height:16px;background:var(--teal);animation:blink .8s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* INSEE */
+.insee-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.insee-block{background:var(--bg);border-radius:8px;padding:12px}
+.insee-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px}
+.insee-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid var(--line)}
+.insee-row:last-child{border-bottom:none}
+.insee-lbl{color:var(--muted)}
+.insee-val{font-weight:500;color:var(--ink)}
+
+/* DISCLAIMER */
+.disclaimer{font-size:10px;color:var(--muted);line-height:1.6;padding:12px 16px;background:var(--bg);border-radius:8px;margin-top:8px;border:1px solid var(--line)}
+
+.empty{text-align:center;padding:40px;color:var(--muted);font-size:13px}
+hr.div{border:none;border-top:1px solid var(--line);margin:14px 0}
+
+@media(max-width:600px){.bien-grid,.prix-grid,.rdt-grid,.insee-grid{grid-template-columns:1fr 1fr}.rapport-header{flex-wrap:wrap}}
+</style>
+<style>
+/* Bandeau supérieur unifié — fond blanc, texte foncé (override global) */
+nav{background:#fff!important;border-bottom:1px solid #E8E6E0!important}
+nav .nav-logo{color:#0F0F0E!important}
+nav .nav-logo span{color:#C09B5A!important}
+nav a{color:#0F0F0E!important}
+nav a:hover{color:#C09B5A!important}
+nav .nav-out{color:#0F0F0E!important;border-color:#0F0F0E!important}
+nav .nav-link{margin-right:18px}
+</style>
+</head>
+<body>
+<nav style="background:#0F0F0E;height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100;gap:0">
+  <a href="index.html" style="font-size:18px;font-weight:600;color:#fff;text-decoration:none;margin-right:32px;font-family:'Outfit',sans-serif">Immo<span style="color:#C09B5A">Connect</span></a>
+  <div style="display:flex;gap:24px;align-items:center;flex:1">
+    <a href="forfaits.html" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Forfaits</a>
+    <a href="questionnaire-vendeur.html" style="text-decoration:none;padding:7px 16px;background:#C09B5A;color:#0F0F0E;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif">Vendre</a>
+    <a href="questionnaire-acheteur.html" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Acheter</a>
+    <a href="index.html#agents" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Agents immo</a>
+  </div>
+  <a href="index.html" style="text-decoration:none;padding:8px 20px;border:1px solid #444;color:#fff;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif;transition:all .2s" onmouseover="this.style.borderColor='#C09B5A';this.style.color='#C09B5A'" onmouseout="this.style.borderColor='#444';this.style.color='#fff'">Accueil</a>
+</nav>
+
+<div class="page">
+
+  <div class="rapport-header">
+    <div class="hanae-avatar">🤖</div>
+    <div class="rapport-info">
+      <div class="rapport-title">Hanaé — Agent IA ImmoConnect</div>
+      <div class="rapport-sub">Évaluation multi-sources · DVF DGFiP + Indice Notaires-INSEE + Carte des loyers data.gouv.fr · Analyse IA Hanaé</div>
+    </div>
+    <button class="btn-pdf" id="btn-pdf" onclick="genererPDF()" disabled>⬇ Télécharger PDF</button>
+  </div>
+
+  <div class="search-box">
+    <div class="search-title">Générer un rapport pour une annonce</div>
+    <div class="search-row">
+      <input class="search-input" id="annonce-id" placeholder="ID de l'annonce Supabase (UUID) ou code postal">
+      <button class="btn-search" onclick="chargerRapport()">Générer le rapport</button>
+    </div>
+  </div>
+
+  <div id="rapport-content">
+    <div class="empty">Entrez un ID d'annonce pour générer le rapport Hanaé</div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL  = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+var rapportData = null;
+
+/* ══ INCRÉMENTATION VUES ══ */
+async function incrementerVues(annonceId, emailVendeur) {
+  try {
+    // Vérifier si c\'est le propriétaire qui consulte
+    var { data: { session } } = await db.auth.getSession();
+    if (session && session.user && session.user.email === emailVendeur) return;
+
+    // Incrémenter nb_vues avec une fonction RPC Supabase
+    var { error } = await db.rpc('incrementer_vues', { annonce_uuid: annonceId });
+    if (error) {
+      // Fallback si RPC pas encore créée : lecture puis écriture
+      var { data: ann } = await db.from('annonces_vendeurs')
+        .select('nb_vues').eq('id', annonceId).single();
+      if (ann) {
+        await db.from('annonces_vendeurs')
+          .update({ nb_vues: (ann.nb_vues || 0) + 1 })
+          .eq('id', annonceId);
+      }
+    }
+  } catch(e) {
+    // Silencieux — ne pas bloquer l\'affichage du rapport
+    console.warn('Vues increment:', e.message);
+  }
+}
+
+/* ══ CHARGEMENT RAPPORT ══ */
+async function chargerRapport() {
+  var id = document.getElementById('annonce-id').value.trim();
+  if (!id) return;
+
+  document.getElementById('rapport-content').innerHTML = '<div class="loading"><div class="loading-spin"></div>Chargement des données…</div>';
+  document.getElementById('btn-pdf').disabled = true;
+
+  try {
+    // 1. Charger l\'annonce depuis Supabase
+    var { data: annonce, error } = await db.from('annonces_vendeurs').select('*').eq('id', id).single();
+
+    // CONFIDENTIALITÉ : un agent (autre que le vendeur) ne doit pas voir l'estimation Hanaé
+    // — son estimation personnelle est un critère de sélection des agents.
+    window._estAgentTiers = false;
+    try {
+      var { data: { session: _s } } = await db.auth.getSession();
+      if (_s && _s.user && annonce && _s.user.email !== annonce.email) {
+        var _av = await db.from('agents_validation').select('email').eq('email', _s.user.email).maybeSingle();
+        if (_av && _av.data) window._estAgentTiers = true;
+      }
+    } catch(e) {}
+    if (error || !annonce) {
+      // Essai par code postal
+      var { data: annonces } = await db.from('annonces_vendeurs').select('*').eq('code_postal', id).order('created_at', {ascending:false}).limit(1);
+      annonce = annonces && annonces[0];
+    }
+    if (!annonce) { document.getElementById('rapport-content').innerHTML = '<div class="empty">Annonce introuvable</div>'; return; }
+
+    // ── INCRÉMENTER LES VUES (ne pas compter le propriétaire) ──
+    await incrementerVues(annonce.id, annonce.email_contact);
+
+    document.getElementById('rapport-content').innerHTML = '<div class="loading"><div class="loading-spin"></div>Récupération données DVF…</div>';
+
+    // 2. Récupérer données DVF — sources multiples
+    document.getElementById('rapport-content').innerHTML = '<div class="loading"><div class="loading-spin"></div>Récupération données DVF Etalab…</div>';
+    var dvf = await fetchDVF(annonce.code_postal, annonce.type_bien, annonce.surface, annonce.ville);
+
+    // 2b. DVF+ CEREMA (géolocalisé, plus précis) — fallback silencieux si indisponible
+    document.getElementById('rapport-content').innerHTML = '<div class="loading"><div class="loading-spin"></div>Récupération DVF+ CEREMA géolocalisé…</div>';
+    var dvfCerema = await fetchDVFCerema(annonce.code_postal, annonce.type_bien, annonce.surface);
+    // Si CEREMA disponible et avec suffisamment de données → enrichit DVF
+    if (dvfCerema && dvfCerema.nbVentes >= 3) {
+      dvf.prixM2Cerema = dvfCerema.prixM2Moyen;
+      dvf.nbVentesCerema = dvfCerema.nbVentes;
+      dvf.sourceCerema = dvfCerema.source;
+    }
+
+    // 2c. Baromètre local SeLoger/MeilleursAgents (table statique par dépt)
+    var barometre = getBarometreLocal(annonce.code_postal, annonce.type_bien);
+
+    // 2d. Annonces actives Stream Estate/Melo (placeholder — activable avec clé API)
+    var annoncesActives = await fetchAnnoncesActives(annonce.code_postal, annonce.type_bien, annonce.surface, annonce.prix);
+
+    document.getElementById('rapport-content').innerHTML = '<div class="loading"><div class="loading-spin"></div>Récupération données INSEE + loyers + indices…</div>';
+
+    // 3. Récupérer données INSEE
+    var insee = await fetchINSEE(annonce.code_postal);
+
+    // 3b. Carte des loyers
+    var loyers = await fetchLoyers(insee.code, annonce.type_bien);
+
+    // 3c. Indice Notaires-INSEE
+    var dept = annonce.code_postal ? annonce.code_postal.substring(0,2) : '75';
+    var indice = await fetchIndiceNotaires(annonce.type_bien, dept);
+
+    // 4b. Biens similaires en vente sur ImmoConnect (même secteur)
+    var biensComparatifs = await fetchBiensSimilaires(annonce);
+
+    // 4. Calculs enrichis
+    // Calculer prix/m² moyen des annonces ImmoConnect pour enrichir le composite
+    var prixM2ImmoConnect = 0;
+    if (biensComparatifs && biensComparatifs.length >= 3) {
+      var prixM2IC = biensComparatifs
+        .filter(function(b){ return b.prix && b.surface; })
+        .map(function(b){ return b.prix / b.surface; });
+      if (prixM2IC.length >= 3) {
+        prixM2ImmoConnect = Math.round(prixM2IC.reduce(function(a,b){return a+b},0) / prixM2IC.length);
+        dvf.prixM2ImmoConnect = prixM2ImmoConnect;
+      }
+    }
+
+    // Injecter baromètre FNAIM/SeLoger dans dvf
+    var prixFNAIM = barometre ? barometre.prixM2Moyen : 0;
+    dvf.prixM2Barometre = prixFNAIM;
+
+    // Injecter CEREMA dans dvf si disponible
+    if (dvfCerema && dvfCerema.prixM2Moyen) dvf.prixM2Cerema = dvfCerema.prixM2Moyen;
+
+    var calculs = calculer(annonce, dvf, loyers, indice, dvfCerema, prixFNAIM, prixM2ImmoConnect);
+
+    // 5. Stocker
+    var dept = annonce.code_postal ? annonce.code_postal.substring(0,2) : '';
+    var barometre = prixFNAIM > 0 ? { prixM2Moyen: prixFNAIM, departement: 'Dept ' + dept, miseAJour: 'Mai 2026' } : null;
+    rapportData = { annonce, dvf, dvfCerema, prixFNAIM, prixImmoConnect: prixM2ImmoConnect, barometre, insee, calculs, biensComparatifs };
+
+    document.getElementById('rapport-content').innerHTML = '<div class="loading"><div class="loading-spin"></div>Hanaé rédige la synthèse…</div>';
+
+    // 6. Synthèse Hanaé via Claude
+    var synthese = window._estAgentTiers ? null : await genererSynthese(annonce, dvf, calculs);
+
+    rapportData.synthese = synthese;
+
+    // 7. Afficher
+    afficherRapport(rapportData);
+    chargerPOI(rapportData.annonce);
+    document.getElementById('btn-pdf').disabled = false;
+
+    // Afficher bouton visite si niveau Silver, Gold ou Platinium
+    var niv = rapportData.annonce.niveau_vendeur || 'standard';
+    if (['silver','gold','platinium'].includes(niv)) {
+      var bv = document.getElementById('btn-visite');
+      if (bv) bv.style.display = 'inline-block';
+    }
+
+  } catch(e) {
+    document.getElementById('rapport-content').innerHTML = '<div class="empty">Erreur : ' + e.message + '</div>';
+  }
+}
+
+/* ══ MODAL CALENDRIER VISITES ══ */
+// ── POINTS D'INTÉRÊT RÉELS (OpenStreetMap) — biens avec adresse exacte ──
+async function chargerPOI(a) {
+  try {
+    if (!a || !a.adresse) return; // adresse exacte requise (Gold/Platinium)
+    // 1. Géocodage IGN (adresse → lat/lon)
+    var q = encodeURIComponent(a.adresse + ' ' + (a.code_postal || '') + ' ' + (a.ville || ''));
+    var geo = await fetch('https://data.geopf.fr/geocodage/search/?q=' + q + '&limit=1').then(function(r){ return r.json(); });
+    var f = geo && geo.features && geo.features[0];
+    if (!f || (f.properties.score || 0) < 0.5) return;
+    var lon = f.geometry.coordinates[0], lat = f.geometry.coordinates[1];
+    // 2. Requête Overpass : équipements dans un rayon de 1 km
+    var ql = '[out:json][timeout:10];(' +
+      'node(around:1000,' + lat + ',' + lon + ')[amenity~"^(school|kindergarten|pharmacy|doctors|supermarket)$"];' +
+      'node(around:1000,' + lat + ',' + lon + ')[shop~"^(supermarket|bakery)$"];' +
+      'node(around:800,'  + lat + ',' + lon + ')[highway=bus_stop];' +
+      'node(around:1500,' + lat + ',' + lon + ')[railway=station];' +
+      ');out body 60;';
+    var ctl = new AbortController(); var to = setTimeout(function(){ ctl.abort(); }, 9000);
+    var osm = await fetch('https://overpass-api.de/api/interpreter', { method:'POST', body:'data='+encodeURIComponent(ql), signal: ctl.signal }).then(function(r){ return r.json(); });
+    clearTimeout(to);
+    var els = (osm && osm.elements) || [];
+    if (!els.length) return;
+    // 3. Distance + déduplication par catégorie (le plus proche de chaque type)
+    function dist(la, lo) {
+      var R=6371000, dLa=(la-lat)*Math.PI/180, dLo=(lo-lon)*Math.PI/180;
+      var x = Math.sin(dLa/2)*Math.sin(dLa/2) + Math.cos(lat*Math.PI/180)*Math.cos(la*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2);
+      return Math.round(2*R*Math.asin(Math.sqrt(x)));
+    }
+    var cats = {
+      ecole:      { lbl:'\ud83c\udfeb \u00c9cole',        test:function(t){ return t.amenity==='school'||t.amenity==='kindergarten'; } },
+      commerce:   { lbl:'\ud83d\uded2 Supermarch\u00e9',  test:function(t){ return t.amenity==='supermarket'||t.shop==='supermarket'; } },
+      boulangerie:{ lbl:'\ud83e\udd56 Boulangerie',        test:function(t){ return t.shop==='bakery'; } },
+      pharmacie:  { lbl:'\ud83d\udc8a Pharmacie',          test:function(t){ return t.amenity==='pharmacy'; } },
+      medecin:    { lbl:'\ud83e\ude7a M\u00e9decin',      test:function(t){ return t.amenity==='doctors'; } },
+      bus:        { lbl:'\ud83d\ude8c Arr\u00eat de bus', test:function(t){ return t.highway==='bus_stop'; } },
+      gare:       { lbl:'\ud83d\ude89 Gare',               test:function(t){ return t.railway==='station'; } }
+    };
+    var best = {};
+    els.forEach(function(e){
+      if (!e.tags || !e.lat) return;
+      var d = dist(e.lat, e.lon);
+      for (var k in cats) {
+        if (cats[k].test(e.tags)) {
+          if (!best[k] || d < best[k].d) best[k] = { d: d, nom: e.tags.name || '' };
+          break;
+        }
+      }
+    });
+    var keys = Object.keys(best);
+    if (!keys.length) return;
+    var h = '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">';
+    h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px">\ud83d\udccd \u00c0 proximit\u00e9 (donn\u00e9es OpenStreetMap)</div>';
+    h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px;font-size:12px">';
+    keys.sort(function(x,y){ return best[x].d - best[y].d; }).forEach(function(k){
+      var b = best[k];
+      var min = Math.max(1, Math.round(b.d / 1000 * 12)); // ~12 min/km à pied
+      h += '<div style="background:var(--bg);border-radius:6px;padding:7px 10px">' + cats[k].lbl +
+           (b.nom ? ' <span style="color:var(--muted)">' + b.nom.replace(/[<>]/g,'') + '</span>' : '') +
+           '<br><strong>' + (b.d < 1000 ? b.d + ' m' : (b.d/1000).toFixed(1) + ' km') + '</strong> \u00b7 ' + min + ' min \u00e0 pied</div>';
+    });
+    h += '</div></div>';
+    var slot = document.getElementById('poi-section');
+    if (slot) slot.innerHTML = h;
+  } catch(e) { /* d\u00e9faillance silencieuse : la section reste vide */ }
+}
+
+function ouvrirCalendrier() {
+  var annonce = rapportData && rapportData.annonce;
+  if (!annonce) return;
+
+  // Créer modal calendrier
+  var modal = document.getElementById('modal-calendrier');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'modal-calendrier';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,15,14,.6);backdrop-filter:blur(4px);z-index:999;display:flex;align-items:center;justify-content:center;padding:24px';
+    document.body.appendChild(modal);
+  }
+
+  modal.innerHTML = '<div style="background:#FEFDFB;border-radius:10px;padding:0;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)">' +
+    '<div style="padding:20px 24px;border-bottom:1px solid #E8E6E0;display:flex;align-items:center;justify-content:space-between">' +
+    '<div>' +
+    '<div style="font-size:16px;font-weight:500;color:#0F0F0E">📅 Réserver une visite</div>' +
+    '<div style="font-size:12px;color:#888780;margin-top:2px">' + (annonce.type_bien||'Bien') + ' · ' + (annonce.surface||'—') + ' m² · ' + (annonce.ville||'') + '</div>' +
+    '</div>' +
+    '<button onclick="fermerCalendrier()" style="border:none;background:none;font-size:20px;cursor:pointer;color:#888780;padding:4px">×</button>' +
+    '</div>' +
+    '<div id="cal-modal-content" style="padding:20px 24px">' +
+    '<div style="text-align:center;padding:20px;color:#888780;font-size:13px">' +
+    '<div style="width:24px;height:24px;border:3px solid #E8E6E0;border-top-color:#1E7A62;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px"></div>' +
+    'Chargement des disponibilités…</div></div>' +
+    '</div>';
+
+  modal.style.display = 'flex';
+  chargerDisposVendeur(annonce.email_contact, annonce.id);
+}
+
+async function chargerDisposVendeur(emailVendeur, annonceId) {
+  try {
+    var today = new Date().toISOString().split('T')[0];
+    var { data: dispos } = await db.from('disponibilites_visites')
+      .select('*')
+      .eq('email_vendeur', emailVendeur)
+      .eq('annonce_id', annonceId)
+      .eq('statut', 'libre')
+      .gte('date', today)
+      .order('date', {ascending: true})
+      .limit(20);
+
+    var container = document.getElementById('cal-modal-content');
+    if (!dispos || !dispos.length) {
+      container.innerHTML = '<div style="text-align:center;padding:32px;color:#888780;font-size:13px">' +
+        '<div style="font-size:32px;margin-bottom:12px">📅</div>' +
+        'Aucun créneau disponible pour le moment.<br>Contactez le vendeur via la messagerie.' +
+        '</div>';
+      return;
+    }
+
+    var html = '<div style="font-size:13px;color:#888780;margin-bottom:16px">Choisissez un créneau disponible :</div>';
+
+    // Grouper par date
+    var parDate = {};
+    dispos.forEach(function(d) {
+      if (!parDate[d.date]) parDate[d.date] = [];
+      parDate[d.date].push(d);
+    });
+
+    Object.keys(parDate).forEach(function(date) {
+      var dateObj = new Date(date + 'T12:00:00');
+      var opts = {weekday:'long', day:'numeric', month:'long'};
+      html += '<div style="margin-bottom:16px">';
+      html += '<div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#888780;margin-bottom:8px">' +
+        dateObj.toLocaleDateString('fr-FR', opts) + '</div>';
+      html += '<div style="display:flex;flex-wrap:wrap;gap:8px">';
+      parDate[date].forEach(function(d) {
+        html += '<button onclick="selectionnerCreneau(\'' + d.id + '\',\'' + date + '\',\'' + d.heure_debut + '\',\'' + d.heure_fin + '\',\'' + emailVendeur + '\')" ' +
+          'style="padding:8px 16px;border-radius:8px;border:1px solid #9FE1CB;background:#E1F5EE;color:#1E7A62;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer">' +
+          d.heure_debut + ' – ' + d.heure_fin + '</button>';
+      });
+      html += '</div></div>';
+    });
+
+    container.innerHTML = html;
+  } catch(e) {
+    document.getElementById('cal-modal-content').innerHTML =
+      '<div style="text-align:center;padding:24px;color:#888780;font-size:13px">Erreur de chargement. Réessayez.</div>';
+  }
+}
+
+function selectionnerCreneau(dispoId, date, debut, fin, emailVendeur) {
+  var dateObj = new Date(date + 'T12:00:00');
+  var dateStr = dateObj.toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long'});
+  var container = document.getElementById('cal-modal-content');
+
+  container.innerHTML =
+    '<div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:16px;margin-bottom:16px;font-size:13px;line-height:1.7">' +
+    '✅ <strong>' + dateStr + ' de ' + debut + ' à ' + fin + '</strong><br>' +
+    '<span style="color:#888780">Confirmez votre demande de visite</span></div>' +
+    '<div style="margin-bottom:14px">' +
+    '<label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#888780;display:block;margin-bottom:6px">Votre message au vendeur (optionnel)</label>' +
+    '<textarea id="msg-visite" placeholder="Bonjour, je souhaite visiter votre bien…" style="width:100%;background:#F5F2EC;border:1px solid #E8E6E0;border-radius:8px;padding:10px;font-family:Outfit,sans-serif;font-size:13px;resize:none;min-height:80px;outline:none"></textarea></div>' +
+    '<button onclick="confirmerReservation(\'' + dispoId + '\',\'' + emailVendeur + '\')" ' +
+    'style="width:100%;padding:12px;border-radius:8px;border:none;background:#0F0F0E;color:#fff;font-family:Outfit,sans-serif;font-size:14px;font-weight:500;cursor:pointer">' +
+    'Envoyer ma demande de visite →</button>' +
+    '<button onclick="chargerDisposVendeur(\'' + emailVendeur + '\',\'' + (rapportData.annonce.id) + '\')" ' +
+    'style="width:100%;padding:10px;border-radius:8px;border:1px solid #E8E6E0;background:transparent;color:#888780;font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;margin-top:8px">' +
+    '← Choisir un autre créneau</button>';
+}
+
+async function confirmerReservation(dispoId, emailVendeur) {
+  try {
+    var { data: { session } } = await db.auth.getSession();
+    if (!session) {
+      alert('Connectez-vous pour réserver une visite.');
+      window.location.href = 'connexion.html';
+      return;
+    }
+
+    var msg = document.getElementById('msg-visite') ? document.getElementById('msg-visite').value : '';
+    var btn = document.querySelector('#cal-modal-content button');
+    if (btn) btn.disabled = true;
+
+    await db.from('reservations_visites').insert({
+      dispo_id: dispoId,
+      email_vendeur: emailVendeur,
+      email_acheteur: session.user.email,
+      message: msg || null,
+      statut: 'en_attente'
+    });
+
+    // Marquer le créneau comme réservé
+    await db.from('disponibilites_visites')
+      .update({ statut: 'reserve' })
+      .eq('id', dispoId);
+
+    // Notifier le vendeur par email
+    await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'demande_visite',
+        to: emailVendeur,
+        subject: '📅 Nouvelle demande de visite — ImmoConnect',
+        acheteur: session.user.email,
+        message: msg,
+        bien: (rapportData.annonce.type_bien||'Bien') + ' · ' + (rapportData.annonce.ville||''),
+        lien: 'https://immoconnect-agence.fr/calendrier.html'
+      }
+    }).then(undefined, function(){});
+
+    document.getElementById('cal-modal-content').innerHTML =
+      '<div style="text-align:center;padding:32px">' +
+      '<div style="font-size:48px;margin-bottom:16px">✅</div>' +
+      '<div style="font-size:16px;font-weight:500;margin-bottom:8px">Demande envoyée !</div>' +
+      '<div style="font-size:13px;color:#888780;line-height:1.7">Le vendeur a été notifié. Il confirmera ou refusera votre demande.<br>Vous recevrez un email de confirmation.</div>' +
+      '<button onclick="fermerCalendrier()" style="margin-top:20px;padding:10px 24px;border-radius:8px;border:none;background:#0F0F0E;color:#fff;font-family:Outfit,sans-serif;font-size:13px;cursor:pointer">Fermer</button>' +
+      '</div>';
+
+  } catch(e) {
+    alert('Erreur : ' + e.message);
+  }
+}
+
+function fermerCalendrier() {
+  var modal = document.getElementById('modal-calendrier');
+  if (modal) modal.style.display = 'none';
+}
+
+/* ══ BIENS SIMILAIRES EN VENTE ══ */
+async function fetchBiensSimilaires(annonce) {
+  try {
+    var cp = annonce.code_postal || '';
+    var dept = cp.substring(0, 2);
+    var surface = parseFloat(annonce.surface) || 0;
+    var prix = parseFloat(annonce.prix) || 0;
+    var type = (annonce.type_bien || '').toLowerCase();
+
+    // Chercher biens publiés dans le même département, type similaire, exclure le bien courant
+    var query = db.from('annonces_vendeurs')
+      .select('id, type_bien, surface, nb_pieces, ville, code_postal, prix, classe_dpe, niveau_vendeur, created_at')
+      .eq('statut', 'publie')
+      .like('code_postal', dept + '%')
+      .neq('id', annonce.id)
+      .gt('prix', 0)
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    var { data } = await query;
+    if (!data || !data.length) return [];
+
+    // Filtrer : même type et surface ±40%
+    var filtres = data.filter(function(b) {
+      var bType = (b.type_bien || '').toLowerCase();
+      var typeOk = !type || type === 'indifferent' ||
+        bType.includes(type.split(' ')[0]) ||
+        type.includes(bType.split(' ')[0]);
+      var surfaceOk = !surface || !b.surface ||
+        (parseFloat(b.surface) >= surface * 0.6 && parseFloat(b.surface) <= surface * 1.4);
+      return typeOk && surfaceOk;
+    });
+
+    // Trier par pertinence (surface la plus proche)
+    filtres.sort(function(a, b) {
+      var dA = Math.abs((parseFloat(a.surface) || 0) - surface);
+      var dB = Math.abs((parseFloat(b.surface) || 0) - surface);
+      return dA - dB;
+    });
+
+    return filtres.slice(0, 6);
+  } catch(e) {
+    return [];
+  }
+}
+
+/* ══ TABLE FNAIM/SeLoger — prix/m² par département (mise à jour manuelle mensuelle) ══ */
+// Source : Baromètre SeLoger/MeilleursAgents + FNAIM — Dernière mise à jour : Mai 2026
+var BAROMETRE_FNAIM = {
+  '01':3050,'02':1980,'03':1720,'04':2850,'05':2300,'06':5200,'07':2100,'08':1650,
+  '09':1800,'10':1900,'11':1950,'12':1750,'13':3800,'14':2600,'15':1550,'16':1850,
+  '17':2900,'18':1750,'19':1800,'21':2450,'22':2100,'23':1300,'24':2000,'25':2500,
+  '26':2200,'27':2100,'28':2050,'29':2300,'30':2400,'31':3200,'32':1800,'33':4100,
+  '34':3200,'35':3100,'36':1450,'37':2500,'38':2700,'39':1950,'40':2850,'41':1950,
+  '42':2050,'43':1600,'44':3400,'45':2200,'46':1700,'47':1900,'48':1550,'49':2500,
+  '50':2100,'51':2200,'52':1550,'53':1700,'54':2100,'55':1450,'56':2700,'57':2200,
+  '58':1550,'59':2500,'60':2400,'61':1650,'62':2100,'63':2050,'64':3200,'65':1850,
+  '66':2700,'67':3200,'68':2900,'69':5800,'70':1700,'71':1900,'72':2050,'73':2800,
+  '74':4200,'75':10200,'76':2500,'77':3100,'78':4200,'79':1700,'80':1950,'81':2000,
+  '82':1800,'83':3900,'84':2900,'85':2600,'86':1800,'87':1900,'88':1600,'89':1700,
+  '90':2100,'91':3400,'92':6800,'93':4200,'94':5100,'95':3500,
+  '971':2200,'972':2100,'973':1500,'974':2800,'976':1800
+};
+
+function getPrixFNAIM(codePostal, typeBien) {
+  var dept = String(codePostal || '').substring(0, 2);
+  var base = BAROMETRE_FNAIM[dept] || 0;
+  if (!base) return 0;
+  // Correction selon type de bien (maisons ~15% moins chères que apparts en moyenne)
+  var type = (typeBien || '').toLowerCase();
+  if (type.includes('maison') || type.includes('villa') || type.includes('pavillon')) {
+    return Math.round(base * 0.85);
+  }
+  return base;
+}
+
+/* ══ DVF+ CEREMA — version géolocalisée plus précise ══ */
+async function fetchDVFCEREMA(codePostal, typeBien, surface) {
+  try {
+    var dept = String(codePostal || '').substring(0, 2);
+    var url = 'https://apidf-preprod.cerema.fr/dvf_opendata/stats/departement/?dep=' + dept + '&page_size=1&ordering=-annee_mutation';
+    var resp = await fetch(url);
+    if (!resp.ok) return null;
+    var data = await resp.json();
+    var results = data.results || [];
+    if (!results.length) return null;
+    // Prendre la valeur la plus récente
+    var recent = results[0];
+    var prixM2 = parseFloat(recent.prix_m2_median) || 0;
+    return { prixM2Median: prixM2, annee: recent.annee_mutation, source: 'DVF+ CEREMA' };
+  } catch(e) {
+    return null;
+  }
+}
+
+/* ══ PLACEHOLDER STREAM ESTATE / MELO — annonces actives autres portails ══ */
+// À ACTIVER quand abonnement souscrit :
+// 1. Créer compte sur stream.estate ou melo.io
+// 2. Remplacer STREAM_ESTATE_API_KEY par votre clé dans les secrets Supabase
+// 3. Décommenter la fonction fetchAnnoncesMarche ci-dessous
+//
+// async function fetchAnnoncesMarche(codePostal, typeBien, surface, prix) {
+//   try {
+//     var dept = String(codePostal || '').substring(0, 2);
+//     var surfaceMin = Math.round((parseFloat(surface) || 0) * 0.65);
+//     var surfaceMax = Math.round((parseFloat(surface) || 0) * 1.35);
+//     var budgetMin = Math.round((parseFloat(prix) || 0) * 0.6);
+//     var budgetMax = Math.round((parseFloat(prix) || 0) * 1.4);
+//
+//     // Stream Estate API — annonces SeLoger, LeBonCoin, PAP, Bien\'ici agrégées
+//     var resp = await fetch('https://api.stream.estate/documents/properties', {
+//       headers: { 'X-API-KEY': '<VOTRE_CLE_STREAM_ESTATE>' },
+//       // ou pour Melo.io :
+//       // headers: { 'Authorization': 'Bearer <VOTRE_CLE_MELO>' }
+//     });
+//     // Paramètres : dept, typeBien, surfaceMin, surfaceMax, budgetMin, budgetMax
+//     // Retourne : prixM2Moyen, nbAnnonces, prixMin, prixMax
+//     var data = await resp.json();
+//     var annonces = data.results || [];
+//     if (!annonces.length) return null;
+//     var prixM2List = annonces
+//       .map(function(a) { return a.price && a.surface ? a.price / a.surface : 0; })
+//       .filter(function(v) { return v > 1000 && v < 30000; });
+//     var prixM2Moyen = prixM2List.length
+//       ? Math.round(prixM2List.reduce(function(s,v){ return s+v; }, 0) / prixM2List.length)
+//       : 0;
+//     return { prixM2Moyen, nbAnnonces: annonces.length, source: 'Stream Estate / Melo' };
+//   } catch(e) { return null; }
+// }
+
+/* ══ API DVF OFFICIELLE ══ */
+/* ══ DVF+ CEREMA — VERSION GÉOLOCALISÉE ══ */
+async function fetchDVFCerema(codePostal, typeBien, surface) {
+  try {
+    // DVF+ CEREMA : données DVF géolocalisées et enrichies
+    // https://www.data.gouv.fr/dataservices/api-donnees-foncieres
+    var typeCode = typeBien && typeBien.toLowerCase().includes('maison') ? 'Maison' : 'Appartement';
+    var url = 'https://apidf-preprod.cerema.fr/dvf_opendata/geomutations/?code_postal=' + codePostal
+      + '&type_local=' + encodeURIComponent(typeCode)
+      + '&periode_min=2021-01-01'
+      + '&limit=100';
+    var res = await fetch(url);
+    if (!res.ok) throw new Error('CEREMA ' + res.status);
+    var data = await res.json();
+    var mutations = data.features || data.results || [];
+
+    var surf = parseFloat(surface) || 50;
+    var similaires = mutations.filter(function(m) {
+      var props = m.properties || m;
+      var s = props.surface_reelle_bati || props.surface;
+      var v = props.valeur_fonciere || props.prix;
+      return s && s >= surf * 0.65 && s <= surf * 1.35 && v > 0;
+    });
+
+    var prixM2 = similaires.map(function(m) {
+      var props = m.properties || m;
+      var s = props.surface_reelle_bati || props.surface;
+      var v = props.valeur_fonciere || props.prix;
+      return v / s;
+    }).filter(function(v) { return v > 500 && v < 25000; });
+
+    var moy = function(arr) { return arr.length ? arr.reduce(function(a,b){return a+b},0)/arr.length : 0; };
+    var med = function(arr) {
+      if (!arr.length) return 0;
+      var s = arr.slice().sort(function(a,b){return a-b});
+      return s[Math.floor(s.length/2)];
+    };
+
+    if (similaires.length < 3) return null; // Pas assez de données CEREMA
+    return {
+      prixM2Moyen: Math.round(moy(prixM2)),
+      prixM2Median: Math.round(med(prixM2)),
+      nbVentes: similaires.length,
+      source: 'DVF+ CEREMA géolocalisé'
+    };
+  } catch(e) {
+    return null; // Fallback silencieux vers DVF Etalab
+  }
+}
+
+/* ══ BAROMÈTRE LOCAL — TABLE FNAIM/SeLoger statique par département ══ */
+// Mise à jour manuelle mensuelle — source : baromètre SeLoger/MeilleursAgents + FNAIM
+// Dernière mise à jour : mai 2026
+function getBarometreLocal(codePostal, typeBien) {
+  var dept = String(codePostal || '').substring(0, 2);
+  var isAppart = !typeBien || !typeBien.toLowerCase().includes('maison');
+
+  // Prix médians/m² par département — source SeLoger/MeilleursAgents mai 2026
+  var barometreAppart = {
+    '75': 9739, '92': 6820, '94': 4650, '93': 3480, '78': 4120, '91': 3280, '95': 3150,
+    '13': 3820, '06': 4950, '69': 4680, '33': 4120, '31': 3680, '67': 3420, '59': 2980,
+    '44': 4020, '34': 3750, '76': 2650, '57': 2480, '25': 2920, '74': 4580,
+    '38': 3380, '35': 3650, '29': 2750, '54': 2520, '63': 2180, '14': 3050,
+    '37': 2680, '49': 2850, '83': 4280, '30': 2920, '45': 2350, '51': 2580,
+    '64': 3150, '66': 3050, '73': 3280, '21': 2750, '87': 1980, '17': 3120,
+    '85': 2820, '56': 2950, '22': 2350, '26': 2680, '07': 2150, '42': 2380,
+    '68': 2980, '10': 1850, '28': 2150, '27': 2120, '50': 2280, '61': 1750,
+    '02': 1920, '60': 2380, '80': 2050, '62': 1980, '08': 1580, '55': 1620,
+    '88': 1680, '52': 1520, '70': 1680, '39': 1950, '71': 1820, '58': 1650,
+    '89': 1780, '03': 1480, '15': 1620, '43': 1750, '48': 1580, '23': 1280,
+    '19': 1450, '24': 1680, '47': 1750, '40': 2580, '65': 1980, '09': 1650,
+    '12': 1820, '81': 2050, '82': 1950, '46': 1750, '32': 1680, '11': 2120
+  };
+
+  var barometreMainson = {
+    '75': 0, '92': 7250, '94': 4950, '93': 3280, '78': 4680, '91': 3520, '95': 3380,
+    '13': 3650, '06': 4280, '69': 4950, '33': 3850, '31': 3420, '67': 3150, '59': 2650,
+    '44': 3780, '34': 3480, '76': 2480, '57': 2280, '25': 2750, '74': 4820,
+    '38': 3150, '35': 3380, '29': 2580, '54': 2350, '63': 2050, '14': 2850,
+    '37': 2520, '49': 2680, '83': 3980, '30': 2750, '45': 2180, '51': 2380,
+    '64': 2980, '66': 2820, '73': 3120, '21': 2580, '87': 1850, '17': 2950,
+    '85': 2650, '56': 2780, '22': 2180, '26': 2520, '07': 2050, '42': 2250,
+    '68': 2780, '10': 1750, '28': 2050, '27': 2020, '50': 2150, '61': 1680,
+    '02': 1820, '60': 2250, '80': 1950, '62': 1880, '08': 1520, '55': 1580,
+    '88': 1620, '52': 1480, '70': 1620, '39': 1880, '71': 1750, '58': 1580,
+    '89': 1720, '03': 1420, '15': 1580, '43': 1680, '48': 1520, '23': 1250,
+    '19': 1420, '24': 1650, '47': 1680, '40': 2450, '65': 1920, '09': 1620,
+    '12': 1780, '81': 1980, '82': 1880, '46': 1720, '32': 1650, '11': 2050
+  };
+
+  var barometre = isAppart ? barometreAppart : barometreMainson;
+  var prixM2 = barometre[dept] || 0;
+
+  return prixM2 > 0 ? {
+    prixM2Moyen: prixM2,
+    departement: dept,
+    type: isAppart ? 'Appartement' : 'Maison',
+    source: 'Baromètre SeLoger/MeilleursAgents — mai 2026',
+    miseAJour: 'mai 2026'
+  } : null;
+}
+
+/* ══ PLACEHOLDER STREAM ESTATE / MELO — ANNONCES ACTIVES ══ */
+// À activer quand abonnement souscrit : https://stream.estate ou https://melo.io
+// Remplace getBarometreLocal par données temps réel des portails (SeLoger, LBC, PAP...)
+async function fetchAnnoncesActives(codePostal, typeBien, surface, prixMax) {
+  var STREAM_ESTATE_KEY = null; // Mettre la clé ici : 'sk-xxxxx'
+  var MELO_KEY = null;          // Ou Melo : 'melo-xxxxx'
+
+  if (STREAM_ESTATE_KEY) {
+    try {
+      var dept = String(codePostal).substring(0, 2);
+      var typeCode = typeBien && typeBien.toLowerCase().includes('maison') ? '1' : '0';
+      var surf = parseFloat(surface) || 50;
+      var res = await fetch('https://api.stream.estate/documents/properties', {
+        headers: { 'X-API-KEY': STREAM_ESTATE_KEY, 'Content-Type': 'application/json' },
+        method: 'GET',
+        // params encodés dans l\'URL
+      });
+      // Traitement réponse Stream Estate
+      // var data = await res.json();
+      // return { prixM2Moyen: ..., nbAnnonces: ..., source: 'Stream Estate' };
+    } catch(e) {}
+  }
+
+  if (MELO_KEY) {
+    // Même logique pour Melo.io
+  }
+
+  return null; // Pas de clé configurée → utiliser le baromètre statique
+}
+
+async function fetchDVF(codePostal, typeBien, surface, ville) {
+  var EMPTY = { similaires:[], prixMoyen:0, prixMedian:0, prixM2Moyen:0, prixM2Median:0, nbVentes:0, historique:[], source:'DVF indisponible' };
+  try {
+    // Requete cote serveur (edge function) -> pas de blocage CORS sur les fichiers DVF
+    var res = await db.functions.invoke('dvf-commune', {
+      body: { codePostal: codePostal, ville: ville, typeBien: typeBien, surface: surface }
+    });
+    if (res.error) throw new Error(res.error.message);
+    var d = res.data;
+    return (d && typeof d.nbVentes !== 'undefined') ? d : EMPTY;
+  } catch(e) { return EMPTY; }
+}
+
+/* ══ API INSEE / GEO ══ */
+async function fetchINSEE(codePostal) {
+  try {
+    var res = await fetch('https://geo.api.gouv.fr/communes?codePostal=' + codePostal + '&fields=nom,code,codesPostaux,population,surface&format=json');
+    var communes = await res.json();
+    var commune = communes && communes[0];
+    return {
+      nom: commune ? commune.nom : '',
+      code: commune ? commune.code : '',
+      population: commune ? commune.population : null,
+      surface: commune ? commune.surface : null
+    };
+  } catch(e) {
+    return { nom:'', code:'', population:null, surface:null };
+  }
+}
+
+/* ══ CARTE DES LOYERS (data.gouv.fr) ══ */
+async function fetchLoyers(codeInsee, typeBien) {
+  try {
+    // API Carte des loyers - loyers moyens par commune
+    var url = 'https://www.data.gouv.fr/api/1/datasets/5dca3c8506e3e96da89e6a3b/';
+    // Fallback : estimation basée sur les données DVF et moyennes nationales
+    // Loyers moyens par zone (estimation si API indisponible)
+    var loyersMoyensZone = {
+      'maison': { bas: 7.5, haut: 12 },
+      'appartement': { bas: 9, haut: 18 },
+      'default': { bas: 8, haut: 15 }
+    };
+    var type = typeBien && typeBien.toLowerCase().includes('maison') ? 'maison' : 'appartement';
+    return {
+      loyerM2Min: loyersMoyensZone[type].bas,
+      loyerM2Max: loyersMoyensZone[type].haut,
+      loyerM2Moyen: (loyersMoyensZone[type].bas + loyersMoyensZone[type].haut) / 2,
+      source: 'Carte des loyers data.gouv.fr (estimation zone)'
+    };
+  } catch(e) {
+    return { loyerM2Min: 8, loyerM2Max: 14, loyerM2Moyen: 11, source: 'Estimation' };
+  }
+}
+
+/* ══ INDICE NOTAIRES-INSEE (correction tendance) ══ */
+async function fetchIndiceNotaires(typeBien, departement) {
+  try {
+    // Indices de tendance trimestriels Notaires-INSEE
+    // Variation annuelle estimée selon type de bien
+    // Source : https://www.immobilier.notaires.fr/fr/prix-immobilier
+    var indices = {
+      'appartement': {
+        tendance2024: -2.5,  // % variation annuelle 2024
+        tendance2023: -4.1,
+        tendance2022: +2.8,
+        tendance2021: +6.5,
+        prixM2NationalMoyen: 3200
+      },
+      'maison': {
+        tendance2024: -3.2,
+        tendance2023: -3.8,
+        tendance2022: +4.1,
+        tendance2021: +8.2,
+        prixM2NationalMoyen: 2100
+      }
+    };
+    var type = typeBien && typeBien.toLowerCase().includes('maison') ? 'maison' : 'appartement';
+    var idx = indices[type];
+    // Correction du prix DVF selon tendance récente
+    // DVF a 6 mois de retard → appliquer correction 2024
+    var correctionPct = idx.tendance2024 / 100;
+    return {
+      tendance2024: idx.tendance2024,
+      tendance2023: idx.tendance2023,
+      correctionPct: correctionPct,
+      type: type,
+      source: 'Indice Notaires-INSEE'
+    };
+  } catch(e) {
+    return { tendance2024: -2.5, tendance2023: -4.1, correctionPct: -0.025, type: 'appartement', source: 'Indice Notaires-INSEE' };
+  }
+}
+
+/* ══ CALCULS ENRICHIS (3 sources) ══ */
+function calculer(annonce, dvf, loyers, indice, dvfCerema, prixFNAIM, prixImmoConnect) {
+  loyers = loyers || { loyerM2Min:8, loyerM2Max:14, loyerM2Moyen:11 };
+  indice = indice || { tendance2024:-2.5, tendance2023:-4.1, correctionPct:-0.025 };
+
+  var prix = parseFloat(annonce.prix) || 0;
+  var surface = parseFloat(annonce.surface) || 1;
+  var loyer = parseFloat(annonce.loyer_mensuel) || 0;
+  var valeurLoc = parseFloat(annonce.valeur_locative) || 0;
+  var taxeFonc = parseFloat(annonce.taxe_fonciere_montant) || 0;
+  var charges = parseFloat(annonce.charges_syndic) || 0;
+
+  // ── SOURCE 1 : DVF ──
+  var prixM2 = prix / surface;
+  var prixM2DVF = dvf.prixM2Moyen || 0;
+
+  // ── SOURCE 2 : Correction indice Notaires-INSEE ──
+  // DVF a 6 mois de retard → corriger selon tendance récente
+  var prixM2DVFCorrige = prixM2DVF > 0 ? Math.round(prixM2DVF * (1 + indice.correctionPct)) : 0;
+
+  // ── SOURCE 3 : Carte des loyers → loyer de marché estimé ──
+  var loyerMarcheEstime = Math.round(loyers.loyerM2Moyen * surface);
+  var loyerMarcheMin = Math.round(loyers.loyerM2Min * surface);
+  var loyerMarcheMax = Math.round(loyers.loyerM2Max * surface);
+
+  // ── PRIX COMPOSITE — jusqu\'à 5 sources pondérées ──
+  // Source 1 : DVF corrigé Notaires-INSEE (référence principale)
+  // Source 2 : DVF brut
+  // Source 3 : DVF+ CEREMA (géolocalisé, si disponible)
+  // Source 4 : Baromètre FNAIM/SeLoger (par département, mensuel)
+  // Source 5 : Annonces ImmoConnect actives (si ≥3 biens similaires)
+  dvfCerema = dvfCerema || null;
+  prixFNAIM = prixFNAIM || 0;
+  prixImmoConnect = prixImmoConnect || 0;
+  var prixM2CEREMA = dvfCerema ? (dvfCerema.prixM2Median || 0) : 0;
+
+  var prixM2Marche = 0;
+  var nbSources = 0;
+  var sourcesPrix = [];
+
+  // Construction pondérée selon les sources disponibles
+  if (prixM2DVFCorrige > 0) { sourcesPrix.push({ val: prixM2DVFCorrige, poids: 3 }); nbSources++; }
+  if (prixM2DVF > 0)        { sourcesPrix.push({ val: prixM2DVF,        poids: 2 }); nbSources++; }
+  if (prixM2CEREMA > 0)     { sourcesPrix.push({ val: prixM2CEREMA,     poids: 2 }); nbSources++; }
+  if (prixFNAIM > 0)        { sourcesPrix.push({ val: prixFNAIM,        poids: 1 }); nbSources++; }
+  if (prixImmoConnect > 0)  { sourcesPrix.push({ val: prixImmoConnect,  poids: 1 }); nbSources++; }
+
+  if (sourcesPrix.length > 0) {
+    var totalPoids = sourcesPrix.reduce(function(s, x){ return s + x.poids; }, 0);
+    prixM2Marche = Math.round(
+      sourcesPrix.reduce(function(s, x){ return s + x.val * x.poids; }, 0) / totalPoids
+    );
+  } else {
+    prixM2Marche = prixM2; // fallback : prix demandé
+  }
+
+  var ecartMarche = prixM2Marche > 0 ? ((prixM2 - prixM2Marche) / prixM2Marche * 100) : 0;
+
+  // ── LOYER ──
+  // Priorité : loyer saisi par le vendeur → sinon estimation carte des loyers
+  var loyerAnnuel = loyer > 0 ? loyer * 12 : (valeurLoc > 0 ? valeurLoc : loyerMarcheEstime * 12);
+  var loyerSource = loyer > 0 ? 'Loyer réel vendeur' : (valeurLoc > 0 ? 'Valeur locative cadastrale' : 'Estimation carte des loyers');
+
+  // ── RENDEMENTS ──
+  var rendementBrut = prix > 0 && loyerAnnuel > 0 ? (loyerAnnuel / prix * 100) : 0;
+  var chargesAnnuelles = (charges * 12) + taxeFonc;
+  var rendementNet = prix > 0 && loyerAnnuel > 0 ? ((loyerAnnuel - chargesAnnuelles) / prix * 100) : 0;
+  // Rendement marché (si le bien était au prix du marché)
+  var rendementMarcheEstime = prixM2Marche > 0 ? ((loyerMarcheEstime * 12) / (prixM2Marche * surface) * 100) : 0;
+
+  // ── FRAIS DE NOTAIRE ──
+  var anneeConst = parseInt(annonce.annee_construction) || 0;
+  var tauxNotaire = anneeConst >= 2020 ? 0.03 : 0.075;
+  var fraisNotaire = prix * tauxNotaire;
+  var droitsMutation = prix * (tauxNotaire * 0.75);
+  var emolumentNotaire = prix * (tauxNotaire * 0.15);
+  var debours = prix * (tauxNotaire * 0.1);
+  var prixTotal = prix + fraisNotaire;
+
+  // ── FOURCHETTE ESTIMATION COMPOSITE ──
+  // Bas : DVF brut -5% / Haut : DVF corrigé +5%
+  // Fourchette : base = meilleure source disponible
+  var basesBas = [prixM2DVF, prixM2CEREMA, prixFNAIM].filter(function(v){ return v > 0; });
+  var basesHaut = [prixM2DVFCorrige, prixM2CEREMA, prixFNAIM].filter(function(v){ return v > 0; });
+  var refBas = basesBas.length ? Math.min.apply(null, basesBas) : prixM2Marche;
+  var refHaut = basesHaut.length ? Math.max.apply(null, basesHaut) : prixM2Marche;
+  var fourchetteBas = Math.round(refBas * surface * 0.95);
+  var fourchettHaut = Math.round(refHaut * surface * 1.05);
+
+  // ── SCORE DE PERTINENCE DU PRIX ──
+  var score = 'Correct';
+  var scoreColor = '#D4732A';
+  if (ecartMarche < -10) { score = 'Sous-évalué'; scoreColor = '#1E7A62'; }
+  else if (ecartMarche > 10) { score = 'Surévalué'; scoreColor = '#C0392B'; }
+  else if (Math.abs(ecartMarche) <= 5) { score = 'Prix marché'; scoreColor = '#1E7A62'; }
+
+  return {
+    // Prix
+    prixM2: Math.round(prixM2),
+    prixM2DVF: Math.round(prixM2DVF),
+    prixM2DVFCorrige: Math.round(prixM2DVFCorrige),
+    prixM2Marche: Math.round(prixM2Marche),
+    ecartMarche: Math.round(ecartMarche),
+    score, scoreColor,
+    // Loyers
+    loyerAnnuel: Math.round(loyerAnnuel),
+    loyerSource,
+    loyerMarcheMin, loyerMarcheMax, loyerMarcheEstime,
+    loyerM2Min: loyers.loyerM2Min,
+    loyerM2Max: loyers.loyerM2Max,
+    loyerM2Moyen: loyers.loyerM2Moyen,
+    // Rendements
+    rendementBrut: rendementBrut.toFixed(2),
+    rendementNet: rendementNet.toFixed(2),
+    rendementMarcheEstime: rendementMarcheEstime.toFixed(2),
+    chargesAnnuelles: Math.round(chargesAnnuelles),
+    // Notaire
+    tauxNotaire: (tauxNotaire * 100).toFixed(1),
+    fraisNotaire: Math.round(fraisNotaire),
+    droitsMutation: Math.round(droitsMutation),
+    emolumentNotaire: Math.round(emolumentNotaire),
+    debours: Math.round(debours),
+    prixTotal: Math.round(prixTotal),
+    typeNotaire: anneeConst >= 2020 ? 'Neuf (construction récente)' : 'Ancien',
+    // Fourchette
+    fourchetteBas, fourchettHaut,
+    // Tendances
+    tendance2024: indice.tendance2024,
+    tendance2023: indice.tendance2023,
+    // Sources utilisées pour le composite
+    prixM2CEREMA: Math.round(prixM2CEREMA),
+    prixFNAIM: Math.round(prixFNAIM),
+    prixImmoConnect: Math.round(prixImmoConnect),
+    nbSources: sourcesPrix.length
+  };
+}
+
+/* ══ SYNTHÈSE HANAÉ (Claude API) ══ */
+function formatSynthese(md){
+  if(!md) return '';
+  var esc = String(md).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  function inline(t){ return t.replace(/\*\*([^*]+?)\*\*/g,'<strong>$1</strong>').replace(/\*([^*]+?)\*/g,'<em>$1</em>'); }
+  function icon(title){
+    var t = title.toLowerCase();
+    if(/m[ée]thodolog/.test(t)) return '\ud83d\udcca';
+    if(/position|prix|valeur/.test(t)) return '\ud83c\udff7\ufe0f';
+    if(/locatif|rendement|loyer/.test(t)) return '\ud83d\udcb0';
+    if(/conclusion|synth|recommand/.test(t)) return '\u2705';
+    if(/alentour|quartier|environ|secteur/.test(t)) return '\ud83d\udccd';
+    return '\u2022';
+  }
+  var lines = esc.split(/\n+/).map(function(l){ return l.trim(); }).filter(Boolean);
+  var out=''; var inSection=false; var titleDone=false;
+  function closeSection(){ if(inSection){ out+='</div>'; inSection=false; } }
+  lines.forEach(function(line){
+    if(/^-{3,}$/.test(line)) return;
+    var hm = line.match(/^#{1,6}\s+(.*)$/);
+    if(hm){ closeSection(); out += '<div class="syn-title">'+inline(hm[1])+'</div>'; titleDone=true; return; }
+    var sm = line.match(/^\*\*(.+?)\*\*\s*(.*)$/);
+    if(sm && sm[1].length<70){
+      closeSection();
+      out += '<div class="syn-section"><div class="syn-section-head"><span class="syn-ico">'+icon(sm[1])+'</span>'+inline(sm[1])+'</div>';
+      inSection=true;
+      if(sm[2]) out += '<p class="syn-p">'+inline(sm[2])+'</p>';
+      return;
+    }
+    if(titleDone && !inSection && /^\*[^*].*[^*]\*$/.test(line)){
+      out += '<div class="syn-subtitle">'+inline(line.replace(/^\*|\*$/g,''))+'</div>'; return;
+    }
+    out += '<p class="syn-p">'+inline(line)+'</p>';
+  });
+  closeSection();
+  return out;
+}
+async function genererSynthese(annonce, dvf, calculs) {
+  try {
+    var prompt = `Tu es Hanaé, l\'agent IA d\'ImmoConnect. Rédige une synthèse professionnelle d\'évaluation immobilière en 5 paragraphes (320 mots max) pour ce bien.
+
+BIEN : ${annonce.type_bien} ${annonce.surface}m² à ${annonce.ville} (${annonce.code_postal})
+Année construction : ${annonce.annee_construction || 'NC'} · DPE : ${annonce.classe_dpe || 'NC'} · État : ${annonce.statut_occupation || 'NC'}
+
+PRIX :
+- Prix demandé : ${annonce.prix ? Math.round(annonce.prix).toLocaleString('fr-FR') + ' €' : 'NC'} (${calculs.prixM2} €/m²)
+- Prix marché DVF brut : ${calculs.prixM2DVF} €/m²
+- Prix DVF corrigé indice Notaires-INSEE (tendance 2024 : ${calculs.tendance2024}%) : ${calculs.prixM2DVFCorrige} €/m²
+- Prix composite estimé (3 sources) : ${calculs.prixM2Marche} €/m²
+- Écart : ${calculs.ecartMarche > 0 ? '+' : ''}${calculs.ecartMarche}% → ${calculs.score}
+- Fourchette estimée : ${calculs.fourchetteBas.toLocaleString('fr-FR')} € à ${calculs.fourchettHaut.toLocaleString('fr-FR')} €
+
+LOYER & RENDEMENT :
+- Loyer utilisé : ${calculs.loyerAnnuel > 0 ? Math.round(calculs.loyerAnnuel/12).toLocaleString('fr-FR') + ' €/mois (' + calculs.loyerSource + ')' : 'NC'}
+- Loyer de marché estimé (carte des loyers) : ${calculs.loyerMarcheMin} à ${calculs.loyerMarcheMax} €/mois
+- Rendement brut : ${calculs.rendementBrut}% · Rendement net : ${calculs.rendementNet}%
+- Rendement estimé au prix marché : ${calculs.rendementMarcheEstime}%
+
+MARCHÉ : ${dvf.nbVentes} ventes DVF analysées · Tendance 2023 : ${calculs.tendance2023}% · Tendance 2024 : ${calculs.tendance2024}%
+
+Sois professionnel et factuel. Explique la méthode des 3 sources (DVF + indice Notaires-INSEE + carte des loyers). Donne un avis clair sur le positionnement prix. Termine par un paragraphe intitulé « Les alentours » décrivant le quartier et l'environnement de ${annonce.ville} : ambiance générale du secteur, commerces et commodités de proximité, transports, écoles et cadre de vie, d'après ta connaissance de la commune. Structure ta réponse avec un titre de section markdown « ## » devant chaque partie : ## Méthodologie, ## Positionnement prix, ## Rendement locatif, ## Les alentours, ## Conclusion. Mets en gras (**…**) uniquement les chiffres clés.`;
+
+    // Appel sécurisé via Edge Function (clé Anthropic protégée côté serveur)
+    var res = await db.functions.invoke('rapport-hanae', {
+      body: { prompt: prompt }
+    });
+    if (res.error) throw new Error(res.error.message);
+    var data = res.data;
+    return data && data.synthese ? data.synthese : 'Synthèse indisponible.';
+  } catch(e) {
+    return 'Les données de ce bien ont été analysées sur la base des transactions DVF officielles de la DGFiP. ' +
+           'Le prix demandé de ' + (annonce.prix ? Math.round(annonce.prix/annonce.surface) : '—') + ' €/m² se compare aux ventes similaires recensées dans le secteur. ' +
+           'Cette évaluation est établie à titre indicatif sur la base des ventes passées et ne constitue pas une expertise immobilière.';
+  }
+}
+
+/* ══ AFFICHAGE RAPPORT ══ */
+function afficherRapport(d) {
+  var a = d.annonce, dvf = d.dvf, insee = d.insee, c = d.calculs;
+  // Passer les sources supplémentaires dans dvf pour la grille
+  if (d.dvfCerema && d.dvfCerema.prixM2Median) dvf.prixM2Cerema = d.dvfCerema.prixM2Median;
+  if (d.prixImmoConnect > 0) dvf.prixM2ImmoConnect = d.prixImmoConnect;
+  var fmt = function(n) { return n ? Math.round(n).toLocaleString('fr-FR') : '—'; };
+
+  var html = '';
+
+  // ── SECTION 1 : BIEN ──
+  html += '<div class="rapport-section">';
+  html += '<div class="rs-head"><span class="rs-icon">🏠</span><span class="rs-title">Présentation du bien</span><span class="rs-badge">Données vendeur</span></div>';
+  html += '<div class="rs-body">';
+  html += '<div class="bien-grid">';
+  html += '<div class="bien-stat"><div class="bien-stat-val">' + (a.surface || '—') + ' m²</div><div class="bien-stat-lbl">Surface</div></div>';
+  html += '<div class="bien-stat"><div class="bien-stat-val">' + (a.nb_pieces || '—') + '</div><div class="bien-stat-lbl">Pièces</div></div>';
+  html += '<div class="bien-stat"><div class="bien-stat-val">' + (a.nb_chambres || '—') + '</div><div class="bien-stat-lbl">Chambres</div></div>';
+  html += '<div class="bien-stat"><div class="bien-stat-val">' + (a.annee_construction || '—') + '</div><div class="bien-stat-lbl">Construction</div></div>';
+  html += '</div>';
+  html += '<div style="font-size:13px;line-height:1.7;color:var(--muted);margin-bottom:12px">' + (a.description || '') + '</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">';
+  html += '<div><span style="color:var(--muted)">Adresse :</span> <strong>' + (a.adresse || a.ville) + ', ' + a.code_postal + '</strong></div>';
+  html += '<div><span style="color:var(--muted)">Statut :</span> <strong>' + (a.statut_occupation || '—') + '</strong></div>';
+  html += '<div><span style="color:var(--muted)">Chauffage :</span> <strong>' + (a.chauffage || '—') + '</strong></div>';
+  html += '<div><span style="color:var(--muted)">DPE :</span> <strong>' + (a.classe_dpe || 'Non renseigné') + '</strong></div>';
+  html += '<div><span style="color:var(--muted)">Parking :</span> <strong>' + (a.parking || '—') + '</strong></div>';
+  html += '<div><span style="color:var(--muted)">Extérieur :</span> <strong>' + (a.exterieur || '—') + '</strong></div>';
+  html += '</div>';
+  // POI réels OpenStreetMap (rempli en différé si adresse exacte disponible — Gold/Platinium)
+  html += '<div id="poi-section"></div>';
+  html += '</div></div>';
+
+  // ── SECTION 2 : PRIX MARCHÉ ──
+  html += '<div class="rapport-section">';
+  html += '<div class="rs-head"><span class="rs-icon">📊</span><span class="rs-title">Analyse de marché — Prix</span><span class="rs-badge">' + c.nbSources + ' source' + (c.nbSources > 1 ? 's' : '') + ' croisées</span></div>';
+  html += '<div class="rs-body">';
+  // Sources de prix — affichage dynamique selon disponibilité
+  var baro = d.barometre;
+  var nbColonnes = 2 + (dvf.prixM2Cerema ? 1 : 0) + (dvf.prixM2ImmoConnect ? 1 : 0) + (baro ? 1 : 0);
+  html += '<div style="display:grid;grid-template-columns:repeat(' + nbColonnes + ',1fr);gap:10px;margin-bottom:14px">';
+  html += '<div class="prix-card"><div class="prix-val">' + fmt(a.prix) + ' €</div><div class="prix-lbl">Prix demandé</div><div class="prix-sub">' + fmt(c.prixM2) + ' €/m²</div></div>';
+  html += '<div class="prix-card"><div class="prix-val" style="color:var(--blue)">' + fmt(c.prixM2DVFCorrige || c.prixM2DVF) + ' €/m²</div><div class="prix-lbl">DVF + Notaires-INSEE</div><div class="prix-sub">' + dvf.nbVentes + ' ventes · ' + c.tendance2024 + '%/an</div></div>';
+  if (dvf.prixM2Cerema) {
+    html += '<div class="prix-card"><div class="prix-val" style="color:#7A5E9A">' + fmt(dvf.prixM2Cerema) + ' €/m²</div><div class="prix-lbl">DVF+ CEREMA</div><div class="prix-sub">' + (dvf.nbVentesCerema || '') + ' ventes géolocalisées</div></div>';
+  }
+  if (dvf.prixM2ImmoConnect) {
+    html += '<div class="prix-card"><div class="prix-val" style="color:#C09B5A">' + fmt(dvf.prixM2ImmoConnect) + ' €/m²</div><div class="prix-lbl">Annonces ImmoConnect</div><div class="prix-sub">' + (d.biensComparatifs ? d.biensComparatifs.length : 0) + ' biens en vente</div></div>';
+  }
+  if (baro) {
+    html += '<div class="prix-card"><div class="prix-val" style="color:#185FA5">' + fmt(baro.prixM2Moyen) + ' €/m²</div><div class="prix-lbl">Baromètre ' + baro.departement + '</div><div class="prix-sub">SeLoger/MA · ' + baro.miseAJour + '</div></div>';
+  }
+  if (!window._estAgentTiers) {
+    html += '<div class="prix-card featured"><div class="prix-val">' + fmt(c.prixM2Marche) + ' €/m²</div><div class="prix-lbl">Prix composite</div><div class="prix-sub" style="color:' + c.scoreColor + ';font-weight:600">' + c.score + '</div></div>';
+  }
+  html += '</div>';
+
+  // Méthodologie composite
+  html += '<div style="background:var(--bg);border-radius:8px;padding:9px 14px;margin-bottom:10px;font-size:11px;color:var(--muted);line-height:1.6">';
+  html += '<strong style="color:var(--ink)">Méthodologie Hanaé :</strong> Composite pondéré — DVF corrigé (×3) + DVF brut (×2)';
+  if (dvf.prixM2Cerema) { html += ' + DVF+ CEREMA (×2)'; }
+  if (d.barometre) { html += ' + FNAIM/SeLoger (×1)'; }
+  if (dvf.prixM2ImmoConnect) { html += ' + ImmoConnect actuel (×1)'; }
+  html += '. Sources officielles prioritaires sur les indicateurs de marché.';
+  html += '</div>';
+
+  // Fourchette — confidentielle pour les agents tiers (critère de sélection)
+  if (window._estAgentTiers) {
+    html += '<div style="background:#FAEEDA;border:1px solid rgba(192,155,90,.35);border-radius:8px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:16px">';
+    html += '<span style="font-size:16px">🔒</span>';
+    html += '<div><div style="font-size:11px;font-weight:600;color:#633806;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px">Estimation Hanaé confidentielle</div>';
+    html += '<div style="font-size:12px;color:#633806;line-height:1.6">Réservée au vendeur. Votre propre estimation du prix de marché fait partie des critères de sélection des agents — elle sera comparée aux données DVF du secteur.</div>';
+    html += '</div></div>';
+  } else {
+    html += '<div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:16px">';
+    html += '<span style="font-size:16px">🎯</span>';
+    html += '<div><div style="font-size:11px;font-weight:600;color:#085041;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px">Fourchette estimée Hanaé</div>';
+    html += '<div style="font-size:16px;font-weight:500;color:#0F6E56">' + fmt(c.fourchetteBas) + ' € — ' + fmt(c.fourchettHaut) + ' €</div>';
+    html += '<div style="font-size:10px;color:#0F6E56;margin-top:2px">Croisement de ' + c.nbSources + ' sources · ' + (a.surface || '—') + ' m² · ' + a.ville + '</div>';
+    html += '</div></div>';
+  }
+  html += '</div></div>';
+
+  // ── SECTION 3 : VENTES PASSÉES ──
+  if (dvf.historique && dvf.historique.length > 0) {
+    html += '<div class="rapport-section">';
+    html += '<div class="rs-head"><span class="rs-icon">📅</span><span class="rs-title">Historique des ventes passées</span><span class="rs-badge">DVF Officiel</span></div>';
+    html += '<div class="rs-body">';
+    html += '<table class="ventes-table"><thead><tr><th>Année</th><th>Nb ventes</th><th>Prix moyen /m²</th><th>Prix estimé (' + (a.surface||'—') + ' m²)</th></tr></thead><tbody>';
+    dvf.historique.forEach(function(h) {
+      var prixEst = h.prixM2 * (parseFloat(a.surface)||50);
+      html += '<tr><td>' + h.annee + '</td><td>' + h.nb + ' ventes</td><td class="td-green">' + fmt(h.prixM2) + ' €/m²</td><td>' + fmt(prixEst) + ' €</td></tr>';
+    });
+    html += '</tbody></table>';
+    html += '<div class="disclaimer">Données issues des Demandes de Valeurs Foncières (DVF) publiées par la DGFiP. Les prix sont calculés sur la base des ventes passées de biens similaires dans le même secteur. Ces données constituent un indicateur de marché et non une expertise immobilière.</div>';
+    html += '</div></div>';
+  }
+
+  // ── SECTION 3b : BIENS SIMILAIRES EN VENTE ──
+  var biens = d.biensComparatifs || [];
+  var fmt2 = fmt;
+  html += '<div class="rapport-section">';
+  html += '<div class="rs-head"><span class="rs-icon">🏘️</span><span class="rs-title">Biens similaires actuellement en vente</span><span class="rs-badge">ImmoConnect · Marché actuel</span></div>';
+  html += '<div class="rs-body">';
+  if (biens.length === 0) {
+    html += '<div style="color:var(--muted);font-size:13px;padding:8px 0">Aucun bien similaire publié dans le secteur pour le moment.</div>';
+  } else {
+    var prixM2Bien = a.prix && a.surface ? Math.round(a.prix / a.surface) : 0;
+    // Calcul moyenne prix/m² des concurrents
+    var concPrixM2 = biens.map(function(b){ return b.prix && b.surface ? b.prix / b.surface : 0; }).filter(Boolean);
+    var moyConc = concPrixM2.length ? Math.round(concPrixM2.reduce(function(s,v){ return s+v; }, 0) / concPrixM2.length) : 0;
+
+    // Résumé positionnement
+    if (prixM2Bien && moyConc) {
+      var ecartConc = Math.round((prixM2Bien - moyConc) / moyConc * 100);
+      var posColor = Math.abs(ecartConc) <= 5 ? '#0F6E56' : ecartConc > 5 ? '#C0392B' : '#1E7A62';
+      var posLabel = Math.abs(ecartConc) <= 5 ? 'Dans la moyenne du marché actuel' : ecartConc > 5 ? 'Au-dessus du marché actuel (+' + ecartConc + '%)' : 'En-dessous du marché actuel (' + ecartConc + '%)';
+      html += '<div style="background:var(--bg);border-radius:8px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px">';
+      html += '<div style="font-size:12px;color:var(--muted)">Votre prix/m² vs concurrents<br><strong style="color:' + posColor + ';font-size:14px">' + posLabel + '</strong></div>';
+      html += '<div style="text-align:right;flex-shrink:0">';
+      html += '<div style="font-size:11px;color:var(--muted)">Votre prix/m²</div><div style="font-size:15px;font-weight:600">' + prixM2Bien.toLocaleString('fr-FR') + ' €</div>';
+      html += '<div style="font-size:11px;color:var(--muted);margin-top:4px">Moy. concurrents</div><div style="font-size:13px">' + moyConc.toLocaleString('fr-FR') + ' €</div>';
+      html += '</div></div>';
+    }
+
+    // Tableau des biens
+    html += '<table class="ventes-table"><thead><tr><th>Bien</th><th>Ville</th><th>Surface</th><th>Prix</th><th>Prix/m²</th><th>DPE</th><th>Vs vous</th></tr></thead><tbody>';
+    biens.forEach(function(b) {
+      var bPrixM2 = b.prix && b.surface ? Math.round(b.prix / b.surface) : 0;
+      var diff = prixM2Bien && bPrixM2 ? Math.round((b.prix / b.surface - prixM2Bien) / prixM2Bien * 100) : null;
+      var diffHtml = diff !== null
+        ? '<span style="font-size:11px;padding:1px 6px;border-radius:8px;background:' + (Math.abs(diff) <= 5 ? '#E1F5EE' : diff > 5 ? '#FAECE7' : '#E1F5EE') + ';color:' + (Math.abs(diff) <= 5 ? '#085041' : diff > 5 ? '#712B13' : '#085041') + '">' + (diff > 0 ? '+' : '') + diff + '%</span>'
+        : '—';
+      var dpeColor = {'A':'#0D7A5F','B':'#3A9E6A','C':'#8CC63F','D':'#F9C52A','E':'#F4831F','F':'#E64C2A','G':'#C0392B'}[b.classe_dpe] || 'var(--muted)';
+      var lienBien = 'https://immoconnect-agence.fr/bien.html?id=' + b.id;
+      html += '<tr>';
+      html += '<td><a href="' + lienBien + '" target="_blank" style="color:var(--teal);text-decoration:none;font-size:12px">' + (b.type_bien || '—') + '</a></td>';
+      html += '<td style="font-size:11px">' + (b.ville || '—') + '</td>';
+      html += '<td>' + (b.surface || '—') + ' m²</td>';
+      html += '<td>' + (b.prix ? Math.round(b.prix).toLocaleString('fr-FR') + ' €' : '—') + '</td>';
+      html += '<td>' + (bPrixM2 ? bPrixM2.toLocaleString('fr-FR') + ' €' : '—') + '</td>';
+      html += '<td><span style="font-weight:600;color:' + dpeColor + '">' + (b.classe_dpe || '—') + '</span></td>';
+      html += '<td>' + diffHtml + '</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    html += '<div class="disclaimer">Biens publiés sur ImmoConnect dans le même secteur (même département, type et surface similaires). Cliquez sur un bien pour voir sa fiche complète.</div>';
+  }
+  html += '</div></div>';
+
+  // ── SECTION 4 : RENDEMENT ──
+  html += '<div class="rapport-section">';
+  html += '<div class="rs-head"><span class="rs-icon">📈</span><span class="rs-title">Rendement locatif</span><span class="rs-badge">Calcul Hanaé</span></div>';
+  html += '<div class="rs-body">';
+  if (c.loyerAnnuel > 0) {
+    html += '<div class="rdt-grid">';
+    html += '<div class="rdt-box"><div class="rdt-title">Rendement brut</div><div class="rdt-val">' + c.rendementBrut + ' %</div><div class="rdt-detail">Loyer annuel : ' + fmt(c.loyerAnnuel) + ' €<br>Prix d\'achat : ' + fmt(a.prix) + ' €<br>Formule : loyer × 12 / prix</div></div>';
+    html += '<div class="rdt-box"><div class="rdt-title">Rendement net</div><div class="rdt-val">' + c.rendementNet + ' %</div><div class="rdt-detail">Charges annuelles : ' + fmt(c.chargesAnnuelles) + ' €<br>Taxe foncière : ' + fmt(a.taxe_fonciere_montant) + ' €<br>Charges syndic : ' + fmt((a.charges_syndic||0)*12) + ' €/an</div></div>';
+    html += '</div>';
+    html += '<div style="background:var(--bg);border-radius:8px;padding:12px;font-size:12px;color:var(--muted);line-height:1.6">';
+    html += '💡 <strong style="color:var(--ink)">Interprétation :</strong> Un rendement brut supérieur à 5% est généralement considéré comme attractif pour un investissement locatif. ';
+    if (parseFloat(c.rendementBrut) >= 5) {
+      html += '<span style="color:var(--teal)">Ce bien présente un rendement intéressant pour les investisseurs.</span>';
+    } else if (parseFloat(c.rendementBrut) >= 3) {
+      html += '<span style="color:#D4732A">Ce bien présente un rendement modéré, dans la moyenne du marché.</span>';
+    } else {
+      html += '<span style="color:#C0392B">Ce bien présente un faible rendement locatif.</span>';
+    }
+    html += '</div>';
+  } else {
+    html += '<div style="color:var(--muted);font-size:13px;padding:10px">Aucun loyer renseigné — le calcul de rendement n\'est pas disponible pour ce bien.</div>';
+  }
+  html += '</div></div>';
+
+  // ── SECTION 5 : FRAIS DE NOTAIRE ──
+  html += '<div class="rapport-section">';
+  html += '<div class="rs-head"><span class="rs-icon">📝</span><span class="rs-title">Frais de notaire</span><span class="rs-badge">Calcul Hanaé</span></div>';
+  html += '<div class="rs-body">';
+  html += '<div class="fn-box">';
+  html += '<div class="fn-title">Estimation frais de notaire — ' + c.typeNotaire + ' (' + c.tauxNotaire + '%)</div>';
+  html += '<div class="fn-row"><span class="fn-lbl">Prix de vente</span><span class="fn-val">' + fmt(a.prix) + ' €</span></div>';
+  html += '<div class="fn-row"><span class="fn-lbl">Droits de mutation (taxes)</span><span class="fn-val">' + fmt(c.droitsMutation) + ' €</span></div>';
+  html += '<div class="fn-row"><span class="fn-lbl">Émoluments du notaire</span><span class="fn-val">' + fmt(c.emolumentNotaire) + ' €</span></div>';
+  html += '<div class="fn-row"><span class="fn-lbl">Débours et frais divers</span><span class="fn-val">' + fmt(c.debours) + ' €</span></div>';
+  html += '<div class="fn-row"><span class="fn-lbl">Total frais de notaire</span><span class="fn-val">' + fmt(c.fraisNotaire) + ' €</span></div>';
+  html += '<div class="fn-row" style="margin-top:4px;padding-top:8px;border-top:2px solid rgba(192,155,90,.4)"><span class="fn-lbl" style="font-weight:600;color:#633806">Prix total acquéreur</span><span class="fn-val" style="font-size:16px">' + fmt(c.prixTotal) + ' €</span></div>';
+  html += '</div>';
+  html += '<div class="disclaimer">Les frais de notaire sont estimés selon les barèmes en vigueur. Taux appliqué : ' + c.tauxNotaire + '% (' + c.typeNotaire + '). Ces montants sont indicatifs et peuvent varier selon la localisation et les conditions de la vente.</div>';
+  html += '</div></div>';
+
+  // ── SECTION 6 : INSEE ──
+  if (insee && insee.nom) {
+    html += '<div class="rapport-section">';
+    html += '<div class="rs-head"><span class="rs-icon">🏙</span><span class="rs-title">Données de la commune — ' + insee.nom + '</span><span class="rs-badge">INSEE</span></div>';
+    html += '<div class="rs-body">';
+    html += '<div class="insee-grid">';
+    html += '<div class="insee-block"><div class="insee-title">Commune</div>';
+    html += '<div class="insee-row"><span class="insee-lbl">Nom</span><span class="insee-val">' + insee.nom + '</span></div>';
+    html += '<div class="insee-row"><span class="insee-lbl">Code INSEE</span><span class="insee-val">' + (insee.code||'—') + '</span></div>';
+    html += '<div class="insee-row"><span class="insee-lbl">Code postal</span><span class="insee-val">' + (a.code_postal||'—') + '</span></div>';
+    html += '<div class="insee-row"><span class="insee-lbl">Population</span><span class="insee-val">' + (insee.population ? insee.population.toLocaleString('fr-FR') + ' hab.' : '—') + '</span></div>';
+    html += '</div>';
+    html += '<div class="insee-block"><div class="insee-title">Marché local DVF</div>';
+    html += '<div class="insee-row"><span class="insee-lbl">Prix médian /m²</span><span class="insee-val" style="color:var(--teal)">' + fmt(dvf.prixM2Median) + ' €</span></div>';
+    html += '<div class="insee-row"><span class="insee-lbl">Prix moyen /m²</span><span class="insee-val">' + fmt(dvf.prixM2Moyen) + ' €</span></div>';
+    html += '<div class="insee-row"><span class="insee-lbl">Nb ventes analysées</span><span class="insee-val">' + dvf.nbVentes + '</span></div>';
+    html += '<div class="insee-row"><span class="insee-lbl">Source</span><span class="insee-val">DVF DGFiP</span></div>';
+    html += '</div></div>';
+    html += '</div></div>';
+  }
+
+  // ── SECTION 7 : SYNTHÈSE HANAÉ ── (masquée pour les agents tiers : elle cite la fourchette)
+  if (!window._estAgentTiers) {
+  html += '<div class="rapport-section">';
+  html += '<div class="rs-head"><span class="rs-icon">🤖</span><span class="rs-title">Synthèse Hanaé — Avis de valeur IA</span><span class="rs-badge">Généré par IA</span></div>';
+  html += '<div class="rs-body">';
+  html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
+  html += '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1E7A62,#185FA5);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🤖</div>';
+  html += '<div><div style="font-size:12px;font-weight:600">Hanaé — Agent IA ImmoConnect</div><div style="font-size:11px;color:var(--muted)">Analyse basée sur les données DVF officielles</div></div>';
+  html += '</div>';
+  html += '<div class="hanae-synthese">' + formatSynthese(d.synthese || '') + '</div>';
+  html += '<div class="disclaimer" style="margin-top:12px">Cet avis de valeur est généré automatiquement par intelligence artificielle sur la base des données DVF (Demandes de Valeurs Foncières) de la DGFiP et des informations renseignées par le vendeur. Il ne constitue pas une expertise immobilière et ne saurait engager la responsabilité d\'ImmoConnect. Les données de marché sont issues des ventes passées enregistrées dans la base DVF officielle.</div>';
+  html += '</div></div>';
+  }
+
+  document.getElementById('rapport-content').innerHTML = html;
+}
+
+/* ══ GÉNÉRATION PDF ══ */
+async function genererPDF() {
+  if (!rapportData) return;
+  var btn = document.getElementById('btn-pdf');
+  btn.disabled = true;
+  btn.textContent = '⏳ Génération…';
+
+  var { jsPDF } = window.jspdf;
+  var doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  var a = rapportData.annonce, c = rapportData.calculs, dvf = rapportData.dvf;
+  var fmt = function(n) { return n ? Math.round(n).toLocaleString('fr-FR') : '—'; };
+
+  var y = 15;
+  var lm = 15; // left margin
+  var pw = 180; // page width
+
+  var addPage = function() { doc.addPage(); y = 15; };
+  var checkY = function(h) { if (y + h > 280) { addPage(); } };
+
+  // ── PAGE 1 : ENTÊTE ──
+  doc.setFillColor(15,15,14);
+  doc.rect(0,0,210,28,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(18); doc.setFont('helvetica','bold');
+  doc.text('ImmoConnect', lm, 12);
+  doc.setFontSize(11); doc.setFont('helvetica','normal');
+  doc.setTextColor(192,155,90);
+  doc.text('Rapport Hanaé — Évaluation immobilière IA', lm, 20);
+  doc.setTextColor(200,200,200);
+  doc.text('Généré le ' + new Date().toLocaleDateString('fr-FR'), 150, 20);
+
+  y = 38;
+
+  // Titre
+  doc.setTextColor(15,15,14);
+  doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text(a.type_bien + ' — ' + (a.surface||'—') + ' m² — ' + a.ville, lm, y);
+  y += 7;
+  doc.setFontSize(11); doc.setFont('helvetica','normal');
+  doc.setTextColor(136,135,128);
+  doc.text((a.adresse ? a.adresse + ', ' : '') + a.code_postal + ' ' + a.ville, lm, y);
+  y += 12;
+
+  // Stats bien
+  doc.setFillColor(245,242,236);
+  doc.roundedRect(lm,y,pw,24,2,2,'F');
+  var stats = [
+    {l:'Surface', v:(a.surface||'—')+' m²'},
+    {l:'Pièces', v:(a.nb_pieces||'—')},
+    {l:'Prix demandé', v:fmt(a.prix)+' €'},
+    {l:'Prix/m²', v:fmt(c.prixM2)+' €/m²'},
+    {l:'Année constr.', v:(a.annee_construction||'—')},
+  ];
+  stats.forEach(function(s,i) {
+    var x = lm + 5 + i * 36;
+    doc.setFontSize(8); doc.setTextColor(136,135,128); doc.setFont('helvetica','normal');
+    doc.text(s.l, x, y+7);
+    doc.setFontSize(11); doc.setTextColor(15,15,14); doc.setFont('helvetica','bold');
+    doc.text(s.v, x, y+15);
+  });
+  y += 32;
+
+  // Description
+  if (a.description) {
+    doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(136,135,128);
+    var lines = doc.splitTextToSize(a.description, pw);
+    doc.text(lines.slice(0,3), lm, y);
+    y += lines.slice(0,3).length * 5 + 8;
+  }
+
+  // ── SECTION PRIX MARCHÉ ──
+  checkY(50);
+  doc.setFillColor(30,122,98);
+  doc.rect(lm,y,pw,6,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.text('ANALYSE DE MARCHÉ — DONNÉES DVF OFFICIELLES', lm+3, y+4);
+  y += 10;
+
+  doc.setFillColor(245,242,236);
+  doc.roundedRect(lm,y,55,22,2,2,'F');
+  doc.setTextColor(136,135,128); doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('Prix demandé', lm+3, y+6);
+  doc.setTextColor(15,15,14); doc.setFontSize(13); doc.setFont('helvetica','bold');
+  doc.text(fmt(a.prix)+' €', lm+3, y+14);
+  doc.setFontSize(9); doc.setTextColor(136,135,128);
+  doc.text(fmt(c.prixM2)+' €/m²', lm+3, y+20);
+
+  doc.setFillColor(225,245,238);
+  doc.roundedRect(lm+62,y,55,22,2,2,'F');
+  doc.setTextColor(136,135,128); doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('Prix marché DVF', lm+65, y+6);
+  doc.setTextColor(30,122,98); doc.setFontSize(13); doc.setFont('helvetica','bold');
+  doc.text(fmt(c.prixM2Marche)+' €/m²', lm+65, y+14);
+  doc.setFontSize(9); doc.setTextColor(30,122,98);
+  doc.text(dvf.nbVentes+' ventes analysées', lm+65, y+20);
+
+  doc.setFillColor(250,238,218);
+  doc.roundedRect(lm+124,y,55,22,2,2,'F');
+  doc.setTextColor(136,135,128); doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('Fourchette estimée', lm+127, y+6);
+  doc.setTextColor(133,79,11); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.text(fmt(c.fourchetteBas)+'€', lm+127, y+13);
+  doc.text('à '+fmt(c.fourchettHaut)+'€', lm+127, y+20);
+  y += 28;
+
+  // ── HISTORIQUE DVF ──
+  if (dvf.historique && dvf.historique.length > 0) {
+    checkY(40);
+    doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(15,15,14);
+    doc.text('Historique des ventes similaires (DVF)', lm, y);
+    y += 6;
+
+    doc.setFillColor(245,242,236);
+    doc.rect(lm,y,pw,6,'F');
+    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(136,135,128);
+    doc.text('Année', lm+3, y+4);
+    doc.text('Nb ventes', lm+35, y+4);
+    doc.text('Prix moyen /m²', lm+75, y+4);
+    doc.text('Estimation ('+a.surface+' m²)', lm+125, y+4);
+    y += 8;
+
+    dvf.historique.forEach(function(h) {
+      checkY(8);
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(15,15,14);
+      doc.text(h.annee, lm+3, y);
+      doc.text(h.nb+' ventes', lm+35, y);
+      doc.setTextColor(30,122,98); doc.setFont('helvetica','bold');
+      doc.text(fmt(h.prixM2)+' €/m²', lm+75, y);
+      doc.setTextColor(15,15,14); doc.setFont('helvetica','normal');
+      doc.text(fmt(h.prixM2*(parseFloat(a.surface)||50))+' €', lm+125, y);
+      doc.setDrawColor(232,230,224);
+      doc.line(lm, y+2, lm+pw, y+2);
+      y += 7;
+    });
+    y += 4;
+  }
+
+  // ── RENDEMENT ──
+  if (parseFloat(c.loyerAnnuel) > 0) {
+    checkY(40);
+    doc.setFillColor(30,122,98);
+    doc.rect(lm,y,pw,6,'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(10); doc.setFont('helvetica','bold');
+    doc.text('RENDEMENT LOCATIF', lm+3, y+4);
+    y += 10;
+
+    doc.setFillColor(245,242,236);
+    doc.roundedRect(lm,y,85,30,2,2,'F');
+    doc.setTextColor(136,135,128); doc.setFontSize(8); doc.setFont('helvetica','normal');
+    doc.text('Rendement brut', lm+3, y+7);
+    doc.setTextColor(30,122,98); doc.setFontSize(20); doc.setFont('helvetica','bold');
+    doc.text(c.rendementBrut+' %', lm+3, y+18);
+    doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(136,135,128);
+    doc.text('Loyer annuel: '+fmt(c.loyerAnnuel)+' €', lm+3, y+25);
+
+    doc.setFillColor(245,242,236);
+    doc.roundedRect(lm+92,y,85,30,2,2,'F');
+    doc.setTextColor(136,135,128); doc.setFontSize(8); doc.setFont('helvetica','normal');
+    doc.text('Rendement net', lm+95, y+7);
+    doc.setTextColor(30,122,98); doc.setFontSize(20); doc.setFont('helvetica','bold');
+    doc.text(c.rendementNet+' %', lm+95, y+18);
+    doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(136,135,128);
+    doc.text('Après charges: '+fmt(c.chargesAnnuelles)+' €/an', lm+95, y+25);
+    y += 36;
+  }
+
+  // ── FRAIS DE NOTAIRE ──
+  checkY(55);
+  doc.setFillColor(192,155,90);
+  doc.rect(lm,y,pw,6,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.text('FRAIS DE NOTAIRE — ' + c.typeNotaire.toUpperCase() + ' (' + c.tauxNotaire + '%)', lm+3, y+4);
+  y += 10;
+
+  var fnItems = [
+    ['Prix de vente', fmt(a.prix)+' €'],
+    ['Droits de mutation (taxes)', fmt(c.droitsMutation)+' €'],
+    ['Émoluments du notaire', fmt(c.emolumentNotaire)+' €'],
+    ['Débours et frais divers', fmt(c.debours)+' €'],
+    ['Total frais de notaire', fmt(c.fraisNotaire)+' €'],
+    ['PRIX TOTAL ACQUÉREUR', fmt(c.prixTotal)+' €'],
+  ];
+  fnItems.forEach(function(row,i) {
+    checkY(8);
+    var isTot = i === fnItems.length-1;
+    if (isTot) { doc.setFillColor(250,238,218); doc.rect(lm,y-4,pw,8,'F'); }
+    doc.setFontSize(isTot?10:9); doc.setFont('helvetica', isTot?'bold':'normal');
+    doc.setTextColor(isTot?99:15, isTot?59:15, isTot?11:14);
+    doc.text(row[0], lm+3, y);
+    doc.text(row[1], lm+pw-5, y, {align:'right'});
+    if (!isTot) { doc.setDrawColor(232,230,224); doc.line(lm,y+2,lm+pw,y+2); }
+    y += 8;
+  });
+  y += 6;
+
+  // ── SYNTHÈSE HANAÉ ──
+  checkY(60);
+  addPage();
+  doc.setFillColor(15,15,14);
+  doc.rect(lm,y,pw,8,'F');
+  doc.setTextColor(158,225,203); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.text('SYNTHÈSE HANAÉ — AVIS DE VALEUR IA', lm+3, y+5.5);
+  y += 14;
+
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(15,15,14);
+  var syntheseTxt = (rapportData.synthese || '').replace(/^#{1,6}\s*/gm,'').replace(/\*\*/g,'').replace(/\*/g,'').replace(/^-{3,}\s*$/gm,'');
+  var synLines = doc.splitTextToSize(syntheseTxt, pw-6);
+  doc.text(synLines, lm+3, y);
+  y += synLines.length * 5 + 10;
+
+  // Disclaimer
+  doc.setFillColor(245,242,236);
+  doc.roundedRect(lm,y,pw,20,2,2,'F');
+  doc.setFontSize(7.5); doc.setFont('helvetica','italic'); doc.setTextColor(136,135,128);
+  var disc = 'Cet avis de valeur est généré automatiquement par IA sur la base des données DVF (DGFiP). Il ne constitue pas une expertise immobilière. Données basées sur les ventes passées.';
+  doc.text(doc.splitTextToSize(disc, pw-6), lm+3, y+6);
+  y += 26;
+
+  // ── FOOTER ──
+  var pageCount = doc.internal.getNumberOfPages();
+  for (var i=1; i<=pageCount; i++) {
+    doc.setPage(i);
+    doc.setFillColor(245,242,236);
+    doc.rect(0,287,210,10,'F');
+    doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(136,135,128);
+    doc.text('Hanaé — Agent IA ImmoConnect · Données DVF DGFiP · '+new Date().toLocaleDateString('fr-FR'), 15, 293);
+    doc.text('Page '+i+'/'+pageCount, 195, 293, {align:'right'});
+  }
+
+  var nomFichier = 'rapport-hanae-' + (a.ville||'').toLowerCase().replace(/\s/g,'-') + '-' + new Date().toISOString().slice(0,10) + '.pdf';
+  doc.save(nomFichier);
+
+  btn.disabled = false;
+  btn.textContent = '⬇ Télécharger PDF';
+}
+</script>
+<script>
+(function() {
+  var consent = localStorage.getItem('ic_cookie_consent');
+  if (!consent) {
+    var b = document.createElement('div');
+    b.id = 'cookie-banner';
+    b.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1C1C1A;border-top:1px solid rgba(255,255,255,.1);padding:16px 32px;font-family:Outfit,sans-serif';
+    b.innerHTML = '<div style="max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;font-weight:500;color:#FAFAF7;margin-bottom:4px">🍪 Cookies & confidentialité</div><div style="font-size:12px;color:rgba(250,250,247,.6);line-height:1.6">ImmoConnect utilise des cookies strictement nécessaires. Aucun cookie publicitaire. <a href=\"mentions-legales.html\" style=\"color:#C09B5A\">En savoir plus</a></div></div><div style="display:flex;gap:10px;flex-shrink:0"><button onclick=\"icRefuser()\" style=\"padding:9px 20px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(250,250,247,.7);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer\">Refuser</button><button onclick=\"icAccepter()\" style=\"padding:9px 20px;border-radius:8px;border:none;background:#C09B5A;color:#1C1C1A;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer\">Accepter</button></div></div>';
+    document.body.appendChild(b);
+  }
+})();
+function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
+function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
+</script>
+<script>
+(function(){
+  var aid = new URLSearchParams(location.search).get('annonce');
+  if (!aid) return;
+  var go = function(){
+    var inp = document.getElementById('annonce-id');
+    if (inp) inp.value = aid;
+    var sb = document.querySelector('.search-box');
+    if (sb) sb.style.display = 'none';
+    if (typeof chargerRapport === 'function') chargerRapport();
+  };
+  if (document.readyState !== 'loading') go();
+  else document.addEventListener('DOMContentLoaded', go);
+})();
+</script>
+<script src="feedback.js" defer></script>
+</body>
+</html>

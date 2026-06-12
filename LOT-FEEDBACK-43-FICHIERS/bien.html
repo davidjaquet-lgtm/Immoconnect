@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0F0F0E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ImmoConnect">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<title>ImmoConnect — Fiche bien</title>
+<meta name="description" content="Consultez cette annonce immobilière sur ImmoConnect">
+<!-- Open Graph — aperçu Facebook, WhatsApp, SMS -->
+<meta property="og:site_name" content="ImmoConnect">
+<meta property="og:type" content="website">
+<meta property="og:title" id="og-title" content="Bien immobilier sur ImmoConnect">
+<meta property="og:description" id="og-desc" content="Découvrez ce bien sur ImmoConnect — la plateforme qui met en relation vendeurs, agents et acheteurs.">
+<meta property="og:image" id="og-image" content="https://immoconnect-agence.fr/og-default.jpg">
+<meta property="og:url" id="og-url" content="https://immoconnect-agence.fr/bien.html">
+<meta name="twitter:card" content="summary_large_image">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:#fff;border-bottom:1px solid var(--line);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:var(--ink);text-decoration:none}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:20px;align-items:center;flex:1;margin-left:24px}
+.nav-links a{text-decoration:none;color:var(--ink);font-size:13px}
+.nav-links a:visited{color:var(--ink)}
+.nav-links a:hover{color:var(--gold)}
+.nav-link{color:var(--ink);text-decoration:none;font-size:13px;margin-right:18px}
+.nav-link:visited{color:var(--ink)}
+.nav-link:hover{color:var(--gold)}
+.nav-gold{padding:7px 14px;background:var(--gold);color:var(--ink)!important;border-radius:4px;font-weight:500}
+.nav-out{padding:7px 14px;border:1px solid var(--ink);color:var(--ink)!important;border-radius:4px;font-size:13px;text-decoration:none}
+.nav-out:visited{color:var(--ink)!important}
+
+.page{max-width:1040px;margin:0 auto;padding:32px 24px 80px}
+.breadcrumb{font-size:12px;color:var(--muted);margin-bottom:20px}
+.breadcrumb a{color:var(--muted);text-decoration:none}
+.breadcrumb a:hover{color:var(--ink)}
+.breadcrumb span{margin:0 6px}
+
+/* LAYOUT */
+.bien-layout{display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start}
+
+/* GALERIE */
+.galerie{border-radius:var(--r);overflow:hidden;margin-bottom:20px;position:relative}
+.photo-main{width:100%;height:400px;object-fit:cover;background:var(--line);display:block}
+.photo-main-placeholder{width:100%;height:400px;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:48px}
+.photos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:4px}
+.photo-thumb{width:100%;height:80px;object-fit:cover;cursor:pointer;transition:opacity .2s}
+.photo-thumb:hover{opacity:.8}
+.photo-wrap{position:relative}
+.carousel-arrow{position:absolute;top:200px;transform:translateY(-50%);width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,.92);color:#0F0F0E;font-size:26px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.18);z-index:6}
+.ca-prev{left:12px}.ca-next{right:12px}
+.carousel-arrow:hover{background:#fff}
+.carousel-count{position:absolute;bottom:12px;right:12px;background:rgba(15,15,14,.7);color:#fff;font-size:12px;padding:4px 10px;border-radius:20px;z-index:6}
+.simu-card{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:20px}
+.simu-title{font-size:13px;font-weight:600;margin-bottom:12px}
+.simu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.simu-grid label{display:flex;flex-direction:column;font-size:11px;color:var(--muted);gap:4px}
+.simu-grid input,.simu-grid select{padding:8px 10px;border:1px solid var(--line);border-radius:6px;font-family:inherit;font-size:13px;color:var(--ink);background:#fff}
+.simu-zero{margin-top:8px;width:100%;padding:7px;border:1px dashed var(--line);background:#fff;border-radius:6px;font-family:inherit;font-size:12px;cursor:pointer;color:var(--muted)}
+.simu-out{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.simu-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;color:var(--ink)}
+.simu-row span{color:var(--muted)}
+.simu-row.simu-hl strong{color:var(--teal);font-size:16px}
+.simu-note{font-size:10px;color:var(--muted);margin-top:8px;line-height:1.5}
+.simu-tabs{display:flex;gap:6px;margin-bottom:12px}
+.simu-tab{flex:1;padding:8px;border:1px solid var(--line);background:#fff;border-radius:6px;font-family:inherit;font-size:12px;cursor:pointer;color:var(--muted)}
+.simu-tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.simu-card.mode-simple .simu-fisc{display:none}
+.niveau-badge{position:absolute;top:16px;left:16px;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.8px}
+.nb-standard{background:#F1EFE8;color:#555}
+.nb-silver{background:#E6F1FB;color:var(--blue)}
+.nb-gold{background:#FAEEDA;color:#854F0B}
+.nb-platinium{background:#E1F5EE;color:var(--teal)}
+.score-dossier{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:14px}
+.score-dossier-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.score-dossier-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+.score-circle-big{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;border:3px solid;flex-shrink:0}
+.score-items{display:flex;flex-direction:column;gap:5px}
+.score-item{display:flex;align-items:center;gap:8px;font-size:11px}
+.score-item-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-ok{background:#1E7A62}
+.dot-no{background:#E8E6E0}
+.score-bar-wrap{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:8px}
+.score-bar-inner{height:100%;border-radius:3px;transition:width .6s ease}
+.mandat-badge{position:absolute;top:16px;right:16px;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;background:#FAEEDA;color:#854F0B}
+.excl-banner{background:linear-gradient(135deg,#854F0B,#C09B5A);border-radius:8px;padding:14px 16px;margin-bottom:14px;color:#fff;font-size:12px;line-height:1.7}
+.excl-banner strong{font-size:14px;display:block;margin-bottom:4px}
+.excl-timer{font-size:22px;font-weight:600;color:#FAEEDA;margin:6px 0}
+.excl-blocked{background:#F5F2EC;border:2px solid #E8E6E0;border-radius:8px;padding:14px 16px;margin-bottom:14px;text-align:center;font-size:12px;color:var(--muted);line-height:1.7}
+.excl-blocked strong{color:var(--ink);display:block;margin-bottom:4px;font-size:13px}
+.mode-badge{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;margin-bottom:10px}
+.mode-acheteurs{background:#E6F1FB;color:#0C447C}
+.mode-agents{background:#E1F5EE;color:#085041}
+.mode-comparatif{background:#FAEEDA;color:#633806}
+.quota-agent{background:#F5F2EC;border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.btn-excl{width:100%;padding:12px;border-radius:8px;border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:6px;transition:opacity .15s;background:linear-gradient(135deg,#854F0B,#C09B5A);color:#fff}
+.btn-excl:hover{opacity:.88}
+.btn-excl:disabled{opacity:.5;cursor:not-allowed}
+
+/* INFOS BIEN */
+.bien-titre{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;margin-bottom:8px;line-height:1.2}
+.bien-localisation{font-size:14px;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:6px}
+.bien-prix{font-size:36px;font-weight:300;color:var(--ink);margin-bottom:4px}
+.bien-pm2{font-size:13px;color:var(--muted);margin-bottom:20px}
+
+/* STATS RAPIDES */
+.stats-rapides{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+.stat-r{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:12px;text-align:center}
+.stat-r-val{font-size:18px;font-weight:500;margin-bottom:2px}
+.stat-r-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+
+/* DPE */
+.dpe-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:20px}
+.dpe-A{background:#00A550;color:#fff}
+.dpe-B{background:#51B848;color:#fff}
+.dpe-C{background:#8DC63F;color:#fff}
+.dpe-D{background:#F7C125;color:#0F0F0E}
+.dpe-E{background:#F3891D;color:#fff}
+.dpe-F{background:#ED1C24;color:#fff}
+.dpe-G{background:#9B1915;color:#fff}
+.dpe-NC{background:#888780;color:#fff}
+
+/* DESCRIPTION */
+.section{margin-bottom:28px}
+.section-title{font-size:15px;font-weight:500;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.description{font-size:14px;color:var(--muted);line-height:1.9}
+.details-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.detail-item{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.detail-lbl{font-size:12px;color:var(--muted)}
+.detail-val{font-size:13px;font-weight:500}
+
+/* SIDEBAR */
+.sidebar{position:sticky;top:70px}
+.contact-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:14px}
+.contact-title{font-size:14px;font-weight:500;margin-bottom:14px}
+.btn-contact{width:100%;padding:12px;border-radius:8px;border:none;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-bottom:8px;transition:opacity .15s;display:block;text-align:center;text-decoration:none}
+.btn-contact:hover{opacity:.85}
+.bc-teal{background:var(--teal);color:#fff}
+.bc-blue{background:var(--blue);color:#fff}
+.bc-out{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.lock-info{background:var(--bg);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:8px;text-align:center}
+.lock-info strong{color:var(--ink)}
+
+/* RAPPORT */
+.rapport-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.rapport-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px}
+.rapport-val{font-size:22px;font-weight:500;color:var(--teal);margin-bottom:2px}
+.rapport-sub{font-size:11px;color:var(--muted)}
+.rapport-badge{font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;display:inline-block;margin-top:6px}
+.rb-ok{background:#E1F5EE;color:var(--teal)}
+.rb-warn{background:#FAEEDA;color:#854F0B}
+.rb-bad{background:#FAECE7;color:#993C1D}
+
+/* MODAL CONTACT */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,15,14,.6);backdrop-filter:blur(4px);z-index:999;display:none;align-items:center;justify-content:center;padding:24px}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--warm);border-radius:var(--r);padding:28px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:18px;font-weight:500;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+label.lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+input,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink);outline:none;width:100%}
+input:focus,textarea:focus{border-color:var(--ink)}
+.err-box{background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:10px;font-size:12px;color:#712B13;margin-bottom:12px;display:none}
+.ok-box{background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:10px;font-size:12px;color:#1E7A62;margin-bottom:12px;display:none}
+
+/* SIMILAIRES */
+.similaires-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.sim-card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;text-decoration:none;color:var(--ink);transition:border-color .2s}
+.sim-card:hover{border-color:var(--muted)}
+.sim-img{width:100%;height:120px;object-fit:cover;background:var(--line)}
+.sim-body{padding:12px}
+.sim-titre{font-size:13px;font-weight:500;margin-bottom:4px}
+.sim-meta{font-size:11px;color:var(--muted)}
+.sim-prix{font-size:14px;font-weight:500;margin-top:6px;color:var(--teal)}
+
+.spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin:60px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.not-found{text-align:center;padding:60px;color:var(--muted);font-size:14px}
+.not-found-icon{font-size:48px;margin-bottom:16px}
+
+@media(max-width:760px){
+  .bien-layout{grid-template-columns:1fr}
+  .sidebar{position:static}
+  .stats-rapides{grid-template-columns:1fr 1fr}
+  .similaires-grid{grid-template-columns:1fr 1fr}
+  .details-grid{grid-template-columns:1fr}
+  .bien-titre{font-size:24px}
+}
+</style>
+<style>
+/* Bandeau supérieur unifié — fond blanc, texte foncé (override global) */
+nav{background:#fff!important;border-bottom:1px solid #E8E6E0!important}
+nav .nav-logo{color:#0F0F0E!important}
+nav .nav-logo span{color:#C09B5A!important}
+nav a{color:#0F0F0E!important}
+nav a:hover{color:#C09B5A!important}
+nav .nav-out{color:#0F0F0E!important;border-color:#0F0F0E!important}
+nav .nav-link{margin-right:18px}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo"><img src="logo-immoconnect.png" alt="ImmoConnect" style="height:38px;width:auto;object-fit:contain;vertical-align:middle"><span style="font-size:22px;font-weight:600;color:#0F0F0E;margin-left:8px">Immo<span style="color:#C09B5A">Connect</span></span></a>
+  <div class="nav-links">
+    <a href="index.html">Annonces</a>
+    <a href="carte.html">Carte</a>
+    <a href="questionnaire-vendeur.html" class="nav-gold">Vendre</a>
+  </div>
+  <a href="blog.html" class="nav-link">Blog</a>
+  <a href="connexion.html" class="nav-out">Se connecter</a>
+</nav>
+
+<div class="page">
+  <div id="loading"><div class="spin"></div></div>
+  <div id="content" style="display:none"></div>
+</div>
+
+<!-- MODAL CONTACT -->
+<div class="modal-overlay" id="modal-contact">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">Contacter le vendeur</div>
+    <div class="modal-sub" id="modal-sub">Envoyez un message pour en savoir plus sur ce bien.</div>
+    <div id="modal-err" class="err-box"></div>
+    <div id="modal-ok" class="ok-box"></div>
+    <div id="modal-form">
+      <div class="field"><label class="lbl">Votre nom *</label><input type="text" id="c-nom" placeholder="Jean Dupont"></div>
+      <div class="field"><label class="lbl">Votre email *</label><input type="email" id="c-email" placeholder="jean@exemple.fr"></div>
+      <div class="field"><label class="lbl">Votre téléphone</label><input type="tel" id="c-tel" placeholder="06 12 34 56 78"></div>
+      <div class="field"><label class="lbl">Message *</label><textarea id="c-message" rows="4" placeholder="Bonjour, je suis intéressé(e) par votre bien..."></textarea></div>
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:14px">
+        <input type="checkbox" id="c-consent" style="width:16px;height:16px;margin-top:2px;flex-shrink:0;accent-color:var(--teal)">
+        <label for="c-consent" style="font-size:12px;color:var(--muted);line-height:1.5;cursor:pointer">J'autorise ImmoConnect à transmettre mes coordonnées au vendeur dans le cadre de ce projet immobilier.</label>
+      </div>
+      <button class="btn-contact bc-teal" onclick="envoyerContact()">Envoyer mon message →</button>
+      <button class="btn-contact bc-out" style="margin-top:6px" onclick="fermerModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VISITE -->
+<div class="modal-overlay" id="modal-visite">
+  <div class="modal-box">
+    <div class="modal-title">📅 Réserver une visite</div>
+    <div class="modal-sub" id="visite-sub">Choisissez un créneau disponible</div>
+    <div id="visite-content"><div class="spin"></div></div>
+    <button class="btn-contact bc-out" style="margin-top:14px" onclick="document.getElementById('modal-visite').classList.remove('open')">Fermer</button>
+  </div>
+</div>
+
+<script>
+const SB_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const { createClient } = supabase;
+const db = createClient(SB_URL, SB_KEY);
+
+var bien = null;
+var currentUser = null;
+
+// ── INIT ──
+(async function() {
+  var params = new URLSearchParams(window.location.search);
+  var id = params.get('id');
+  if (!id) { afficherErreur('Annonce introuvable'); return; }
+
+  // Mettre à jour le title de la page
+  document.title = 'ImmoConnect — Chargement…';
+
+  // Charger le bien
+  var { data, error } = await db.from('annonces_vendeurs')
+    .select('*').eq('id', id).eq('statut_annonce', 'publiee').single();
+
+  if (error || !data) { afficherErreur('Cette annonce n\'existe pas ou a été supprimée.'); return; }
+  bien = data;
+
+  // Mettre à jour meta
+  document.title = 'ImmoConnect — ' + (bien.titre || bien.type_bien + ' · ' + bien.ville);
+  var metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) metaDesc.content = (bien.type_bien||'Bien') + ' ' + (bien.surface||'') + 'm² à ' + (bien.ville||'') + ' — ' + (bien.prix ? Math.round(bien.prix).toLocaleString('fr-FR') + '€' : '');
+
+  // Vérifier si connecté (refresh pour récupérer un abonnement récent)
+  try { await db.auth.refreshSession(); } catch (e) {}
+  var { data: { session } } = await db.auth.getSession();
+  currentUser = session ? session.user : null;
+
+  // Incrémenter vues (si pas le propriétaire)
+  if (!currentUser || currentUser.email !== bien.email_contact) {
+    await db.rpc('incrementer_vues', { annonce_uuid: bien.id }).then(undefined, function(){});
+  }
+
+  // Charger biens similaires
+  var { data: similaires } = await db.from('annonces_vendeurs')
+    .select('id,titre,type_bien,surface,prix,ville,niveau_vendeur')
+    .eq('statut_annonce', 'publiee')
+    .eq('type_bien', bien.type_bien)
+    .neq('id', bien.id)
+    .limit(3);
+
+  verifierRetourExclusivite();
+
+  try {
+    await afficherBien(bien, similaires || []);
+  } catch (err) {
+    console.error('Erreur affichage bien:', err);
+    var l = document.getElementById('loading'); if (l) l.style.display = 'none';
+    var ct = document.getElementById('content');
+    if (ct) { ct.style.display = 'block';
+      ct.innerHTML = '<div style="max-width:620px;margin:60px auto;padding:24px;text-align:center;color:#712B13;background:#FAECE7;border-radius:10px;font-size:14px">Une erreur est survenue à l\'affichage de cette annonce.<br><span style="font-size:11px;color:#9a6a55">' + ((err && err.message) ? err.message : err) + '</span></div>'; }
+  }
+})();
+
+// ── AFFICHER ──
+async function afficherBien(b, similaires) {
+  var niv = b.niveau_vendeur || 'standard';
+  var NIVLBL = { standard:'Annonce', silver:'Annonce enrichie', gold:'Vérifié ✓', platinium:'Vérifié + DPE ✓✓' };
+  var nivLabel = NIVLBL[niv] || (niv.charAt(0).toUpperCase() + niv.slice(1));
+  var pm2 = b.prix && b.surface ? Math.round(b.prix / b.surface).toLocaleString('fr-FR') + ' €/m²' : '';
+  var prixFmt = b.prix ? Math.round(b.prix).toLocaleString('fr-FR') + ' €' : 'Prix sur demande';
+  var titre = b.titre || (b.type_bien || 'Bien') + ' · ' + (b.surface || '—') + ' m²';
+
+  // Photos
+  var photosHtml = '';
+  var photos = [];
+  try {
+    var pu = b.photos_urls;
+    if (typeof pu === 'string') pu = JSON.parse(pu);
+    if (Array.isArray(pu)) photos = pu.filter(Boolean);
+  } catch(e) {}
+  if (!photos.length && b.photo_principale) photos = [b.photo_principale];
+  if (!photos.length && b.photos_supplementaires) {
+    try { var sup = JSON.parse(b.photos_supplementaires); if (Array.isArray(sup)) photos = sup.filter(Boolean); } catch(e) {}
+  }
+
+  window._photos = photos; window._photoIdx = 0;
+  var carouselCtrl = photos.length > 1
+    ? '<button class="carousel-arrow ca-prev" type="button" onclick="navPhoto(-1)">\u2039</button><button class="carousel-arrow ca-next" type="button" onclick="navPhoto(1)">\u203a</button><div class="carousel-count" id="carousel-count">1 / ' + photos.length + '</div>'
+    : '';
+  var mainPhoto = photos.length > 0
+    ? '<div class="photo-wrap"><img class="photo-main" src="' + photos[0] + '" alt="' + titre + '" id="main-photo">' + carouselCtrl + '</div>'
+    : '<div class="photo-main-placeholder">🏠</div>';
+
+  var thumbsHtml = '';
+  if (photos.length > 1) {
+    thumbsHtml = '<div class="photos-grid">';
+    photos.slice(1, 5).forEach(function(p, i) {
+      thumbsHtml += '<img class="photo-thumb" src="' + p + '" onclick="setPhoto(' + (i+1) + ')" alt="Photo ' + (i+2) + '">';
+    });
+    thumbsHtml += '</div>';
+  }
+
+  // ── ACCÈS : l'annonce est visible PAR TOUS. Les OPTIONS (visite, rapport, fiscalité) sont
+  //    réservées aux ABONNÉS. Le contact est gratuit pour tout compte connecté (plafonné + surveillé). ──
+  var estProprioAcces = currentUser && currentUser.email === b.email_contact;
+  var isAgent = false, isAgentAbonne = false, isInvestAbonne = false;
+  if (currentUser) {
+    try {
+      var _av = await db.from('agents_validation').select('forfait_agent, abonnement_actif').eq('email', currentUser.email).maybeSingle();
+      if (_av && _av.data) { isAgent = true; isAgentAbonne = (_av.data.abonnement_actif === true) && _av.data.forfait_agent && _av.data.forfait_agent !== 'pay_per_use'; }
+    } catch (e) {}
+    try {
+      var _pa = await db.from('projets_acheteurs').select('forfait,apport,duree_emprunt,taux_envisage,strategie,tmi,regime_fiscal,salaire_net,salaire_co,primes_annuelles,revenus_locatifs').eq('email', currentUser.email).maybeSingle();
+      if (_pa && _pa.data) { if (_pa.data.forfait === 'investisseur') isInvestAbonne = true; window._profil = _pa.data; }
+    } catch (e) {}
+  }
+  var estAbonne = estProprioAcces || isAgentAbonne || isInvestAbonne;
+  window._estAbonne = estAbonne;
+  window._estConnecte = !!currentUser;
+
+  // Niveau et mandat
+  var mandatHtml = b.sous_mandat_exclusif ? '<div class="mandat-badge">🤝 Sous mandat exclusif</div>' : '';
+
+  // DPE
+  var dpe = b.classe_dpe || 'NC';
+  var dpeHtml = '<span class="dpe-badge dpe-' + dpe + '">DPE ' + dpe + '</span>';
+
+  // Stats rapides
+  // BADGE BAISSE DE PRIX
+  if (b.prix_precedent && b.prix_precedent > b.prix) {
+    var baissePct = Math.round((b.prix_precedent - b.prix) / b.prix_precedent * 100);
+    var baisseMontant = Math.round(b.prix_precedent - b.prix);
+    html += '<div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px">';
+    html += '<div style="font-size:20px">📉</div>';
+    html += '<div><div style="font-size:13px;font-weight:500;color:#085041">Baisse de prix — -' + baissePct + '% (-' + baisseMontant.toLocaleString("fr-FR") + ' €)</div>';
+    html += '<div style="font-size:11px;color:#1E7A62">Ancien prix : ' + Math.round(b.prix_precedent).toLocaleString("fr-FR") + ' €';
+    if (b.date_derniere_baisse) html += ' · Baissé le ' + new Date(b.date_derniere_baisse).toLocaleDateString("fr-FR");
+    html += '</div></div></div>';
+  }
+
+  var statsHtml = '<div class="stats-rapides">';
+  statsHtml += '<div class="stat-r"><div class="stat-r-val">' + (b.surface || '—') + '</div><div class="stat-r-lbl">m²</div></div>';
+  statsHtml += '<div class="stat-r"><div class="stat-r-val">' + (b.nb_pieces || '—') + '</div><div class="stat-r-lbl">Pièces</div></div>';
+  statsHtml += '<div class="stat-r"><div class="stat-r-val">' + (b.annee_construction || '—') + '</div><div class="stat-r-lbl">Année</div></div>';
+  statsHtml += '<div class="stat-r"><div class="stat-r-val">' + dpe + '</div><div class="stat-r-lbl">DPE</div></div>';
+  statsHtml += '</div>';
+
+  // Détails
+  var details = [
+    ['Type', b.type_bien || '—'],
+    ['Surface', b.surface ? b.surface + ' m²' : '—'],
+    ['Pièces', b.nb_pieces || '—'],
+    ['Étage', b.etage || '—'],
+    ['Année', b.annee_construction || '—'],
+    ['État', b.statut_occupation || '—'],
+    ['Charges', b.charges_syndic ? b.charges_syndic + ' €/mois' : '—'],
+    ['Taxe foncière', b.taxe_fonciere_montant ? b.taxe_fonciere_montant + ' €/an' : '—'],
+    ['DPE', dpe],
+    ['Ville', b.ville || '—'],
+  ];
+
+  var detailsHtml = '<div class="details-grid">';
+  details.forEach(function(d) {
+    detailsHtml += '<div class="detail-item"><span class="detail-lbl">' + d[0] + '</span><span class="detail-val">' + d[1] + '</span></div>';
+  });
+  detailsHtml += '</div>';
+
+  // Adresse (selon niveau)
+  var adresseHtml = '';
+  if (currentUser && ['gold','platinium'].includes(niv) && b.adresse) {
+    adresseHtml = '📍 ' + b.adresse + ', ' + b.ville + ' (' + (b.code_postal||'') + ')';
+  } else {
+    adresseHtml = '📍 ' + (b.ville || '') + ' (' + (b.code_postal||'') + ')';
+  }
+
+  // Documents vérifiés
+  var docsHtml = '';
+  if (b.taxe_fonciere_verifie) docsHtml += '<div style="font-size:12px;color:var(--teal);margin-bottom:4px">✅ Taxe foncière vérifiée</div>';
+  if (b.classe_dpe && b.classe_dpe !== 'NC') docsHtml += '<div style="font-size:12px;color:var(--teal);margin-bottom:4px">✅ DPE disponible</div>';
+
+  // Vérifier exclusivité active et suivi baisse prix
+  await checkExclusivite(b.id);
+  await checkSuivi(b.id);
+  currentNiv = niv;
+  var contactHtml = buildContactButtons(b, niv);
+
+  // Sidebar rapport — différencié selon profil et forfait
+  var rapportHtml = '';
+
+  if (estAbonne) {
+    if (isAgent) {
+      rapportHtml = '<div class="rapport-card">'
+        + '<div class="rapport-title">Analyse de marché Hanaé</div>'
+        + '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:8px">DVF · Notaires-INSEE · Loyers du secteur</div>'
+        + "<div style='background:#FAEEDA;border-radius:6px;padding:8px 10px;font-size:11px;color:#854F0B;line-height:1.6;margin-bottom:10px'>L'estimation de prix est confidentielle (cohérence du scoring). L'agent retenu évaluera le bien lors de la visite.</div>"
+        + '<a href="rapport-hanae.html?annonce=' + b.id + '&mode=agent" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;padding:10px">📊 Voir l\'analyse de marché</a>'
+        + '</div>';
+    } else {
+      rapportHtml = '<div class="rapport-card">'
+        + '<div class="rapport-title">Rapport Hanaé IA</div>'
+        + '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px">Estimation basée sur DVF + Notaires-INSEE + carte des loyers</div>'
+        + '<a href="rapport-hanae.html?annonce=' + b.id + '" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;padding:10px">📊 Voir le rapport complet</a>'
+        + '</div>';
+    }
+  }
+
+  // Biens similaires
+  var similairesHtml = '';
+  if (similaires.length > 0) {
+    similairesHtml = '<div class="section" style="margin-top:32px"><div class="section-title">Biens similaires</div><div class="similaires-grid">';
+    similaires.forEach(function(s) {
+      var sPrix = s.prix ? Math.round(s.prix).toLocaleString('fr-FR') + ' €' : '—';
+      similairesHtml += '<a href="bien.html?id=' + s.id + '" class="sim-card">' +
+        '<div class="sim-img" style="display:flex;align-items:center;justify-content:center;font-size:32px">🏠</div>' +
+        '<div class="sim-body">' +
+        '<div class="sim-titre">' + (s.type_bien||'Bien') + ' · ' + (s.surface||'—') + ' m²</div>' +
+        '<div class="sim-meta">' + (s.ville||'') + '</div>' +
+        '<div class="sim-prix">' + sPrix + '</div>' +
+        '</div></a>';
+    });
+    similairesHtml += '</div></div>';
+  }
+
+  var html = '<div class="breadcrumb"><a href="index.html">Accueil</a><span>›</span><a href="index.html">Annonces</a><span>›</span>' + titre + '</div>';
+  html += '<div class="bien-layout">';
+
+  // COLONNE GAUCHE
+  html += '<div>';
+  // Badge niveau — masqué pour agents pay per use
+  var userProfilsBadge = currentUser ? (currentUser.user_metadata?.profils || []) : [];
+  var forfaitBadge = currentUser ? (currentUser.user_metadata?.forfait_agent || 'pay_per_use') : null;
+  var isAgentPayPerUse = userProfilsBadge.includes('agent') && forfaitBadge === 'pay_per_use';
+  var niveauBadgeHtml = isAgentPayPerUse
+    ? '<div class="niveau-badge" style="background:#F1EFE8;color:#888780">Dossier disponible</div>'
+    : '<div class="niveau-badge nb-' + niv + '">' + nivLabel + '</div>';
+  html += '<div class="galerie">' + mainPhoto + thumbsHtml + niveauBadgeHtml + mandatHtml + '</div>';
+  // Bandeau info pour agents pay per use
+  if (isAgentPayPerUse) {
+    html += '<div style="background:#FAEEDA;border:1px solid rgba(212,115,42,.3);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px">'
+      + '<div style="font-size:16px;flex-shrink:0">ℹ️</div>'
+      + '<div style="font-size:12px;color:#633806;line-height:1.6">'
+      + '<strong>Accès limité — Pay per use</strong><br>'
+      + 'Vous voyez ce bien comme un acheteur payant : adresse, photos et prix vendeur. '
+      + 'Le badge « Dossier vérifié », les alertes de publication et l\'analyse de marché Hanaé sont réservés aux abonnés.'
+      + ' <a href="forfaits.html" style="color:#854F0B;font-weight:600">Voir les forfaits →</a>'
+      + '</div></div>';
+  }
+  html += '<h1 class="bien-titre">' + titre + '</h1>';
+  html += '<div class="bien-localisation">' + adresseHtml + '</div>';
+  html += '<div class="bien-prix">' + prixFmt + '</div>';
+  if (pm2) html += '<div class="bien-pm2">' + pm2 + '</div>';
+
+  // BOUTONS DE PARTAGE
+  var urlBien = 'https://immoconnect-agence.fr/bien.html?id=' + b.id;
+  var titrePartage = (b.type_bien || 'Bien') + ' ' + (b.surface ? b.surface + 'm² ' : '') + 'à ' + (b.ville || '') + (b.prix ? ' — ' + Math.round(b.prix).toLocaleString('fr-FR') + '€' : '');
+  var msgPartage = encodeURIComponent('Je viens de trouver ce bien sur ImmoConnect : ' + titrePartage + '. Regarde ici : ' + urlBien);
+  var msgWhatsapp = encodeURIComponent('🏠 ' + titrePartage + '\n\nVoir le bien : ' + urlBien);
+  var msgSms = encodeURIComponent('Regarde ce bien sur ImmoConnect : ' + titrePartage + ' → ' + urlBien);
+
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;margin-bottom:4px">'
+    + '<a href="https://wa.me/?text=' + msgWhatsapp + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:#25D366;color:#fff;border-radius:8px;text-decoration:none;font-size:12px;font-weight:500">'
+    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.532 5.855L0 24l6.335-1.61A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.017-1.375l-.36-.214-3.727.977.995-3.634-.235-.374A9.818 9.818 0 1121.818 12 9.83 9.83 0 0112 21.818z"/></svg>'
+    + 'WhatsApp</a>'
+    + '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(urlBien) + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:#1877F2;color:#fff;border-radius:8px;text-decoration:none;font-size:12px;font-weight:500">'
+    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>'
+    + 'Facebook</a>'
+    + '<a href="sms:?body=' + msgSms + '" style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:#34C759;color:#fff;border-radius:8px;text-decoration:none;font-size:12px;font-weight:500">'
+    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>'
+    + 'SMS</a>'
+    + '<button onclick="copierLien(\'' + urlBien + '\')" style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--warm);color:var(--ink);border:1px solid var(--line);border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif" id="btn-copier-lien">'
+    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>'
+    + 'Copier le lien</button>'
+    + '</div>';
+
+  // Mettre à jour les meta Open Graph dynamiquement
+  majMetaOG(b, urlBien, titrePartage);
+
+  html += statsHtml;
+  if (docsHtml) html += '<div style="margin-bottom:16px">' + docsHtml + '</div>';
+
+  // DOCUMENTS COMPLÉMENTAIRES VENDEUR — abonnés uniquement, via URL signées
+  var autresDocsB = [];
+  try { var ad = b.autres_documents; if (typeof ad === 'string') ad = JSON.parse(ad); if (Array.isArray(ad)) autresDocsB = ad.filter(Boolean); } catch(e) {}
+  if (autresDocsB.length && estAbonne) {
+    var adh = '<div style="background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:16px">';
+    adh += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px">\ud83d\uddc2\ufe0f Documents fournis par le vendeur</div>';
+    autresDocsB.forEach(function(d, i){
+      var nom = String(d.name || 'Document ' + (i+1)).replace(/[<>]/g, '');
+      adh += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px"><span>\ud83d\udcc4 ' + nom + '</span>';
+      if (d.path) {
+        adh += '<button type="button" onclick="ouvrirDocVendeur(\'' + String(d.path).replace(/'/g, '') + '\')" style="background:var(--ink);color:#fff;border:none;border-radius:5px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:inherit">Ouvrir</button>';
+      } else if (d.url) {
+        adh += '<a href="' + d.url + '" target="_blank" rel="noopener" style="font-size:11px">Ouvrir</a>';
+      }
+      adh += '</div>';
+    });
+    adh += '<div style="font-size:10px;color:var(--muted);margin-top:8px">Acc\u00e8s confidentiel \u2014 liens s\u00e9curis\u00e9s \u00e0 dur\u00e9e limit\u00e9e</div></div>';
+    html += adh;
+  }
+
+  // SCORE DOSSIER — visible uniquement par les agents connectés
+  var userProfils2 = currentUser ? (currentUser.user_metadata?.profils || []) : [];
+  if (userProfils2.includes('agent')) {
+    html += buildScoreDossierHtml(b);
+  }
+
+  // SIMULATEUR ACHETEUR — abonnés uniquement
+  var loyer = b.loyer_mensuel || b.valeur_locative || 0;
+  var loyerM2 = (b.type_bien||'').toLowerCase().includes('maison') ? 8.5 : 11;
+  var loyerAuto = b.surface > 0 ? Math.round(loyerM2 * b.surface) : 0;
+  var loyerEffectif = loyer > 0 ? loyer : loyerAuto;
+  var prix = b.prix || 0;
+  var niveauBien = b.niveau_vendeur || 'standard';
+  var silverPlus = ['silver','gold','platinium'].indexOf(niveauBien) !== -1;
+  if (estAbonne && prix > 0) {
+    var chargesAnnuelles = (b.charges_syndic||0)*12 + (b.taxe_fonciere_montant||0);
+    window._simu = { loyer: loyerEffectif, charges: chargesAnnuelles, silverPlus: silverPlus, typeBien: (b.type_bien||'') };
+    var prof = window._profil || {};
+    var stratMap = {'Location meubl\u00e9e (LMNP)':'lmnp_micro','Location nue longue dur\u00e9e':'micro','Colocation':'lmnp_micro','Immeuble de rapport':'reel','D\u00e9ficit foncier / travaux':'reel','Location courte dur\u00e9e (Airbnb)':'lmnp_micro'};
+    var dApport = prof.apport || 0, dTaux = prof.taux_envisage || 3.5, dDuree = prof.duree_emprunt || 20, dTmi = (prof.tmi ? String(prof.tmi) : ''), dRegime = prof.regime_fiscal || stratMap[prof.strategie] || 'micro';
+    var dRevenu = Math.round(((prof.salaire_net||0)+(prof.salaire_co||0))*12 + (prof.primes_annuelles||0) + (prof.revenus_locatifs||0));
+    var dParts = prof.parts || 1;
+    var sel = function(v,t){ return v===t ? ' selected' : ''; };
+    var s = '<div class="simu-card mode-simple"><div class="simu-title">\ud83e\uddee Simulateur acheteur</div>';
+    if (silverPlus) s += '<div class="simu-tabs"><button type="button" class="simu-tab active" id="tab-simple" onclick="setSimuMode(\'simple\')">Sans imp\u00f4t</button><button type="button" class="simu-tab" id="tab-impot" onclick="setSimuMode(\'impot\')">Avec imp\u00f4t</button></div>';
+    s += '<div class="simu-grid">';
+    s += '<label>Prix du bien (\u20ac)<input type="number" id="si-prix" value="'+prix+'" oninput="recalcSimu()"></label>';
+    s += '<label>Apport (\u20ac)<input type="number" id="si-apport" value="'+dApport+'" oninput="recalcSimu()"></label>';
+    s += '<label>Taux annuel (%)<input type="number" step="0.1" id="si-taux" value="'+dTaux+'" oninput="recalcSimu()"></label>';
+    s += '<label>Dur\u00e9e (ans)<input type="number" id="si-duree" value="'+dDuree+'" oninput="recalcSimu()"></label>';
+    s += '<label>Assurance (%/an)<input type="number" step="0.05" id="si-assurance" value="0.30" oninput="recalcSimu()"></label>';
+    s += '<label>Type de bien<select id="si-type" onchange="recalcSimu()"><option value="ancien">Ancien (~7,5%)</option><option value="neuf">Neuf (~2,5%)</option></select></label>';
+    if (silverPlus) {
+      s += '<label class="simu-fisc">R\u00e9gime fiscal<select id="si-regime" onchange="recalcSimu()"><option value="micro"'+sel(dRegime,'micro')+'>Nu \u2014 micro-foncier (30%)</option><option value="reel"'+sel(dRegime,'reel')+'>Nu \u2014 r\u00e9el</option><option value="lmnp_micro"'+sel(dRegime,'lmnp_micro')+'>LMNP \u2014 micro-BIC (50%)</option><option value="lmnp_reel"'+sel(dRegime,'lmnp_reel')+'>LMNP \u2014 r\u00e9el (amortissement)</option></select></label>';
+      s += '<label class="simu-fisc">Votre TMI<select id="si-tmi" onchange="recalcSimu()"><option value=""'+sel(dTmi,'')+'>\u2014 \u00e0 renseigner \u2014</option><option value="11"'+sel(dTmi,'11')+'>11 %</option><option value="30"'+sel(dTmi,'30')+'>30 %</option><option value="41"'+sel(dTmi,'41')+'>41 %</option><option value="45"'+sel(dTmi,'45')+'>45 %</option></select></label>';
+      s += '<label class="simu-fisc">Revenu net imposable foyer (\u20ac/an)<input type="number" id="si-revenu" value="'+dRevenu+'" oninput="recalcSimu()"></label>';
+      s += '<label class="simu-fisc">Nombre de parts<input type="number" step="0.5" min="1" id="si-parts" value="'+dParts+'" oninput="recalcSimu()"></label>';
+    }
+    s += '</div>';
+    s += '<div class="simu-out">';
+    s += '<div class="simu-row"><span>Frais de notaire</span><strong id="so-notaire">\u2014</strong></div>';
+    s += '<div class="simu-row"><span>Co\u00fbt total d\'acquisition</span><strong id="so-total">\u2014</strong></div>';
+    s += '<div class="simu-row"><span>Montant emprunt\u00e9</span><strong id="so-emprunt">\u2014</strong></div>';
+    s += '<div class="simu-row simu-hl"><span>Mensualit\u00e9 estim\u00e9e</span><strong id="so-mens">\u2014</strong></div>';
+    if (silverPlus) {
+      s += '<div class="simu-row"><span>Rendement brut</span><strong id="so-rdt-brut">\u2014</strong></div>';
+      s += '<div class="simu-row"><span>Rendement net</span><strong id="so-rdt-net">\u2014</strong></div>';
+      s += '<div class="simu-row simu-fisc"><span>Imp\u00f4t annuel estim\u00e9</span><strong id="so-impot">\u2014</strong></div>';
+      s += '<div class="simu-row simu-hl simu-fisc"><span>Rendement net apr\u00e8s imp\u00f4t</span><strong id="so-rdt-apres">\u2014</strong></div>';
+      s += '<div class="simu-row simu-hl"><span>Cash-flow mensuel (avant imp\u00f4t)</span><strong id="so-cf-avant">\u2014</strong></div>';
+      s += '<div class="simu-row simu-hl simu-fisc"><span>Cash-flow mensuel (apr\u00e8s imp\u00f4t)</span><strong id="so-cf-apres">\u2014</strong></div>';
+    }
+    s += '</div>';
+    if (silverPlus) s += '<div class="simu-note">Rendement bas\u00e9 sur la valeur locative et les charges d\u00e9clar\u00e9es par le vendeur.</div>';
+    else s += '<div class="simu-note">Le rendement locatif s\'affiche d\u00e8s que le vendeur a renseigné le loyer estimé.</div>';
+    if (prof && (prof.apport || prof.taux_envisage)) s += '<div class="simu-note">Valeurs pr\u00e9-remplies depuis votre profil investisseur \u2014 modifiables ici.</div>';
+    if (silverPlus) s += '<div class="simu-note simu-fisc" id="so-mode"></div>';
+    s += '<div class="simu-note">Frais de notaire, mensualit\u00e9s et fiscalit\u00e9 estimatifs \u2014 \u00e0 confirmer avec votre notaire, votre banque et un conseiller fiscal.</div>';
+    s += '</div>';
+    html += s;
+  }
+
+  if (b.description) {
+    html += '<div class="section"><div class="section-title">Description</div><div class="description">' + b.description.replace(/\n/g, '<br>') + '</div></div>';
+  }
+
+  html += '<div class="section"><div class="section-title">Caractéristiques</div>' + detailsHtml + '</div>';
+  html += similairesHtml;
+  html += '</div>';
+
+  // COLONNE DROITE — SIDEBAR
+  html += '<div class="sidebar">';
+  html += '<div class="contact-card"><div class="contact-title">Intéressé(e) par ce bien ?</div>' + contactHtml + '</div>';
+  html += rapportHtml;
+  html += '<div class="contact-card" style="font-size:12px;color:var(--muted);line-height:1.7">';
+  html += '<div style="font-weight:500;color:var(--ink);margin-bottom:6px">🛡️ Vos données sont protégées</div>';
+  html += 'Vos coordonnées ne sont transmises qu\'au vendeur. ImmoConnect ne revend jamais vos données. <a href="cgu.html" style="color:var(--teal)">CGU</a>';
+  html += '</div>';
+  html += '</div>';
+
+  html += '</div>';
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('content').innerHTML = html;
+  if (document.getElementById('si-prix')) recalcSimu();
+  document.getElementById('content').style.display = 'block';
+}
+
+// ── SCORE DOSSIER VENDEUR ──
+function calculerScoreDossier(b) {
+  var criteres = [
+    { label: 'Photos (3 minimum)',         ok: b.photos && b.photos.length >= 3,           pts: 10 },
+    { label: 'Description rédigée',        ok: b.description && b.description.length > 50, pts: 10 },
+    { label: 'Surface renseignée',         ok: !!b.surface,                                pts: 5  },
+    { label: 'Nombre de pièces',           ok: !!b.nb_pieces,                              pts: 5  },
+    { label: 'Prix demandé',               ok: !!b.prix,                                   pts: 5  },
+    { label: 'Année de construction',      ok: !!b.annee_construction,                     pts: 5  },
+    { label: 'Valeur locative / Loyer',    ok: !!b.valeur_locative || !!b.loyer_mensuel,   pts: 10 },
+    { label: 'Taxe foncière vérifiée',     ok: !!b.taxe_fonciere_montant,                  pts: 15 },
+    { label: 'Règlement de copropriété',   ok: !!b.copro_doc || b.is_copro === 'Non',      pts: 10 },
+    { label: 'DPE renseigné',              ok: !!b.classe_dpe,                             pts: 15 },
+    { label: 'Adresse complète',           ok: !!b.adresse,                                pts: 5  },
+    { label: 'Géolocalisation',            ok: !!b.latitude && !!b.longitude,              pts: 5  }
+  ]
+  var total = criteres.reduce(function(acc, c) { return acc + c.pts; }, 0)
+  var obtenu = criteres.filter(function(c) { return c.ok; }).reduce(function(acc, c) { return acc + c.pts; }, 0)
+  var score = Math.round(obtenu / total * 100)
+  return { score, criteres, obtenu, total }
+}
+
+function buildBoutonsPartage(b) {
+  var titre = encodeURIComponent((b.titre || b.type_bien || 'Bien') + ' à ' + (b.ville || ''));
+  var url = encodeURIComponent('https://immoconnect-agence.fr/bien.html?id=' + b.id);
+  var texteWA = encodeURIComponent('Je vends mon bien sur ImmoConnect — ' + (b.type_bien || 'Bien') + ' à ' + (b.ville || '') + ' · ' + (b.prix ? Math.round(b.prix).toLocaleString('fr-FR') + '€' : '') + ' : https://immoconnect-agence.fr/bien.html?id=' + b.id);
+
+  return '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">'
+    + '<a href="https://wa.me/?text=' + texteWA + '" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;background:#25D366;color:#fff;text-decoration:none;font-size:12px;font-weight:500">'
+    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.549 4.107 1.514 5.842L.057 23.882l6.19-1.435A11.934 11.934 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.894a9.877 9.877 0 01-5.031-1.376l-.361-.214-3.737.981.994-3.643-.235-.374A9.861 9.861 0 012.106 12C2.106 6.58 6.58 2.106 12 2.106c5.421 0 9.894 4.474 9.894 9.894 0 5.421-4.473 9.894-9.894 9.894z"/></svg>'
+    + 'WhatsApp</a>'
+    + '<a href="https://www.facebook.com/sharer/sharer.php?u=' + url + '" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;background:#1877F2;color:#fff;text-decoration:none;font-size:12px;font-weight:500">'
+    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>'
+    + 'Facebook</a>'
+    + '<button onclick="copyLienBien(\'' + b.id + '\')" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;background:var(--warm);border:1px solid var(--line);color:var(--ink);font-size:12px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif">'
+    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>'
+    + 'Copier le lien</button>'
+    + '</div>';
+}
+
+function startCountdown(bienId, msRestants) {
+  var interval = setInterval(function() {
+    msRestants -= 1000;
+    if (msRestants <= 0) {
+      clearInterval(interval);
+      var wrap = document.getElementById('countdown-wrap-' + bienId);
+      if (wrap) {
+        wrap.style.background = '#F1EFE8';
+        wrap.style.border = '1px solid var(--line)';
+        wrap.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center">⏰ Fenêtre de candidature fermée — scoring en cours...</div>';
+      }
+      return;
+    }
+    var h = Math.floor(msRestants / 3600000);
+    var m = Math.floor((msRestants % 3600000) / 60000);
+    var s = Math.floor((msRestants % 60000) / 1000);
+    var el = document.getElementById('countdown-' + bienId);
+    if (el) el.textContent = h + 'h ' + m + 'min ' + s + 's';
+    // Passer en rouge si moins de 6h
+    if (msRestants < 6 * 3600000) {
+      var wrap = document.getElementById('countdown-wrap-' + bienId);
+      if (wrap) { wrap.style.background = '#FAECE7'; wrap.style.borderColor = '#F5C4B3'; }
+      if (el) el.style.color = '#C0392B';
+    }
+  }, 1000);
+}
+
+function copyLienBien(id) {
+  var lien = 'https://immoconnect-agence.fr/bien.html?id=' + id;
+  navigator.clipboard.writeText(lien).then(function() {
+    var btn = event.currentTarget;
+    var old = btn.innerHTML;
+    btn.innerHTML = '✅ Lien copié !';
+    btn.style.borderColor = 'var(--teal)';
+    setTimeout(function(){ btn.innerHTML = old; btn.style.borderColor = 'var(--line)'; }, 2000);
+  });
+}
+
+function buildScoreDossierHtml(b) {
+  var sd = calculerScoreDossier(b)
+  var s = sd.score
+  var color = s >= 80 ? '#1E7A62' : s >= 50 ? '#D4732A' : '#C0392B'
+  var label = s >= 80 ? 'Excellent' : s >= 60 ? 'Bon' : s >= 40 ? 'Moyen' : 'Incomplet'
+  var html = '<div class="score-dossier">'
+  html += '<div class="score-dossier-header">'
+  html += '<div><div class="score-dossier-title">Score du dossier</div>'
+  html += '<div style="font-size:11px;color:var(--muted);margin-top:2px">Qualité du dossier vendeur</div></div>'
+  html += '<div class="score-circle-big" style="color:' + color + ';border-color:' + color + '">' + s + '</div>'
+  html += '</div>'
+  html += '<div class="score-bar-wrap"><div class="score-bar-inner" style="width:' + s + '%;background:' + color + '"></div></div>'
+  html += '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin:4px 0 10px">'
+  html += '<span>0</span><span style="color:' + color + ';font-weight:600">' + label + ' — ' + s + '/100</span><span>100</span></div>'
+  html += '<div class="score-items">'
+  sd.criteres.forEach(function(c) {
+    html += '<div class="score-item"><div class="score-item-dot ' + (c.ok ? 'dot-ok' : 'dot-no') + '"></div>'
+    html += '<span style="color:' + (c.ok ? 'var(--ink)' : 'var(--muted)') + '">' + c.label + '</span>'
+    html += '<span style="margin-left:auto;font-size:10px;color:' + (c.ok ? 'var(--teal)' : 'var(--muted)') + '">' + (c.ok ? '+' + c.pts + 'pts' : '—') + '</span>'
+    html += '</div>'
+  })
+  html += '</div></div>'
+  return html
+}
+
+// Variable globale exclusivité
+var exclusiviteActive = null;
+
+async function checkExclusivite(bienId) {
+  var { data } = await db.rpc('get_exclusivite_active', { p_annonce_id: bienId }).then(undefined, function(){ return { data: null }; });
+  exclusiviteActive = (data && data.length > 0) ? data[0] : null;
+  return exclusiviteActive;
+}
+
+function buildContactButtons(b, niv) {
+  var html = '';
+  var userEmail = currentUser ? currentUser.email : null;
+  var userProfils = currentUser ? (currentUser.user_metadata?.profils || []) : [];
+  var isAgent = userProfils.includes('agent');
+  var userForfait = currentUser ? (currentUser.user_metadata?.forfait_agent || 'starter') : null;
+
+  // EXCLUSIVITÉ ACTIVE ?
+  if (exclusiviteActive) {
+    var heures = Math.ceil(parseFloat(exclusiviteActive.heures_restantes));
+    var isMonExclusivite = userEmail && exclusiviteActive.agent_email === userEmail;
+
+    if (isMonExclusivite) {
+      // L\'agent qui a l\'exclusivité voit son statut
+      html += '<div class="excl-banner"><strong>✅ Vous avez l\'exclusivité de contact</strong>';
+      html += '<div class="excl-timer">⏱ ' + heures + 'h restantes</div>';
+      html += 'Vous êtes le seul agent à pouvoir contacter ce vendeur pendant cette période.</div>';
+      html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">💬 Contacter le vendeur</button>';
+      html += '<button class="btn-contact bc-blue" onclick="ouvrirVisite()">📅 Réserver une visite</button>';
+      return html;
+    } else if (isAgent) {
+      // Autre agent : bien bloqué
+      html += '<div class="excl-blocked"><strong>🔒 Exclusivité de contact en cours</strong>';
+      html += 'Un agent a une exclusivité sur ce bien.<br>Disponible dans <strong>' + heures + 'h</strong>.</div>';
+      html += '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px">Revenez dans ' + heures + 'h pour contacter ce vendeur</div>';
+      return html;
+    }
+  }
+
+  // BADGE MODE CONTACT
+  var modeContact = b.mode_contact || 'acheteurs'
+  var modeLabels = {
+    acheteurs:        '👤 Acheteurs & investisseurs uniquement',
+    acheteurs_agents: '🤝 Acheteurs + Je choisis mon agent',
+    comparatif:       '📊 ImmoConnect sélectionne les 3 meilleurs'
+  }
+  var modeClasses = {
+    acheteurs:        'mode-acheteurs',
+    acheteurs_agents: 'mode-agents',
+    comparatif:       'mode-comparatif'
+  }
+  html += '<div class="mode-badge ' + (modeClasses[modeContact] || 'mode-acheteurs') + '">' + (modeLabels[modeContact] || '') + '</div>'
+
+  // MODE ACHETEURS UNIQUEMENT — agents : lecture seule du dossier, pas de contact
+  if (isAgent && modeContact === 'acheteurs') {
+    var forfaitAgent = currentUser ? (currentUser.user_metadata?.forfait_agent || 'pay_per_use') : 'pay_per_use'
+    var isAbonne = forfaitAgent !== 'pay_per_use'
+
+    // Bandeau informatif
+    html += '<div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:14px;margin-bottom:12px">'
+    html += '<div style="font-size:13px;font-weight:600;color:#712B13;margin-bottom:4px">🚫 Ce vendeur n\'accepte pas les contacts agents</div>'
+    html += '<div style="font-size:11px;color:#712B13;line-height:1.7">Vous pouvez consulter le dossier ci-dessous à titre informatif. Tout contact direct avec ce vendeur constitue une infraction au règlement ImmoConnect et entraîne :<br><strong>① Un message d\'avertissement · ② −10 points sur votre score pendant 6 mois</strong></div>'
+    html += '</div>'
+
+    // Accès dossier pour abonnés uniquement
+    if (isAbonne) {
+      html += '<a href="rapport-hanae.html?annonce=' + b.id + '&mode=agent" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;padding:12px;border-radius:8px;font-weight:500;margin-bottom:8px">📊 Consulter le dossier (lecture seule)</a>'
+    } else {
+      html += '<div style="font-size:11px;color:var(--muted);text-align:center;padding:10px;background:var(--bg);border-radius:8px;margin-bottom:8px">Accès au dossier réservé aux agents abonnés (Starter, Pro, Premium)</div>'
+    }
+
+    // Bouton signaler un agent qui aurait quand même contacté
+    html += '<div style="text-align:center;margin-top:4px">'
+    html += '<button onclick="ouvrirSignalement(\'' + b.id + '\', \'' + (b.email_contact || '') + '\')" style="font-size:11px;color:var(--muted);background:transparent;border:none;cursor:pointer;text-decoration:underline;font-family:Outfit,sans-serif">⚠️ Signaler un contact agent non sollicité</button>'
+    html += '</div>'
+    return html
+  }
+
+  // PAS D\'EXCLUSIVITÉ — boutons normaux
+  var _estCo = (typeof window._estConnecte === 'undefined') ? !!currentUser : window._estConnecte;
+  var _estAb = (typeof window._estAbonne === 'undefined') ? false : window._estAbonne;
+  // CONTACT — gratuit, nécessite un compte (plafond + surveillance gérés à l'envoi)
+  if (_estCo) {
+    html += '<button class="btn-contact bc-teal" onclick="ouvrirContact()">💬 Contacter le vendeur</button>';
+  } else {
+    html += '<a href="connexion.html" class="btn-contact bc-teal" style="display:block;text-align:center;text-decoration:none">💬 Créez un compte gratuit pour contacter</a>';
+  }
+  // VISITE — abonnés uniquement
+  if (_estAb) {
+    html += '<button class="btn-contact bc-out" onclick="ouvrirVisite()">📅 Réserver une visite</button>';
+  } else {
+    html += '<a href="forfaits.html" class="btn-contact bc-out" style="display:block;text-align:center;text-decoration:none">📅 Réserver une visite — abonnés</a>';
+  }
+
+  // AFFICHAGE QUOTA CONTACTS VENDEUR pour agents (mode acheteurs_agents)
+  if (isAgent && modeContact === 'acheteurs_agents') {
+    var forfaitAgent = currentUser ? (currentUser.user_metadata?.forfait_agent || 'pay_per_use') : 'pay_per_use'
+    var maxLeads = { pay_per_use: 2, starter: 8, pro: 15, premium: '∞' }
+    var isAgentPPU = forfaitAgent === 'pay_per_use'
+
+    if (isAgentPPU) {
+      // PPU : pas d\'accès au dossier, pas de contact en mode acheteurs_agents
+      html += '<div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:12px 14px;text-align:center">'
+        + '<div style="font-size:13px;font-weight:600;color:#712B13;margin-bottom:4px">Accès non disponible</div>'
+        + '<div style="font-size:11px;color:#712B13;line-height:1.6">Ce mode de contact est réservé aux agents abonnés (Starter, Pro, Premium). En pay per use, vous êtes alerté uniquement lorsque le vendeur demande une sélection top 3.</div>'
+        + '</div>'
+    } else {
+      html += '<div class="quota-agent"><span>Contacts vendeur disponibles cette semaine</span><span style="font-weight:600;color:var(--teal)">' + (maxLeads[forfaitAgent] || '?') + ' max</span></div>'
+      html += '<a href="messagerie.html?annonce=' + b.id + '" class="btn-contact bc-teal" style="display:block;text-align:center;text-decoration:none;padding:12px;margin-top:8px;border-radius:8px;font-weight:500">Contacter ce vendeur →</a>'
+    }
+  }
+
+  // ── FENÊTRE 48H COMPTE À REBOURS ──
+  if (isAgent && modeContact === 'comparatif') {
+    var datePublication = b.created_at ? new Date(b.created_at) : null;
+    var now = new Date();
+    var deadline48h = datePublication ? new Date(datePublication.getTime() + 48 * 60 * 60 * 1000) : null;
+    var msRestants = deadline48h ? (deadline48h - now) : 0;
+    var fenetreOuverte = msRestants > 0;
+    var statutSelection = b.statut_selection || 'en_attente';
+    var dejaCloture = ['top3_pret','attente_fantomes','agent_choisi','cloture_mandat','cloture'].includes(statutSelection);
+
+    if (dejaCloture) {
+      // Fenêtre fermée — scoring terminé
+      html += '<div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:12px;color:#712B13;line-height:1.6">'
+        + '🔒 <strong>Fenêtre de candidature fermée</strong> — Le scoring est terminé. '
+        + (statutSelection === 'agent_choisi' ? 'Un agent a été sélectionné par le vendeur.' : 'Les candidats ont été présentés au vendeur.')
+        + '</div>';
+    } else if (fenetreOuverte) {
+      // Fenêtre ouverte — compte à rebours
+      var heuresRestantes = Math.floor(msRestants / 3600000);
+      var minutesRestantes = Math.floor((msRestants % 3600000) / 60000);
+      var urgence = msRestants < 6 * 3600000; // moins de 6h = urgent
+      html += '<div id="countdown-wrap-' + b.id + '" style="background:' + (urgence ? '#FAECE7' : '#E1F5EE') + ';border:1px solid ' + (urgence ? '#F5C4B3' : '#9FE1CB') + ';border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
+        + '<div style="font-size:12px;font-weight:600;color:' + (urgence ? '#712B13' : '#085041') + '">⏱ Fenêtre de candidature ouverte</div>'
+        + '<div id="countdown-' + b.id + '" style="font-size:18px;font-weight:500;color:' + (urgence ? '#C0392B' : '#1E7A62') + '">'
+        + heuresRestantes + 'h ' + minutesRestantes + 'min'
+        + '</div></div>'
+        + '<div style="height:4px;background:' + (urgence ? '#F5C4B3' : '#9FE1CB') + ';border-radius:2px;overflow:hidden">'
+        + '<div style="height:100%;width:' + Math.round((1 - msRestants/(48*3600000))*100) + '%;background:' + (urgence ? '#C0392B' : '#1E7A62') + ';border-radius:2px"></div>'
+        + '</div>'
+        + '<div style="font-size:10px;color:' + (urgence ? '#712B13' : '#085041') + ';margin-top:4px">Ferme le ' + deadline48h.toLocaleDateString('fr-FR', {weekday:'long',hour:'2-digit',minute:'2-digit'}) + '</div>'
+        + '</div>';
+      // Démarrer le countdown JS
+      html += '<script>startCountdown("' + b.id + '",' + msRestants + ');<\/script>';
+    } else {
+      // Devrait être géré par le cron — affichage de secours
+      html += '<div style="background:#F1EFE8;border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:var(--muted)">Fenêtre de candidature expirée — scoring en cours de traitement.</div>';
+    }
+
+  // CANDIDATURE pour mode comparatif — tous les agents (PPU inclus)
+  if (isAgent && modeContact === 'comparatif') {
+    var forfaitComp = currentUser ? (currentUser.user_metadata?.forfait_agent || 'pay_per_use') : 'pay_per_use'
+
+    // PPU : accès dossier autorisé uniquement en mode comparatif + lien pour candidater
+    if (forfaitComp === 'pay_per_use') {
+      html += '<div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:11px;color:#085041;line-height:1.6">'
+        + '🏆 <strong>Sélection top 3 ouverte</strong> — Vous avez accès à ce dossier complet car le vendeur demande une sélection Hanaé IA. Candidatez pour être parmi les 3 meilleurs profils présentés.'
+        + '</div>'
+    }
+
+    // Accès dossier pour tous en mode comparatif
+    html += '<a href="rapport-hanae.html?annonce=' + b.id + '&mode=agent" class="btn-contact bc-blue" style="display:block;text-align:center;text-decoration:none;padding:10px;border-radius:8px;font-weight:500;margin-bottom:6px">📊 Consulter le dossier complet</a>'
+    html += '<a href="candidature-agent.html?annonce=' + b.id + '" class="btn-contact" style="display:block;text-align:center;text-decoration:none;padding:12px;border-radius:8px;background:#1E7A62;color:#fff;font-weight:500">🏆 Candidater — Sélection top 3 — 9,99 €</a>'
+  }
+  }
+
+  // BOUTON SIGNALER pour vendeurs — si l\'agent a contacté hors mode autorisé
+  if (!isAgent && currentUser && modeContact === 'acheteurs') {
+    html += '<div style="margin-top:8px;text-align:center">'
+    html += '<button onclick="ouvrirSignalement(\'' + b.id + '\', \'\')" style="font-size:11px;color:var(--muted);background:transparent;border:none;cursor:pointer;text-decoration:underline;font-family:Outfit,sans-serif">⚠️ Signaler un contact agent non sollicité</button>'
+    html += '</div>'
+  }
+
+  // BOUTON SUIVI BAISSES DE PRIX pour acheteurs connectés
+  if (currentUser && !isAgent) {
+    html += '<div style="margin-top:8px" id="suivi-wrap-' + b.id + '">';
+    html += '<button id="btn-suivi-' + b.id + '" onclick="toggleSuivi(\'' + b.id + '\')" style="width:100%;padding:9px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:12px;cursor:pointer;color:var(--muted);transition:all .15s" onmouseover="this.style.borderColor=\'var(--ink)\'" onmouseout="this.style.borderColor=\'var(--line)\'">🔔 Alertes baisse de prix</button>';
+    html += '</div>';
+  }
+
+  // BOUTON EXCLUSIVITÉ pour agents Expert et Platinium
+  if (isAgent && (userForfait === 'expert' || userForfait === 'platinium') && !exclusiviteActive) {
+    var duree = userForfait === 'platinium' ? 96 : 48;
+    var prix = '9,99'; // contact vendeur = 9,99€ (dossier complet inclus)
+    html += '<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">';
+    html += '<button class="btn-excl" onclick="acheterExclusivite(' + duree + ',' + prix.replace(',','.') + ')">';
+    html += '🔒 Exclusivité ' + duree + 'h — ' + prix + ' €</button>';
+    html += '<div style="font-size:10px;color:var(--muted);text-align:center">Seul agent à contacter ce vendeur pendant ' + duree + 'h</div>';
+    html += '</div>';
+  }
+
+  return html;
+}
+
+// ── DÉCLARER ACHETEUR POTENTIEL (mode acheteurs_agents) ──
+async function declarerAcheteur(annonceId, mandatId, forfait) {
+  if (!currentUser) { window.location.href = 'connexion.html'; return; }
+
+  // Vérifier le quota via matcher-mandats
+  var res = await db.functions.invoke('matcher-mandats', {
+    body: {
+      type: 'verifier_quota_lead',
+      data: { agent_email: currentUser.email, annonce_id: annonceId, forfait: forfait }
+    }
+  }).then(undefined, function(){ return { data: { autorise: false, message: 'Erreur réseau' } }; })
+
+  var result = res.data || {}
+  if (!result.autorise) {
+    if (result.raison === 'quota_epuise') {
+      showToast('Quota de contacts vendeur atteint cette semaine.', 'error')
+    } else {
+      showToast(result.message || 'Contact non autorisé.', 'error')
+    }
+    return
+  }
+
+  // Ouvrir la messagerie avec pré-remplissage "J\'ai un acheteur potentiel"
+  var { data: annonce } = await db.from('annonces_vendeurs').select('email_contact, titre, type_bien, ville').eq('id', annonceId).single().then(undefined, function(){ return { data: null } })
+  var { data: mandat } = await db.from('mandats_recherche').select('label, budget_max, type_bien, secteur').eq('id', mandatId).single().then(undefined, function(){ return { data: null } })
+
+  var message = 'Bonjour,\n\nJ\'ai un acheteur potentiel pour votre bien.'
+    + (mandat ? '\n\nProfil acheteur : ' + (mandat.label || 'Acheteur qualifié') + ' — budget jusqu\'à ' + Math.round(parseFloat(mandat.budget_max || 0)).toLocaleString('fr-FR') + ' €.' : '')
+    + '\n\nJe souhaite vous contacter pour vous présenter ce profil et discuter d\'un mandat simple.';
+
+  // Insérer le message en base
+  await db.from('messages').insert({
+    expediteur_email: currentUser.email,
+    destinataire_email: annonce?.email_contact,
+    annonce_id: annonceId,
+    message: message,
+    type: 'acheteur_potentiel',
+    mandat_recherche_id: mandatId,
+    lu: false
+  }).then(undefined, function(){})
+
+  // Envoyer email au vendeur
+  await db.functions.invoke('envoyer-email', {
+    body: {
+      type: 'acheteur_potentiel_vendeur',
+      to: annonce?.email_contact,
+      subject: 'Un agent a un acheteur potentiel pour votre bien · ImmoConnect',
+      bien_titre: annonce?.titre || (annonce?.type_bien + ' ' + annonce?.ville),
+      agent_email: currentUser.email,
+      agent_nom: currentUser.user_metadata?.prenom + ' ' + currentUser.user_metadata?.nom,
+      mandat_label: mandat?.label || 'Acheteur qualifié',
+      budget_max: mandat?.budget_max,
+      lien: 'https://immoconnect-agence.fr/messagerie.html?annonce=' + annonceId
+    }
+  }).then(undefined, function(){})
+
+  showToast('Votre message a été envoyé au vendeur.', 'ok')
+  // Rediriger vers la messagerie
+  setTimeout(function(){ window.location.href = 'messagerie.html?annonce=' + annonceId }, 1500)
+}
+
+// ── SIGNALEMENT AGENT ──
+function ouvrirSignalement(annonceId, emailAgent) {
+  var modal = document.createElement('div');
+  modal.id = 'modal-signalement';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML = '<div style="background:var(--warm);border-radius:12px;padding:28px;max-width:440px;width:100%">'
+    + '<div style="font-size:16px;font-weight:500;color:var(--ink);margin-bottom:8px">⚠️ Signaler un contact non sollicité</div>'
+    + '<div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:16px">Un agent vous a contacté alors que vous n\'acceptez pas les contacts agents ? Signalez-le. ImmoConnect vérifiera et appliquera une pénalité de −10 points pendant 6 mois si le signalement est confirmé.</div>'
+    + '<div style="margin-bottom:12px">'
+    + '<label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Email de l\'agent (si connu)</label>'
+    + '<input id="sig-email" type="email" value="' + (emailAgent || '') + '" placeholder="agent@exemple.fr" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:Outfit,sans-serif;font-size:13px;color:var(--ink)">'
+    + '</div>'
+    + '<div style="margin-bottom:16px">'
+    + '<label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Décrivez le contact non sollicité</label>'
+    + '<textarea id="sig-desc" rows="3" placeholder="Par quel canal l\'agent vous a contacté, quand, etc." style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:Outfit,sans-serif;font-size:13px;color:var(--ink);resize:vertical"></textarea>'
+    + '</div>'
+    + '<div style="display:flex;gap:10px">'
+    + '<button onclick="envoyerSignalement(\'' + annonceId + '\')" style="flex:1;padding:11px;border-radius:8px;border:none;background:#C0392B;color:#fff;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer">Envoyer le signalement</button>'
+    + '<button onclick="document.getElementById(\'modal-signalement\').remove()" style="padding:11px 18px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;color:var(--muted)">Annuler</button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(modal);
+  modal.addEventListener('click', function(e){ if(e.target === modal) modal.remove(); });
+}
+
+async function envoyerSignalement(annonceId) {
+  var emailAgent = document.getElementById('sig-email').value.trim();
+  var description = document.getElementById('sig-desc').value.trim();
+  if (!description) { alert('Décrivez le contact non sollicité.'); return; }
+
+  try {
+    // 1. Enregistrer le signalement en base
+    await db.from('signalements_agents').insert({
+      annonce_id: annonceId,
+      email_signalant: currentUser ? currentUser.email : null,
+      email_signale: emailAgent || null,
+      raison: description,
+      statut: 'en_attente'
+    });
+
+    // 2. Alerter l\'admin par email
+    await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'signalement_agent',
+        to: 'contact@immoconnect-agence.fr',
+        subject: 'Signalement agent — bien ' + annonceId,
+        email_signale: emailAgent || 'inconnu',
+        email_signalant: currentUser ? currentUser.email : 'inconnu',
+        conversation_id: annonceId,
+        raison: description,
+        lien: 'https://immoconnect-agence.fr/admin-agents.html'
+      }
+    }).then(undefined, function(){});
+
+    document.getElementById('modal-signalement').remove();
+    alert('Signalement envoyé. ImmoConnect va vérifier et vous informer de la suite.');
+  } catch(e) {
+    alert('Erreur : ' + (e.message || 'Réessayez.'));
+  }
+}
+
+// ── SUIVI BAISSES DE PRIX ──
+var isSuivant = false;
+
+async function checkSuivi(bienId) {
+  if (!currentUser) return;
+  var { data } = await db.from('suivi_biens').select('id').eq('annonce_id', bienId).eq('email', currentUser.email).single().then(undefined, function(){ return { data: null }; });
+  isSuivant = !!data;
+  majBtnSuivi(bienId);
+}
+
+function majBtnSuivi(bienId) {
+  var btn = document.getElementById('btn-suivi-' + bienId);
+  if (!btn) return;
+  if (isSuivant) {
+    btn.textContent = '🔔 Alertes activées — Cliquer pour désactiver';
+    btn.style.borderColor = 'var(--teal)';
+    btn.style.color = 'var(--teal)';
+    btn.style.background = '#E1F5EE';
+  } else {
+    btn.textContent = '🔔 Alertes baisse de prix';
+    btn.style.borderColor = 'var(--line)';
+    btn.style.color = 'var(--muted)';
+    btn.style.background = 'transparent';
+  }
+}
+
+async function toggleSuivi(bienId) {
+  if (!currentUser) { alert('Connectez-vous pour activer les alertes.'); return; }
+  var profils = currentUser.user_metadata?.profils || [];
+  var profil = profils.includes('agent') ? 'agent' : profils.includes('investisseur') ? 'investisseur' : 'gratuit';
+  if (isSuivant) {
+    await db.from('suivi_biens').delete().eq('annonce_id', bienId).eq('email', currentUser.email);
+    isSuivant = false;
+  } else {
+    await db.from('suivi_biens').insert({ annonce_id: bienId, email: currentUser.email, profil });
+    isSuivant = true;
+  }
+  majBtnSuivi(bienId);
+}
+
+// ── EXCLUSIVITÉ DE CONTACT ──
+async function acheterExclusivite(dureeHeures, prix) {
+  if (!currentUser) { alert('Connectez-vous pour activer une exclusivité.'); return; }
+  if (!bien) return;
+  var btn = event.target;
+  btn.disabled = true;
+  btn.textContent = 'Redirection vers le paiement…';
+  try {
+    // SÉCURITÉ : aucun droit n'est accordé ici. Le paiement Stripe est vérifié
+    // côté serveur (edge function verifier-achat) qui seule insère l'exclusivité.
+    var res = await db.functions.invoke('creer-checkout-exclusivite', {
+      body: {
+        annonce_id: bien.id,
+        agent_email: currentUser.email,
+        email_vendeur: bien.email_contact,
+        duree_heures: dureeHeures,
+        prix: prix,
+        forfait_agent: (currentUser.user_metadata && currentUser.user_metadata.forfait_agent) || 'expert',
+        success_url: 'https://immoconnect-agence.fr/bien.html?id=' + bien.id,
+        cancel_url: 'https://immoconnect-agence.fr/bien.html?id=' + bien.id
+      }
+    });
+    if (res.error) throw new Error(res.error.message);
+    if (res.data && res.data.url) { window.location.href = res.data.url; return; }
+    throw new Error((res.data && res.data.error) || 'Stripe indisponible');
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Exclusivité ' + dureeHeures + 'h — ' + prix.toFixed(2).replace('.',',') + ' €';
+    alert('Erreur : ' + e.message);
+  }
+}
+
+// ── RETOUR PAIEMENT EXCLUSIVITÉ : vérification serveur puis confirmation ──
+async function verifierRetourExclusivite() {
+  var params = new URLSearchParams(window.location.search);
+  var sid = params.get('exclu_session');
+  if (!sid) return;
+  window.history.replaceState({}, '', 'bien.html?id=' + params.get('id'));
+  try {
+    var res = await db.functions.invoke('verifier-achat', { body: { session_id: sid } });
+    var d = res.data || {};
+    if (d.verified && d.action === 'exclusivite') {
+      // Email au vendeur (après vérification du paiement uniquement)
+      if (!d.already && d.email_vendeur) {
+        var nomAgent = (currentUser && currentUser.user_metadata && currentUser.user_metadata.nom_complet) || (d.agent_email || '').split('@')[0];
+        var finStr = d.fin_at ? new Date(d.fin_at).toLocaleDateString('fr-FR', { weekday:'long', day:'2-digit', month:'long', hour:'2-digit', minute:'2-digit' }) : '';
+        db.functions.invoke('envoyer-email', { body: {
+          type: 'exclusivite_contact',
+          to: d.email_vendeur,
+          subject: 'Un agent a une exclusivite de contact sur votre bien - ImmoConnect',
+          agent_nom: nomAgent,
+          agent_email: d.agent_email,
+          bien_titre: (bien && (bien.titre || (bien.type_bien + ' ' + bien.ville))) || '',
+          duree_heures: d.duree_heures,
+          fin_at: finStr,
+          lien: 'https://immoconnect-agence.fr/connexion.html'
+        }}).then(undefined, function(){});
+      }
+      alert('\u2705 Paiement confirm\u00e9 — exclusivit\u00e9 de ' + (d.duree_heures || '') + 'h activ\u00e9e ! Le vendeur a \u00e9t\u00e9 pr\u00e9venu.');
+      location.reload();
+    } else if (d.verified === false) {
+      alert('Paiement non confirm\u00e9 — l\'exclusivit\u00e9 n\'a pas \u00e9t\u00e9 activ\u00e9e.');
+    }
+  } catch(e) {}
+}
+
+var currentNiv = 'standard';
+
+// ── OUVERTURE DOCUMENT VENDEUR (URL signée, abonnés) ──
+async function ouvrirDocVendeur(path) {
+  try {
+    var res = await db.functions.invoke('doc-url', { body: { bucket: 'documents-vendeurs', path: path } });
+    if (res.data && res.data.url) { window.open(res.data.url, '_blank', 'noopener'); }
+    else { alert('Document indisponible.'); }
+  } catch(e) { alert('Document indisponible.'); }
+}
+
+// ── CONTACT ──
+function ouvrirContact() {
+  document.getElementById('modal-contact').classList.add('open');
+}
+function fermerModal() {
+  document.getElementById('modal-contact').classList.remove('open');
+}
+
+async function envoyerContact() {
+  if (!currentUser) { window.location.href = 'connexion.html'; return; }
+  var nom = document.getElementById('c-nom').value.trim();
+  var email = document.getElementById('c-email').value.trim();
+  var tel = document.getElementById('c-tel').value.trim();
+  var msg = document.getElementById('c-message').value.trim();
+  var consent = document.getElementById('c-consent').checked;
+  var err = document.getElementById('modal-err');
+  var ok = document.getElementById('modal-ok');
+
+  err.style.display = 'none'; ok.style.display = 'none';
+
+  if (!nom || !email || !msg) { err.textContent = 'Remplissez tous les champs obligatoires.'; err.style.display = 'block'; return; }
+  if (!consent) { err.textContent = 'Cochez la case de consentement.'; err.style.display = 'block'; return; }
+  if (!bien) return;
+
+  // Plafond : 5 vendeurs / 7 jours (abonnés illimité)
+  if (!window._estAbonne) {
+    try {
+      var _depuis = new Date(Date.now() - 7*24*3600*1000).toISOString();
+      var _cpt = await db.from('contacts_envoyes').select('id').eq('user_id', currentUser.id).gte('created_at', _depuis);
+      if (_cpt && _cpt.data && _cpt.data.length >= 5) { err.textContent = 'Limite de 5 contacts par semaine atteinte. Passez à un abonnement pour contacter sans limite.'; err.style.display='block'; return; }
+    } catch(e) {}
+  }
+
+  // Surveillance Hanaé : blocage du démarchage d'agent déguisé
+  try {
+    var _scan = await db.functions.invoke('analyser-contact', { body: { message: msg, nom: nom } });
+    if (_scan && _scan.data && _scan.data.suspect === true) { err.textContent = "Ce message s'apparente à du démarchage professionnel. Le contact vendeur est réservé aux acheteurs ; les agents disposent d'un accès dédié via leur abonnement."; err.style.display='block'; return; }
+  } catch(e) {}
+
+  try {
+    // Enregistrer dans messages_annonces
+    await db.from('messages_annonces').insert({
+      annonce_id: bien.id,
+      email_vendeur: bien.email_contact,
+      nom_acheteur: nom,
+      email_acheteur: email,
+      telephone_acheteur: tel || null,
+      message: msg,
+      lu: false
+    });
+    // Compteur du plafond hebdomadaire
+    await db.from('contacts_envoyes').insert({ user_id: currentUser.id, user_email: currentUser.email, annonce_id: bien.id, email_vendeur: bien.email_contact }).then(undefined, function(){});
+
+    // Incrémenter contacts
+    await db.rpc('incrementer_contacts', { annonce_uuid: bien.id }).then(undefined, function(){});
+
+    // Notifier le vendeur
+    await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'nouveau_message',
+        to: bien.email_contact,
+        subject: '💬 Nouveau contact pour votre bien — ImmoConnect',
+        expediteur: nom,
+        message: msg,
+        bien: (bien.type_bien||'Bien') + ' · ' + (bien.ville||''),
+        lien: 'https://immoconnect-agence.fr/connexion.html'
+      }
+    }).then(undefined, function(){});
+
+    ok.textContent = '✅ Message envoyé ! Le vendeur vous répondra rapidement.';
+    ok.style.display = 'block';
+    document.getElementById('modal-form').style.display = 'none';
+
+  } catch(e) {
+    err.textContent = 'Erreur : ' + e.message;
+    err.style.display = 'block';
+  }
+}
+
+// ── VISITE ──
+async function ouvrirVisite() {
+  document.getElementById('modal-visite').classList.add('open');
+  document.getElementById('visite-sub').textContent = (bien.type_bien||'Bien') + ' · ' + (bien.ville||'');
+
+  var today = new Date().toISOString().split('T')[0];
+  var { data: dispos } = await db.from('disponibilites_visites')
+    .select('*').eq('email_vendeur', bien.email_contact)
+    .eq('annonce_id', bien.id).eq('statut', 'libre')
+    .gte('date', today).order('date', {ascending: true}).limit(20);
+
+  var container = document.getElementById('visite-content');
+  if (!dispos || !dispos.length) {
+    container.innerHTML =
+      '<div style="font-size:13px;color:var(--muted);margin-bottom:14px">Aucun créneau prédéfini par le vendeur. Envoyez une demande de visite : il vous répondra directement.</div>'
+      + '<div class="field"><label class="lbl">Votre nom *</label><input type="text" id="vl-nom" placeholder="Jean Dupont"></div>'
+      + '<div class="field"><label class="lbl">Votre email *</label><input type="email" id="vl-email" placeholder="jean@exemple.fr"></div>'
+      + '<div class="field"><label class="lbl">Date souhaitée *</label><input type="date" id="vl-date"></div>'
+      + '<div class="field"><label class="lbl">Créneau souhaité</label><input type="text" id="vl-heure" placeholder="ex. après-midi, 14h-16h..."></div>'
+      + '<div class="field"><label class="lbl">Message (optionnel)</label><textarea id="vl-msg" rows="3" placeholder="Précisions sur votre projet..."></textarea></div>'
+      + '<button onclick="envoyerDemandeLibre()" style="width:100%;padding:12px;border-radius:8px;border:none;background:#0F0F0E;color:#fff;font-family:Outfit,sans-serif;font-size:14px;font-weight:500;cursor:pointer">Envoyer ma demande →</button>';
+    return;
+  }
+
+  var parDate = {};
+  dispos.forEach(function(d) { if (!parDate[d.date]) parDate[d.date] = []; parDate[d.date].push(d); });
+
+  var html = '<div style="font-size:13px;color:var(--muted);margin-bottom:14px">Choisissez un créneau :</div>';
+  Object.keys(parDate).forEach(function(date) {
+    var dateObj = new Date(date + 'T12:00:00');
+    var dateStr = dateObj.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+    html += '<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">' + dateStr + '</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:8px">';
+    parDate[date].forEach(function(d) {
+      html += '<button onclick="selectionnerCreneau(\'' + d.id + '\',\'' + date + '\',\'' + d.heure_debut + '\',\'' + d.heure_fin + '\')" style="padding:8px 14px;border-radius:8px;border:1px solid #9FE1CB;background:#E1F5EE;color:#1E7A62;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer">' + d.heure_debut + ' – ' + d.heure_fin + '</button>';
+    });
+    html += '</div></div>';
+  });
+  container.innerHTML = html;
+}
+
+function selectionnerCreneau(dispoId, date, debut, fin) {
+  var dateObj = new Date(date + 'T12:00:00');
+  var dateStr = dateObj.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+  window._creneauLabel = dateStr + ' · ' + debut + ' – ' + fin;
+  document.getElementById('visite-content').innerHTML =
+    '<div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:14px;margin-bottom:14px;font-size:13px;line-height:1.7">✅ <strong>' + dateStr + ' · ' + debut + ' – ' + fin + '</strong></div>' +
+    '<div class="field"><label class="lbl">Votre nom *</label><input type="text" id="v-nom" placeholder="Jean Dupont"></div>' +
+    '<div class="field"><label class="lbl">Votre email *</label><input type="email" id="v-email" placeholder="jean@exemple.fr"></div>' +
+    '<div class="field"><label class="lbl">Message (optionnel)</label><textarea id="v-msg" rows="3" placeholder="Précisions sur votre projet..."></textarea></div>' +
+    '<button onclick="confirmerVisite(\'' + dispoId + '\')" style="width:100%;padding:12px;border-radius:8px;border:none;background:#0F0F0E;color:#fff;font-family:Outfit,sans-serif;font-size:14px;font-weight:500;cursor:pointer">Envoyer ma demande →</button>';
+}
+
+async function confirmerVisite(dispoId) {
+  var nom = document.getElementById('v-nom').value.trim();
+  var email = document.getElementById('v-email').value.trim();
+  var msg = document.getElementById('v-msg') ? document.getElementById('v-msg').value : '';
+  if (!nom || !email) { alert('Renseignez votre nom et email.'); return; }
+
+  var bienLabel = (bien.type_bien||'Bien') + ' · ' + (bien.ville||'');
+  var creneauLabel = window._creneauLabel || '';
+  var urlBien = 'https://immoconnect-agence.fr/bien.html?id=' + bien.id;
+  await db.from('reservations_visites').insert({
+    dispo_id: dispoId, annonce_id: bien.id, email_vendeur: bien.email_contact,
+    email_acheteur: email, nom_acheteur: nom, bien_label: bienLabel,
+    creneau_souhaite: creneauLabel, message: msg || null, statut: 'en_attente', type_demande: 'creneau'
+  });
+  await db.from('disponibilites_visites').update({ statut: 'reserve' }).eq('id', dispoId);
+  // Notif vendeur
+  await db.functions.invoke('envoyer-email', {
+    body: {
+      type: 'demande_visite', to: bien.email_contact,
+      subject: '📅 Nouvelle demande de visite — ImmoConnect',
+      acheteur: nom + ' (' + email + ')', message: (creneauLabel ? 'Créneau : ' + creneauLabel + '. ' : '') + (msg||''),
+      bien: bienLabel, lien: 'https://immoconnect-agence.fr/calendrier.html'
+    }
+  }).then(undefined, function(){});
+  // Accusé de réception acheteur
+  await db.functions.invoke('envoyer-email', {
+    body: { type: 'visite_accuse', to: email, subject: '📩 Demande de visite reçue — ImmoConnect', bien: bienLabel, creneau: creneauLabel, lien: urlBien }
+  }).then(undefined, function(){});
+
+  document.getElementById('visite-content').innerHTML =
+    '<div style="text-align:center;padding:24px"><div style="font-size:48px;margin-bottom:14px">✅</div>' +
+    '<div style="font-size:15px;font-weight:500;margin-bottom:8px">Demande envoyée !</div>' +
+    '<div style="font-size:13px;color:var(--muted)">Le vendeur a été notifié et confirmera votre visite sous 24h.</div></div>';
+}
+
+async function envoyerDemandeLibre() {
+  var nom = document.getElementById('vl-nom').value.trim();
+  var email = document.getElementById('vl-email').value.trim();
+  var date = document.getElementById('vl-date').value;
+  var heure = document.getElementById('vl-heure').value.trim();
+  var msg = document.getElementById('vl-msg').value.trim();
+  if (!nom || !email || !date) { alert('Renseignez votre nom, votre email et la date souhaitée.'); return; }
+  var bienLabel = (bien.type_bien||'Bien') + ' · ' + (bien.ville||'');
+  var creneau = new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'}) + (heure ? ' · ' + heure : '');
+  var urlBien = 'https://immoconnect-agence.fr/bien.html?id=' + bien.id;
+
+  await db.from('reservations_visites').insert({
+    dispo_id: null, annonce_id: bien.id, email_vendeur: bien.email_contact,
+    email_acheteur: email, nom_acheteur: nom, bien_label: bienLabel,
+    creneau_souhaite: creneau, message: msg || null, statut: 'en_attente', type_demande: 'libre'
+  });
+  await db.functions.invoke('envoyer-email', {
+    body: { type: 'demande_visite', to: bien.email_contact, subject: '📅 Nouvelle demande de visite — ImmoConnect',
+      acheteur: nom + ' (' + email + ')', message: 'Créneau souhaité : ' + creneau + '. ' + (msg||''),
+      bien: bienLabel, lien: 'https://immoconnect-agence.fr/calendrier.html' }
+  }).then(undefined, function(){});
+  await db.functions.invoke('envoyer-email', {
+    body: { type: 'visite_accuse', to: email, subject: '📩 Demande de visite reçue — ImmoConnect', bien: bienLabel, creneau: creneau, lien: urlBien }
+  }).then(undefined, function(){});
+
+  document.getElementById('visite-content').innerHTML =
+    '<div style="text-align:center;padding:24px"><div style="font-size:48px;margin-bottom:14px">✅</div>' +
+    '<div style="font-size:15px;font-weight:500;margin-bottom:8px">Demande envoyée !</div>' +
+    '<div style="font-size:13px;color:var(--muted)">Un accusé de réception vous a été envoyé par email. Le vendeur vous répondra sous 24h.</div></div>';
+}
+
+// ── GALERIE ──
+function setPhoto(idx){
+  if(!window._photos||!window._photos.length)return;
+  window._photoIdx=(idx+window._photos.length)%window._photos.length;
+  var img=document.getElementById('main-photo'); if(img) img.src=window._photos[window._photoIdx];
+  var cc=document.getElementById('carousel-count'); if(cc) cc.textContent=(window._photoIdx+1)+' / '+window._photos.length;
+}
+function navPhoto(dir){ setPhoto((window._photoIdx||0)+dir); }
+function setSimuMode(m){
+  var card=document.querySelector('.simu-card'); if(!card) return;
+  if(m==='impot') card.classList.remove('mode-simple'); else card.classList.add('mode-simple');
+  var ts=document.getElementById('tab-simple'), ti=document.getElementById('tab-impot');
+  if(ts) ts.classList.toggle('active', m!=='impot');
+  if(ti) ti.classList.toggle('active', m==='impot');
+}
+function recalcSimu(){
+  var prix=+(document.getElementById('si-prix').value)||0;
+  var apport=+(document.getElementById('si-apport').value)||0;
+  var taux=+(document.getElementById('si-taux').value)||0;
+  var duree=+(document.getElementById('si-duree').value)||0;
+  var type=document.getElementById('si-type').value;
+  var tauxNot=type==='neuf'?0.025:0.075;
+  var notaire=Math.round(prix*tauxNot);
+  var total=prix+notaire;
+  var emprunt=Math.max(total-apport,0);
+  var tauxAss=+(document.getElementById('si-assurance')||{}).value||0;
+  var mens=0, mensAss=0;
+  if(emprunt>0 && duree>0){
+    if(taux>0){ var i=taux/100/12, n=duree*12; mens=Math.round(emprunt*i/(1-Math.pow(1+i,-n))); }
+    else { mens=Math.round(emprunt/(duree*12)); }
+    mensAss=Math.round(emprunt*tauxAss/100/12);
+    mens+=mensAss; // mensualit\u00e9 totale cr\u00e9dit + assurance
+  }
+  var f=function(v){return (Math.round(v)).toLocaleString('fr-FR')+' \u20ac';};
+  document.getElementById('so-notaire').textContent=f(notaire);
+  document.getElementById('so-total').textContent=f(total);
+  document.getElementById('so-emprunt').textContent=f(emprunt);
+  document.getElementById('so-mens').textContent=mens?f(mens)+'/mois'+(mensAss?' (dont assurance '+f(mensAss)+')':''):'\u2014';
+  var s=window._simu||{};
+  if(s.silverPlus){
+    var la=(s.loyer||0)*12;
+    var eb=document.getElementById('so-rdt-brut'), en=document.getElementById('so-rdt-net');
+    if(eb) eb.textContent=(prix>0&&la>0)?(la/prix*100).toFixed(1)+' %':'\u2014';
+    if(en) en.textContent=(prix>0&&la>0)?((la-(s.charges||0))/prix*100).toFixed(1)+' %':'\u2014';
+    var regime=(document.getElementById('si-regime')||{}).value||'micro';
+    var tmi=(document.getElementById('si-tmi')||{}).value;
+    var revenuFoyer=+(document.getElementById('si-revenu')||{}).value||0;
+    var parts=+(document.getElementById('si-parts')||{}).value||1;
+    var interets=Math.round(emprunt*(taux/100));
+    var fiscCalc=(revenuFoyer>0)||(tmi!==''&&tmi!=null);
+    var loyerM=s.loyer||0, chargesM=(s.charges||0)/12;
+    var cfAvant=loyerM-chargesM-mens;
+    var fcf=function(v){var x=Math.round(v);return (x>=0?'+':'')+x.toLocaleString('fr-FR')+' \u20ac/mois';};
+    var RED='#c0392b';
+    var ei=document.getElementById('so-impot'), ea=document.getElementById('so-rdt-apres'), em=document.getElementById('so-mode'), ca=document.getElementById('so-cf-avant'), cp=document.getElementById('so-cf-apres');
+    if(ca){ ca.textContent=la>0?fcf(cfAvant):'\u2014'; ca.style.color=(la>0&&cfAvant<0)?RED:''; }
+    if(!fiscCalc){
+      if(ei) ei.textContent='Non calculable';
+      if(ea) ea.textContent='Non calculable';
+      if(cp){ cp.textContent='Non calculable'; cp.style.color=''; }
+      if(em) em.textContent='Renseignez votre revenu imposable et vos parts (ou au minimum votre TMI) pour estimer l\'imp\u00f4t et le cash-flow apr\u00e8s imp\u00f4t.';
+    } else {
+      var r=calculerImpot({loyerAnnuel:la, charges:(s.charges||0), interets:interets, prix:prix, regime:regime, typeBien:(s.typeBien||''), revenuFoyer:revenuFoyer, parts:parts, tmi:tmi});
+      var impot=r.impot;
+      var cfApres=cfAvant-impot/12;
+      if(ei) ei.textContent=la>0?f(impot)+'/an':'\u2014';
+      if(ea) ea.textContent=(prix>0&&la>0)?(((la-(s.charges||0)-impot)/prix)*100).toFixed(1)+' %':'\u2014';
+      if(cp){ cp.textContent=la>0?fcf(cfApres):'\u2014'; cp.style.color=(la>0&&cfApres<0)?RED:''; }
+      if(em){ em.textContent=(r.mode==='bareme')?('Imp\u00f4t au bar\u00e8me progressif ('+parts+' part'+(parts>1?'s':'')+', revenu foyer renseign\u00e9) + 17,2 % de pr\u00e9l\u00e8vements sociaux.'):('Estimation simplifi\u00e9e \u00e0 la TMI ('+tmi+' %) + 17,2 % \u2014 renseignez revenu imposable et parts pour un calcul au bar\u00e8me.'); }
+    }
+  }
+}
+function _irBareme(revenu, parts){
+  parts = parts>0?parts:1;
+  var q=revenu/parts; if(q<=0) return 0;
+  var tr=[[11600,0],[29579,0.11],[84577,0.30],[181917,0.41],[1e15,0.45]];
+  var t=0, prev=0;
+  for(var i=0;i<tr.length;i++){ var seuil=tr[i][0], taux=tr[i][1]; if(q>prev){ t+=(Math.min(q,seuil)-prev)*taux; prev=seuil; } else break; }
+  return t*parts;
+}
+function calculerImpot(p){
+  var loyer=p.loyerAnnuel||0, charges=p.charges||0, interets=p.interets||0, prix=p.prix||0, regime=p.regime||'micro';
+  var base=0, basePS=0;
+  if(regime==='micro'){ if(loyer>15000) regime='reel'; else { base=loyer*0.70; basePS=base; } }
+  if(regime==='lmnp_micro'){ if(loyer>77700) regime='lmnp_reel'; else { base=loyer*0.50; basePS=base; } }
+  if(regime==='reel'){ base=loyer-charges-interets; basePS=Math.max(0,base); }
+  if(regime==='lmnp_reel'){
+    var pt=(p.typeBien&&p.typeBien.toLowerCase().indexOf('maison')!==-1)?0.20:0.15;
+    var amortMax=prix*(1-pt)/30 + prix*0.10/7;
+    var resAvant=loyer-charges-interets;
+    var amort=Math.min(Math.max(resAvant,0), amortMax);
+    base=Math.max(0, resAvant-amort); basePS=base;
+  }
+  var ps=Math.round(Math.max(0,basePS)*0.172);
+  var ir=0, mode='tmi';
+  var bi=base<0?Math.max(base,-10700):base;
+  if(p.revenuFoyer>0){
+    ir=Math.round(_irBareme(p.revenuFoyer+bi, p.parts)-_irBareme(p.revenuFoyer, p.parts));
+    mode='bareme';
+  } else {
+    ir=Math.round(bi*(parseFloat(p.tmi)/100));
+  }
+  return { impot: ir+ps, ir: ir, ps: ps, base: Math.round(base), regime: regime, mode: mode };
+}
+function changePhoto(src) {
+  var el = document.getElementById('main-photo');
+  if (el) el.src = src;
+}
+
+// ── SIGNALEMENT AGENT CONTACT ABUSIF ──
+async function ouvrirSignalement() {
+  var raison = prompt('Décrivez brièvement le problème (ex: contact non sollicité, pression commerciale, message inapproprié) :');
+  if (!raison) return;
+  var { data: { user } } = await db.auth.getUser();
+  if (!user) { alert('Connectez-vous pour signaler.'); return; }
+  var params = new URLSearchParams(window.location.search);
+  var annonceId = params.get('id');
+  await db.from('signalements_agents').insert({
+    annonce_id: annonceId,
+    signale_par: user.email,
+    raison: raison,
+    statut: 'en_attente',
+    created_at: new Date().toISOString()
+  }).then(undefined, function(){});
+  await db.functions.invoke('envoyer-email', {
+    body: {
+      type: 'signalement_agent',
+      to: 'contact@immoconnect-agence.fr',
+      subject: 'Signalement contact agent abusif — ' + annonceId,
+      email_signale: 'inconnu',
+      email_signalant: user.email,
+      conversation_id: annonceId,
+      raison: raison,
+      lien: 'https://immoconnect-agence.fr/admin-agents.html'
+    }
+  }).then(undefined, function(){});
+  alert('Signalement envoyé. Nous traitons votre demande sous 48h.');
+}
+
+// ── PARTAGE ──
+function copierLien(url) {
+  navigator.clipboard.writeText(url).then(function() {
+    var btn = document.getElementById('btn-copier-lien');
+    if (btn) {
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copié !';
+      btn.style.background = 'var(--teal)';
+      btn.style.color = '#fff';
+      btn.style.borderColor = 'var(--teal)';
+      setTimeout(function() {
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copier le lien';
+        btn.style.background = 'var(--warm)';
+        btn.style.color = 'var(--ink)';
+        btn.style.borderColor = 'var(--line)';
+      }, 2000);
+    }
+  }).then(undefined, function() {
+    var ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
+
+function majMetaOG(b, url, titrePartage) {
+  document.title = 'ImmoConnect — ' + titrePartage;
+  var setMeta = function(id, val) { var el = document.getElementById(id); if (el) el.setAttribute('content', val); };
+  var desc = (b.type_bien||'Bien') + ' de ' + (b.surface||'—') + 'm² à ' + (b.ville||'') + (b.prix ? ' — ' + Math.round(b.prix).toLocaleString('fr-FR') + '€' : '') + '. Découvrez ce bien sur ImmoConnect.';
+  setMeta('og-title', titrePartage + ' · ImmoConnect');
+  setMeta('og-desc', desc);
+  setMeta('og-url', url);
+  var photo = '';
+  if (b.photo_principale) { photo = b.photo_principale; }
+  else if (b.photos_supplementaires) { try { var p = JSON.parse(b.photos_supplementaires); if (p&&p[0]) photo=p[0]; } catch(e){} }
+  if (photo) setMeta('og-image', photo);
+}
+
+// ── ERREUR ──
+function afficherErreur(msg) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('content').innerHTML = '<div class="not-found"><div class="not-found-icon">🏠</div>' + msg + '<br><br><a href="index.html" style="color:var(--teal)">Retour aux annonces →</a></div>';
+  document.getElementById('content').style.display = 'block';
+}
+
+// Fermer modals en cliquant dehors
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('modal-overlay')) {
+    e.target.classList.remove('open');
+  }
+});
+</script>
+<script>
+(function() {
+  var consent = localStorage.getItem('ic_cookie_consent');
+  if (!consent) {
+    var b = document.createElement('div');
+    b.id = 'cookie-banner';
+    b.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1C1C1A;border-top:1px solid rgba(255,255,255,.1);padding:16px 32px;font-family:Outfit,sans-serif';
+    b.innerHTML = '<div style="max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;font-weight:500;color:#FAFAF7;margin-bottom:4px">🍪 Cookies & confidentialité</div><div style="font-size:12px;color:rgba(250,250,247,.6);line-height:1.6">ImmoConnect utilise des cookies strictement nécessaires. <a href=\"mentions-legales.html\" style=\"color:#C09B5A\">En savoir plus</a></div></div><div style="display:flex;gap:10px;flex-shrink:0"><button onclick=\"icRefuser()\" style=\"padding:9px 20px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(250,250,247,.7);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer\">Refuser</button><button onclick=\"icAccepter()\" style=\"padding:9px 20px;border-radius:8px;border:none;background:#C09B5A;color:#1C1C1A;font-family:Outfit,sans-serif;font-size:13px;font-weight:500;cursor:pointer\">Accepter</button></div></div>';
+    document.body.appendChild(b);
+  }
+})();
+function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
+function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
+</script>
+<script src="/pwa.js"></script>
+<script src="feedback.js" defer></script>
+</body>
+</html>

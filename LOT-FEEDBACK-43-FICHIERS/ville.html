@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">Immobilier — ImmoConnect</title>
+
+
+
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--teal-l:#E1F5EE;--blue:#185FA5;--blue-l:#E6F1FB;--amber:#D4732A;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none;margin-right:auto}
+.nav-logo span{color:var(--gold)}
+.nav-link{font-size:13px;color:rgba(255,255,255,.6);text-decoration:none}
+.nav-link:hover{color:#fff}
+.nav-cta{padding:7px 14px;background:var(--gold);color:var(--ink);border-radius:6px;font-size:12px;font-weight:500;text-decoration:none}
+.container{max-width:1000px;margin:0 auto;padding:32px 16px}
+/* HERO */
+.hero{background:linear-gradient(135deg,#0F1F19,#1E3D2F);border-radius:14px;padding:40px;margin-bottom:32px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 30%,rgba(192,155,90,.12),transparent 60%)}
+.hero-breadcrumb{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:12px}
+.hero-breadcrumb a{color:rgba(255,255,255,.4);text-decoration:none}
+.hero-breadcrumb a:hover{color:rgba(255,255,255,.7)}
+.hero-titre{font-size:32px;font-weight:300;color:#fff;margin-bottom:8px;line-height:1.2}
+.hero-titre strong{font-weight:600;color:var(--gold)}
+.hero-sub{font-size:14px;color:rgba(255,255,255,.5);margin-bottom:28px;line-height:1.6}
+.hero-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.hero-kpi{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:14px;text-align:center}
+.hero-kpi-n{font-size:24px;font-weight:400;color:#fff}
+.hero-kpi-l{font-size:11px;color:rgba(255,255,255,.4);margin-top:3px}
+/* SECTIONS */
+.section{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);margin-bottom:20px;overflow:hidden}
+.section-head{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.section-title{font-size:14px;font-weight:500}
+.section-body{padding:16px 20px}
+/* PRIX MARCHÉ */
+.prix-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.prix-card{background:var(--bg);border-radius:8px;padding:14px;text-align:center}
+.prix-n{font-size:22px;font-weight:500}
+.prix-l{font-size:11px;color:var(--muted);margin-top:3px}
+.prix-sub{font-size:10px;color:var(--muted);margin-top:2px}
+/* TENDANCES */
+.tendance-bars{display:flex;align-items:flex-end;gap:6px;height:100px;margin-top:12px}
+.tb-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.tb-bar{width:100%;border-radius:3px 3px 0 0;background:var(--teal);transition:height .5s ease;min-height:4px}
+.tb-lbl{font-size:10px;color:var(--muted)}
+.tb-val{font-size:10px;font-weight:500}
+/* ANNONCES */
+.ann-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ann-card{border:1px solid var(--line);border-radius:8px;overflow:hidden;text-decoration:none;color:inherit;display:block;transition:box-shadow .2s}
+.ann-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.ann-photo{width:100%;height:140px;object-fit:cover;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:32px}
+.ann-body{padding:12px}
+.ann-titre{font-size:13px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ann-loc{font-size:11px;color:var(--muted);margin-bottom:6px}
+.ann-prix{font-size:15px;font-weight:500;color:var(--teal)}
+.ann-pm2{font-size:11px;color:var(--muted)}
+/* AGENTS */
+.agent-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:12px}
+.agent-item:last-child{border-bottom:none}
+.agent-avatar{width:40px;height:40px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:500;flex-shrink:0}
+.agent-nom{font-weight:500;font-size:13px}
+.agent-sub{color:var(--muted);margin-top:2px}
+.agent-note{margin-left:auto;text-align:right}
+.agent-etoiles{color:var(--gold);font-size:14px}
+/* RISQUES */
+.risque-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px;border-bottom:1px solid var(--line)}
+.risque-item:last-child{border-bottom:none}
+.risque-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+/* CTA */
+.cta-section{background:linear-gradient(135deg,#0F1F19,#1A3528);border-radius:var(--r);padding:28px;text-align:center;margin-bottom:20px}
+.cta-titre{font-size:20px;font-weight:400;color:#fff;margin-bottom:8px}
+.cta-sub{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:20px}
+.cta-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.cta-btn-gold{padding:11px 24px;background:var(--gold);color:var(--ink);border-radius:8px;text-decoration:none;font-size:13px;font-weight:500}
+.cta-btn-outline{padding:11px 24px;border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:8px;text-decoration:none;font-size:13px}
+/* VILLES LIEES */
+.villes-grid{display:flex;flex-wrap:wrap;gap:8px}
+.ville-chip{padding:6px 14px;background:var(--bg);border:1px solid var(--line);border-radius:20px;font-size:12px;text-decoration:none;color:var(--ink);transition:all .2s}
+.ville-chip:hover{background:var(--teal-l);border-color:var(--teal);color:var(--teal)}
+/* LOADING */
+.skeleton{background:linear-gradient(90deg,var(--line) 25%,var(--bg) 50%,var(--line) 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:4px;height:16px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* BADGE */
+.badge{font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px}
+.b-g{background:var(--teal-l);color:var(--teal)}
+.b-b{background:var(--blue-l);color:var(--blue)}
+.b-a{background:#FEF3E7;color:var(--amber)}
+/* SEO TEXT */
+.seo-text{font-size:13px;color:var(--muted);line-height:1.8;margin-top:16px}
+.seo-text h3{font-size:14px;font-weight:500;color:var(--ink);margin:16px 0 6px}
+/* RESPONSIVE */
+@media(max-width:600px){.hero-kpis{grid-template-columns:1fr 1fr}.ann-grid{grid-template-columns:1fr}.prix-grid{grid-template-columns:1fr 1fr}}
+</style>
+<style>
+/* Bandeau supérieur unifié — fond blanc, texte foncé (override global) */
+nav{background:#fff!important;border-bottom:1px solid #E8E6E0!important}
+nav .nav-logo{color:#0F0F0E!important}
+nav .nav-logo span{color:#C09B5A!important}
+nav a{color:#0F0F0E!important}
+nav a:hover{color:#C09B5A!important}
+nav .nav-out{color:#0F0F0E!important;border-color:#0F0F0E!important}
+nav .nav-link{margin-right:18px}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><img src="logo-immoconnect.png" alt="ImmoConnect" style="height:38px;width:auto;object-fit:contain;vertical-align:middle"><span style="font-size:22px;font-weight:600;color:#0F0F0E;margin-left:8px">Immo<span style="color:#C09B5A">Connect</span></span></a>
+  <a href="index.html" class="nav-link">Accueil</a>
+  <a href="questionnaire-vendeur.html" class="nav-link">Vendre</a>
+  <a href="questionnaire-acheteur.html" class="nav-link">Acheter</a>
+  <a href="blog.html" class="nav-link">Blog</a>
+  <a href="connexion.html" class="nav-cta">Mon espace</a>
+</nav>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero" id="hero">
+    <div class="hero-breadcrumb">
+      <a href="index.html">Accueil</a> › <a href="regions.html">Régions</a> › <span id="breadcrumb-ville">Chargement…</span>
+    </div>
+    <div class="hero-titre">Immobilier à <strong id="hero-ville">…</strong></div>
+    <div class="hero-sub" id="hero-sub">Données de marché · Annonces · Agents locaux</div>
+    <div class="hero-kpis">
+      <div class="hero-kpi"><div class="hero-kpi-n" id="kpi-pm2">—</div><div class="hero-kpi-l">€/m² médian</div></div>
+      <div class="hero-kpi"><div class="hero-kpi-n" id="kpi-annonces">—</div><div class="hero-kpi-l">Annonces actives</div></div>
+      <div class="hero-kpi"><div class="hero-kpi-n" id="kpi-agents">—</div><div class="hero-kpi-l">Agents locaux</div></div>
+      <div class="hero-kpi"><div class="hero-kpi-n" id="kpi-pop">—</div><div class="hero-kpi-l">Habitants</div></div>
+    </div>
+  </div>
+
+  <!-- PRIX DU MARCHÉ -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">📊 Prix du marché — données DVF officielles</span>
+      <span class="badge b-g" id="dvf-source">DGFiP 2024</span>
+    </div>
+    <div class="section-body">
+      <div class="prix-grid">
+        <div class="prix-card">
+          <div class="prix-n" id="pm2-appart">—</div>
+          <div class="prix-l">€/m² appartement</div>
+          <div class="prix-sub" id="nb-ventes-appart">— ventes analysées</div>
+        </div>
+        <div class="prix-card">
+          <div class="prix-n" id="pm2-maison">—</div>
+          <div class="prix-l">€/m² maison</div>
+          <div class="prix-sub" id="nb-ventes-maison">— ventes analysées</div>
+        </div>
+        <div class="prix-card">
+          <div class="prix-n" id="pm2-fourchette">—</div>
+          <div class="prix-l">Fourchette marché</div>
+          <div class="prix-sub">Q1 → Q3</div>
+        </div>
+      </div>
+      <!-- TENDANCES -->
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Évolution des prix</div>
+      <div class="tendance-bars" id="tendance-bars">
+        <div class="tb-wrap"><div class="tb-bar skeleton" style="height:60px"></div><div class="tb-lbl">—</div></div>
+        <div class="tb-wrap"><div class="tb-bar skeleton" style="height:70px"></div><div class="tb-lbl">—</div></div>
+        <div class="tb-wrap"><div class="tb-bar skeleton" style="height:80px"></div><div class="tb-lbl">—</div></div>
+        <div class="tb-wrap"><div class="tb-bar skeleton" style="height:90px"></div><div class="tb-lbl">—</div></div>
+        <div class="tb-wrap"><div class="tb-bar skeleton" style="height:100px"></div><div class="tb-lbl">—</div></div>
+      </div>
+      <div class="seo-text" id="seo-prix"></div>
+    </div>
+  </div>
+
+  <!-- ANNONCES IMMOCONNECT -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">🏠 Biens en vente sur ImmoConnect</span>
+      <a href="questionnaire-acheteur.html" style="font-size:12px;color:var(--teal);text-decoration:none">Déposer un projet →</a>
+    </div>
+    <div class="section-body">
+      <div class="ann-grid" id="annonces-container">
+        <div style="text-align:center;padding:30px;color:var(--muted);grid-column:1/-1">Chargement des annonces…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGENTS LOCAUX -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">🤝 Agents immobiliers locaux</span>
+      <a href="candidature-agent.html" style="font-size:12px;color:var(--teal);text-decoration:none">Rejoindre ImmoConnect →</a>
+    </div>
+    <div class="section-body" id="agents-container">
+      <div style="text-align:center;padding:20px;color:var(--muted)">Chargement…</div>
+    </div>
+  </div>
+
+  <!-- RISQUES GÉORISQUES -->
+  <div class="section" id="section-risques" style="display:none">
+    <div class="section-head">
+      <span class="section-title">⚠️ Risques naturels et technologiques</span>
+      <span class="badge b-a">Source Géorisques BRGM</span>
+    </div>
+    <div class="section-body" id="risques-container"></div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <div class="cta-titre">Vous vendez ou achetez à <span id="cta-ville">cette ville</span> ?</div>
+    <div class="cta-sub">ImmoConnect est 100% gratuit pour les vendeurs · Mise en relation directe avec les meilleurs agents locaux</div>
+    <div class="cta-btns">
+      <a href="questionnaire-vendeur.html" class="cta-btn-gold">Publier mon bien gratuitement</a>
+      <a href="questionnaire-acheteur.html" class="cta-btn-outline">Déposer mon projet acheteur</a>
+    </div>
+  </div>
+
+  <!-- VILLES VOISINES -->
+  <div class="section">
+    <div class="section-head"><span class="section-title">🗺️ Villes voisines</span></div>
+    <div class="section-body">
+      <div class="villes-grid" id="villes-voisines"></div>
+    </div>
+  </div>
+
+  <!-- TEXTE SEO -->
+  <div class="section">
+    <div class="section-head"><span class="section-title">📖 Guide immobilier</span></div>
+    <div class="section-body">
+      <div class="seo-text" id="seo-guide">Chargement…</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SB_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const { createClient } = supabase;
+const db = createClient(SB_URL, SB_KEY);
+
+// Villes et codes postaux connus
+var VILLES = {
+  'toulouse':    { cp: '31000', dept: '31', lat: 43.6047, lon: 1.4442,  pop: '498000', voisines: ['montauban','albi','castres','carcassonne','pamiers'] },
+  'paris':       { cp: '75001', dept: '75', lat: 48.8566, lon: 2.3522,  pop: '2161000', voisines: ['boulogne-billancourt','versailles','vincennes','saint-denis','montreuil'] },
+  'lyon':        { cp: '69001', dept: '69', lat: 45.7640, lon: 4.8357,  pop: '522000', voisines: ['villeurbanne','bron','venissieux','caluire','tassin'] },
+  'marseille':   { cp: '13001', dept: '13', lat: 43.2965, lon: 5.3698,  pop: '868000', voisines: ['aix-en-provence','aubagne','martigues','salon-de-provence'] },
+  'bordeaux':    { cp: '33000', dept: '33', lat: 44.8378, lon: -0.5792, pop: '257000', voisines: ['merignac','pessac','talence','lormont','begles'] },
+  'montpellier': { cp: '34000', dept: '34', lat: 43.6108, lon: 3.8767,  pop: '295000', voisines: ['nimes','beziers','sete','lunel','palavas'] },
+  'nice':        { cp: '06000', dept: '06', lat: 43.7102, lon: 7.2620,  pop: '342000', voisines: ['antibes','cannes','menton','monaco','cagnes-sur-mer'] },
+  'nantes':      { cp: '44000', dept: '44', lat: 47.2184, lon: -1.5536, pop: '320000', voisines: ['saint-nazaire','la-roche-sur-yon','angers','rennes'] },
+  'strasbourg':  { cp: '67000', dept: '67', lat: 48.5734, lon: 7.7521,  pop: '285000', voisines: ['mulhouse','colmar','metz','karlsruhe'] },
+  'lille':       { cp: '59000', dept: '59', lat: 50.6292, lon: 3.0573,  pop: '232000', voisines: ['roubaix','tourcoing','lens','valenciennes','douai'] },
+  'rennes':      { cp: '35000', dept: '35', lat: 48.1173, lon: -1.6778, pop: '222000', voisines: ['saint-malo','brest','nantes','caen'] },
+  'grenoble':    { cp: '38000', dept: '38', lat: 45.1885, lon: 5.7245,  pop: '158000', voisines: ['chambery','annecy','lyon','valence'] },
+  'montauban':   { cp: '82000', dept: '82', lat: 44.0181, lon: 1.3528,  pop: '62000',  voisines: ['toulouse','albi','cahors'] },
+  'albi':        { cp: '81000', dept: '81', lat: 43.9292, lon: 2.1483,  pop: '50000',  voisines: ['toulouse','castres','rodez'] },
+  'annecy':      { cp: '74000', dept: '74', lat: 45.8992, lon: 6.1294,  pop: '130000', voisines: ['grenoble','chambery','geneve','lyon'] },
+  'brest':       { cp: '29200', dept: '29', lat: 48.3905, lon: -4.4860, pop: '144000', voisines: ['quimper','lorient','rennes'] },
+};
+
+var villeSlug = '';
+var villeData = null;
+var dvfAppart = null;
+var dvfMaison = null;
+
+window.addEventListener('DOMContentLoaded', async function() {
+  var params = new URLSearchParams(window.location.search);
+  villeSlug = (params.get('ville') || params.get('v') || 'toulouse').toLowerCase().replace(/[^a-z-]/g, '');
+  villeData = VILLES[villeSlug] || VILLES['toulouse'];
+
+  var villeNom = villeSlug.charAt(0).toUpperCase() + villeSlug.slice(1).replace(/-/g, '-');
+
+  // SEO meta
+  document.getElementById('page-title').textContent = 'Immobilier ' + villeNom + ' — Prix, annonces et agents · ImmoConnect';
+  document.getElementById('page-desc').content = 'Prix immobilier à ' + villeNom + ' en 2025, données DVF officielles. Annonces de particuliers et agents locaux sur ImmoConnect.';
+  document.getElementById('og-title').content = 'Immobilier ' + villeNom + ' · ImmoConnect';
+  document.getElementById('og-desc').content = 'Prix immobilier à ' + villeNom + ', annonces et agents locaux.';
+
+  // UI
+  document.getElementById('hero-ville').textContent = villeNom;
+  document.getElementById('breadcrumb-ville').textContent = villeNom;
+  document.getElementById('cta-ville').textContent = villeNom;
+  document.getElementById('hero-sub').textContent = 'Marché immobilier de ' + villeNom + ' · Données DVF officielles · Mis à jour ' + new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+
+  // Villes voisines
+  var voisines = (villeData.voisines || []).slice(0, 8);
+  document.getElementById('villes-voisines').innerHTML = voisines.map(function(v) {
+    var nom = v.charAt(0).toUpperCase() + v.slice(1).replace(/-/g, '-');
+    return '<a href="ville.html?ville=' + v + '" class="ville-chip">' + nom + '</a>';
+  }).join('');
+
+  // Charger tout en parallèle
+  await Promise.all([
+    chargerDVF(villeNom),
+    chargerAnnonces(villeNom),
+    chargerAgents(villeNom),
+    chargerPopulation(),
+    chargerGeorisques()
+  ]);
+
+  // Texte SEO
+  genererTexteSEO(villeNom);
+});
+
+// ── DVF ────────────────────────────────────────────────────────────────
+async function chargerDVF(villeNom) {
+  try {
+    function dvfEdge(type){
+      return fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/dvf-commune', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM','apikey':'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM'},
+        body: JSON.stringify({ codePostal: villeData.cp, typeBien: type, surface: 0, ville: villeData.nom || null })
+      }).then(function(r){ return r.json(); }).catch(function(){ return null; });
+    }
+    function toStats(d){
+      if (!d || !d.nbVentes) return null;
+      var tendances = {};
+      (d.historique || []).forEach(function(h){ tendances[h.annee] = h.prixM2; });
+      return { median: d.prixM2Median, q1: d.prixM2Q1 || Math.round(d.prixM2Median*0.85), q3: d.prixM2Q3 || Math.round(d.prixM2Median*1.15), nb: d.nbVentes, tendances: tendances };
+    }
+    var [dA, dM] = await Promise.all([dvfEdge('appartement'), dvfEdge('maison')]);
+    dvfAppart = toStats(dA);
+    dvfMaison = toStats(dM);
+
+    if (dvfAppart) {
+      document.getElementById('pm2-appart').textContent = dvfAppart.median.toLocaleString('fr-FR') + '€';
+      document.getElementById('nb-ventes-appart').textContent = dvfAppart.nb + ' ventes analysées';
+      document.getElementById('kpi-pm2').textContent = dvfAppart.median.toLocaleString('fr-FR') + '€';
+    }
+    if (dvfMaison) {
+      document.getElementById('pm2-maison').textContent = dvfMaison.median.toLocaleString('fr-FR') + '€';
+      document.getElementById('nb-ventes-maison').textContent = dvfMaison.nb + ' ventes analysées';
+    }
+
+    var dvfRef = dvfAppart || dvfMaison;
+    if (dvfRef) {
+      document.getElementById('pm2-fourchette').textContent = dvfRef.q1.toLocaleString('fr-FR') + ' – ' + dvfRef.q3.toLocaleString('fr-FR') + '€';
+      afficherTendances(dvfRef.tendances);
+    }
+
+    document.getElementById('dvf-source').textContent = 'DGFiP · ' + (dvfRef ? dvfRef.nb : 0) + ' ventes';
+
+  } catch(e) {
+    document.getElementById('pm2-appart').textContent = 'N/D';
+    document.getElementById('pm2-maison').textContent = 'N/D';
+    console.warn('DVF error:', e);
+  }
+}
+
+function calculerStatsDVF(features) {
+  var ventes = features
+    .map(function(f) { return f.properties; })
+    .filter(function(p) { return p.valeur_fonciere && p.surface_reelle_bati > 0; })
+    .map(function(p) { return { pm2: p.valeur_fonciere / p.surface_reelle_bati, date: p.date_mutation }; });
+
+  if (ventes.length === 0) return null;
+
+  var pm2s = ventes.map(function(v){ return v.pm2; }).sort(function(a,b){ return a-b; });
+  var median = pm2s[Math.floor(pm2s.length / 2)];
+  var q1 = pm2s[Math.floor(pm2s.length * 0.25)];
+  var q3 = pm2s[Math.floor(pm2s.length * 0.75)];
+
+  var parAnnee = {};
+  ventes.forEach(function(v) {
+    var annee = v.date ? v.date.substring(0, 4) : '0';
+    if (!parAnnee[annee]) parAnnee[annee] = [];
+    parAnnee[annee].push(v.pm2);
+  });
+
+  var tendances = {};
+  Object.keys(parAnnee).sort().forEach(function(annee) {
+    var prix = parAnnee[annee];
+    tendances[annee] = Math.round(prix.reduce(function(s,v){ return s+v; }, 0) / prix.length);
+  });
+
+  return { median: Math.round(median), q1: Math.round(q1), q3: Math.round(q3), nb: ventes.length, tendances };
+}
+
+function afficherTendances(tendances) {
+  var annees = Object.keys(tendances).sort().slice(-6);
+  if (annees.length === 0) return;
+
+  var valeurs = annees.map(function(a){ return tendances[a]; });
+  var max = Math.max.apply(null, valeurs);
+  var min = Math.min.apply(null, valeurs);
+
+  document.getElementById('tendance-bars').innerHTML = annees.map(function(annee, i) {
+    var val = valeurs[i];
+    var hauteur = max > min ? Math.round(20 + (val - min) / (max - min) * 80) : 60;
+    var couleur = i === annees.length - 1 ? 'var(--teal)' : 'rgba(30,122,98,.4)';
+    return '<div class="tb-wrap">'
+      + '<div class="tb-val">' + Math.round(val/100)*100 + '€</div>'
+      + '<div class="tb-bar" style="height:' + hauteur + 'px;background:' + couleur + '"></div>'
+      + '<div class="tb-lbl">' + annee + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+// ── ANNONCES IMMOCONNECT ───────────────────────────────────────────────
+async function chargerAnnonces(villeNom) {
+  var { data: annonces } = await db.from('annonces_vendeurs')
+    .select('id, titre, type_bien, surface, nb_pieces, prix, ville, niveau_valide, statut_annonce, photo_principale')
+    .ilike('ville', '%' + villeSlug + '%')
+    .eq('statut_annonce', 'publiee')
+    .order('created_at', { ascending: false })
+    .limit(6);
+
+  document.getElementById('kpi-annonces').textContent = annonces ? annonces.length : 0;
+
+  var container = document.getElementById('annonces-container');
+
+  if (!annonces || annonces.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);grid-column:1/-1;font-size:13px">'
+      + 'Aucune annonce active à ' + villeNom + ' pour le moment.<br>'
+      + '<a href="questionnaire-vendeur.html" style="color:var(--teal);font-weight:500;margin-top:8px;display:inline-block">Publier gratuitement mon bien →</a>'
+      + '</div>';
+    return;
+  }
+
+  container.innerHTML = annonces.map(function(a) {
+    var titre = a.titre || ((a.type_bien || 'Bien') + (a.surface ? ' ' + a.surface + 'm²' : '') + (a.nb_pieces ? ' · ' + a.nb_pieces + 'p' : ''));
+    var prix = a.prix ? Math.round(a.prix).toLocaleString('fr-FR') + '€' : 'Prix non communiqué';
+    var pm2 = (a.prix && a.surface) ? Math.round(a.prix / a.surface).toLocaleString('fr-FR') + '€/m²' : '';
+    var niveauIcon = { standard: '', silver: '🥈', gold: '🥇', platinium: '💎' };
+    return '<a href="bien.html?id=' + a.id + '" class="ann-card">'
+      + '<div class="ann-photo">' + (a.photo_principale ? '<img src="' + a.photo_principale + '" style="width:100%;height:100%;object-fit:cover">' : '🏠') + '</div>'
+      + '<div class="ann-body">'
+      + '<div class="ann-titre">' + (niveauIcon[a.niveau_valide] || '') + ' ' + titre + '</div>'
+      + '<div class="ann-loc">📍 ' + (a.ville || villeNom) + '</div>'
+      + '<div class="ann-prix">' + prix + '</div>'
+      + (pm2 ? '<div class="ann-pm2">' + pm2 + '</div>' : '')
+      + '</div></a>';
+  }).join('');
+}
+
+// ── AGENTS LOCAUX ──────────────────────────────────────────────────────
+async function chargerAgents(villeNom) {
+  var { data: agents } = await db.from('agents_validation')
+    .select('email, nom, prenom, agence, note_moyenne, nb_notations, badges, forfait_agent, secteurs')
+    .eq('statut', 'valide')
+    .order('note_moyenne', { ascending: false })
+    .limit(5);
+
+  document.getElementById('kpi-agents').textContent = agents ? agents.length : 0;
+
+  var container = document.getElementById('agents-container');
+  if (!agents || agents.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">'
+      + 'Pas encore d\'agent validé dans cette ville.<br>'
+      + '<a href="candidature-agent.html" style="color:var(--teal);font-weight:500">Rejoindre ImmoConnect →</a>'
+      + '</div>';
+    return;
+  }
+
+  container.innerHTML = agents.map(function(a) {
+    var nom = ((a.prenom || '') + ' ' + (a.nom || '')).trim() || a.email.split('@')[0];
+    var initiale = nom[0] ? nom[0].toUpperCase() : 'A';
+    var note = a.note_moyenne ? parseFloat(a.note_moyenne).toFixed(1) : null;
+    var etoiles = note ? '⭐'.repeat(Math.round(parseFloat(note))) : '';
+    var badges = (a.badges || []).slice(0, 2).join(' · ');
+    var forfaitLabel = { starter: 'Starter', pro: 'Pro', premium: 'Premium ⚡', pay_per_use: '' };
+    return '<div class="agent-item">'
+      + '<div class="agent-avatar">' + initiale + '</div>'
+      + '<div style="flex:1;min-width:0">'
+      + '<div class="agent-nom">' + nom + (forfaitLabel[a.forfait_agent] ? ' <span class="badge b-b" style="font-size:9px">' + forfaitLabel[a.forfait_agent] + '</span>' : '') + '</div>'
+      + '<div class="agent-sub">' + (a.agence || 'Agent indépendant') + (badges ? ' · ' + badges : '') + '</div>'
+      + '</div>'
+      + (note ? '<div class="agent-note"><div class="agent-etoiles">' + etoiles + '</div><div style="font-size:11px;color:var(--muted)">' + note + '/5 (' + a.nb_notations + ')</div></div>' : '')
+      + '</div>';
+  }).join('');
+}
+
+// ── POPULATION ────────────────────────────────────────────────────────
+async function chargerPopulation() {
+  try {
+    var res = await fetch('https://geo.api.gouv.fr/communes?codePostal=' + villeData.cp + '&fields=population&format=json&geometry=centre');
+    if (res.ok) {
+      var data = await res.json();
+      if (data && data[0] && data[0].population) {
+        var pop = parseInt(data[0].population);
+        document.getElementById('kpi-pop').textContent = pop > 999 ? Math.round(pop/1000) + 'k' : pop;
+      }
+    }
+  } catch(e) {
+    document.getElementById('kpi-pop').textContent = villeData.pop ? (parseInt(villeData.pop) > 999 ? Math.round(parseInt(villeData.pop)/1000) + 'k' : villeData.pop) : '—';
+  }
+}
+
+// ── GÉORISQUES ────────────────────────────────────────────────────────
+async function chargerGeorisques() {
+  try {
+    var res = await fetch('https://georisques.gouv.fr/api/v1/gaspar/risques?latlon=' + villeData.lon + ',' + villeData.lat + '&rayon=5000');
+    if (!res.ok) return;
+    var data = await res.json();
+    var risques = (data.data || []).slice(0, 6);
+    if (risques.length === 0) return;
+
+    document.getElementById('section-risques').style.display = 'block';
+    var niveauColors = { 'Faible': '#1D9E75', 'Moyen': '#BA7517', 'Fort': '#E24B4A', 'Très fort': '#E24B4A' };
+
+    document.getElementById('risques-container').innerHTML = risques.map(function(r) {
+      var couleur = niveauColors[r.niveau_risque] || '#888780';
+      return '<div class="risque-item">'
+        + '<div class="risque-dot" style="background:' + couleur + '"></div>'
+        + '<span style="flex:1">' + (r.libelle_risque || r.code_risque) + '</span>'
+        + '<span style="font-size:11px;color:' + couleur + ';font-weight:500">' + (r.niveau_risque || 'à vérifier') + '</span>'
+        + '</div>';
+    }).join('');
+  } catch(e) {}
+}
+
+// ── TEXTE SEO ─────────────────────────────────────────────────────────
+function genererTexteSEO(villeNom) {
+  var pm2 = dvfAppart ? dvfAppart.median.toLocaleString('fr-FR') + '€/m²' : 'des prix compétitifs';
+  var tendanceTexte = '';
+  if (dvfAppart && dvfAppart.tendances) {
+    var annees = Object.keys(dvfAppart.tendances).sort();
+    if (annees.length >= 2) {
+      var prems = dvfAppart.tendances[annees[0]];
+      var dern = dvfAppart.tendances[annees[annees.length-1]];
+      var evol = Math.round((dern - prems) / prems * 100);
+      tendanceTexte = ' Les prix ont ' + (evol > 0 ? 'progressé de +' + evol + '%' : 'baissé de ' + evol + '%') + ' sur la période observée.';
+    }
+  }
+
+  document.getElementById('seo-guide').innerHTML = '<h3>Le marché immobilier à ' + villeNom + '</h3>'
+    + '<p>Le prix médian de l\'immobilier à ' + villeNom + ' est de <strong>' + pm2 + '</strong> pour les appartements, selon les données DVF (Demandes de Valeurs Foncières) du Ministère des Finances.' + tendanceTexte + '</p>'
+    + '<h3>Vendre son bien à ' + villeNom + '</h3>'
+    + '<p>ImmoConnect vous permet de publier votre annonce gratuitement à ' + villeNom + '. Notre IA Hanaé analyse les données DVF du secteur pour vous fournir une estimation confidentielle. Les meilleurs agents locaux peuvent ensuite candidater pour vous accompagner.</p>'
+    + '<h3>Acheter à ' + villeNom + '</h3>'
+    + '<p>Déposez votre projet d\'achat sur ImmoConnect et recevez des alertes dès qu\'un bien correspond à vos critères à ' + villeNom + ' et dans les communes environnantes. Service gratuit, sans engagement.</p>'
+    + '<h3>Agents immobiliers à ' + villeNom + '</h3>'
+    + '<p>ImmoConnect sélectionne les meilleurs agents locaux à ' + villeNom + ' par un algorithme de scoring sur 100 points (expérience locale, estimations, réputation). Seuls les agents ayant obtenu plus de 60 points sont présentés aux vendeurs.</p>';
+
+  document.getElementById('seo-prix').innerHTML = '<p>Les données sont issues des actes de vente officiels enregistrés par la DGFiP et publiés en open data. Elles couvrent les transactions depuis 2014 et sont mises à jour semestriellement.</p>';
+}
+</script>
+<script src="feedback.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Estimation IA + Système Exclusivité</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0F0F0E;--ink2:#3A3A38;--muted:#8C8B86;
+  --bg:#F5F2EC;--warm:#FEFDFB;--line:rgba(15,15,14,.08);
+  --gold:#C09B5A;--gold2:#E2C07A;--gold-bg:rgba(192,155,90,.08);
+  --teal:#1E7A62;--teal-bg:rgba(30,122,98,.08);
+  --rose:#C0392B;--rose-bg:rgba(192,57,43,.08);
+  --purple:#6B3FA0;--slate:#2C3E6A;--amber:#D4732A;
+  --ia:#1A3A5C;--ia2:#2A5A8C;--r:4px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:200;background:rgba(15,15,14,.95);backdrop-filter:blur(12px);height:56px;display:flex;align-items:center;padding:0 32px;gap:16px;border-bottom:1px solid rgba(255,255,255,.05)}
+.nav-logo{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#fff}
+.nav-logo span{color:var(--gold2)}
+.nav-tabs{display:flex;gap:4px;margin-left:auto}
+.nav-tab{padding:7px 16px;border-radius:var(--r);font-size:12px;font-weight:500;cursor:pointer;border:none;background:rgba(255,255,255,.06);color:rgba(255,255,255,.55);font-family:'Outfit',sans-serif;transition:all .2s}
+.nav-tab.active{background:var(--gold);color:var(--ink)}
+.nav-tab:hover:not(.active){background:rgba(255,255,255,.12);color:#fff}
+
+/* LAYOUT */
+.app{display:flex;min-height:calc(100vh - 56px)}
+.panel-left{width:420px;min-width:420px;background:var(--warm);border-right:1px solid var(--line);padding:24px;overflow-y:auto;flex-shrink:0}
+.panel-right{flex:1;overflow-y:auto;background:var(--bg)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;border:none;letter-spacing:.2px}
+.btn-gold{background:var(--gold);color:var(--ink)}
+.btn-gold:hover{background:var(--gold2)}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-dark:hover{background:var(--gold);color:var(--ink)}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink2)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-exclu{background:linear-gradient(135deg,#7B3FA0,#5B2F80);color:#fff;width:100%;justify-content:center;padding:14px;font-size:14px;font-weight:600}
+.btn-exclu:hover{opacity:.9}
+.btn-simple{background:var(--slate);color:#fff;width:100%;justify-content:center;padding:12px;font-size:14px}
+.btn-simple:hover{opacity:.9}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-ia{background:linear-gradient(135deg,var(--ia),var(--ia2));color:#fff}
+.btn-ia:hover{opacity:.9}
+
+/* SECTION LABELS */
+.s-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:8px}
+.s-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:4px;line-height:1.2}
+.s-title em{font-style:italic;color:var(--gold)}
+
+/* IA ESTIMATION PANEL */
+.ia-panel{background:linear-gradient(135deg,var(--ia) 0%,#0D2A47 100%);border-radius:10px;overflow:hidden;margin-bottom:20px}
+.ia-panel-head{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.08)}
+.ia-avatar{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.ia-info{}
+.ia-name{font-size:14px;font-weight:600;color:#fff}
+.ia-status{font-size:11px;color:rgba(255,255,255,.45);display:flex;align-items:center;gap:4px;margin-top:2px}
+.ia-dot{width:6px;height:6px;border-radius:50%;background:#4DC9A0;animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.ia-body{padding:20px}
+.ia-result-box{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:16px;margin-bottom:14px}
+.ia-result-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:8px;font-weight:600}
+.ia-price-range{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.ia-price-main{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--gold2);line-height:1}
+.ia-price-range-txt{font-size:12px;color:rgba(255,255,255,.5);line-height:1.5}
+.ia-confidence{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,.5)}
+.ia-conf-bar{flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.ia-conf-fill{height:100%;background:#4DC9A0;border-radius:2px}
+.ia-comparables{margin-top:12px}
+.ia-comp-title{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:8px;font-weight:600}
+.ia-comp-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px}
+.ia-comp-item:last-child{border-bottom:none}
+.ia-comp-addr{color:rgba(255,255,255,.6)}
+.ia-comp-price{color:var(--gold2);font-weight:500}
+.ia-comp-meta{color:rgba(255,255,255,.35);font-size:10px;margin-top:1px}
+.ia-factors{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.ia-factor{background:rgba(255,255,255,.05);border-radius:6px;padding:8px 10px;font-size:11px}
+.ia-factor-label{color:rgba(255,255,255,.35);margin-bottom:2px}
+.ia-factor-val{color:#fff;font-weight:500}
+.ia-factor-val.up{color:#4DC9A0}
+.ia-factor-val.down{color:#E87A6A}
+.ia-factor-val.neutral{color:var(--gold2)}
+
+/* BIEN CARD */
+.bien-card{background:var(--warm);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:16px;transition:transform .2s,box-shadow .2s}
+.bien-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(15,15,14,.08)}
+.bien-photos{position:relative;height:180px;background:linear-gradient(135deg,#C8C5BC,#A8A59C);overflow:hidden}
+.bien-photo-grid{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;height:100%;gap:2px}
+.bien-photo-main{background:linear-gradient(135deg,#8A8780,#6A6760);grid-row:span 2;display:flex;align-items:center;justify-content:center;font-size:48px;opacity:.3}
+.bien-photo-sm{background:linear-gradient(135deg,#7A7770,#5A5750);display:flex;align-items:center;justify-content:center;font-size:24px;opacity:.25}
+.bien-badge-tier{position:absolute;top:12px;left:12px;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1px}
+.tier-or{background:var(--gold);color:var(--ink)}
+.tier-argent{background:#888780;color:#fff}
+.tier-attente{background:var(--rose);color:#fff}
+.bien-badge-score{position:absolute;top:12px;right:12px;background:rgba(15,15,14,.7);color:#fff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;backdrop-filter:blur(4px)}
+.bien-card-body{padding:16px 18px}
+.bien-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.bien-price{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold)}
+.bien-ia-price{font-size:11px;color:var(--teal);font-weight:500;margin-top:2px}
+.bien-title{font-size:15px;font-weight:600;margin-bottom:4px}
+.bien-addr{font-size:12px;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:4px}
+.bien-features{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-bottom:12px;flex-wrap:wrap}
+.bien-feature{display:flex;align-items:center;gap:4px}
+.dpe-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700}
+.dpe-C{background:#b0d136;color:#2c2c2a}
+.dpe-D{background:#f0c30f;color:#2c2c2a}
+.dpe-E{background:#f0a30f;color:#2c2c2a}
+.dpe-F{background:#e06020;color:#fff}
+.dpe-G{background:#c0392b;color:#fff}
+.bien-card-foot{padding:12px 18px;border-top:1px solid var(--line);background:var(--bg);display:flex;align-items:center;gap:8px}
+
+/* CONTACT MASK */
+.contact-masked{display:flex;flex-direction:column;gap:6px;padding:12px 14px;background:var(--warm);border:1px solid var(--line);border-radius:var(--r);margin-bottom:12px}
+.contact-row{display:flex;align-items:center;gap:10px;font-size:13px}
+.contact-icon{font-size:14px;width:20px;text-align:center;flex-shrink:0;color:var(--muted)}
+.contact-masked-val{color:var(--muted);letter-spacing:2px;font-family:'Outfit',sans-serif}
+.contact-lock{font-size:12px;color:var(--rose);font-weight:500;display:flex;align-items:center;gap:4px}
+
+/* EXCLUSIVITE MODAL AREA */
+.exclu-section{background:var(--warm);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:20px}
+.exclu-head{padding:16px 20px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,rgba(107,63,160,.06),rgba(44,62,106,.06))}
+.exclu-title{font-size:16px;font-weight:700;margin-bottom:4px;color:var(--purple)}
+.exclu-sub{font-size:12px;color:var(--muted)}
+.exclu-body{padding:20px}
+.exclu-options{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.exclu-opt{border:1.5px solid var(--line);border-radius:8px;padding:16px;cursor:pointer;transition:all .2s;position:relative}
+.exclu-opt:hover{border-color:var(--gold)}
+.exclu-opt.selected{border-color:var(--purple);background:rgba(107,63,160,.04)}
+.exclu-opt.best::before{content:'Recommandé';position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--purple);color:#fff;font-size:9px;font-weight:700;padding:2px 10px;border-radius:10px;white-space:nowrap;letter-spacing:.5px}
+.exclu-opt-icon{font-size:22px;margin-bottom:8px}
+.exclu-opt-name{font-size:14px;font-weight:700;margin-bottom:4px}
+.exclu-opt-price{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--gold);margin-bottom:6px}
+.exclu-opt-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.exclu-opt-features{margin-top:10px;display:flex;flex-direction:column;gap:4px}
+.exclu-feat{font-size:11px;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.exclu-feat::before{content:'✓';color:var(--teal);font-size:10px;font-weight:700;flex-shrink:0}
+
+/* TIMER */
+.exclu-timer{background:var(--rose-bg);border:1px solid rgba(192,57,43,.2);border-radius:6px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:12px}
+.timer-icon{font-size:18px;flex-shrink:0}
+.timer-text{font-size:12px;color:var(--rose);flex:1}
+.timer-count{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--rose);white-space:nowrap}
+
+/* COUNTDOWN */
+.countdown-bar{background:var(--rose-bg);border:1px solid rgba(192,57,43,.15);border-radius:6px;padding:8px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;font-size:12px}
+.countdown-label{color:var(--rose)}
+.countdown-val{font-weight:700;color:var(--rose);font-family:'Playfair Display',serif;font-size:16px}
+
+/* BIENS LIST */
+.biens-list{padding:20px}
+.biens-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.biens-filters{display:flex;gap:8px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;transition:all .2s}
+.filter-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.filter-btn:hover:not(.active){border-color:var(--gold);color:var(--gold)}
+
+/* STATS BAR */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 20px;background:var(--warm);border-bottom:1px solid var(--line)}
+.stat-mini{text-align:center}
+.stat-mini-val{font-family:'Playfair Display',serif;font-size:22px;font-weight:700}
+.stat-mini-val.gold{color:var(--gold)}
+.stat-mini-val.teal{color:var(--teal)}
+.stat-mini-val.purple{color:var(--purple)}
+.stat-mini-label{font-size:10px;color:var(--muted);letter-spacing:.5px;margin-top:2px}
+
+/* CHIP */
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.chip-gold{background:var(--gold-bg);color:#9A7A38}
+.chip-teal{background:var(--teal-bg);color:var(--teal)}
+.chip-purple{background:rgba(107,63,160,.1);color:var(--purple)}
+.chip-rose{background:var(--rose-bg);color:var(--rose)}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--ink);color:#fff;padding:12px 18px;border-radius:var(--r);font-size:13px;display:flex;align-items:center;gap:10px;min-width:280px;box-shadow:0 8px 32px rgba(15,15,14,.25);animation:tIn .25s ease}
+@keyframes tIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+.toast.success{border-left:3px solid var(--teal)}
+.toast.purple{border-left:3px solid var(--purple)}
+.toast.gold{border-left:3px solid var(--gold)}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;z-index:300;background:rgba(15,15,14,.65);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--warm);border-radius:12px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:modalUp .25s ease}
+@keyframes modalUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.modal-head{padding:20px 24px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--warm);z-index:1}
+.modal-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700}
+.modal-close{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:none;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.modal-close:hover{background:var(--ink);color:#fff}
+.modal-body{padding:20px 24px 24px}
+
+@media(max-width:900px){
+  .app{flex-direction:column}
+  .panel-left{width:100%;min-width:unset}
+  .exclu-options{grid-template-columns:1fr}
+  .stats-bar{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+<style>
+/* Bandeau supérieur unifié — fond blanc, texte foncé (override global) */
+nav{background:#fff!important;border-bottom:1px solid #E8E6E0!important}
+nav .nav-logo{color:#0F0F0E!important}
+nav .nav-logo span{color:#C09B5A!important}
+nav a{color:#0F0F0E!important}
+nav a:hover{color:#C09B5A!important}
+nav .nav-out{color:#0F0F0E!important;border-color:#0F0F0E!important}
+nav .nav-link{margin-right:18px}
+</style>
+</head>
+<body>
+
+<nav style="background:#0F0F0E;height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100;gap:0">
+  <a href="index.html" style="font-size:18px;font-weight:600;color:#fff;text-decoration:none;margin-right:32px;font-family:'Outfit',sans-serif">Immo<span style="color:#C09B5A">Connect</span></a>
+  <div style="display:flex;gap:24px;align-items:center;flex:1">
+    <a href="forfaits.html" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Forfaits</a>
+    <a href="questionnaire-vendeur.html" style="text-decoration:none;padding:7px 16px;background:#C09B5A;color:#0F0F0E;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif">Vendre</a>
+    <a href="questionnaire-acheteur.html" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Acheter</a>
+    <a href="index.html#agents" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Agents immo</a>
+  </div>
+  <a href="index.html" style="text-decoration:none;padding:8px 20px;border:1px solid #444;color:#fff;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif;transition:all .2s" onmouseover="this.style.borderColor='#C09B5A';this.style.color='#C09B5A'" onmouseout="this.style.borderColor='#444';this.style.color='#fff'">Accueil</a>
+</nav>
+
+<div class="app">
+
+<!-- ══ PANEL GAUCHE : IA + DÉTAIL BIEN ══ -->
+<div class="panel-left">
+
+  <!-- IA ESTIMATION -->
+  <div class="s-label" style="margin-bottom:10px">Estimation Intelligence Artificielle</div>
+  <div class="ia-panel">
+    <div class="ia-panel-head">
+      <div class="ia-avatar">🤖</div>
+      <div class="ia-info">
+        <div class="ia-name">Agent IA ImmoConnect</div>
+        <div class="ia-status"><div class="ia-dot"></div>Analyse DVF en cours…</div>
+      </div>
+    </div>
+    <div class="ia-body">
+      <div class="ia-result-box">
+        <div class="ia-result-label">Estimation basée sur 47 transactions DVF · 500m · 24 mois</div>
+        <div class="ia-price-range">
+          <div class="ia-price-main" id="iaMainPrice">287 000 €</div>
+          <div class="ia-price-range-txt">Fourchette :<br><strong style="color:var(--gold2)" id="iaLow">265 000 €</strong> — <strong style="color:var(--gold2)" id="iaHigh">312 000 €</strong></div>
+        </div>
+        <div class="ia-confidence">
+          <span style="color:rgba(255,255,255,.4);font-size:11px">Fiabilité</span>
+          <div class="ia-conf-bar"><div class="ia-conf-fill" id="iaConfFill" style="width:87%"></div></div>
+          <span style="color:#4DC9A0;font-size:11px;font-weight:600" id="iaConfPct">87%</span>
+        </div>
+      </div>
+
+      <!-- Comparables DVF -->
+      <div class="ia-comparables">
+        <div class="ia-comp-title">Transactions DVF comparables</div>
+        <div id="comparables"></div>
+      </div>
+
+      <!-- Facteurs d'ajustement -->
+      <div class="ia-factors" style="margin-top:14px">
+        <div class="ia-factor">
+          <div class="ia-factor-label">DPE C</div>
+          <div class="ia-factor-val up">+2,5%</div>
+        </div>
+        <div class="ia-factor">
+          <div class="ia-factor-label">2ème étage</div>
+          <div class="ia-factor-val up">+1,8%</div>
+        </div>
+        <div class="ia-factor">
+          <div class="ia-factor-label">Travaux récents</div>
+          <div class="ia-factor-val up">+3,2%</div>
+        </div>
+        <div class="ia-factor">
+          <div class="ia-factor-label">Charges élevées</div>
+          <div class="ia-factor-val down">-1,5%</div>
+        </div>
+        <div class="ia-factor">
+          <div class="ia-factor-label">Exposition Sud</div>
+          <div class="ia-factor-val up">+2,0%</div>
+        </div>
+        <div class="ia-factor">
+          <div class="ia-factor-label">Marché secteur</div>
+          <div class="ia-factor-val neutral">Stable</div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;padding:10px 12px;background:rgba(77,201,160,.1);border:1px solid rgba(77,201,160,.2);border-radius:6px">
+        <div style="font-size:11px;color:#4DC9A0;font-weight:600;margin-bottom:4px">Avis de l'Agent IA</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.65);line-height:1.6">Le prix demandé de <strong style="color:#fff">295 000 €</strong> est <strong style="color:#4DC9A0">cohérent avec le marché</strong> (+2,8% vs médiane DVF). Dossier complet à 97% — bien recommandé aux acheteurs en priorité Or.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACT MASQUÉ -->
+  <div class="s-label" style="margin-bottom:8px">Contact vendeur</div>
+  <div id="contactSection">
+    <div class="contact-masked">
+      <div class="contact-row">
+        <span class="contact-icon">📞</span>
+        <span class="contact-masked-val" id="phoneDisplay">06 •• •• •• ••</span>
+      </div>
+      <div class="contact-row">
+        <span class="contact-icon">✉</span>
+        <span class="contact-masked-val" id="emailDisplay">m***@***.fr</span>
+      </div>
+      <div class="contact-lock" id="lockMsg">🔒 Déverrouiller pour voir les coordonnées</div>
+    </div>
+  </div>
+
+  <!-- SYSTÈME EXCLUSIVITÉ -->
+  <div class="exclu-section">
+    <div class="exclu-head">
+      <div class="exclu-title">🔐 Accès au contact vendeur</div>
+      <div class="exclu-sub">Choisissez votre niveau d'accès</div>
+    </div>
+    <div class="exclu-body">
+
+      <div class="exclu-timer">
+        <div class="timer-icon">⏰</div>
+        <div class="timer-text">Exclusivité disponible — aucun agent n'a encore ce contact</div>
+        <div class="timer-count" id="timerDisplay">23:47:12</div>
+      </div>
+
+      <div class="exclu-options">
+        <div class="exclu-opt" id="optSimple" onclick="selectOpt('simple')">
+          <div class="exclu-opt-icon">🔓</div>
+          <div class="exclu-opt-name">Accès simple</div>
+          <div class="exclu-opt-price">29 €</div>
+          <div class="exclu-opt-desc">Accès immédiat aux coordonnées. Partagé avec d'autres agents.</div>
+          <div class="exclu-opt-features">
+            <div class="exclu-feat">Téléphone + email débloqués</div>
+            <div class="exclu-feat">Accès immédiat</div>
+            <div class="exclu-feat">Autres agents peuvent acheter</div>
+          </div>
+        </div>
+        <div class="exclu-opt best" id="optExclu" onclick="selectOpt('exclu')">
+          <div class="exclu-opt-icon">🏆</div>
+          <div class="exclu-opt-name">Exclusivité 7 jours</div>
+          <div class="exclu-opt-price">149 €</div>
+          <div class="exclu-opt-desc">Vous seul pouvez contacter ce vendeur pendant 7 jours.</div>
+          <div class="exclu-opt-features">
+            <div class="exclu-feat">Téléphone + email débloqués</div>
+            <div class="exclu-feat">Accès immédiat</div>
+            <div class="exclu-feat">Aucun concurrent pendant 7j</div>
+            <div class="exclu-feat">Badge "Agent exclusif" sur la fiche</div>
+            <div class="exclu-feat">Rappel automatique J+3</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="roiBox" style="background:var(--gold-bg);border:1px solid rgba(192,155,90,.2);border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--ink2);display:none">
+        <strong>ROI potentiel :</strong> Sur ce bien à 295 000€, votre commission = ~14 750€. L'exclusivité à 149€ représente <strong>1% de votre commission</strong>.
+      </div>
+
+      <button class="btn btn-exclu" id="btnPay" onclick="openPayment()">
+        <span id="btnPayLabel">Choisir un accès</span>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ PANEL DROIT : LISTE BIENS ══ -->
+<div class="panel-right" id="viewAgent">
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat-mini"><div class="stat-mini-val gold" id="statOr">8</div><div class="stat-mini-label">Dossiers Or</div></div>
+    <div class="stat-mini"><div class="stat-mini-val" style="color:var(--muted)" id="statArgent">14</div><div class="stat-mini-label">Dossiers Argent</div></div>
+    <div class="stat-mini"><div class="stat-mini-val purple" id="statExclu">3</div><div class="stat-mini-label">Exclusivités actives</div></div>
+    <div class="stat-mini"><div class="stat-mini-val teal" id="statRev">1 241 €</div><div class="stat-mini-label">Revenus contacts</div></div>
+  </div>
+
+  <!-- BIENS LIST -->
+  <div class="biens-list">
+    <div class="biens-header">
+      <div class="s-title" style="font-size:18px">Biens <em>disponibles</em></div>
+      <div class="biens-filters">
+        <button class="filter-btn active" onclick="filterBiens('all',this)">Tous</button>
+        <button class="filter-btn" onclick="filterBiens('or',this)">⭐ Or</button>
+        <button class="filter-btn" onclick="filterBiens('libre',this)">🔓 Libres</button>
+        <button class="filter-btn" onclick="filterBiens('exclu',this)">🏆 Mes exclusivités</button>
+      </div>
+    </div>
+    <div id="biensGrid"></div>
+  </div>
+</div>
+
+</div>
+
+<!-- MODAL PAIEMENT -->
+<div class="modal-bg" id="payModal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="payModalTitle">Confirmer l'accès</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="payModalBody"></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ══ DATA ══ */
+const BIENS = [
+  { id:1, titre:'Appartement T4 lumineux — Carmes', adresse:'14 rue du Taur, Toulouse', prix:295000, surface:82, pieces:4, chambres:3, dpe:'C', score:97, tier:'or', statut:'libre', exclu:null, iaPrice:287000, iaLow:265000, iaHigh:312000 },
+  { id:2, titre:'Maison avec jardin — Saint-Agne', adresse:'7 allée des Pins, Toulouse', prix:485000, surface:145, pieces:6, chambres:4, dpe:'D', score:94, tier:'argent', statut:'libre', exclu:null, iaPrice:471000, iaLow:445000, iaHigh:498000 },
+  { id:3, titre:'Studio rénové — Capitole', adresse:'3 place du Capitole, Toulouse', prix:128000, surface:28, pieces:1, chambres:0, dpe:'E', score:96, tier:'or', statut:'exclu', exclu:'Sophie Martin', iaPrice:124000, iaLow:115000, iaHigh:132000 },
+  { id:4, titre:'T3 vue dégagée — Saint-Cyprien', adresse:'22 quai de la Daurade, Toulouse', prix:245000, surface:68, pieces:3, chambres:2, dpe:'C', score:98, tier:'or', statut:'libre', exclu:null, iaPrice:251000, iaLow:235000, iaHigh:268000 },
+  { id:5, titre:'Villa piscine — Tournefeuille', adresse:'15 chemin des Roses, Tournefeuille', prix:620000, surface:210, pieces:8, chambres:5, dpe:'D', score:88, tier:'argent', statut:'libre', exclu:null, iaPrice:598000, iaLow:570000, iaHigh:635000 },
+  { id:6, titre:'T2 investissement locatif — Rangueil', adresse:'45 route de Narbonne, Toulouse', prix:165000, surface:42, pieces:2, chambres:1, dpe:'F', score:72, tier:'argent', statut:'simple', exclu:null, iaPrice:158000, iaLow:148000, iaHigh:170000 },
+];
+
+let selectedBien = BIENS[0];
+let selectedOpt = null;
+let timerInterval;
+
+/* ══ RENDER COMPARABLES ══ */
+function renderComparables(bien) {
+  const comps = [
+    { addr:'12 rue du Taur', surf:78, date:'Jan 2026', price: Math.round(bien.iaPrice * 0.97) },
+    { addr:'8 place des Carmes', surf:85, date:'Nov 2025', price: Math.round(bien.iaPrice * 1.03) },
+    { addr:'18 rue Pargaminières', surf:80, date:'Oct 2025', price: Math.round(bien.iaPrice * 0.99) },
+    { addr:'5 rue de la Pomme', surf:76, date:'Sep 2025', price: Math.round(bien.iaPrice * 1.02) },
+  ];
+  document.getElementById('comparables').innerHTML = comps.map(c => `
+    <div class="ia-comp-item">
+      <div><div class="ia-comp-addr">${c.addr}</div><div class="ia-comp-meta">${c.surf}m² · Vente ${c.date}</div></div>
+      <div class="ia-comp-price">${c.price.toLocaleString('fr-FR')} €</div>
+    </div>`).join('');
+}
+
+/* ══ RENDER BIENS ══ */
+function renderBiens(filter='all') {
+  const list = filter === 'all' ? BIENS
+    : filter === 'or' ? BIENS.filter(b => b.tier === 'or')
+    : filter === 'libre' ? BIENS.filter(b => b.statut === 'libre')
+    : BIENS.filter(b => b.exclu === 'Moi');
+
+  const tierLabels = { or:'⭐ Dossier Or', argent:'Argent', attente:'En attente' };
+  const tierClass = { or:'tier-or', argent:'tier-argent', attente:'tier-attente' };
+  const statutLabels = {
+    libre:'🔓 Contact libre',
+    exclu:'🔒 Exclusivité prise',
+    simple:'🔓 Accès simple vendu'
+  };
+  const statutColors = { libre:'var(--teal)', exclu:'var(--rose)', simple:'var(--amber)' };
+
+  document.getElementById('biensGrid').innerHTML = list.map(b => `
+    <div class="bien-card" onclick="selectBien(${b.id})">
+      <div class="bien-photos">
+        <div class="bien-photo-grid">
+          <div class="bien-photo-main">🏠</div>
+          <div class="bien-photo-sm">🛋</div>
+          <div class="bien-photo-sm">🚿</div>
+        </div>
+        <div class="bien-badge-tier ${tierClass[b.tier]}">${tierLabels[b.tier]}</div>
+        <div class="bien-badge-score">${b.score}%</div>
+      </div>
+      <div class="bien-card-body">
+        <div class="bien-top">
+          <div>
+            <div class="bien-price">${b.prix.toLocaleString('fr-FR')} €</div>
+            <div class="bien-ia-price">🤖 IA : ${b.iaPrice.toLocaleString('fr-FR')} € (±${Math.abs(Math.round((b.prix - b.iaPrice)/b.prix*100))}%)</div>
+          </div>
+          <div class="dpe-pill dpe-${b.dpe}">DPE ${b.dpe}</div>
+        </div>
+        <div class="bien-title">${b.titre}</div>
+        <div class="bien-addr">📍 ${b.adresse}</div>
+        <div class="bien-features">
+          <div class="bien-feature">📐 ${b.surface}m²</div>
+          <div class="bien-feature">🏠 ${b.pieces}p</div>
+          <div class="bien-feature">🛏 ${b.chambres}ch</div>
+        </div>
+      </div>
+      <div class="bien-card-foot">
+        <div style="flex:1;font-size:12px;font-weight:600;color:${statutColors[b.statut]}">${statutLabels[b.statut]}</div>
+        ${b.exclu && b.exclu !== 'Moi' ? `<span style="font-size:11px;color:var(--muted)">par ${b.exclu}</span>` : ''}
+        ${b.statut === 'libre' || b.statut === 'simple' ? `<button class="btn btn-gold btn-sm" onclick="event.stopPropagation();selectBien(${b.id});scrollLeft()">Accéder →</button>` : `<span class="chip chip-rose">Bloqué 7j</span>`}
+      </div>
+    </div>`).join('');
+}
+
+function scrollLeft() {
+  document.querySelector('.panel-left').scrollIntoView({ behavior: 'smooth' });
+}
+
+function filterBiens(f, el) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderBiens(f);
+}
+
+function selectBien(id) {
+  selectedBien = BIENS.find(b => b.id === id);
+  if (!selectedBien) return;
+  selectedOpt = null;
+  document.getElementById('optSimple').classList.remove('selected');
+  document.getElementById('optExclu').classList.remove('selected');
+  document.getElementById('btnPayLabel').textContent = 'Choisir un accès';
+  document.getElementById('roiBox').style.display = 'none';
+  document.getElementById('iaMainPrice').textContent = selectedBien.iaPrice.toLocaleString('fr-FR') + ' €';
+  document.getElementById('iaLow').textContent = selectedBien.iaLow.toLocaleString('fr-FR') + ' €';
+  document.getElementById('iaHigh').textContent = selectedBien.iaHigh.toLocaleString('fr-FR') + ' €';
+  const conf = 75 + Math.floor(Math.random() * 20);
+  document.getElementById('iaConfFill').style.width = conf + '%';
+  document.getElementById('iaConfPct').textContent = conf + '%';
+  resetContact();
+  renderComparables(selectedBien);
+  toast('Bien sélectionné : ' + selectedBien.titre, 'gold');
+}
+
+function resetContact() {
+  document.getElementById('phoneDisplay').textContent = '06 •• •• •• ••';
+  document.getElementById('emailDisplay').textContent = 'm***@***.fr';
+  document.getElementById('lockMsg').style.display = 'flex';
+}
+
+/* ══ SELECT OPT ══ */
+function selectOpt(type) {
+  selectedOpt = type;
+  document.getElementById('optSimple').classList.toggle('selected', type === 'simple');
+  document.getElementById('optExclu').classList.toggle('selected', type === 'exclu');
+  const roi = document.getElementById('roiBox');
+  if (type === 'exclu') {
+    const comm = Math.round(selectedBien.prix * 0.05);
+    document.getElementById('roiBox').innerHTML = `<strong>ROI potentiel :</strong> Sur ce bien à ${selectedBien.prix.toLocaleString('fr-FR')}€, votre commission = ~${comm.toLocaleString('fr-FR')}€. L\'exclusivité à 149€ représente <strong>${(149/comm*100).toFixed(1)}% de votre commission</strong>.`;
+    roi.style.display = 'block';
+    document.getElementById('btnPayLabel').textContent = '🏆 Payer 149 € — Exclusivité 7 jours';
+  } else {
+    roi.style.display = 'none';
+    document.getElementById('btnPayLabel').textContent = '🔓 Payer 29 € — Accès simple';
+  }
+}
+
+/* ══ PAYMENT MODAL ══ */
+function openPayment() {
+  if (!selectedOpt) { toast('Choisissez un type d\'accès d\'abord', 'gold'); return; }
+  const isExclu = selectedOpt === 'exclu';
+  const price = isExclu ? 149 : 29;
+  document.getElementById('payModalTitle').textContent = isExclu ? '🏆 Exclusivité 7 jours' : '🔓 Accès simple';
+  document.getElementById('payModalBody').innerHTML = `
+    <div style="background:var(--bg);border-radius:8px;padding:14px 16px;margin-bottom:16px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Bien concerné</div>
+      <div style="font-size:14px;font-weight:600">${selectedBien.titre}</div>
+      <div style="font-size:12px;color:var(--muted)">${selectedBien.adresse}</div>
+    </div>
+    ${isExclu ? `<div style="background:rgba(107,63,160,.06);border:1px solid rgba(107,63,160,.2);border-radius:6px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--purple);line-height:1.6">
+      <strong>Ce que vous obtenez :</strong> Pendant 7 jours, aucun autre agent ImmoConnect ne peut acheter l\'accès à ce vendeur. Vous êtes seul à pouvoir le contacter.
+    </div>` : `<div style="background:var(--gold-bg);border:1px solid rgba(192,155,90,.2);border-radius:6px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.6">
+      <strong>Accès partagé :</strong> D\'autres agents peuvent également acheter l\'accès à ce même vendeur.
+    </div>`}
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:16px">
+      <span style="font-size:14px;font-weight:500">Total à payer</span>
+      <span style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--gold)">${price} €</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:500">Numéro de carte</label>
+        <input type="text" placeholder="4242 4242 4242 4242" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);font-size:14px;background:var(--bg);font-family:'Outfit',sans-serif">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:500">Expiration</label><input type="text" placeholder="MM/AA" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);font-size:14px;background:var(--bg);font-family:'Outfit',sans-serif"></div>
+        <div><label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:500">CVV</label><input type="text" placeholder="123" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);font-size:14px;background:var(--bg);font-family:'Outfit',sans-serif"></div>
+      </div>
+      <button class="btn" style="background:${isExclu?'linear-gradient(135deg,#7B3FA0,#5B2F80)':'var(--slate)'};color:#fff;width:100%;justify-content:center;padding:13px;font-size:14px;font-weight:600;margin-top:6px" onclick="confirmPayment(${isExclu},${price})">
+        Confirmer le paiement — ${price} €
+      </button>
+    </div>`;
+  document.getElementById('payModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function confirmPayment(isExclu, price) {
+  closeModal();
+  setTimeout(() => {
+    document.getElementById('phoneDisplay').textContent = '06 12 34 56 78';
+    document.getElementById('emailDisplay').textContent = 'marie.dupont@gmail.com';
+    document.getElementById('lockMsg').style.display = 'none';
+    if (isExclu) {
+      toast('🏆 Exclusivité activée ! Vous êtes le seul agent pendant 7 jours.', 'purple');
+      document.getElementById('timerDisplay').textContent = '7j 00:00:00';
+      startCountdown(7 * 24 * 3600);
+      document.getElementById('statExclu').textContent = parseInt(document.getElementById('statExclu').textContent) + 1;
+    } else {
+      toast('🔓 Contact débloqué ! Bonne vente !', 'success');
+    }
+    const rev = parseInt(document.getElementById('statRev').textContent.replace(/[^0-9]/g,'')) + price;
+    document.getElementById('statRev').textContent = rev.toLocaleString('fr-FR') + ' €';
+  }, 800);
+}
+
+function startCountdown(seconds) {
+  clearInterval(timerInterval);
+  let s = seconds;
+  timerInterval = setInterval(() => {
+    s--;
+    if (s <= 0) { clearInterval(timerInterval); return; }
+    const d = Math.floor(s / 86400);
+    const h = Math.floor((s % 86400) / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    document.getElementById('timerDisplay').textContent =
+      (d > 0 ? d + 'j ' : '') +
+      String(h).padStart(2,'0') + ':' +
+      String(m).padStart(2,'0') + ':' +
+      String(sec).padStart(2,'0');
+  }, 1000);
+}
+
+/* ══ MODAL ══ */
+function closeModal() { document.getElementById('payModal').classList.remove('open'); document.body.style.overflow = ''; }
+function closeModalOutside(e) { if (e.target === document.getElementById('payModal')) closeModal(); }
+
+/* ══ VIEW SWITCH ══ */
+function switchView(v, el) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  if (v === 'admin') toast('Vue Admin — revenus et gestion des exclusivités', 'gold');
+  if (v === 'vendeur') toast('Vue Vendeur — suivi de votre annonce', 'success');
+}
+
+/* ══ TOAST ══ */
+function toast(msg, type='success') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icons = { success:'✅', purple:'🏆', gold:'⭐' };
+  t.innerHTML = `<span>${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  document.getElementById('toastWrap').appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='.3s'},4000);
+  setTimeout(()=>t.remove(),4300);
+}
+
+/* ══ TIMER INITIAL ══ */
+startCountdown(23 * 3600 + 47 * 60 + 12);
+renderBiens();
+renderComparables(selectedBien);
+</script>
+<script src="feedback.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Vos 3 agents sélectionnés</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--amber:#D4732A;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:24px;align-items:center;flex:1;margin-left:32px}
+.nav-links a{text-decoration:none;color:#888780;font-size:13px}
+
+.page{max-width:900px;margin:0 auto;padding:32px 24px 80px}
+
+/* BIEN HEADER */
+.bien-banner{background:var(--ink);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px}
+.bien-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(192,155,90,.2);color:var(--gold);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;display:inline-block}
+.bien-titre{font-size:16px;font-weight:500;color:#FAFAF7;margin-bottom:4px}
+.bien-meta{font-size:12px;color:rgba(250,250,247,.4)}
+.bien-prix{font-size:22px;font-weight:300;color:var(--gold);margin-left:auto;white-space:nowrap}
+
+/* INTRO */
+.intro-box{background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin-bottom:24px;display:flex;align-items:flex-start;gap:14px}
+.intro-icon{width:36px;height:36px;border-radius:8px;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+
+/* AGENTS GRID */
+.agents-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+
+/* AGENT CARD */
+.agent-card{background:var(--warm);border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:box-shadow .2s;cursor:pointer;position:relative}
+.agent-card:hover{border-color:var(--muted)}
+.agent-card.selected{border:2px solid var(--teal)}
+.agent-card-top{padding:18px 18px 12px}
+.agent-rank{position:absolute;top:12px;left:12px;width:22px;height:22px;border-radius:50%;background:var(--bg);font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.agent-rank.rank-1{background:var(--gold);color:var(--ink)}
+.agent-rank.rank-2{background:#B4B2A9;color:var(--ink)}
+.agent-rank.rank-3{background:#C09B5A44;color:var(--ink)}
+.agent-avatar{width:44px;height:44px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:var(--teal);margin:0 auto 10px}
+.agent-nom{font-size:13px;font-weight:600;text-align:center;margin-bottom:2px}
+.agent-agence{font-size:11px;color:var(--muted);text-align:center;margin-bottom:10px}
+.agent-flux{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.6px}
+.flux-a{background:#E6F1FB;color:#185FA5}
+.flux-b{background:#E1F5EE;color:#1E7A62}
+
+/* SCORE */
+.agent-score{display:flex;align-items:center;gap:8px;margin:12px 0 6px}
+.score-num{font-size:28px;font-weight:300;color:var(--ink)}
+.score-max{font-size:13px;color:var(--muted);align-self:flex-end;padding-bottom:2px}
+.score-bar-wrap{flex:1;height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:2px}
+
+/* BADGES */
+.agent-badges{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.badge-pill{font-size:10px;padding:2px 8px;border-radius:20px;background:var(--bg);color:var(--muted);border:0.5px solid var(--line)}
+
+/* INFOS */
+.agent-infos{display:flex;justify-content:space-between;font-size:11px;padding:10px 18px;background:var(--bg);border-top:1px solid var(--line)}
+.agent-info-item{display:flex;flex-direction:column;align-items:center;gap:2px}
+.agent-info-val{font-weight:600;font-size:12px}
+.agent-info-lbl{color:var(--muted)}
+
+/* STRATEGIE */
+.agent-strategie{font-size:12px;color:var(--muted);line-height:1.6;padding:10px 18px 14px;border-top:1px solid var(--line)}
+
+/* BOUTONS */
+.agent-btns{display:flex;gap:6px;padding:12px 18px;border-top:1px solid var(--line)}
+.btn-choisir{flex:1;padding:9px;border-radius:7px;border:none;background:var(--teal);color:#fff;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer}
+.btn-question{flex:1;padding:9px;border-radius:7px;border:1px solid var(--line);background:transparent;font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer}
+
+/* COMPTE À REBOURS 48H */
+.countdown-wrapper{background:linear-gradient(135deg,#0F1F19,#1E3D2F);border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:20px;position:relative;overflow:hidden}
+.countdown-wrapper::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 50%,rgba(192,155,90,.08),transparent 60%)}
+.countdown-left{flex:1}
+.countdown-titre{font-size:11px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.countdown-digits{font-size:36px;font-weight:300;color:#fff;font-family:monospace;letter-spacing:4px;line-height:1}
+.countdown-sub{font-size:11px;color:rgba(255,255,255,.4);margin-top:4px}
+.countdown-digits.urgent{color:#E24B4A;animation:urgentPulse 1s infinite}
+@keyframes urgentPulse{0%,100%{opacity:1}50%{opacity:.6}}
+.countdown-right{text-align:right}
+.candidats-count{font-size:32px;font-weight:300;color:var(--gold)}
+.candidats-lbl{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px}
+.candidats-mini-bar{height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:8px;overflow:hidden;width:120px}
+.candidats-mini-fill{height:100%;border-radius:2px;background:var(--gold);transition:width .5s ease}
+.statut-fenetre{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;margin-bottom:16px}
+.sf-ouverte{background:rgba(30,122,98,.3);color:#5FC9A0}
+.sf-cloturee{background:rgba(163,45,45,.3);color:#E24B4A}
+.sf-scored{background:rgba(24,95,165,.3);color:#7EB8F5}
+.realtime-ping{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:ping 1.5s infinite}
+@keyframes ping{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.6}}
+
+/* COMPARATIF HANAE */
+.comparatif-box{background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:20px 24px;margin-bottom:20px}
+.comparatif-title{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.comparatif-text{font-size:13px;color:var(--ink);line-height:1.8}
+.comparatif-text strong{color:var(--teal)}
+
+/* TABLEAU COMPARATIF */
+.table-wrap{overflow-x:auto;margin-bottom:20px}
+.comp-table{width:100%;border-collapse:collapse;font-size:12px}
+.comp-table th{padding:10px 12px;background:var(--ink);color:#fff;font-weight:500;text-align:center}
+.comp-table th:first-child{text-align:left;border-radius:6px 0 0 0}
+.comp-table th:last-child{border-radius:0 6px 0 0}
+.comp-table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:center}
+.comp-table td:first-child{text-align:left;color:var(--muted)}
+.comp-table tr:last-child td{border-bottom:none}
+.comp-table tr:nth-child(even) td{background:var(--bg)}
+.td-best{color:var(--teal);font-weight:600}
+
+/* MODAL CHOISIR */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,15,14,.6);backdrop-filter:blur(3px);z-index:999;display:none;align-items:center;justify-content:center;padding:24px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--warm);border-radius:12px;max-width:480px;width:100%;padding:28px}
+.modal-title{font-size:18px;font-weight:500;margin-bottom:8px}
+.modal-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px}
+.btn-confirmer{width:100%;padding:13px;border-radius:8px;border:none;background:var(--teal);color:#fff;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-bottom:8px}
+.btn-annuler{width:100%;padding:11px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer}
+
+/* LOADING */
+.loading{text-align:center;padding:60px 24px;color:var(--muted)}
+.spin{width:24px;height:24px;border:2px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:11px 24px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;display:none}
+.toast.ok{background:#1E7A62;color:#fff}
+.toast.err{background:#C0392B;color:#fff}
+
+@media(max-width:700px){.agents-grid{grid-template-columns:1fr}}
+</style>
+<style>
+/* Bandeau supérieur unifié — fond blanc, texte foncé (override global) */
+nav{background:#fff!important;border-bottom:1px solid #E8E6E0!important}
+nav .nav-logo{color:#0F0F0E!important}
+nav .nav-logo span{color:#C09B5A!important}
+nav a{color:#0F0F0E!important}
+nav a:hover{color:#C09B5A!important}
+nav .nav-out{color:#0F0F0E!important;border-color:#0F0F0E!important}
+nav .nav-link{margin-right:18px}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><img src="logo-immoconnect.png" alt="ImmoConnect" style="height:38px;width:auto;object-fit:contain;vertical-align:middle"><span style="font-size:22px;font-weight:600;color:#0F0F0E;margin-left:8px">Immo<span style="color:#C09B5A">Connect</span></span></a>
+  <div class="nav-links">
+    <a href="connexion.html">Mon espace</a>
+  </div>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Vos 3 agents sélectionnés</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--amber:#D4732A;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:24px;align-items:center;flex:1;margin-left:32px}
+.nav-links a{text-decoration:none;color:#888780;font-size:13px}
+
+.page{max-width:900px;margin:0 auto;padding:32px 24px 80px}
+
+/* BIEN HEADER */
+.bien-banner{background:var(--ink);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px}
+.bien-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(192,155,90,.2);color:var(--gold);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;display:inline-block}
+.bien-titre{font-size:16px;font-weight:500;color:#FAFAF7;margin-bottom:4px}
+.bien-meta{font-size:12px;color:rgba(250,250,247,.4)}
+.bien-prix{font-size:22px;font-weight:300;color:var(--gold);margin-left:auto;white-space:nowrap}
+
+/* INTRO */
+.intro-box{background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin-bottom:24px;display:flex;align-items:flex-start;gap:14px}
+.intro-icon{width:36px;height:36px;border-radius:8px;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+
+/* AGENTS GRID */
+.agents-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+
+/* AGENT CARD */
+.agent-card{background:var(--warm);border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:box-shadow .2s;cursor:pointer;position:relative}
+.agent-card:hover{border-color:var(--muted)}
+.agent-card.selected{border:2px solid var(--teal)}
+.agent-card-top{padding:18px 18px 12px}
+.agent-rank{position:absolute;top:12px;left:12px;width:22px;height:22px;border-radius:50%;background:var(--bg);font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.agent-rank.rank-1{background:var(--gold);color:var(--ink)}
+.agent-rank.rank-2{background:#B4B2A9;color:var(--ink)}
+.agent-rank.rank-3{background:#C09B5A44;color:var(--ink)}
+.agent-avatar{width:44px;height:44px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:var(--teal);margin:0 auto 10px}
+.agent-nom{font-size:13px;font-weight:600;text-align:center;margin-bottom:2px}
+.agent-agence{font-size:11px;color:var(--muted);text-align:center;margin-bottom:10px}
+.agent-flux{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.6px}
+.flux-a{background:#E6F1FB;color:#185FA5}
+.flux-b{background:#E1F5EE;color:#1E7A62}
+
+/* SCORE */
+.agent-score{display:flex;align-items:center;gap:8px;margin:12px 0 6px}
+.score-num{font-size:28px;font-weight:300;color:var(--ink)}
+.score-max{font-size:13px;color:var(--muted);align-self:flex-end;padding-bottom:2px}
+.score-bar-wrap{flex:1;height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:2px}
+
+/* BADGES */
+.agent-badges{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.badge-pill{font-size:10px;padding:2px 8px;border-radius:20px;background:var(--bg);color:var(--muted);border:0.5px solid var(--line)}
+
+/* INFOS */
+.agent-infos{display:flex;justify-content:space-between;font-size:11px;padding:10px 18px;background:var(--bg);border-top:1px solid var(--line)}
+.agent-info-item{display:flex;flex-direction:column;align-items:center;gap:2px}
+.agent-info-val{font-weight:600;font-size:12px}
+.agent-info-lbl{color:var(--muted)}
+
+/* STRATEGIE */
+.agent-strategie{font-size:12px;color:var(--muted);line-height:1.6;padding:10px 18px 14px;border-top:1px solid var(--line)}
+
+/* BOUTONS */
+.agent-btns{display:flex;gap:6px;padding:12px 18px;border-top:1px solid var(--line)}
+.btn-choisir{flex:1;padding:9px;border-radius:7px;border:none;background:var(--teal);color:#fff;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer}
+.btn-question{flex:1;padding:9px;border-radius:7px;border:1px solid var(--line);background:transparent;font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer}
+
+/* COMPTE À REBOURS 48H */
+.countdown-wrapper{background:linear-gradient(135deg,#0F1F19,#1E3D2F);border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:20px;position:relative;overflow:hidden}
+.countdown-wrapper::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 50%,rgba(192,155,90,.08),transparent 60%)}
+.countdown-left{flex:1}
+.countdown-titre{font-size:11px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.countdown-digits{font-size:36px;font-weight:300;color:#fff;font-family:monospace;letter-spacing:4px;line-height:1}
+.countdown-sub{font-size:11px;color:rgba(255,255,255,.4);margin-top:4px}
+.countdown-digits.urgent{color:#E24B4A;animation:urgentPulse 1s infinite}
+@keyframes urgentPulse{0%,100%{opacity:1}50%{opacity:.6}}
+.countdown-right{text-align:right}
+.candidats-count{font-size:32px;font-weight:300;color:var(--gold)}
+.candidats-lbl{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px}
+.candidats-mini-bar{height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:8px;overflow:hidden;width:120px}
+.candidats-mini-fill{height:100%;border-radius:2px;background:var(--gold);transition:width .5s ease}
+.statut-fenetre{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;margin-bottom:16px}
+.sf-ouverte{background:rgba(30,122,98,.3);color:#5FC9A0}
+.sf-cloturee{background:rgba(163,45,45,.3);color:#E24B4A}
+.sf-scored{background:rgba(24,95,165,.3);color:#7EB8F5}
+.realtime-ping{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:ping 1.5s infinite}
+@keyframes ping{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.6}}
+
+/* COMPARATIF HANAE */
+.comparatif-box{background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:20px 24px;margin-bottom:20px}
+.comparatif-title{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.comparatif-text{font-size:13px;color:var(--ink);line-height:1.8}
+.comparatif-text strong{color:var(--teal)}
+
+/* TABLEAU COMPARATIF */
+.table-wrap{overflow-x:auto;margin-bottom:20px}
+.comp-table{width:100%;border-collapse:collapse;font-size:12px}
+.comp-table th{padding:10px 12px;background:var(--ink);color:#fff;font-weight:500;text-align:center}
+.comp-table th:first-child{text-align:left;border-radius:6px 0 0 0}
+.comp-table th:last-child{border-radius:0 6px 0 0}
+.comp-table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:center}
+.comp-table td:first-child{text-align:left;color:var(--muted)}
+.comp-table tr:last-child td{border-bottom:none}
+.comp-table tr:nth-child(even) td{background:var(--bg)}
+.td-best{color:var(--teal);font-weight:600}
+
+/* MODAL CHOISIR */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,15,14,.6);backdrop-filter:blur(3px);z-index:999;display:none;align-items:center;justify-content:center;padding:24px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--warm);border-radius:12px;max-width:480px;width:100%;padding:28px}
+.modal-title{font-size:18px;font-weight:500;margin-bottom:8px}
+.modal-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px}
+.btn-confirmer{width:100%;padding:13px;border-radius:8px;border:none;background:var(--teal);color:#fff;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-bottom:8px}
+.btn-annuler{width:100%;padding:11px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer}
+
+/* LOADING */
+.loading{text-align:center;padding:60px 24px;color:var(--muted)}
+.spin{width:24px;height:24px;border:2px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:11px 24px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;display:none}
+.toast.ok{background:#1E7A62;color:#fff}
+.toast.err{background:#C0392B;color:#fff}
+
+@media(max-width:700px){.agents-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><img src="logo-immoconnect.png" alt="ImmoConnect" style="height:38px;width:auto;object-fit:contain;vertical-align:middle"><span style="font-size:22px;font-weight:600;color:#0F0F0E;margin-left:8px">Immo<span style="color:#C09B5A">Connect</span></span></a>
+  <div class="nav-links">
+    <a href="connexion.html">Mon espace</a>
+  </div>
+  <a href="blog.html" style="color:rgba(255,255,255,.6);text-decoration:none;font-size:13px;padding:0 8px">Blog</a>
+</nav>
+
+<div class="page">
+  <div id="main-content">
+    <div class="loading"><div class="spin"></div>Chargement de votre selection...</div>
+  </div>
+</div>
+
+<!-- MODAL CHOISIR -->
+<div class="modal-overlay" id="modal-choisir">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Confirmer votre choix</div>
+    <div class="modal-sub" id="modal-sub">Vous etes sur le point de choisir cet agent. Un mandat simple sera genere automatiquement.</div>
+    <div style="background:var(--bg);border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;line-height:1.8" id="modal-recap"></div>
+    <div id="modal-warning" style="background:#FAEEDA;border-radius:8px;padding:10px 14px;font-size:12px;color:#633806;line-height:1.6;margin-bottom:16px">
+      Une fois confirme, les autres agents seront notifies. Cette action est definitive.
+    </div>
+    <button class="btn-confirmer" id="btn-confirmer-final" onclick="confirmerChoix()">Confirmer et generer le mandat</button>
+    <button class="btn-annuler" id="btn-modal-annuler" onclick="fermerModal()" style="display:none">Annuler</button>
+  </div>
+
+  <!-- MODAL CHOIX LIBRE -->
+  <div class="modal-overlay" id="modal-libre">
+    <div class="modal">
+      <div class="modal-title">Choisir librement un agent</div>
+      <div style="background:#E1F5EE;border-radius:8px;padding:12px 14px;font-size:12px;color:#085041;line-height:1.7;margin-bottom:16px">
+        Nous vous conseillons de vous limiter a <strong>3 mandats simples</strong> simultanes pour rester efficace et bien coordonne avec vos agents.
+      </div>
+      <div id="modal-libre-content">Chargement...</div>
+      <button class="btn-annuler" onclick="document.getElementById('modal-libre').classList.remove('open')" style="margin-top:8px">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+var annonceId = null;
+var bien = null;
+var agents = [];
+var agentChoisi = null;
+
+(async function() {
+  var params = new URLSearchParams(window.location.search);
+  annonceId = params.get('annonce');
+  if (!annonceId) { showErr('Annonce non specifiee.'); return; }
+
+  var { data: { user } } = await db.auth.getUser();
+  if (!user) { window.location.href = 'connexion.html'; return; }
+
+  await charger();
+})();
+
+async function charger() {
+  var { data: b } = await db.from('annonces_vendeurs').select('*').eq('id', annonceId).single();
+  if (!b) { showErr('Bien introuvable.'); return; }
+  bien = b;
+
+  var { data: cands } = await db.from('candidatures_agents')
+    .select('*').eq('annonce_id', annonceId).eq('statut', 'selectionne')
+    .order('score_total', { ascending: false });
+
+  if (!cands || cands.length === 0) {
+    showErr('Aucun agent selectionne pour ce bien pour le moment. L\'algorithme calcule les scores apres la cloture des 48h.');
+    return;
+  }
+
+  agents = cands;
+  render();
+}
+
+var SEUIL_QUALITE = 60
+
+function render() {
+  var titre = bien.titre || ((bien.type_bien || 'Bien') + ' ' + (bien.surface || '') + 'm2');
+  var prix = bien.prix ? Math.round(bien.prix).toLocaleString('fr-FR') + ' €' : '—';
+  var niv = bien.niveau_vendeur || '';
+  var nivLabel = { silver: 'Silver', gold: 'Gold', platinium: 'Platinium' }[niv] || niv;
+
+  var h = '<div class="bien-banner">'
+    + '<div style="flex:1"><div class="bien-badge">' + (nivLabel || 'Dossier') + '</div><div class="bien-titre">' + titre + '</div><div class="bien-meta">' + (bien.ville || '') + ' · ' + (bien.surface || '') + 'm2' + (bien.nb_pieces ? ' · ' + bien.nb_pieces + ' pieces' : '') + '</div></div>'
+    + '<div class="bien-prix">' + prix + '</div>'
+    + '</div>';
+
+  // COMPTE À REBOURS 48H
+  var fenetreStatut = bien.fenetre_statut || 'inactive';
+  var clotureLe = bien.fenetre_candidature_cloture_le || null;
+  var nbCandidats = agents.length || 0;
+
+  if (fenetreStatut === 'ouverte' && clotureLe) {
+    h += '<div class="countdown-wrapper" id="countdown-wrapper">'
+      + '<div class="countdown-left">'
+      + '<div class="countdown-titre"><span class="realtime-ping" style="display:inline-block;margin-right:6px"></span>Fenêtre de candidature</div>'
+      + '<div class="countdown-digits" id="main-countdown">--:--:--</div>'
+      + '<div class="countdown-sub">jusqu\'à la clôture automatique</div>'
+      + '</div>'
+      + '<div class="countdown-right">'
+      + '<div class="candidats-count" id="nb-candidats-rt">' + nbCandidats + '</div>'
+      + '<div class="candidats-lbl">candidat(s)</div>'
+      + '<div class="candidats-mini-bar"><div class="candidats-mini-fill" id="candidats-fill" style="width:' + Math.min(nbCandidats/3*100,100) + '%"></div></div>'
+      + '</div>'
+      + '</div>';
+
+    // Démarrer le countdown
+    setTimeout(function() { demarrerCountdown(clotureLe); }, 100);
+  } else if (fenetreStatut === 'scored' || fenetreStatut === 'cloturee') {
+    h += '<div style="background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px">'
+      + '<span style="font-size:20px">✅</span>'
+      + '<div><div style="font-size:13px;font-weight:500">Sélection terminée</div>'
+      + '<div style="font-size:12px;color:var(--muted)">La fenêtre de candidature est clôturée · ' + nbCandidats + ' candidature(s) analysée(s) par Hanaé</div>'
+      + '</div></div>';
+  }
+
+  h += '<div class="intro-box"><div class="intro-icon">🤖</div><div><div style="font-size:14px;font-weight:500;margin-bottom:4px">Hanae a selectionne les ' + agents.length + ' meilleurs agents</div><div style="font-size:12px;color:var(--muted);line-height:1.7">Chaque agent a ete note sur 100 points selon son experience locale, sa reputation et la coherence de son estimation. Voici votre comparatif personnalise.</div></div></div>';
+
+  // CARDS AGENTS
+  h += '<div class="section-eyebrow" style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Les ' + agents.length + ' meilleurs profils pour votre bien</div>';
+  h += '<div class="agents-grid">';
+  agents.forEach(function(ag, i) {
+    var scoreColor = ag.score_total >= 70 ? '#1E7A62' : ag.score_total >= 50 ? '#854F0B' : '#888780';
+    var initiales = (ag.agent_email || 'A').substring(0, 2).toUpperCase();
+    var badges = ag.badges || [];
+    if (ag.badge_vente_prouvee) badges = ['🏆 Vente prouvée'].concat(badges);
+    if (ag.badge_certifie || (ag.score_total >= 75 && ag.nb_ventes_prouvees >= 3)) badges = ['⭐ Certifié'].concat(badges);
+    var strategie = ag.strategie_hanae || 'Analyse en cours...';
+    var honoraires = ag.honoraires_proposes || '—';
+    var delai = ag.delai_moyen || null;
+    var fluxLabel = ag.flux === 'A' ? 'Mandat de vente' : 'Acheteur en portefeuille';
+    var fluxClass = ag.flux === 'A' ? 'flux-a' : 'flux-b';
+    var fluxIcon = ag.flux === 'A' ? '🎯' : '👥';
+
+    h += '<div class="agent-card" id="card-' + i + '">'
+      + '<div class="agent-rank rank-' + (i+1) + '">' + (i+1) + '</div>'
+      + '<div class="agent-card-top">'
+      + '<div style="text-align:center;margin-bottom:10px;padding-top:8px">'
+      + '<div class="agent-avatar">' + initiales + '</div>'
+      + '<div class="agent-nom">Agent ' + String.fromCharCode(65+i) + '</div>'
+      + '<div class="agent-agence">' + ag.agent_email.split('@')[1] + '</div>'
+      + '<div style="text-align:center"><span class="agent-flux ' + fluxClass + '">' + fluxIcon + ' ' + fluxLabel + '</span></div>'
+      + '</div>'
+      + '<div class="agent-score">'
+      + '<div class="score-num" style="color:' + scoreColor + '">' + ag.score_total + '</div>'
+      + '<div class="score-max">/100</div>'
+      + '<div class="score-bar-wrap"><div class="score-bar-fill" style="width:' + ag.score_total + '%;background:' + scoreColor + '"></div></div>'
+      + '</div>'
+      + '<div class="agent-badges">' + badges.map(function(b){ return '<span class="badge-pill">' + b + '</span>'; }).join('') + '</div>'
+      + '</div>'
+      + '<div class="agent-strategie">' + strategie + '</div>'
+      + '<div class="agent-infos">'
+      + '<div class="agent-info-item"><span class="agent-info-val">' + honoraires + '</span><span class="agent-info-lbl">Honoraires</span></div>'
+      + '<div class="agent-info-item"><span class="agent-info-val">' + (delai ? delai + 'j' : '—') + '</span><span class="agent-info-lbl">Delai moyen</span></div>'
+      + '<div class="agent-info-item"><span class="agent-info-val">' + ag.score_total + ' pts</span><span class="agent-info-lbl">Score IA</span></div>'
+      + '</div>'
+      + '<div class="agent-btns">'
+      + '<button class="btn-choisir" onclick="ouvrirModal(' + i + ')">Choisir cet agent</button>'
+      + '<button class="btn-question" onclick="contacterAgent(\'' + ag.agent_email + '\')">Poser une question</button>'
+      + '</div>'
+      + '</div>';
+  });
+  h += '</div>';
+
+  // ANALYSE HANAE
+  h += '<div class="comparatif-box">'
+    + '<div class="comparatif-title"><span style="font-size:16px">🤖</span> Analyse comparative Hanae</div>'
+    + '<div class="comparatif-text" id="analyse-hanae">Generation de l\'analyse en cours...</div>'
+    + '</div>';
+
+  // TABLEAU COMPARATIF
+  h += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Tableau comparatif</div>'
+    + '<div class="table-wrap"><table class="comp-table"><thead><tr><th>Critere</th>';
+  agents.forEach(function(ag, i){ h += '<th>Agent ' + String.fromCharCode(65+i) + '</th>'; });
+  h += '</tr></thead><tbody>';
+
+  var criteres = [
+    { lbl: 'Score global', fn: function(ag){ return '<span class="td-best">' + ag.score_total + '/100</span>'; } },
+    { lbl: 'Type de candidature', fn: function(ag){ return ag.flux === 'A' ? 'Mandat de vente' : 'Acheteur en portefeuille'; } },
+    { lbl: 'Honoraires', fn: function(ag){ return ag.honoraires_proposes || '—'; } },
+    { lbl: 'Delai moyen', fn: function(ag){ return ag.delai_moyen ? ag.delai_moyen + ' jours' : '—'; } },
+  ];
+
+  criteres.forEach(function(crit, ci) {
+    h += '<tr><td>' + crit.lbl + '</td>';
+    agents.forEach(function(ag){ h += '<td>' + crit.fn(ag) + '</td>'; });
+    h += '</tr>';
+  });
+  h += '</tbody></table></div>';
+
+  // Vérifier qualité du top 3
+  var tousAuDessus = agents.every(function(a){ return a.score_total >= SEUIL_QUALITE; });
+  var qualiteInsuffisante = agents.some(function(a){ return a.score_total < SEUIL_QUALITE; });
+
+  if (tousAuDessus) {
+    h += '<div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px">'
+      + '<div style="font-size:18px;flex-shrink:0">✅</div>'
+      + '<div><div style="font-size:13px;font-weight:500;color:#1E7A62;margin-bottom:2px">Selection de qualite confirmee</div>'
+      + '<div style="font-size:12px;color:#1E7A62;line-height:1.6">Les 3 agents proposes ont tous atteint notre seuil de qualite (60/100 minimum). Vous devez choisir l\'un d\'eux pour avancer.</div></div>'
+      + '</div>';
+  }
+
+  if (qualiteInsuffisante && !tousAuDessus) {
+    h += '<div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:10px;padding:16px 20px;margin-bottom:16px">'
+      + '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">'
+      + '<div style="font-size:20px;flex-shrink:0">⚠️</div>'
+      + '<div><div style="font-size:13px;font-weight:500;color:#712B13;margin-bottom:4px">Scores partiellement insuffisants — seuil 60/100</div>'
+      + '<div style="font-size:12px;color:#712B13;line-height:1.7">Certains agents n\'ont pas atteint notre seuil de qualite de 60 points. <strong>Vous n\'etes pas oblige de choisir parmi ces profils.</strong> Des agents complementaires ont ete alertes et peuvent encore candidater dans les prochaines heures.</div></div>'
+      + '</div>'
+      + '<div style="background:rgba(255,255,255,.6);border-radius:8px;padding:10px 14px;font-size:12px;color:#712B13;line-height:1.6">'
+      + 'Options : choisir quand meme parmi ces agents · attendre de nouvelles candidatures · passer au choix libre pour elargir votre selection.'
+      + '</div>'
+      + '</div>';
+  }
+
+  // Bouton choix libre EN PLUS (affiché dans tous les cas)
+  h += '<div style="background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin-bottom:16px">'
+    + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'
+    + '<div style="width:36px;height:36px;border-radius:8px;background:#FAEEDA;display:flex;align-items:center;justify-content:center;font-size:16px">🤝</div>'
+    + '<div><div style="font-size:13px;font-weight:500">Vous souhaitez aussi choisir librement ?</div><div style="font-size:11px;color:var(--muted)">En plus du top 3, vous pouvez mandater d\'autres agents. Max 3 mandats conseilles.</div></div>'
+    + '</div>'
+    + '<button onclick="ouvrirChoixLibre()" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;color:var(--ink)">Voir les agents disponibles pour un mandat libre →</button>'
+    + '</div>';
+
+  h += '<div style="display:flex;gap:10px;margin-top:8px">'
+    + '<a href="connexion.html" style="flex:1;padding:12px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;text-align:center;text-decoration:none;color:var(--ink)">← Retour au tableau de bord</a>'
+    + '</div>';
+
+  document.getElementById('main-content').innerHTML = h;
+  genererAnalyseHanae();
+}
+
+async function genererAnalyseHanae() {
+  if (!agents.length) return;
+  try {
+    var a0 = agents[0], a1 = agents[1], a2 = agents[2];
+    var prompt = 'Tu es Hanae, IA ImmoConnect. En 3-4 phrases en francais, explique au vendeur pourquoi ces 3 agents ont ete selectionnes et lequel semble le plus adapte. '
+      + 'Agent A (score ' + (a0?.score_total||0) + '/100, ' + (a0?.flux==='A'?'veut le mandat':'a un acheteur') + '). '
+      + 'Agent B (score ' + (a1?.score_total||0) + '/100, ' + (a1?.flux==='A'?'veut le mandat':'a un acheteur') + '). '
+      + (a2 ? 'Agent C (score ' + (a2?.score_total||0) + '/100, ' + (a2?.flux==='A'?'veut le mandat':'a un acheteur') + '). ' : '')
+      + 'Bien: ' + (bien.type_bien||'') + ' ' + (bien.surface||'') + 'm2 a ' + (bien.ville||'') + ' a ' + Math.round(bien.prix||0).toLocaleString('fr-FR') + ' EUR. '
+      + 'Commence par "Apres analyse de toutes les candidatures...". Sois concis et utile. NE MENTIONNE JAMAIS l\'estimation de prix interne.';
+
+    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': '' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 200, messages: [{ role: 'user', content: prompt }] })
+    });
+
+    var data = await resp.json();
+    var text = data.content?.[0]?.text || '';
+    var el = document.getElementById('analyse-hanae');
+    if (el && text) {
+      el.innerHTML = text.replace(/Agent ([ABC])/g, '<strong>Agent $1</strong>');
+    }
+  } catch(e) {
+    var el = document.getElementById('analyse-hanae');
+    if (el) el.textContent = 'Les 3 agents selectionnes ont ete retenus sur la base de leur experience locale, leur reputation et la pertinence de leur proposition pour votre bien. Consultez les details de chaque profil et posez vos questions avant de faire votre choix.';
+  }
+}
+
+function ouvrirModal(idx) {
+  agentChoisi = agents[idx];
+  var lettre = String.fromCharCode(65+idx);
+  var tousAuDessus = agents.every(function(a){ return a.score_total >= SEUIL_QUALITE; });
+
+  document.getElementById('modal-recap').innerHTML =
+    '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--muted)">Agent selectionne</span><strong>Agent ' + lettre + '</strong></div>'
+    + '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--muted)">Type</span><span>' + (agentChoisi.flux === 'A' ? 'Mandat de vente' : 'Acheteur en portefeuille') + '</span></div>'
+    + '<div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Score IA</span><span style="color:var(--teal);font-weight:600">' + agentChoisi.score_total + '/100</span></div>';
+
+  // Si scores suffisants : pas de bouton annuler (choix obligatoire)
+  // Si scores insuffisants : bouton annuler visible (choix facultatif)
+  var btnAnnuler = document.getElementById('btn-modal-annuler');
+  if (btnAnnuler) btnAnnuler.style.display = tousAuDessus ? 'none' : 'block';
+
+  var warning = document.getElementById('modal-warning');
+  if (warning) {
+    warning.textContent = tousAuDessus
+      ? 'Les 3 agents proposes ont tous atteint notre seuil de qualite. Ce choix est definitif — les autres agents seront notifies.'
+      : 'Les scores sont partiellement insuffisants. Vous pouvez choisir cet agent ou attendre de nouvelles candidatures.';
+  }
+
+  document.getElementById('modal-choisir').classList.add('open');
+}
+
+async function ouvrirChoixLibre() {
+  var modal = document.getElementById('modal-libre');
+  var content = document.getElementById('modal-libre-content');
+  modal.classList.add('open');
+  content.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Chargement des candidats...</div>';
+
+  // Récupérer tous les candidats sur ce bien
+  var { data: cands } = await db.from('candidatures_agents')
+    .select('agent_email, flux, score_total, statut')
+    .eq('annonce_id', annonceId)
+    .eq('paiement_statut', 'paye')
+    .order('score_total', { ascending: false });
+
+  var emailsCandidats = (cands || []).map(function(c){ return c.agent_email; });
+
+  if (!emailsCandidats.length) {
+    // Aucun candidat — déclencher élargissement
+    await db.functions.invoke('matcher-mandats', {
+      body: {
+        type: 'elargir_pool_libre',
+        data: {
+          annonce_id: annonceId,
+          bien: bien,
+          candidats_existants: [],
+          score_min_top3: agents.length > 0 ? agents[agents.length-1].score_total : 0
+        }
+      }
+    }).then(undefined, function(){});
+
+    content.innerHTML = '<div style="background:#E1F5EE;border-radius:8px;padding:14px;font-size:13px;color:#085041;line-height:1.7;margin-bottom:12px">Aucun candidat supplementaire disponible. Nous avons envoye une alerte a tous les agents abonnes de votre secteur. Revenez dans 48h.</div>';
+    return;
+  }
+
+  var html = '<div style="font-size:12px;color:var(--muted);margin-bottom:12px">' + emailsCandidats.length + ' agent(s) disponible(s) — choisissez ceux avec qui vous souhaitez travailler</div>';
+
+  (cands || []).forEach(function(c, i) {
+    var lettre = String.fromCharCode(65 + i);
+    var fluxLabel = c.flux === 'A' ? 'Mandat' : 'Acheteur';
+    var scoreColor = c.score_total >= SEUIL_QUALITE ? 'var(--teal)' : 'var(--amber)';
+    html += '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)">'
+      + '<div style="font-size:12px;font-weight:500;flex:1">Agent ' + lettre + ' · ' + fluxLabel + '</div>'
+      + '<div style="font-size:14px;font-weight:500;color:' + scoreColor + '">' + c.score_total + ' pts</div>'
+      + '<button onclick="mandaterLibre(\'' + c.agent_email + '\')" style="padding:6px 14px;border-radius:6px;border:none;background:var(--teal);color:#fff;font-family:Outfit,sans-serif;font-size:12px;cursor:pointer">Mandater</button>'
+      + '</div>';
+  });
+
+  // Si < 3 candidats → alerter secteur aussi
+  if (emailsCandidats.length < 3) {
+    html += '<div style="background:#FAEEDA;border-radius:8px;padding:12px 14px;font-size:12px;color:#633806;line-height:1.6;margin-top:12px">'
+      + 'Seulement ' + emailsCandidats.length + ' candidat(s). Une alerte a ete envoyee aux agents abonnes de votre secteur pour elargir votre choix.</div>';
+    await db.functions.invoke('matcher-mandats', {
+      body: {
+        type: 'elargir_pool_libre',
+        data: { annonce_id: annonceId, bien: bien, candidats_existants: emailsCandidats, score_min_top3: 0 }
+      }
+    }).then(undefined, function(){});
+  }
+
+  content.innerHTML = html;
+}
+
+async function mandaterLibre(agentEmail) {
+  showToast('Mandat libre initie avec cet agent. Il sera notifie.', 'ok');
+  await db.functions.invoke('envoyer-email', {
+    body: {
+      type: 'alerte_choix_libre',
+      to: agentEmail,
+      subject: 'Le vendeur souhaite travailler avec vous - ImmoConnect',
+      bien_titre: bien ? (bien.titre || bien.type_bien + ' ' + bien.ville) : '',
+      lien: 'https://immoconnect-agence.fr/connexion.html',
+      priorite: true
+    }
+  }).then(undefined, function(){});
+}
+
+function fermerModal() {
+  document.getElementById('modal-choisir').classList.remove('open');
+  agentChoisi = null;
+}
+
+async function confirmerChoix() {
+  if (!agentChoisi) return;
+  var btn = document.getElementById('btn-confirmer-final');
+  btn.disabled = true;
+  btn.textContent = 'Traitement...';
+
+  try {
+    // 1. Marquer la candidature comme gagnante
+    await db.from('candidatures_agents').update({ statut: 'gagnant' }).eq('id', agentChoisi.id);
+
+    // 2. Marquer le bien comme vendu/choisi
+    await db.from('annonces_vendeurs').update({ statut_selection: 'choisi' }).eq('id', annonceId);
+
+    // 3. Récupérer l\'estimation Hanaé pour la transmettre à l\'agent retenu
+    var estimHanae = null;
+    if (bien && bien.estimation_hanae) {
+      estimHanae = Math.round(bien.estimation_hanae).toLocaleString('fr-FR') + ' EUR';
+    }
+
+    // 4. Notifier l\'agent choisi — avec estimation Hanaé confidentielle
+    var msgAgent = 'Felicitations ! Vous avez ete selectionne par le vendeur pour ce bien.\n\n'
+      + 'Le mandat simple va etre genere et envoye pour signature electronique.\n\n';
+    if (estimHanae) {
+      msgAgent += 'Estimation de marche Hanaé (confidentielle — pour vous seul) : ' + estimHanae
+        + '.\nCette estimation est basee sur les donnees DVF et Notaires-INSEE. '
+        + 'Elle vous est transmise pour vous aider dans votre evaluation. '
+        + 'Votre estimation finale apres visite du bien primera sur cette valeur indicative.';
+    }
+
+    await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'nouveau_message',
+        to: agentChoisi.agent_email,
+        subject: 'Felicitations — Vous etes selectionne ! - ImmoConnect',
+        expediteur: 'ImmoConnect',
+        message: msgAgent,
+        bien: bien ? (bien.titre || bien.type_bien + ' ' + bien.ville) : '',
+        lien: 'https://immoconnect-agence.fr/connexion.html'
+      }
+    }).then(undefined, function(){});
+
+    // 5. Notifier les autres agents non retenus
+    for (var ag of agents) {
+      if (ag.id !== agentChoisi.id) {
+        await db.functions.invoke('envoyer-email', {
+          body: {
+            type: 'vendeur_mode_acheteurs',
+            to: ag.agent_email,
+            subject: 'Ce bien a trouve son agent - ImmoConnect',
+            bien_titre: bien ? (bien.titre || bien.type_bien + ' ' + bien.ville) : '',
+            lien: 'https://immoconnect-agence.fr/connexion.html'
+          }
+        }).then(undefined, function(){});
+      }
+    }
+
+    fermerModal();
+    showToast('Agent selectionne ! Le mandat sera genere automatiquement.', 'ok');
+    setTimeout(function(){ window.location.href = 'connexion.html'; }, 2500);
+
+  } catch(e) {
+    showToast('Erreur : ' + (e.message || 'Reessayez.'), 'err');
+    btn.disabled = false;
+    btn.textContent = 'Confirmer et generer le mandat';
+  }
+}
+
+function contacterAgent(email) {
+  window.location.href = 'messagerie.html?contact=' + encodeURIComponent(email) + '&annonce=' + annonceId;
+}
+
+function showErr(msg) {
+  document.getElementById('main-content').innerHTML = '<div style="text-align:center;padding:60px 24px;background:var(--warm);border:1px solid var(--line);border-radius:12px;margin-top:20px"><div style="font-size:32px;margin-bottom:12px">⏳</div><div style="font-size:16px;font-weight:500;margin-bottom:8px">Pas encore disponible</div><div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px">' + msg + '</div><a href="connexion.html" style="display:inline-block;background:var(--ink);color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:13px">Mon tableau de bord</a></div>';
+}
+
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + type; t.style.display = 'block';
+  setTimeout(function(){ t.style.display = 'none'; }, 3500);
+}
+
+// ── COUNTDOWN TEMPS REEL ────────────────────────────────────────
+var countdownTimer = null;
+var realtimeChannel = null;
+
+function demarrerCountdown(clotureLe) {
+  var cloture = new Date(clotureLe).getTime();
+  if (countdownTimer) clearInterval(countdownTimer);
+  function maj() {
+    var el = document.getElementById('main-countdown');
+    if (!el) { clearInterval(countdownTimer); return; }
+    var reste = cloture - Date.now();
+    if (reste <= 0) { el.textContent = 'Cloturee'; el.classList.add('urgent'); clearInterval(countdownTimer); return; }
+    var h = Math.floor(reste / 3600000);
+    var m = Math.floor((reste % 3600000) / 60000);
+    var s = Math.floor((reste % 60000) / 1000);
+    el.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    if (reste < 3 * 3600000) el.classList.add('urgent'); else el.classList.remove('urgent');
+  }
+  maj();
+  countdownTimer = setInterval(maj, 1000);
+}
+
+function activerRealtimeCandidats(annonceId) {
+  realtimeChannel = db.channel('selection-' + annonceId)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'candidatures_agents', filter: 'annonce_id=eq.' + annonceId }, function() {
+      db.from('candidatures_agents').select('id', { count: 'exact', head: true }).eq('annonce_id', annonceId).eq('dans_fenetre', true).then(function(res) {
+        var nb = res.count || 0;
+        var nbEl = document.getElementById('nb-candidats-rt');
+        var fillEl = document.getElementById('candidats-fill');
+        if (nbEl) { nbEl.style.transform = 'scale(1.3)'; nbEl.textContent = nb; setTimeout(function(){ nbEl.style.transform = 'scale(1)'; }, 300); }
+        if (fillEl) fillEl.style.width = Math.min(nb/3*100, 100) + '%';
+      });
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'annonces_vendeurs', filter: 'id=eq.' + annonceId }, function(payload) {
+      if (payload.new && payload.new.fenetre_statut === 'scored') {
+        if (countdownTimer) clearInterval(countdownTimer);
+        var wrapper = document.getElementById('countdown-wrapper');
+        if (wrapper) {
+          wrapper.style.background = 'linear-gradient(135deg,#0C1F3D,#1A3160)';
+          wrapper.innerHTML = '<div style="display:flex;align-items:center;gap:12px;width:100%"><span style="font-size:28px">&#127942;</span><div><div style="font-size:14px;font-weight:500;color:#fff">Selection finalisee !</div><div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px">Le top 3 calcule par Hanae</div></div><button onclick="location.reload()" style="margin-left:auto;padding:8px 16px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-size:12px;cursor:pointer;font-family:Outfit,sans-serif">Voir les resultats</button></div>';
+        }
+      }
+    })
+    .subscribe();
+}
+</script>
+<script src="feedback.js" defer></script>
+</body>
+</html>

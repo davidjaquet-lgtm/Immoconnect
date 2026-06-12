@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — FAQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}
+.nav-logo span{color:var(--gold)}
+.page{max-width:760px;margin:0 auto;padding:48px 24px 80px}
+.page-title{font-size:28px;font-weight:500;margin-bottom:6px}
+.page-sub{font-size:13px;color:var(--muted);margin-bottom:40px}
+.rubrique{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);margin:32px 0 12px}
+.faq-item{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.faq-item summary{list-style:none;cursor:pointer;padding:16px 20px;font-size:14px;font-weight:500;color:var(--ink);display:flex;justify-content:space-between;align-items:center;gap:16px}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:"+";color:var(--gold);font-size:20px;font-weight:400;flex-shrink:0;transition:transform .2s}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item .answer{padding:0 20px 18px;font-size:13px;color:var(--muted);line-height:1.8}
+.faq-item .answer strong{color:var(--ink)}
+.faq-item .answer a{color:var(--teal);text-decoration:none}
+.contact-box{background:#E1F5EE;border:1px solid #9FE1CB;border-radius:8px;padding:16px 18px;margin-top:32px;font-size:13px;color:#0A4A35;line-height:1.7}
+.contact-box a{color:#0A4A35;font-weight:600}
+</style>
+<style>
+/* Bandeau supérieur unifié — fond blanc, texte foncé (override global) */
+nav{background:#fff!important;border-bottom:1px solid #E8E6E0!important}
+nav .nav-logo{color:#0F0F0E!important}
+nav .nav-logo span{color:#C09B5A!important}
+nav a{color:#0F0F0E!important}
+nav a:hover{color:#C09B5A!important}
+nav .nav-out{color:#0F0F0E!important;border-color:#0F0F0E!important}
+nav .nav-link{margin-right:18px}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+</nav>
+<div class="page">
+  <div class="page-title">Foire aux questions</div>
+  <div class="page-sub">Les réponses aux questions les plus fréquentes sur ImmoConnect</div>
+
+  <div class="rubrique">Général</div>
+
+  <details class="faq-item">
+    <summary>Qu'est-ce qu'ImmoConnect ?</summary>
+    <div class="answer">Une plateforme en ligne qui met en relation vendeurs, acheteurs et agents immobiliers, avec des outils d'aide à l'estimation et à la mise en valeur des biens.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>ImmoConnect est-elle une agence immobilière ?</summary>
+    <div class="answer">Non. ImmoConnect est un opérateur de plateforme numérique de mise en relation (hébergeur au sens de la LCEN / DSA). Elle ne négocie pas, ne fixe pas les prix et n'intervient pas dans les transactions. Seuls les agents inscrits, titulaires de la carte T, exercent l'activité d'intermédiation.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Le service est-il payant ?</summary>
+    <div class="answer">La publication et la consultation sont gratuites pour les particuliers. Les agents disposent de forfaits — voir la page <a href="forfaits.html">Forfaits</a>.</div>
+  </details>
+
+  <div class="rubrique">Vendeurs</div>
+
+  <details class="faq-item">
+    <summary>Comment publier mon bien ?</summary>
+    <div class="answer">Créez un compte vendeur et remplissez le questionnaire de mise en vente : informations sur le bien, photos, et documents justificatifs pour valider le niveau de votre annonce.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Mes documents (taxe foncière, DPE…) sont-ils conservés ?</summary>
+    <div class="answer"><strong>Non.</strong> Ils sont lus le temps de la vérification automatique, puis abandonnés. Nous ne conservons que le statut « vérifié ». Vos justificatifs ne sont jamais montrés aux acheteurs ou agents.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>À quoi servent les niveaux d'annonce (Silver, Gold, Platinium) ?</summary>
+    <div class="answer">Ils valorisent votre annonce selon les éléments vérifiés que vous fournissez (bail / valeur locative, copropriété, taxe foncière, DPE).</div>
+  </details>
+
+  <div class="rubrique">Acheteurs</div>
+
+  <details class="faq-item">
+    <summary>Comment contacter un vendeur ?</summary>
+    <div class="answer">Via la plateforme, qui transmet votre demande de mise en relation.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Qu'est-ce que l'attestation de financement et qui la voit ?</summary>
+    <div class="answer">C'est un document facultatif (simulation ou accord de principe bancaire) qui renforce la crédibilité de votre dossier. Elle n'est visible que par le vendeur que vous contactez, via un lien sécurisé temporaire, et elle est supprimée automatiquement.</div>
+  </details>
+
+  <div class="rubrique">Agents</div>
+
+  <details class="faq-item">
+    <summary>Quelles vérifications pour s'inscrire comme agent ?</summary>
+    <div class="answer">Votre SIREN et votre carte professionnelle (carte T) sont vérifiés. La photo de la carte n'est pas conservée.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Qu'est-ce que l'exclusivité temporaire ?</summary>
+    <div class="answer">Elle réserve la visibilité d'un dossier à un agent pour une durée donnée sur la plateforme. Ce n'est pas un mandat de vente au sens légal : un mandat doit être formalisé séparément, conformément à la loi Hoguet.</div>
+  </details>
+
+  <div class="rubrique">Estimation Hanaé</div>
+
+  <details class="faq-item">
+    <summary>Comment fonctionne l'estimation Hanaé ?</summary>
+    <div class="answer">C'est une estimation automatisée générée par intelligence artificielle à partir de données publiques officielles (DVF, INSEE, etc.). Elle est indicative et ne tient pas compte de l'état réel du bien.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Est-ce une expertise officielle ?</summary>
+    <div class="answer">Non. C'est une aide à l'estimation, pas une expertise certifiée.</div>
+  </details>
+
+  <div class="rubrique">Données &amp; sécurité</div>
+
+  <details class="faq-item">
+    <summary>Quelles données collectez-vous sur moi ?</summary>
+    <div class="answer">Ce qui est nécessaire à votre compte, à vos annonces ou recherches, et à la sécurité. Le détail figure dans notre <a href="confidentialite.html">Politique de confidentialité</a>.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Combien de temps conservez-vous mes données ?</summary>
+    <div class="answer">Selon leur nature (compte, annonces, factures, logs…). Le détail des durées figure dans la <a href="confidentialite.html">Politique de confidentialité</a>.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Mes documents sensibles sont-ils en sécurité ?</summary>
+    <div class="answer">Oui : justificatifs non conservés, documents sensibles dans des espaces privés, accès par liens temporaires, suppression automatique, et chiffrement.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Comment supprimer mon compte ou mes données ?</summary>
+    <div class="answer">Écrivez à <a href="mailto:contact@immoconnect-agence.fr">contact@immoconnect-agence.fr</a>. Vous pouvez exercer vos droits d'accès, de rectification et d'effacement à tout moment.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Utilisez-vous l'IA sur mes données ?</summary>
+    <div class="answer">Hanaé utilise une IA (Anthropic) pour les estimations et descriptions. Nous limitons au maximum les données personnelles transmises.</div>
+  </details>
+
+  <div class="contact-box">
+    Vous ne trouvez pas votre réponse ? Écrivez-nous à <a href="mailto:contact@immoconnect-agence.fr">contact@immoconnect-agence.fr</a>.
+  </div>
+
+</div>
+<script src="feedback.js" defer></script>
+</body>
+</html>

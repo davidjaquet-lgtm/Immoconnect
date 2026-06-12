@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Plan d'action complet</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0F0F0E;--ink2:#3A3A38;--muted:#8C8B86;--bg:#F5F2EC;--warm:#FEFDFB;--line:rgba(15,15,14,.08);--gold:#C09B5A;--gold2:#E2C07A;--teal:#1E7A62;--rose:#C0392B;--purple:#6B3FA0;--amber:#D4732A;--r:6px}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(15,15,14,.96);backdrop-filter:blur(14px);height:56px;display:flex;align-items:center;padding:0 40px;gap:20px;border-bottom:1px solid rgba(255,255,255,.05)}
+.nav-logo{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#fff}.nav-logo span{color:var(--gold2)}
+.nav-right{display:flex;gap:12px;margin-left:auto;align-items:center}
+.nav-right a{font-size:12px;color:rgba(255,255,255,.5);text-decoration:none;transition:color .2s}.nav-right a:hover{color:#fff}
+.progress-pill{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:5px 14px;font-size:12px;color:rgba(255,255,255,.6)}
+.progress-pill strong{color:var(--gold2)}
+
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 56px)}
+
+/* SIDENAV */
+.sidenav{background:var(--warm);border-right:1px solid var(--line);position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;padding:16px 0}
+.sn-logo{padding:12px 18px 16px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.sn-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;margin-bottom:2px}
+.sn-sub{font-size:11px;color:var(--muted)}
+.sn-section{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);padding:10px 18px 4px;font-weight:700}
+.sn-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--ink2);cursor:pointer;transition:all .15s;border-left:2px solid transparent;text-decoration:none}
+.sn-item:hover{background:var(--bg);color:var(--ink)}
+.sn-item.active{border-left-color:var(--gold);background:rgba(192,155,90,.06);color:var(--gold);font-weight:500}
+.sn-badge{margin-left:auto;border-radius:20px;font-size:10px;font-weight:700;padding:2px 7px}
+.sn-badge.done{background:rgba(30,122,98,.15);color:var(--teal)}
+.sn-badge.todo{background:rgba(192,57,43,.12);color:var(--rose)}
+.sn-badge.warn{background:rgba(192,155,90,.15);color:var(--gold)}
+
+.prog-wrap{margin:16px 18px 0;padding:12px;background:var(--bg);border-radius:var(--r)}
+.prog-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px}
+.prog-bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--gold));border-radius:3px;transition:width .4s}
+
+/* MAIN */
+.main{padding:32px 40px 60px;max-width:840px}
+
+/* HERO CARD */
+.hero-card{background:var(--ink);border-radius:12px;padding:32px 36px;margin-bottom:32px;position:relative;overflow:hidden}
+.hc-before{position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(192,155,90,.18) 0%,transparent 70%)}
+.hc-eyebrow{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold2);margin-bottom:10px;font-weight:600;position:relative;z-index:1}
+.hc-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#fff;margin-bottom:8px;line-height:1.2;position:relative;z-index:1}
+.hc-title em{font-style:italic;color:var(--gold2)}
+.hc-sub{font-size:13px;color:rgba(255,255,255,.5);line-height:1.7;max-width:520px;position:relative;z-index:1;margin-bottom:20px}
+.hc-stats{display:flex;gap:24px;flex-wrap:wrap;position:relative;z-index:1}
+.hc-stat{}
+.hc-stat-val{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--gold2);line-height:1}
+.hc-stat-lbl{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;letter-spacing:.5px}
+
+/* PHASE BLOCKS */
+.phase{margin-bottom:40px;scroll-margin-top:80px}
+.phase-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.phase-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.phase-info{}
+.phase-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:3px}
+.phase-meta{display:flex;gap:8px;flex-wrap:wrap}
+.ptag{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.ptag-time{background:rgba(30,122,98,.1);color:var(--teal)}
+.ptag-money{background:rgba(192,155,90,.1);color:var(--gold)}
+.ptag-urgent{background:rgba(192,57,43,.1);color:var(--rose)}
+.ptag-free{background:rgba(30,122,98,.1);color:var(--teal)}
+
+/* TASK ITEMS */
+.tasks{display:flex;flex-direction:column;gap:0;background:var(--warm);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.task{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .15s}
+.task:last-child{border-bottom:none}
+.task:hover{background:var(--bg)}
+.task-check{width:22px;height:22px;border-radius:5px;border:1.5px solid var(--line);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s;background:var(--warm)}
+.task-check.done{background:var(--teal);border-color:var(--teal);color:#fff}
+.task-check.priority{border-color:var(--rose)}
+.task-body{flex:1}
+.task-title{font-size:13px;font-weight:500;margin-bottom:3px;line-height:1.4}
+.task-title.done{text-decoration:line-through;color:var(--muted)}
+.task-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.task-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.task-time{font-size:10px;color:var(--muted);white-space:nowrap}
+.task-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap}
+.tb-urgent{background:rgba(192,57,43,.1);color:var(--rose)}
+.tb-done{background:rgba(30,122,98,.1);color:var(--teal)}
+.tb-soon{background:rgba(192,155,90,.1);color:var(--gold)}
+.tb-later{background:rgba(140,139,134,.1);color:var(--muted)}
+
+/* INFO BOX */
+.ibox{border-radius:8px;padding:13px 16px;margin-bottom:14px;display:flex;gap:10px}
+.ibox.tip{background:rgba(30,122,98,.07);border:1px solid rgba(30,122,98,.2)}
+.ibox.warn{background:rgba(192,155,90,.07);border:1px solid rgba(192,155,90,.2)}
+.ibox.danger{background:rgba(192,57,43,.07);border:1px solid rgba(192,57,43,.2)}
+.ibox.info{background:rgba(44,62,106,.07);border:1px solid rgba(44,62,106,.2)}
+.ibox-icon{font-size:16px;flex-shrink:0;margin-top:2px}
+.ibox-text{font-size:13px;line-height:1.7}
+.ibox.tip .ibox-text{color:var(--teal)}.ibox.warn .ibox-text{color:var(--gold)}.ibox.danger .ibox-text{color:var(--rose)}.ibox.info .ibox-text{color:var(--slate,#2C3E6A)}
+.ibox-text strong{font-weight:600}
+
+/* FILES MAP */
+.files-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.file-card{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px}
+.file-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.file-name{font-size:13px;font-weight:600;font-family:monospace;margin-bottom:3px;color:var(--ink)}
+.file-desc{font-size:11px;color:var(--muted);line-height:1.4}
+.file-url{font-size:10px;color:var(--gold);margin-top:3px;font-family:monospace}
+
+/* REVENUE PROJECTION */
+.rev-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.rev-card{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:14px;text-align:center}
+.rev-phase{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.rev-val{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:3px}
+.rev-val.p1{color:var(--muted)}.rev-val.p2{color:var(--gold)}.rev-val.p3{color:var(--amber)}.rev-val.p4{color:var(--teal)}
+.rev-lbl{font-size:11px;color:var(--muted)}
+
+/* GLOBAL PROGRESS */
+.global-prog{background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:20px 24px;margin-bottom:24px}
+.gp-title{font-size:14px;font-weight:600;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.gp-pct{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--gold)}
+.gp-bar{height:10px;background:var(--line);border-radius:5px;overflow:hidden;margin-bottom:10px}
+.gp-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--gold));border-radius:5px;transition:width .5s}
+.gp-cats{display:flex;gap:16px;flex-wrap:wrap}
+.gp-cat{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.gp-cat-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+footer{background:var(--ink);padding:24px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-logo{font-family:'Playfair Display',serif;font-size:16px;color:#fff;font-weight:700}.footer-logo span{color:var(--gold2)}
+.footer-txt{font-size:11px;color:rgba(255,255,255,.3)}
+
+@media(max-width:900px){.layout{grid-template-columns:1fr}.sidenav{display:none}.main{padding:20px}.rev-grid{grid-template-columns:repeat(2,1fr)}.files-grid{grid-template-columns:1fr}}
+</style>
+<style>
+/* Bandeau supérieur unifié — fond blanc, texte foncé (override global) */
+nav{background:#fff!important;border-bottom:1px solid #E8E6E0!important}
+nav .nav-logo{color:#0F0F0E!important}
+nav .nav-logo span{color:#C09B5A!important}
+nav a{color:#0F0F0E!important}
+nav a:hover{color:#C09B5A!important}
+nav .nav-out{color:#0F0F0E!important;border-color:#0F0F0E!important}
+nav .nav-link{margin-right:18px}
+</style>
+</head>
+<body>
+
+<nav style="background:#0F0F0E;height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100;gap:0">
+  <a href="index.html" style="font-size:18px;font-weight:600;color:#fff;text-decoration:none;margin-right:32px;font-family:'Outfit',sans-serif">Immo<span style="color:#C09B5A">Connect</span></a>
+  <div style="display:flex;gap:24px;align-items:center;flex:1">
+    <a href="forfaits.html" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Forfaits</a>
+    <a href="questionnaire-vendeur.html" style="text-decoration:none;padding:7px 16px;background:#C09B5A;color:#0F0F0E;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif">Vendre</a>
+    <a href="questionnaire-acheteur.html" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Acheter</a>
+    <a href="index.html#agents" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Agents immo</a>
+  </div>
+  <a href="index.html" style="text-decoration:none;padding:8px 20px;border:1px solid #444;color:#fff;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif;transition:all .2s" onmouseover="this.style.borderColor='#C09B5A';this.style.color='#C09B5A'" onmouseout="this.style.borderColor='#444';this.style.color='#fff'">Accueil</a>
+</nav>
+
+<div class="layout">
+
+<!-- SIDENAV -->
+<aside class="sidenav">
+  <div class="sn-logo">
+    <div class="sn-title">Plan d'action</div>
+    <div class="sn-sub">ImmoConnect — Feuille de route complète</div>
+  </div>
+
+  <div class="sn-section">Phases</div>
+  <a class="sn-item active" href="#phase0">Fichiers du site<span class="sn-badge warn" id="badge-p0">—</span></a>
+  <a class="sn-item" href="#phase1">Mise en ligne<span class="sn-badge todo" id="badge-p1">—</span></a>
+  <a class="sn-item" href="#phase2">Base de données<span class="sn-badge todo" id="badge-p2">—</span></a>
+  <a class="sn-item" href="#phase3">Stripe paiements<span class="sn-badge todo" id="badge-p3">—</span></a>
+  <a class="sn-item" href="#phase4">Légal & RGPD<span class="sn-badge todo" id="badge-p4">—</span></a>
+  <a class="sn-item" href="#phase5">Commercial<span class="sn-badge todo" id="badge-p5">—</span></a>
+  <a class="sn-item" href="#phase6">Marketing<span class="sn-badge todo" id="badge-p6">—</span></a>
+  <a class="sn-item" href="#phase7">Croissance<span class="sn-badge todo" id="badge-p7">—</span></a>
+
+  <div class="prog-wrap">
+    <div class="prog-label"><span>Progression globale</span><span id="sn-pct">0%</span></div>
+    <div class="prog-bar"><div class="prog-fill" id="sn-fill" style="width:0%"></div></div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- HERO -->
+  <div class="hero-card">
+    <div class="hc-before"></div>
+    <div class="hc-eyebrow">ImmoConnect Agence — Feuille de route</div>
+    <h1 class="hc-title">Tout ce qu'il reste à faire<br>pour lancer <em>ImmoConnect</em></h1>
+    <p class="hc-sub">Cochez chaque tâche au fur et à mesure. La progression se sauvegarde automatiquement dans votre navigateur.</p>
+    <div class="hc-stats">
+      <div class="hc-stat"><div class="hc-stat-val" id="stat-done">0</div><div class="hc-stat-lbl">tâches terminées</div></div>
+      <div class="hc-stat"><div class="hc-stat-val" id="stat-todo">0</div><div class="hc-stat-lbl">tâches restantes</div></div>
+      <div class="hc-stat"><div class="hc-stat-val" id="stat-pct">0%</div><div class="hc-stat-lbl">complété</div></div>
+    </div>
+  </div>
+
+  <!-- GLOBAL PROGRESS -->
+  <div class="global-prog">
+    <div class="gp-title">Progression par catégorie <span class="gp-pct" id="gp-pct">0%</span></div>
+    <div class="gp-bar"><div class="gp-fill" id="gp-fill" style="width:0%"></div></div>
+    <div class="gp-cats">
+      <div class="gp-cat"><div class="gp-cat-dot" style="background:var(--gold)"></div><span id="cat-0">Fichiers : 0%</span></div>
+      <div class="gp-cat"><div class="gp-cat-dot" style="background:var(--teal)"></div><span id="cat-1">En ligne : 0%</span></div>
+      <div class="gp-cat"><div class="gp-cat-dot" style="background:var(--purple)"></div><span id="cat-2">BDD : 0%</span></div>
+      <div class="gp-cat"><div class="gp-cat-dot" style="background:var(--amber)"></div><span id="cat-3">Stripe : 0%</span></div>
+      <div class="gp-cat"><div class="gp-cat-dot" style="background:var(--rose)"></div><span id="cat-4">Légal : 0%</span></div>
+      <div class="gp-cat"><div class="gp-cat-dot" style="background:var(--slate,#2C3E6A)"></div><span id="cat-5">Commercial : 0%</span></div>
+    </div>
+  </div>
+
+  <!-- PROJECTION REVENUS -->
+  <div class="rev-grid">
+    <div class="rev-card"><div class="rev-phase">Phase 1 — Mois 1-2</div><div class="rev-val p1">0–200 €</div><div class="rev-lbl">premiers abonnés</div></div>
+    <div class="rev-card"><div class="rev-phase">Phase 2 — Mois 3-5</div><div class="rev-val p2">500–1 200 €</div><div class="rev-lbl">traction régionale</div></div>
+    <div class="rev-card"><div class="rev-phase">Phase 3 — Mois 6-9</div><div class="rev-val p3">1 500–3 000 €</div><div class="rev-lbl">multi-régions</div></div>
+    <div class="rev-card"><div class="rev-phase">Phase 4 — An 2</div><div class="rev-val p4">3 000–6 000 €</div><div class="rev-lbl">revenus passifs</div></div>
+  </div>
+
+  <!-- ═══ PHASE 0 : FICHIERS ═══ -->
+  <div class="phase" id="phase0">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(192,155,90,.15);font-size:22px">📁</div>
+      <div class="phase-info">
+        <div class="phase-name">Fichiers du site — Ce que vous avez</div>
+        <div class="phase-meta">
+          <span class="ptag ptag-time">11 fichiers HTML prêts</span>
+          <span class="ptag ptag-money">Rien à payer</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="files-grid">
+      <div class="file-card"><div class="file-icon">🏠</div><div><div class="file-name">index.html</div><div class="file-desc">Site vitrine — acheteurs & vendeurs. Section Louer supprimée.</div><div class="file-url">immoconnect-agence.fr/</div></div></div>
+      <div class="file-card"><div class="file-icon">💶</div><div><div class="file-name">forfaits.html</div><div class="file-desc">Plans vendeurs (gratuits), acheteurs, investisseurs + simulateur rendement.</div><div class="file-url">immoconnect-agence.fr/forfaits</div></div></div>
+      <div class="file-card"><div class="file-icon">🗺</div><div><div class="file-name">carte-dvf.html</div><div class="file-desc">Carte interactive avec données DVF réelles de l'API Cerema.</div><div class="file-url">immoconnect-agence.fr/carte</div></div></div>
+      <div class="file-card"><div class="file-icon">⚙️</div><div><div class="file-name">dashboard.html</div><div class="file-desc">Back-office : gestion des demandes, Kanban, matching, stats.</div><div class="file-url">immoconnect-agence.fr/dashboard</div></div></div>
+      <div class="file-card"><div class="file-icon">📍</div><div><div class="file-name">regions.html</div><div class="file-desc">Plans agents par région, places limitées, pitch commercial.</div><div class="file-url">immoconnect-agence.fr/regions</div></div></div>
+      <div class="file-card"><div class="file-icon">🤖</div><div><div class="file-name">agent-ia.html</div><div class="file-desc">Agent IA immobilier + vente sans agence + plans vendeurs.</div><div class="file-url">immoconnect-agence.fr/agent-ia</div></div></div>
+      <div class="file-card"><div class="file-icon">🔐</div><div><div class="file-name">exclusivite.html</div><div class="file-desc">Estimation IA DVF + système achat exclusivité agent (29€ / 149€).</div><div class="file-url">immoconnect-agence.fr/exclusivite</div></div></div>
+      <div class="file-card"><div class="file-icon">💳</div><div><div class="file-name">stripe-paiements.html</div><div class="file-desc">Guide complet Stripe avec tout le code pour encaisser les abonnements.</div><div class="file-url">immoconnect-agence.fr/stripe</div></div></div>
+      <div class="file-card"><div class="file-icon">💰</div><div><div class="file-name">revenus.html</div><div class="file-desc">7 sources de revenus passifs avec simulateur interactif.</div><div class="file-url">immoconnect-agence.fr/revenus</div></div></div>
+      <div class="file-card"><div class="file-icon">📖</div><div><div class="file-name">guide.html</div><div class="file-desc">Guide de déploiement étape par étape avec checklist interactive.</div><div class="file-url">immoconnect-agence.fr/guide</div></div></div>
+      <div class="file-card"><div class="file-icon">✅</div><div><div class="file-name">todo.html</div><div class="file-desc">Ce fichier — Plan d'action complet avec toutes les tâches.</div><div class="file-url">immoconnect-agence.fr/todo</div></div></div>
+    </div>
+
+    <div class="tasks" id="tasks-p0"></div>
+  </div>
+
+  <!-- ═══ PHASE 1 : MISE EN LIGNE ═══ -->
+  <div class="phase" id="phase1">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(30,122,98,.12);font-size:22px">🌐</div>
+      <div class="phase-info">
+        <div class="phase-name">Mise en ligne sur Vercel</div>
+        <div class="phase-meta">
+          <span class="ptag ptag-urgent">🔴 Priorité absolue</span>
+          <span class="ptag ptag-time">⏱ 1–2 heures</span>
+          <span class="ptag ptag-free">Gratuit</span>
+        </div>
+      </div>
+    </div>
+    <div class="ibox danger"><div class="ibox-icon">⚠️</div><div class="ibox-text"><strong>Action immédiate :</strong> votre site est déployé sur Vercel mais affiche "NOT FOUND" à cause du fichier mal nommé "index (1).html". Corrigez ça en premier avant tout le reste.</div></div>
+    <div class="tasks" id="tasks-p1"></div>
+  </div>
+
+  <!-- ═══ PHASE 2 : BASE DE DONNÉES ═══ -->
+  <div class="phase" id="phase2">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(107,63,160,.12);font-size:22px">🗄</div>
+      <div class="phase-info">
+        <div class="phase-name">Base de données Supabase</div>
+        <div class="phase-meta">
+          <span class="ptag ptag-urgent">🟡 Cette semaine</span>
+          <span class="ptag ptag-time">⏱ 30 minutes</span>
+          <span class="ptag ptag-free">Gratuit</span>
+        </div>
+      </div>
+    </div>
+    <div class="ibox tip"><div class="ibox-icon">💡</div><div class="ibox-text">Sans base de données, les demandes soumises via le formulaire disparaissent à la fermeture du navigateur. Supabase est gratuit jusqu'à 500MB — largement suffisant pour démarrer.</div></div>
+    <div class="tasks" id="tasks-p2"></div>
+  </div>
+
+  <!-- ═══ PHASE 3 : STRIPE ═══ -->
+  <div class="phase" id="phase3">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(212,115,42,.12);font-size:22px">💳</div>
+      <div class="phase-info">
+        <div class="phase-name">Stripe — Encaisser les abonnements</div>
+        <div class="phase-meta">
+          <span class="ptag ptag-urgent">🟡 Avant de prospecter</span>
+          <span class="ptag ptag-time">⏱ 1–2 heures</span>
+          <span class="ptag ptag-money">1,5% + 0,25€ / transaction</span>
+        </div>
+      </div>
+    </div>
+    <div class="ibox warn"><div class="ibox-icon">💶</div><div class="ibox-text"><strong>Installez Stripe avant de contacter des agents.</strong> Si un agent veut s'abonner tout de suite et que vous n'avez pas de système de paiement, vous perdez la vente. Voir stripe-paiements.html pour tout le code.</div></div>
+    <div class="tasks" id="tasks-p3"></div>
+  </div>
+
+  <!-- ═══ PHASE 4 : LÉGAL ═══ -->
+  <div class="phase" id="phase4">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(192,57,43,.1);font-size:22px">⚖️</div>
+      <div class="phase-info">
+        <div class="phase-name">Légal & RGPD — Obligatoire en France</div>
+        <div class="phase-meta">
+          <span class="ptag ptag-urgent">🔴 Obligatoire avant ouverture</span>
+          <span class="ptag ptag-time">⏱ 2–3 heures</span>
+          <span class="ptag ptag-free">Gratuit avec outils en ligne</span>
+        </div>
+      </div>
+    </div>
+    <div class="ibox danger"><div class="ibox-icon">🚨</div><div class="ibox-text"><strong>Amendes CNIL jusqu'à 20 millions d'euros</strong> pour non-respect du RGPD. Sans mentions légales, le site est illégal en France. Ne pas ouvrir au public sans ces documents.</div></div>
+    <div class="tasks" id="tasks-p4"></div>
+  </div>
+
+  <!-- ═══ PHASE 5 : COMMERCIAL ═══ -->
+  <div class="phase" id="phase5">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(44,62,106,.1);font-size:22px">🤝</div>
+      <div class="phase-info">
+        <div class="phase-name">Développement commercial</div>
+        <div class="phase-meta">
+          <span class="ptag ptag-urgent">🟡 Dès le site en ligne</span>
+          <span class="ptag ptag-time">⏱ Travail continu</span>
+        </div>
+      </div>
+    </div>
+    <div class="ibox info"><div class="ibox-icon">🎯</div><div class="ibox-text"><strong>La technologie est prête. Le seul levier maintenant c'est vous.</strong> Décrochez votre téléphone, appelez des agents, envoyez des emails. Le script de vente complet est dans regions.html.</div></div>
+    <div class="tasks" id="tasks-p5"></div>
+  </div>
+
+  <!-- ═══ PHASE 6 : MARKETING ═══ -->
+  <div class="phase" id="phase6">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(30,122,98,.1);font-size:22px">📣</div>
+      <div class="phase-info">
+        <div class="phase-name">Marketing & Acquisition trafic</div>
+        <div class="phase-meta">
+          <span class="ptag ptag-time">🟢 Semaines 2-4</span>
+          <span class="ptag ptag-free">Gratuit au départ</span>
+        </div>
+      </div>
+    </div>
+    <div class="tasks" id="tasks-p6"></div>
+  </div>
+
+  <!-- ═══ PHASE 7 : CROISSANCE ═══ -->
+  <div class="phase" id="phase7">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(192,155,90,.12);font-size:22px">🚀</div>
+      <div class="phase-info">
+        <div class="phase-name">Croissance — Mois 2 et au-delà</div>
+        <div class="phase-meta">
+          <span class="ptag ptag-time">🟢 Après stabilisation</span>
+        </div>
+      </div>
+    </div>
+    <div class="tasks" id="tasks-p7"></div>
+  </div>
+
+</div>
+</div>
+
+<footer>
+  <div class="footer-logo">Immo<span>Connect</span></div>
+  <div class="footer-txt">Plan d'action complet — version avril 2026</div>
+  <div class="footer-txt">Progression sauvegardée localement dans votre navigateur</div>
+</footer>
+
+<script>
+const TASKS = {
+  p0: [
+    { t:'Télécharger le ZIP immoconnect-agence-final.zip', d:'Depuis cette conversation Claude', time:'2 min', badge:'urgent' },
+    { t:'Extraire le ZIP sur votre Bureau', d:'Clic droit → Extraire → Dossier "immoconnect-agence"', time:'1 min', badge:'urgent' },
+    { t:'Vérifier les 11 fichiers HTML présents', d:'index · forfaits · carte-dvf · dashboard · regions · agent-ia · exclusivite · stripe · revenus · guide · todo', time:'2 min', badge:'urgent' },
+    { t:'Supprimer "index (1).html" de GitHub', d:'github.com → votre dépôt → cliquer index (1).html → ✏️ → ··· → Delete file → Commit', time:'3 min', badge:'urgent' },
+    { t:'Uploader les 11 fichiers sur GitHub', d:'GitHub → Add file → Upload files → glisser-déposer tous les fichiers → Commit changes', time:'5 min', badge:'urgent' },
+  ],
+  p1: [
+    { t:'Corriger le DNS OVH : www → 216.198.79.1', d:'OVH → Zone DNS → ligne www A 213.186.33.5 → ··· → Modifier → changer en 216.198.79.1 → Confirmer', time:'5 min', badge:'urgent' },
+    { t:'Cliquer Refresh sur Vercel → attendre 10 min', d:'Vercel → votre projet → Domains → immoconnect-agence.fr → Refresh', time:'10 min', badge:'urgent' },
+    { t:'Vérifier que le site s\'affiche sur immoconnect-agence.fr', d:'Ouvrir dans Chrome en navigation privée → vérifier que index.html s\'affiche', time:'2 min', badge:'urgent' },
+    { t:'Vérifier le cadenas HTTPS vert dans le navigateur', d:'Vercel active HTTPS automatiquement dès que le DNS est correct', time:'2 min', badge:'urgent' },
+    { t:'Tester chaque page du site', d:'Ouvrir: /forfaits · /carte · /dashboard · /regions · /agent-ia · /exclusivite · /stripe · /revenus · /guide', time:'10 min', badge:'soon' },
+    { t:'Activer Web Analytics dans Vercel', d:'Vercel → votre projet → Analytics → Enable', time:'2 min', badge:'soon' },
+    { t:'Vérifier sur mobile (iPhone et Android)', d:'Envoyer le lien à un ami ou utiliser Chrome DevTools → mode responsive', time:'5 min', badge:'soon' },
+    { t:'Tester sur Firefox et Safari', d:'En plus de Chrome', time:'5 min', badge:'later' },
+  ],
+  p2: [
+    { t:'Créer un compte Supabase gratuit', d:'supabase.com → Start your project → Se connecter via GitHub', time:'5 min', badge:'urgent' },
+    { t:'Créer un projet "immoconnect" en région Paris (West EU)', d:'New project → nom: immoconnect → mot de passe fort → région: West EU (Paris) → Free plan', time:'3 min', badge:'urgent' },
+    { t:'Exécuter le schema.sql dans Supabase', d:'SQL Editor → New query → Copier le contenu de backend/schema.sql → Run → vérifier "Tables créées ✅"', time:'5 min', badge:'urgent' },
+    { t:'Copier le Project URL et l\'anon key', d:'Settings → API → copier les 2 valeurs dans un fichier texte', time:'2 min', badge:'urgent' },
+    { t:'Intégrer les clés dans dashboard.html', d:'Ouvrir dashboard.html → chercher SUPABASE_URL → remplacer par votre URL et anon key', time:'10 min', badge:'urgent' },
+    { t:'Tester : soumettre une demande et vérifier dans Supabase', d:'Aller sur /dashboard → remplir un formulaire → vérifier dans Supabase → Table Editor → demandes', time:'5 min', badge:'soon' },
+    { t:'Configurer EmailJS pour les emails de confirmation', d:'emailjs.com → ajouter Gmail → créer template → copier Public Key dans dashboard.html', time:'20 min', badge:'soon' },
+    { t:'Tester l\'envoi d\'email automatique', d:'Soumettre une vraie demande → vérifier que l\'email de confirmation arrive', time:'5 min', badge:'soon' },
+  ],
+  p3: [
+    { t:'Créer un compte Stripe sur stripe.com', d:'Commencer maintenant → Email pro → France → Activité: Services en ligne', time:'10 min', badge:'urgent' },
+    { t:'Vérifier votre identité dans Stripe', d:'Ajouter CNI ou passeport + justificatif de domicile → validation 24-48h', time:'10 min', badge:'urgent' },
+    { t:'Ajouter votre RIB/IBAN dans Stripe', d:'Paramètres → Informations bancaires → Ajouter compte bancaire → entrer IBAN', time:'5 min', badge:'urgent' },
+    { t:'Récupérer les clés API Stripe (pk_live_ et sk_live_)', d:'Développeurs → Clés API → copier les deux clés dans votre .env', time:'3 min', badge:'urgent' },
+    { t:'Créer les 10 produits dans le catalogue Stripe', d:'Catalogue → Ajouter produit → un par forfait : 4 agents + 2 acheteurs + investisseur + contact + exclusivité + rapport DVF', time:'15 min', badge:'urgent' },
+    { t:'Générer les liens de paiement pour chaque plan', d:'Stripe → Liens de paiement → Créer un lien → sélectionner le produit → copier l\'URL', time:'10 min', badge:'urgent' },
+    { t:'Remplacer les boutons de démo par les vrais liens Stripe', d:'Dans forfaits.html et regions.html → remplacer onclick="planClick..." par href="https://buy.stripe.com/..."', time:'15 min', badge:'urgent' },
+    { t:'Créer le coupon ESSAI1MOIS (1 mois gratuit pour agents)', d:'Stripe → Coupons → Créer → Code: ESSAI1MOIS → 100% → Durée: 1 mois → Enregistrer', time:'5 min', badge:'soon' },
+    { t:'Configurer le webhook sur /api/webhook', d:'Stripe → Développeurs → Webhooks → Ajouter endpoint → URL: immoconnect-agence.fr/api/webhook → 5 événements', time:'10 min', badge:'soon' },
+    { t:'Créer la page merci.html', d:'Copier le code de stripe-paiements.html → section "Page de remerciement" → créer le fichier', time:'10 min', badge:'soon' },
+    { t:'Test complet en mode TEST avec carte 4242 4242 4242 4242', d:'Utiliser sk_test_ → passer une commande → vérifier que le webhook se déclenche', time:'20 min', badge:'soon' },
+    { t:'Passer en mode LIVE (sk_live_)', d:'Remplacer sk_test_ par sk_live_ dans le code → redéployer sur Vercel', time:'5 min', badge:'later' },
+  ],
+  p4: [
+    { t:'Rédiger les mentions légales', d:'legalstart.fr → générateur gratuit → renseigner: nom, adresse, SIRET (si applicable), hébergeur: Vercel Inc. → télécharger', time:'20 min', badge:'urgent' },
+    { t:'Créer la page mentions-legales.html', d:'Créer un fichier HTML simple avec le contenu généré → uploader sur GitHub', time:'10 min', badge:'urgent' },
+    { t:'Rédiger la politique de confidentialité RGPD', d:'iubenda.com/fr → générateur → indiquer les données collectées (nom, email, téléphone) → durée 3 ans → droits utilisateurs', time:'20 min', badge:'urgent' },
+    { t:'Créer la page confidentialite.html', d:'Même principe que mentions légales', time:'10 min', badge:'urgent' },
+    { t:'Ajouter les liens dans le footer de chaque page', d:'Dans index.html, forfaits.html, agent-ia.html → ajouter liens Mentions légales et Confidentialité dans le footer', time:'15 min', badge:'urgent' },
+    { t:'Installer un bandeau cookies RGPD', d:'cookieyes.com → créer compte gratuit → copier le script → coller dans <head> de chaque page → obligatoire si Google Analytics', time:'15 min', badge:'urgent' },
+    { t:'Vérifier que vous avez le droit d\'exercer', d:'Si vous percevez des commissions sur ventes immobilières → carte professionnelle T obligatoire (CCI de votre département)', time:'Variable', badge:'urgent' },
+    { t:'Ajouter numéro de carte pro dans le footer', d:'Format: Carte pro T n° CPI XXXX XXXX XXX XXX — déjà présent en placeholder dans les pages', time:'5 min', badge:'urgent' },
+  ],
+  p5: [
+    { t:'Lister 20 agences immobilières locales à appeler', d:'Google Maps → "agence immobilière [votre ville]" → noter noms + numéros dans un tableur', time:'30 min', badge:'urgent' },
+    { t:'Appeler les 5 premières agences avec le script de vente', d:'Le script complet est dans regions.html → section "Pitch agent" → Durée 4-6 min par appel', time:'1h', badge:'urgent' },
+    { t:'Envoyer le template email à 10 agences', d:'Template complet dans regions.html → section "Email de prospection" → personnaliser prénom et ville', time:'30 min', badge:'urgent' },
+    { t:'Contacter 3 notaires locaux pour partenariat', d:'Email d\'introduction : accès gratuit aux données DVF en échange d\'envois mutuels de contacts', time:'20 min', badge:'soon' },
+    { t:'Contacter 2 courtiers en crédit pour affiliation', d:'impact.com → chercher Meilleurtaux ou Empruntis → s\'inscrire programme affilié', time:'20 min', badge:'soon' },
+    { t:'Signer votre premier agent abonné', d:'Objectif : 1 agent Starter (49€/mois) dans la première semaine', time:'Variable', badge:'soon' },
+    { t:'Signer 3 agents dans le premier mois', d:'Premier MRR : 3 × 49€ = 147€/mois automatiques', time:'Variable', badge:'soon' },
+    { t:'Demander des témoignages à vos premiers abonnés', d:'Après 2 semaines d\'utilisation → demander 2-3 phrases sur leur expérience → afficher sur le site', time:'15 min', badge:'later' },
+    { t:'Créer un tableau de suivi des prospects', d:'Google Sheets : nom, agence, téléphone, date contact, statut, plan visé', time:'20 min', badge:'soon' },
+  ],
+  p6: [
+    { t:'Créer une fiche Google Business Profile', d:'business.google.com → Ajouter votre entreprise → Catégorie: Agence immobilière → Remplir toutes les infos', time:'20 min', badge:'urgent' },
+    { t:'Installer Google Analytics', d:'analytics.google.com → Nouvelle propriété → Copier le tag GA4 → Coller dans <head> de chaque page HTML', time:'15 min', badge:'urgent' },
+    { t:'Soumettre le site à Google Search Console', d:'search.google.com/search-console → Ajouter propriété → Vérifier → Soumettre sitemap', time:'10 min', badge:'soon' },
+    { t:'Publier 3 posts LinkedIn par semaine', d:'Contenu : prix du marché local, données DVF, conseils vendeurs. Voir templates dans immo-revenus-passifs.html', time:'1h/semaine', badge:'soon' },
+    { t:'Créer une page Facebook/Instagram ImmoConnect', d:'Nom de la page + photo de profil + description + lien vers le site', time:'20 min', badge:'soon' },
+    { t:'Publier votre première vidéo TikTok/Reels', d:'Sujet : "Le prix réel des appartements à [votre ville] selon les données officielles de l\'État"', time:'1h', badge:'later' },
+    { t:'Ajouter les balises SEO dans index.html', d:'<meta name="description"> + <meta property="og:title"> + canonical → voir guide-deploiement.html', time:'10 min', badge:'soon' },
+    { t:'Écrire le premier article de blog (SEO)', d:'Titre : "Prix immobilier à [votre ville] en 2026 — données DVF officielles" → au moins 500 mots', time:'1-2h', badge:'later' },
+  ],
+  p7: [
+    { t:'Ouvrir une deuxième région (ex: PACA ou Nouvelle-Aquitaine)', d:'Répliquer le modèle Occitanie → contacter des agents dans la nouvelle région', time:'Variable', badge:'later' },
+    { t:'Atteindre 10 agents abonnés', d:'MRR cible : 490€-990€/mois récurrents selon les plans', time:'Mois 2-3', badge:'later' },
+    { t:'Activer la vente de rapports DVF (19€)', d:'Ajouter un bouton "Rapport complet PDF" sur carte-dvf.html → lien Stripe paiement unique', time:'1h', badge:'later' },
+    { t:'Lancer le plan Acheteur Essentiel (9€/mois)', d:'Les acheteurs sérieux paieront volontiers pour les alertes DVF temps réel', time:'Variable', badge:'later' },
+    { t:'Activer le système d\'exclusivité (29€/149€)', d:'Connecter exclusivite.html à Supabase → agents voient les biens et achètent l\'accès au contact', time:'2-3h', badge:'later' },
+    { t:'Recruter un commercial à la commission', d:'20-30% des abonnements signés → il prospecte les agents, vous gérez la plateforme', time:'Mois 4-6', badge:'later' },
+    { t:'Intégrer l\'API Anthropic pour l\'Agent IA réel', d:'api.anthropic.com → clé API → connecter le chat de agent-ia.html à Claude pour des vraies réponses', time:'Variable', badge:'later' },
+    { t:'Viser 50 agents abonnés sur 3 régions', d:'MRR cible : 2 450€-4 900€/mois selon les plans', time:'An 1', badge:'later' },
+  ],
+};
+
+const PHASE_LABELS = ['p0','p1','p2','p3','p4','p5','p6','p7'];
+const stored = JSON.parse(localStorage.getItem('ic_todo_v3') || '{}');
+
+function render() {
+  PHASE_LABELS.forEach(phase => {
+    const tasks = TASKS[phase];
+    const el = document.getElementById('tasks-' + phase);
+    if (!el) return;
+    el.innerHTML = tasks.map((t, i) => {
+      const key = `${phase}_${i}`;
+      const done = stored[key];
+      const badgeClass = { urgent:'tb-urgent', soon:'tb-soon', later:'tb-later' }[t.badge] || 'tb-later';
+      const badgeLabel = { urgent:'À faire maintenant', soon:'Bientôt', later:'Plus tard' }[t.badge] || 'Plus tard';
+      return `<div class="task" onclick="toggle('${key}')">
+        <div class="task-check ${done?'done':t.badge==='urgent'?'priority':''}" id="tc-${key}">${done?'✓':''}</div>
+        <div class="task-body">
+          <div class="task-title ${done?'done':''}" id="tt-${key}">${t.t}</div>
+          <div class="task-desc">${t.d}</div>
+        </div>
+        <div class="task-right">
+          <div class="task-time">${t.time}</div>
+          ${!done?`<div class="task-badge ${badgeClass}">${badgeLabel}</div>`:'<div class="task-badge tb-done">✓ Fait</div>'}
+        </div>
+      </div>`;
+    }).join('');
+  });
+  updateProgress();
+}
+
+function toggle(key) {
+  stored[key] = !stored[key];
+  localStorage.setItem('ic_todo_v3', JSON.stringify(stored));
+  render();
+}
+
+function updateProgress() {
+  let total = 0, done = 0;
+  const catDone = [0,0,0,0,0,0,0,0];
+  const catTotal = [0,0,0,0,0,0,0,0];
+
+  PHASE_LABELS.forEach((phase, pi) => {
+    TASKS[phase].forEach((t, i) => {
+      const key = `${phase}_${i}`;
+      total++;
+      catTotal[pi]++;
+      if (stored[key]) { done++; catDone[pi]++; }
+    });
+  });
+
+  const pct = total > 0 ? Math.round(done / total * 100) : 0;
+
+  document.getElementById('stat-done').textContent = done;
+  document.getElementById('stat-todo').textContent = total - done;
+  document.getElementById('stat-pct').textContent = pct + '%';
+  document.getElementById('gp-pct').textContent = pct + '%';
+  document.getElementById('gp-fill').style.width = pct + '%';
+  document.getElementById('navPct').textContent = pct + '%';
+  document.getElementById('sn-pct').textContent = pct + '%';
+  document.getElementById('sn-fill').style.width = pct + '%';
+
+  const catNames = ['Fichiers','En ligne','BDD','Stripe','Légal','Commercial','Marketing','Croissance'];
+  PHASE_LABELS.forEach((phase, pi) => {
+    const p = catTotal[pi] > 0 ? Math.round(catDone[pi]/catTotal[pi]*100) : 0;
+    const badge = document.getElementById(`badge-${phase}`);
+    if (badge) {
+      badge.textContent = `${catDone[pi]}/${catTotal[pi]}`;
+      badge.className = `sn-badge ${p === 100 ? 'done' : p > 0 ? 'warn' : 'todo'}`;
+    }
+    if (pi < 6) {
+      const catEl = document.getElementById(`cat-${pi}`);
+      if (catEl) catEl.textContent = `${catNames[pi]} : ${p}%`;
+    }
+  });
+}
+
+// SCROLL SPY
+const phases = document.querySelectorAll('.phase');
+const links = document.querySelectorAll('.sn-item');
+window.addEventListener('scroll', () => {
+  const pos = window.scrollY + 120;
+  phases.forEach(s => {
+    if (s.offsetTop <= pos) {
+      links.forEach(l => l.classList.remove('active'));
+      const match = [...links].find(l => l.getAttribute('href') === '#' + s.id);
+      if (match) match.classList.add('active');
+    }
+  });
+}, { passive: true });
+
+render();
+</script>
+<script src="feedback.js" defer></script>
+</body>
+</html>
