@@ -608,6 +608,13 @@ async function supprimerAnnonce(id, titre) {
   if (!confirm('Supprimer d\u00e9finitivement l\u2019annonce \u00ab ' + titre + ' \u00bb ?\n\nElle dispara\u00eetra imm\u00e9diatement du site et les acheteurs ne pourront plus la voir ni vous contacter \u00e0 son sujet.')) return;
   if (!confirm('Confirmez la suppression \u2014 cette action est irr\u00e9versible.')) return;
 
+  // 0. Voie principale : suppression c\u00f4t\u00e9 serveur (ind\u00e9pendante des politiques RLS)
+  try {
+    var resEdge = await db.functions.invoke('supprimer-annonce', { body: { annonce_id: id } });
+    if (resEdge && resEdge.data && resEdge.data.success) { chargerAnnonces(); return; }
+    if (resEdge && resEdge.data && resEdge.data.error) { alert('Suppression refus\u00e9e : ' + resEdge.data.error); return; }
+  } catch(e) { /* fonction pas encore d\u00e9ploy\u00e9e \u2192 on tente la voie directe ci-dessous */ }
+
   // 1. V\u00e9rifier la propri\u00e9t\u00e9 (insensible \u00e0 la casse des emails)
   var { data: an, error: e0 } = await db.from('annonces_vendeurs')
     .select('id, email_contact').eq('id', id).single();
