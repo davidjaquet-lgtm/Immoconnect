@@ -1714,9 +1714,19 @@ function showToast(msg,type){
 renderPhotos();renderAutresDocs();updateUI();
 
 /* ══ MODE ÉDITION : pré-remplissage gratuit de l'annonce du vendeur ══ */
-function setVal(id,v){var e=document.getElementById(id);if(e&&v!=null&&v!=='')e.value=v;}
-function setRadio(name,v){if(v==null)return;var lst=document.querySelectorAll('input[name="'+name+'"]');for(var i=0;i<lst.length;i++){if(lst[i].value===String(v))lst[i].checked=true;}}
-function boolRadio(name,b){if(b===true)setRadio(name,'Oui');else if(b===false)setRadio(name,'Non');}
+function icSetVal(id,v){var e=document.getElementById(id);if(e&&v!=null&&v!=='')e.value=v;}
+function icSetRadio(name,v){
+  if(v==null)return;
+  var lst=document.querySelectorAll('input[name="'+name+'"]');
+  for(var i=0;i<lst.length;i++){
+    if(lst[i].value===String(v)){
+      var lab=lst[i].closest('label');
+      if(lab){lab.click();}else{lst[i].checked=true;}
+      return;
+    }
+  }
+}
+function icBoolRadio(name,b){if(b===true)icSetRadio(name,'Oui');else if(b===false)icSetRadio(name,'Non');}
 async function chargerEdition(){
   try{
     var pid=new URLSearchParams(window.location.search).get('edit');
@@ -1734,10 +1744,10 @@ async function chargerEdition(){
     editAnnonceId=pid; niveauExistant=a.niveau_vendeur||'standard'; statutExistant=a.statut_annonce||null;
     // Champs texte / nombre / select
     ['nom_vendeur','telephone','email_contact','type_bien','statut_occupation','titre','description','surface','nb_pieces','nb_chambres','etage','nb_etages','annee_construction','prix','date_achat','nature_travaux','annee_travaux','montant_travaux','description_travaux','ville','code_postal','adresse','chauffage','eau_chaude','valeur_locative','loyer_mensuel','charges_syndic','nb_lots_copro','taxe_fonciere_montant','conso_energie','classe_dpe','classe_ges','emission_ges','mode_contact']
-      .forEach(function(k){setVal(k,a[k]);});
+      .forEach(function(k){icSetVal(k,a[k]);});
     // Radios booléens / chaînes
-    boolRadio('negociable',a.negociable);boolRadio('travaux_bool',a.travaux);boolRadio('ascenseur',a.ascenseur);boolRadio('piscine',a.piscine);boolRadio('is_copro',a.is_copropriete);
-    setRadio('parking',a.parking);setRadio('exterieur',a.exterieur);setRadio('cave',a.cave);setRadio('digicode',a.digicode);setRadio('travaux_par',a.travaux_par);
+    icBoolRadio('negociable',a.negociable);icBoolRadio('travaux_bool',a.travaux);icBoolRadio('ascenseur',a.ascenseur);icBoolRadio('piscine',a.piscine);icBoolRadio('is_copro',a.is_copropriete);
+    icSetRadio('parking',a.parking);icSetRadio('exterieur',a.exterieur);icSetRadio('cave',a.cave);icSetRadio('digicode',a.digicode);icSetRadio('travaux_par',a.travaux_par);
     // Photos déjà en ligne → préservées (supprimables d'un clic)
     var pu=a.photos_urls;if(typeof pu==='string'){try{pu=JSON.parse(pu);}catch(e){pu=[];}}
     (Array.isArray(pu)?pu:[]).slice(0,maxPhotos).forEach(function(u){photos.push({existante:u,url:u});});
@@ -1770,5 +1780,6 @@ chargerEdition();
 function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
 function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
 </script>
+<script src="feedback.js" defer></script>
 </body>
 </html>
