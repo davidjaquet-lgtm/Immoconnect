@@ -324,6 +324,7 @@ async function chargerAnnonces() {
   var { data: annonces } = await db.from('annonces_vendeurs')
     .select('*')
     .eq('email_contact', currentUser.email)
+    .neq('statut_annonce', 'supprimee')
     .order('created_at', { ascending: false });
 
   annoncesData = annonces || [];
@@ -439,6 +440,7 @@ function afficherAnnonces(annonces) {
       + (a.prix_initial && a.prix_initial !== a.prix ? '<span style="font-size:11px;text-decoration:line-through;color:var(--muted)">' + Math.round(a.prix_initial).toLocaleString('fr-FR') + '€</span>' : '')
       + '<button onclick="ouvrirModalPrix(\'' + a.id + '\',' + (a.prix||0) + ')" style="padding:6px 12px;background:var(--bg);border:1px solid var(--line);border-radius:6px;font-size:11px;cursor:pointer;font-family:Outfit,sans-serif">Modifier le prix</button>'
       + '<a href="questionnaire-vendeur.html?edit=' + a.id + '" style="padding:6px 12px;background:var(--ink);color:#fff;border-radius:6px;font-size:11px;text-decoration:none;font-family:Outfit,sans-serif">\u270f\ufe0f Modifier l\'annonce</a>'
+      + '<button onclick="supprimerAnnonce(\'' + a.id + '\',\'' + String(a.titre||a.type_bien||'ce bien').replace(/'/g,'').replace(/"/g,'') + '\')" style="padding:6px 12px;background:#FAECE7;color:#712B13;border:1px solid #E8C4B8;border-radius:6px;font-size:11px;cursor:pointer;font-family:Outfit,sans-serif">\ud83d\uddd1\ufe0f Supprimer</button>'
       + '</div>'
       + '</div>'
 
@@ -602,6 +604,17 @@ function genererConseils(annonces) {
 }
 
 // ── MODIFIER PRIX ─────────────────────────────────────────────────────
+async function supprimerAnnonce(id, titre) {
+  if (!confirm('Supprimer d\u00e9finitivement l\u2019annonce \u00ab ' + titre + ' \u00bb ?\n\nElle dispara\u00eetra imm\u00e9diatement du site et les acheteurs ne pourront plus la voir ni vous contacter \u00e0 son sujet.')) return;
+  if (!confirm('Confirmez la suppression \u2014 cette action est irr\u00e9versible.')) return;
+  var { error } = await db.from('annonces_vendeurs')
+    .update({ statut_annonce: 'supprimee', supprimee_le: new Date().toISOString() })
+    .eq('id', id)
+    .eq('email_contact', currentUser.email); // s\u00e9curit\u00e9 : uniquement ses propres annonces
+  if (error) { alert('Suppression impossible : ' + error.message); return; }
+  chargerAnnonces();
+}
+
 function ouvrirModalPrix(annonceId, prixActuel) {
   document.getElementById('modal-annonce-id').value = annonceId;
   document.getElementById('modal-prix-actuel').textContent = Math.round(prixActuel).toLocaleString('fr-FR') + '€';
@@ -784,5 +797,6 @@ document.getElementById('modal-prix').addEventListener('click', function(e) {
 });
 </script>
 <script src="/pwa.js"></script>
+<script src="feedback.js" defer></script>
 </body>
 </html>
