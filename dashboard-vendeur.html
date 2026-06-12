@@ -607,11 +607,31 @@ function genererConseils(annonces) {
 async function supprimerAnnonce(id, titre) {
   if (!confirm('Supprimer d\u00e9finitivement l\u2019annonce \u00ab ' + titre + ' \u00bb ?\n\nElle dispara\u00eetra imm\u00e9diatement du site et les acheteurs ne pourront plus la voir ni vous contacter \u00e0 son sujet.')) return;
   if (!confirm('Confirmez la suppression \u2014 cette action est irr\u00e9versible.')) return;
-  var { error } = await db.from('annonces_vendeurs')
+
+  // 1. V\u00e9rifier la propri\u00e9t\u00e9 (insensible \u00e0 la casse des emails)
+  var { data: an, error: e0 } = await db.from('annonces_vendeurs')
+    .select('id, email_contact').eq('id', id).single();
+  if (e0 || !an) { alert('Annonce introuvable.'); return; }
+  if ((an.email_contact || '').toLowerCase() !== (currentUser.email || '').toLowerCase()) {
+    alert('Cette annonce n\u2019appartient pas \u00e0 votre compte.'); return;
+  }
+
+  // 2. Suppression douce ; si la colonne supprimee_le n\u2019existe pas encore, on r\u00e9essaie sans elle
+  var res = await db.from('annonces_vendeurs')
     .update({ statut_annonce: 'supprimee', supprimee_le: new Date().toISOString() })
-    .eq('id', id)
-    .eq('email_contact', currentUser.email); // s\u00e9curit\u00e9 : uniquement ses propres annonces
-  if (error) { alert('Suppression impossible : ' + error.message); return; }
+    .eq('id', id).select('id');
+  if (res.error && /supprimee_le/.test(res.error.message || '')) {
+    res = await db.from('annonces_vendeurs')
+      .update({ statut_annonce: 'supprimee' })
+      .eq('id', id).select('id');
+  }
+  if (res.error) { alert('Suppression impossible : ' + res.error.message); return; }
+
+  // 3. D\u00e9tection du blocage silencieux (RLS) : succ\u00e8s mais 0 ligne modifi\u00e9e
+  if (!res.data || res.data.length === 0) {
+    alert('La suppression a \u00e9t\u00e9 bloqu\u00e9e par les r\u00e8gles de s\u00e9curit\u00e9 de la base (RLS).\nIl manque une politique UPDATE sur annonces_vendeurs \u2014 voir sql-suppression-annonce.sql.');
+    return;
+  }
   chargerAnnonces();
 }
 
