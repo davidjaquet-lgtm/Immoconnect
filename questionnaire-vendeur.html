@@ -787,6 +787,7 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 const BUCKET = 'immoconnect-docs';
 
 var niveau='standard', photos=[], docs={}, maxPhotos=3;
+var editAnnonceId=null, niveauExistant=null, statutExistant=null;
 
 function toggle(id){
   var b=document.getElementById(id),a=document.getElementById('arr-'+id),o=b.classList.contains('open');
@@ -1467,6 +1468,7 @@ async function envoyerAlertesAgents(bien, niveau) {
 async function uploadPhotos(){
   var urls=[];
   for(var i=0;i<photos.length;i++){
+    if(photos[i].existante){urls.push(photos[i].existante);continue;} // photo déjà en ligne (édition)
     var f=photos[i].file,ext=f.name.split('.').pop();
     var path='vendeurs/photos/'+Date.now()+'_'+i+'.'+ext;
     var {error}=await db.storage.from(BUCKET).upload(path,f,{upsert:true});
@@ -1591,6 +1593,18 @@ async function soumettre(){
   var ancienPrix = 0;
 
   if (editId) {
+    // Sécurité : seul le propriétaire connecté peut mettre à jour
+    var {data:{session:sessEdit}}=await db.auth.getSession();
+    var {data:proprio}=await db.from('annonces_vendeurs').select('email_contact').eq('id',editId).single();
+    if(!sessEdit||!proprio||(proprio.email_contact||'').toLowerCase()!==sessEdit.user.email.toLowerCase()){
+      alert("Modification refusée : cette annonce n'appartient pas à votre compte.");
+      btn.textContent=origText;btn.disabled=false;return;
+    }
+    delete payload.created_at; // on conserve la date de publication d'origine
+    if(statutExistant) payload.statut_annonce=statutExistant; // pas de dépublication à l'édition
+    // Le niveau acquis (documents déjà vérifiés) n'est pas perdu si aucun nouveau doc
+    var ordre={standard:0,silver:1,gold:2,platinium:3};
+    if((ordre[niveau]||0)<(ordre[niveauExistant]||0)) payload.niveau_vendeur=niveauExistant;
     // Mode édition — vérifier si le prix a baissé
     var { data: ancienBien } = await db.from('annonces_vendeurs').select('prix, prix_initial').eq('id', editId).single();
     ancienPrix = ancienBien ? (ancienBien.prix || 0) : 0;
@@ -1607,6 +1621,10 @@ async function soumettre(){
       if (baissePct >= 1) { // Seuil minimum 1%
         await db.rpc('enregistrer_baisse_prix', { p_annonce_id: editId, p_nouveau_prix: nouveauPrix, p_ancien_prix: ancienPrix }).then(undefined, function(){});
         await envoyerAlertesBaissePrix(editId, ancienPrix, nouveauPrix, baissePct, payload);
+      }
+      // Re-modération du contenu modifié (asynchrone, sans bloquer le vendeur)
+      try{ db.functions.invoke('moderer-annonce',{body:{annonce_id:editId}}); }catch(e){}
+      if(false){
       }
     }
   } else {
@@ -1694,6 +1712,49 @@ function showToast(msg,type){
 }
 
 renderPhotos();renderAutresDocs();updateUI();
+
+/* ══ MODE ÉDITION : pré-remplissage gratuit de l'annonce du vendeur ══ */
+function setVal(id,v){var e=document.getElementById(id);if(e&&v!=null&&v!=='')e.value=v;}
+function setRadio(name,v){if(v==null)return;var lst=document.querySelectorAll('input[name="'+name+'"]');for(var i=0;i<lst.length;i++){if(lst[i].value===String(v))lst[i].checked=true;}}
+function boolRadio(name,b){if(b===true)setRadio(name,'Oui');else if(b===false)setRadio(name,'Non');}
+async function chargerEdition(){
+  try{
+    var pid=new URLSearchParams(window.location.search).get('edit');
+    if(!pid) return;
+    var {data:{session}}=await db.auth.getSession();
+    if(!session||!session.user||!session.user.email){
+      alert('Connectez-vous pour modifier votre annonce.');
+      window.location.href='connexion.html?redirect='+encodeURIComponent('questionnaire-vendeur.html?edit='+pid);return;
+    }
+    var {data:a,error}=await db.from('annonces_vendeurs').select('*').eq('id',pid).single();
+    if(error||!a){alert('Annonce introuvable.');return;}
+    if((a.email_contact||'').toLowerCase()!==session.user.email.toLowerCase()){
+      alert("Cette annonce n'appartient pas à votre compte.");window.location.href='dashboard-vendeur.html';return;
+    }
+    editAnnonceId=pid; niveauExistant=a.niveau_vendeur||'standard'; statutExistant=a.statut_annonce||null;
+    // Champs texte / nombre / select
+    ['nom_vendeur','telephone','email_contact','type_bien','statut_occupation','titre','description','surface','nb_pieces','nb_chambres','etage','nb_etages','annee_construction','prix','date_achat','nature_travaux','annee_travaux','montant_travaux','description_travaux','ville','code_postal','adresse','chauffage','eau_chaude','valeur_locative','loyer_mensuel','charges_syndic','nb_lots_copro','taxe_fonciere_montant','conso_energie','classe_dpe','classe_ges','emission_ges','mode_contact']
+      .forEach(function(k){setVal(k,a[k]);});
+    // Radios booléens / chaînes
+    boolRadio('negociable',a.negociable);boolRadio('travaux_bool',a.travaux);boolRadio('ascenseur',a.ascenseur);boolRadio('piscine',a.piscine);boolRadio('is_copro',a.is_copropriete);
+    setRadio('parking',a.parking);setRadio('exterieur',a.exterieur);setRadio('cave',a.cave);setRadio('digicode',a.digicode);setRadio('travaux_par',a.travaux_par);
+    // Photos déjà en ligne → préservées (supprimables d'un clic)
+    var pu=a.photos_urls;if(typeof pu==='string'){try{pu=JSON.parse(pu);}catch(e){pu=[];}}
+    (Array.isArray(pu)?pu:[]).slice(0,maxPhotos).forEach(function(u){photos.push({existante:u,url:u});});
+    renderPhotos();
+    // Autres documents déjà déposés → préservés
+    var ad=a.autres_documents;if(typeof ad==='string'){try{ad=JSON.parse(ad);}catch(e){ad=[];}}
+    (Array.isArray(ad)?ad:[]).forEach(function(d){if(d)autresDocs.push(d);});
+    renderAutresDocs();
+    updateUI();
+    // Bandeau d'information
+    var b=document.createElement('div');
+    b.style.cssText='background:#FFF8EC;border:1px solid var(--gold);border-radius:10px;padding:12px 16px;margin:0 auto 18px;max-width:760px;font-size:13px';
+    b.innerHTML='✏️ <strong>Modification de votre annonce</strong> — vos informations sont préchargées. Modifiez ce que vous souhaitez puis validez en bas de page. C\'est gratuit, comme toujours.';
+    var pg=document.querySelector('.page')||document.body;pg.insertBefore(b,pg.firstChild);
+  }catch(e){console.warn('Edition:',e);}
+}
+chargerEdition();
 </script>
 <script>
 (function() {

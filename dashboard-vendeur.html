@@ -438,6 +438,7 @@ function afficherAnnonces(annonces) {
       + '<span style="font-size:20px;font-weight:500">' + prixFmt + '</span>'
       + (a.prix_initial && a.prix_initial !== a.prix ? '<span style="font-size:11px;text-decoration:line-through;color:var(--muted)">' + Math.round(a.prix_initial).toLocaleString('fr-FR') + '€</span>' : '')
       + '<button onclick="ouvrirModalPrix(\'' + a.id + '\',' + (a.prix||0) + ')" style="padding:6px 12px;background:var(--bg);border:1px solid var(--line);border-radius:6px;font-size:11px;cursor:pointer;font-family:Outfit,sans-serif">Modifier le prix</button>'
+      + '<a href="questionnaire-vendeur.html?edit=' + a.id + '" style="padding:6px 12px;background:var(--ink);color:#fff;border-radius:6px;font-size:11px;text-decoration:none;font-family:Outfit,sans-serif">\u270f\ufe0f Modifier l\'annonce</a>'
       + '</div>'
       + '</div>'
 
