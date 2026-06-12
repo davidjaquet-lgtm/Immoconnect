@@ -10,6 +10,7 @@ Disallow: /calendrier.html
 Disallow: /stripe-paiements.html
 Disallow: /email-templates.html
 Disallow: /todo.html
+Disallow: /revenus.html
 
 # Sitemaps
 Sitemap: https://immoconnect-agence.fr/sitemap.xml
