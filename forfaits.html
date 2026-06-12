@@ -799,6 +799,7 @@ async function payerPPU(priceId, type) {
       body: JSON.stringify({
         price_id: priceId,
         forfait: type,
+        customer_email: await emailConnecte(),
         mode: 'payment',
         success_url: 'https://immoconnect-agence.fr/dashboard-agent.html?stripe=success&type=' + type,
         cancel_url: 'https://immoconnect-agence.fr/forfaits.html#agents'
@@ -877,6 +878,11 @@ async function payerDossier(priceId) {
   }
 }
 
+async function emailConnecte() {
+  try { var s = await db.auth.getSession(); return (s && s.data && s.data.session && s.data.session.user && s.data.session.user.email) || null; }
+  catch(e) { return null; }
+}
+
 async function souscrire(priceId, forfait) {
   initStripe();
   if (!stripe) { alert('Stripe non chargé, rechargez la page.'); return; }
@@ -894,8 +900,13 @@ async function souscrire(priceId, forfait) {
       body: JSON.stringify({
         price_id: priceId,
         forfait: forfait,
-        success_url: 'https://immoconnect-agence.fr/dashboard-agent.html?stripe=success&forfait=' + forfait,
-        cancel_url: 'https://immoconnect-agence.fr/forfaits.html#agents'
+        customer_email: await emailConnecte(),
+        success_url: forfait === 'investisseur'
+          ? 'https://immoconnect-agence.fr/dashboard.html?stripe=success&forfait=investisseur'
+          : 'https://immoconnect-agence.fr/dashboard-agent.html?stripe=success&forfait=' + forfait,
+        cancel_url: forfait === 'investisseur'
+          ? 'https://immoconnect-agence.fr/forfaits.html#acheteurs'
+          : 'https://immoconnect-agence.fr/forfaits.html#agents'
       })
     });
 
