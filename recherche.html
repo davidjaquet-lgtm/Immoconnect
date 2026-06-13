@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rechercher un bien · ImmoConnect</title>
+<meta name="description" content="Recherchez un bien à acheter sur ImmoConnect : filtrez par localisation, type, budget, surface et nombre de pièces.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --cream:#F5F0E8; --warm-white:#FAFAF7; --charcoal:#1C1C1A; --stone:#8A8478;
+    --gold:#B89A5E; --gold-light:#D4B87A; --terracotta:#C4785A; --sage:#7A9B8A;
+    --border:rgba(28,28,26,0.1); --shadow:0 4px 40px rgba(28,28,26,0.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--charcoal);line-height:1.5}
+  a{color:inherit}
+  /* NAV */
+  nav{display:flex;align-items:center;justify-content:space-between;padding:20px 48px;background:var(--warm-white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+  .logo{display:flex;align-items:center;font-size:22px;font-weight:600}
+  .logo img{height:34px;width:auto;margin-right:8px}
+  .logo span{color:var(--gold)}
+  .nav-links{display:flex;gap:28px;align-items:center}
+  .nav-links a{font-size:14px;color:var(--stone);text-decoration:none;transition:color .2s}
+  .nav-links a:hover{color:var(--charcoal)}
+  .nav-links a.active{color:var(--charcoal);font-weight:500}
+  .btn-nav{padding:9px 20px;border:1px solid var(--charcoal);border-radius:2px;color:var(--charcoal)!important;transition:all .2s}
+  .btn-nav:hover{background:var(--gold);border-color:var(--gold)}
+  /* HEADER ZONE */
+  .head{padding:36px 48px 0}
+  .head h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:40px;margin-bottom:6px}
+  .head h1 em{font-style:italic;color:var(--terracotta)}
+  .head p{color:var(--stone);font-size:14px}
+  /* FILTER BAR */
+  .filters{margin:24px 48px;background:var(--warm-white);border:1px solid var(--border);border-radius:4px;box-shadow:var(--shadow);padding:18px 20px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
+  .f-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:140px}
+  .f-field label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--stone)}
+  .f-field input,.f-field select{padding:10px 12px;border:1px solid var(--border);border-radius:3px;font-family:inherit;font-size:14px;background:#fff;color:var(--charcoal)}
+  .f-field input:focus,.f-field select:focus{outline:none;border-color:var(--gold)}
+  .btn-search{padding:11px 26px;background:var(--charcoal);color:var(--cream);border:none;border-radius:3px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:background .2s;white-space:nowrap}
+  .btn-search:hover{background:var(--gold);color:var(--charcoal)}
+  .btn-reset{padding:11px 14px;background:transparent;color:var(--stone);border:1px solid var(--border);border-radius:3px;font-family:inherit;font-size:13px;cursor:pointer}
+  /* RESULTS */
+  .results-head{padding:0 48px;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .results-count{font-size:14px;color:var(--stone)}
+  .results-count b{color:var(--charcoal)}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;padding:0 48px 60px}
+  .card{background:var(--warm-white);border:1px solid var(--border);border-radius:3px;overflow:hidden;transition:transform .3s,box-shadow .3s;position:relative}
+  .card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(28,28,26,0.12)}
+  .card-link{text-decoration:none;color:inherit;display:block}
+  .card-img{height:200px;background:var(--cream);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:42px;color:var(--stone)}
+  .card-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+  .card:hover .card-img img{transform:scale(1.05)}
+  .card-niv{position:absolute;top:14px;left:14px;padding:4px 11px;border-radius:2px;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;background:var(--charcoal);color:var(--cream)}
+  .nv-platinium{background:#1C1C1A}.nv-gold{background:var(--gold)}.nv-silver{background:var(--stone)}
+  .card-fav{position:absolute;top:12px;right:12px;width:38px;height:38px;border-radius:50%;background:rgba(250,250,247,.92);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:transform .15s,background .2s;z-index:2}
+  .card-fav:hover{background:#fff;transform:scale(1.1)}
+  .card-body{padding:18px 20px 20px}
+  .card-price{font-family:'Cormorant Garamond',serif;font-size:25px;font-weight:300;margin-bottom:4px}
+  .card-price span{font-size:15px}
+  .card-title{font-size:14px;font-weight:500;margin-bottom:5px}
+  .card-loc{font-size:13px;color:var(--stone);margin-bottom:14px}
+  .card-feats{display:flex;gap:16px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--stone)}
+  .empty{grid-column:1/-1;text-align:center;padding:70px 20px;color:var(--stone)}
+  .empty .ico{font-size:46px;margin-bottom:14px}
+  .empty a{color:var(--terracotta);font-weight:500}
+  .cta{margin:0 48px 60px;background:var(--charcoal);color:var(--cream);border-radius:4px;padding:26px 32px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+  .cta-t{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300}
+  .cta-s{font-size:13px;color:rgba(245,240,232,.7);margin-top:4px}
+  .cta a{background:var(--gold);color:var(--charcoal);padding:11px 22px;border-radius:3px;text-decoration:none;font-size:14px;font-weight:500;white-space:nowrap}
+  .loading{grid-column:1/-1;text-align:center;padding:60px;color:var(--stone)}
+  @media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.nav-links{gap:16px}}
+  @media(max-width:640px){
+    nav{padding:16px 20px}.nav-links a:not(.btn-nav){display:none}
+    .head,.filters,.results-head,.grid,.cta{margin-left:16px;margin-right:16px;padding-left:0;padding-right:0}
+    .head{padding:24px 16px 0}.results-head,.grid{padding-left:16px;padding-right:16px}
+    .grid{grid-template-columns:1fr}.f-field{min-width:120px}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo" style="text-decoration:none"><img src="logo-immoconnect.png" alt="">Immo<span>Connect</span></a>
+  <div class="nav-links">
+    <a href="forfaits.html">Forfaits</a>
+    <a href="questionnaire-vendeur.html">Vendre</a>
+    <a href="recherche.html" class="active">Acheter</a>
+    <a href="blog.html">Blog</a>
+    <a href="connexion.html" class="btn-nav" id="nav-account">Connexion</a>
+  </div>
+</nav>
+
+<div class="head">
+  <h1>Trouvez votre <em>bien</em></h1>
+  <p>Toutes les annonces ImmoConnect, en direct des vendeurs — sans commission d'agence.</p>
+</div>
+
+<div class="filters">
+  <div class="f-field" style="flex:2">
+    <label>Localisation</label>
+    <input type="text" id="f-ville" placeholder="Ville, code postal…" onkeydown="if(event.key==='Enter')lancer()">
+  </div>
+  <div class="f-field">
+    <label>Type de bien</label>
+    <select id="f-type">
+      <option value="">Tous</option>
+      <option>Maison</option>
+      <option>Appartement</option>
+      <option>Villa</option>
+      <option>Terrain</option>
+      <option>Immeuble</option>
+      <option>Local commercial</option>
+      <option>Autre</option>
+    </select>
+  </div>
+  <div class="f-field">
+    <label>Prix max (€)</label>
+    <input type="number" id="f-prixmax" min="0" step="10000" placeholder="Sans limite">
+  </div>
+  <div class="f-field">
+    <label>Surface min (m²)</label>
+    <input type="number" id="f-surfmin" min="0" placeholder="0">
+  </div>
+  <div class="f-field">
+    <label>Pièces min.</label>
+    <select id="f-pieces">
+      <option value="">Indifférent</option>
+      <option value="1">1+</option>
+      <option value="2">2+</option>
+      <option value="3">3+</option>
+      <option value="4">4+</option>
+      <option value="5">5+</option>
+    </select>
+  </div>
+  <div class="f-field" style="flex:0 0 auto;flex-direction:row;gap:8px">
+    <button class="btn-search" onclick="lancer()">Rechercher</button>
+    <button class="btn-reset" onclick="reset()">Effacer</button>
+  </div>
+</div>
+
+<div class="results-head">
+  <div class="results-count" id="count">Chargement…</div>
+  <div class="f-field" style="flex:0 0 auto;min-width:170px">
+    <select id="f-tri" onchange="lancer()" style="padding:8px 10px;border:1px solid var(--border);border-radius:3px;font-family:inherit;font-size:13px;background:#fff">
+      <option value="recent">Plus récentes</option>
+      <option value="prix_asc">Prix croissant</option>
+      <option value="prix_desc">Prix décroissant</option>
+      <option value="surface_desc">Plus grandes surfaces</option>
+    </select>
+  </div>
+</div>
+
+<div class="grid" id="grid">
+  <div class="loading">Chargement des annonces…</div>
+</div>
+
+<div class="cta">
+  <div>
+    <div class="cta-t">Pas le temps de chercher ?</div>
+    <div class="cta-s">Déposez votre projet et recevez par email les biens qui correspondent à vos critères.</div>
+  </div>
+  <a href="questionnaire-acheteur.html">Déposer mon projet →</a>
+</div>
+
+<script>
+const SB_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const db = supabase.createClient(SB_URL, SB_KEY);
+
+var currentUser = null;
+var favSet = {}; // annonce_id -> true
+
+// Pré-remplissage des filtres depuis l'URL (?ville=&type=&prixmax=&surfmin=&pieces=&tri=)
+function lireParams() {
+  var p = new URLSearchParams(window.location.search);
+  if (p.get('ville'))    document.getElementById('f-ville').value = p.get('ville');
+  if (p.get('type'))     document.getElementById('f-type').value = p.get('type');
+  if (p.get('prixmax'))  document.getElementById('f-prixmax').value = p.get('prixmax');
+  if (p.get('surfmin'))  document.getElementById('f-surfmin').value = p.get('surfmin');
+  if (p.get('pieces'))   document.getElementById('f-pieces').value = p.get('pieces');
+  if (p.get('tri'))      document.getElementById('f-tri').value = p.get('tri');
+}
+
+function valeurs() {
+  return {
+    ville:   document.getElementById('f-ville').value.trim(),
+    type:    document.getElementById('f-type').value,
+    prixmax: document.getElementById('f-prixmax').value,
+    surfmin: document.getElementById('f-surfmin').value,
+    pieces:  document.getElementById('f-pieces').value,
+    tri:     document.getElementById('f-tri').value
+  };
+}
+
+function lancer() {
+  var v = valeurs();
+  // Met à jour l'URL (partageable / rechargeable) sans recharger la page
+  var p = new URLSearchParams();
+  Object.keys(v).forEach(function(k){ if (v[k]) p.set(k, v[k]); });
+  window.history.replaceState({}, '', 'recherche.html' + (p.toString() ? '?' + p.toString() : ''));
+  chercher(v);
+}
+
+function reset() {
+  ['f-ville','f-prixmax','f-surfmin'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('f-type').value = '';
+  document.getElementById('f-pieces').value = '';
+  document.getElementById('f-tri').value = 'recent';
+  lancer();
+}
+
+async function chercher(v) {
+  var grid = document.getElementById('grid');
+  grid.innerHTML = '<div class="loading">Recherche en cours…</div>';
+
+  var q = db.from('annonces_vendeurs')
+    .select('id, titre, type_bien, ville, code_postal, prix, surface, nb_pieces, photo_principale, niveau_valide, created_at')
+    .eq('statut_annonce', 'publiee');
+
+  if (v.type)    q = q.eq('type_bien', v.type);
+  if (v.ville)   q = q.or('ville.ilike.%' + v.ville + '%,code_postal.ilike.%' + v.ville + '%');
+  if (v.prixmax) q = q.lte('prix', parseInt(v.prixmax));
+  if (v.surfmin) q = q.gte('surface', parseInt(v.surfmin));
+  if (v.pieces)  q = q.gte('nb_pieces', parseInt(v.pieces));
+
+  if (v.tri === 'prix_asc')          q = q.order('prix', { ascending: true });
+  else if (v.tri === 'prix_desc')    q = q.order('prix', { ascending: false });
+  else if (v.tri === 'surface_desc') q = q.order('surface', { ascending: false });
+  else                               q = q.order('created_at', { ascending: false });
+
+  var { data, error } = await q.limit(60);
+  if (error) { grid.innerHTML = '<div class="empty"><div class="ico">⚠️</div>Erreur de chargement. Réessayez.</div>'; document.getElementById('count').textContent=''; return; }
+
+  afficher(data || []);
+}
+
+function nivClass(n){ n=(n||'standard').toLowerCase(); return ['platinium','gold','silver'].indexOf(n)!==-1 ? 'nv-'+n : ''; }
+
+function afficher(annonces) {
+  var grid = document.getElementById('grid');
+  var count = document.getElementById('count');
+  count.innerHTML = '<b>' + annonces.length + '</b> bien' + (annonces.length>1?'s':'') + ' trouvé' + (annonces.length>1?'s':'');
+
+  if (!annonces.length) {
+    grid.innerHTML = '<div class="empty"><div class="ico">🔍</div>Aucun bien ne correspond à ces critères.<br>'
+      + 'Élargissez votre recherche ou <a href="questionnaire-acheteur.html">déposez votre projet</a> pour être alerté dès qu\'un bien correspond.</div>';
+    return;
+  }
+
+  grid.innerHTML = annonces.map(function(a){
+    var prix = a.prix ? Number(a.prix).toLocaleString('fr-FR') : 'Prix NC';
+    var ville = (a.ville || '—') + (a.code_postal ? ' · ' + a.code_postal : '');
+    var niv = (a.niveau_valide || '').toLowerCase();
+    var nivLabel = niv && niv !== 'standard' ? '<div class="card-niv ' + nivClass(niv) + '">' + niv.charAt(0).toUpperCase()+niv.slice(1) + '</div>' : '';
+    var fav = favSet[a.id];
+    var favBtn = '<button class="card-fav" title="Favori" onclick="toggleFav(event,\'' + a.id + '\')">' + (fav ? '❤️' : '🤍') + '</button>';
+    var img = a.photo_principale ? '<img src="' + a.photo_principale + '" alt="">' : '🏠';
+    return '<div class="card">'
+      + nivLabel + favBtn
+      + '<a class="card-link" href="bien.html?id=' + a.id + '">'
+      + '<div class="card-img">' + img + '</div>'
+      + '<div class="card-body">'
+      + '<div class="card-price">' + prix + ' <span>€</span></div>'
+      + '<div class="card-title">' + (a.titre || (a.type_bien || 'Bien')) + '</div>'
+      + '<div class="card-loc">📍 ' + ville + '</div>'
+      + '<div class="card-feats">'
+      + '<span>📐 ' + (a.surface != null ? a.surface + ' m²' : '— m²') + '</span>'
+      + '<span>🏠 ' + (a.nb_pieces != null ? a.nb_pieces + ' pièces' : '— pièces') + '</span>'
+      + '<span>🏷️ ' + (a.type_bien || '—') + '</span>'
+      + '</div></div></a></div>';
+  }).join('');
+}
+
+// ── FAVORIS ──
+async function chargerFavSet() {
+  if (!currentUser) return;
+  try {
+    var { data } = await db.from('favoris').select('annonce_id').eq('email', currentUser.email);
+    favSet = {};
+    (data || []).forEach(function(f){ favSet[f.annonce_id] = true; });
+  } catch(e) {}
+}
+
+async function toggleFav(ev, id) {
+  ev.preventDefault(); ev.stopPropagation();
+  if (!currentUser) { window.location.href = 'connexion.html'; return; }
+  var btn = ev.currentTarget;
+  try {
+    if (favSet[id]) {
+      await db.from('favoris').delete().eq('email', currentUser.email).eq('annonce_id', id);
+      favSet[id] = false; btn.textContent = '🤍';
+    } else {
+      await db.from('favoris').insert({ email: currentUser.email, annonce_id: id });
+      favSet[id] = true; btn.textContent = '❤️';
+    }
+  } catch(e) { alert('Erreur : ' + e.message); }
+}
+
+// ── HEADER COMPTE ──
+async function majHeaderCompte(session) {
+  var el = document.getElementById('nav-account');
+  if (!el) return;
+  try {
+    if (!session) session = (await db.auth.getSession()).data.session;
+    if (session && session.user) {
+      var m = session.user.user_metadata || {};
+      el.textContent = ((m.prenom||'')+' '+(m.nom||'')).trim() || (m.full_name||'') || session.user.email.split('@')[0];
+      el.setAttribute('href', 'connexion.html');
+    } else {
+      el.textContent = 'Connexion';
+    }
+  } catch(e) {}
+}
+
+(async function init() {
+  lireParams();
+  try { var { data: { user } } = await db.auth.getUser(); currentUser = user || null; } catch(e) {}
+  majHeaderCompte();
+  try { db.auth.onAuthStateChange(function(_e, s){ majHeaderCompte(s); }); } catch(e) {}
+  await chargerFavSet();
+  chercher(valeurs());
+})();
+</script>
+<script src="feedback.js" defer></script>
+</body>
+</html>
