@@ -262,12 +262,16 @@ nav .nav-link{margin-right:18px}
 <nav>
   <a href="index.html" class="nav-logo"><img src="logo-immoconnect.png" alt="ImmoConnect" style="height:38px;width:auto;object-fit:contain;vertical-align:middle"><span style="font-size:22px;font-weight:600;color:#0F0F0E;margin-left:8px">Immo<span style="color:#C09B5A">Connect</span></span></a>
   <div class="nav-links">
+    <a href="index.html">Accueil</a>
     <a href="forfaits.html">Forfaits</a>
     <a href="questionnaire-vendeur.html" class="nav-gold">Vendre</a>
     <a href="questionnaire-acheteur.html">Acheter</a>
     <a href="blog.html">Blog</a>
   </div>
-  <a href="index.html" class="nav-out">Accueil</a>
+  <div style="display:flex;align-items:center;gap:14px">
+    <a href="connexion.html" class="nav-out">Dashboard</a>
+    <a href="connexion.html" class="nav-out" id="nav-account">Connexion</a>
+  </div>
 </nav>
 
 <!-- ══ PAGE LOGIN ══ -->
@@ -442,7 +446,8 @@ async function handleAuth() {
       document.getElementById('resend-email-val').value = email;
       return;
     }
-    afficherDashboard(data.user);
+    window.location.href = 'index.html'; // après connexion -> page d'accueil avec les annonces
+    return;
   } else {
     btn.textContent = 'Création…';
     var nom = document.getElementById('signup-nom').value.trim();
@@ -1415,6 +1420,14 @@ async function logout() {
 (async function() {
   switchTab('login');
   var { data: { session } } = await db.auth.getSession();
+  // Header : nom prénom si connecté, sinon "Connexion"
+  try {
+    var el = document.getElementById('nav-account');
+    if (el && session && session.user) {
+      var m = session.user.user_metadata || {};
+      el.textContent = ((m.prenom||'')+' '+(m.nom||'')).trim() || (m.full_name||'') || session.user.email.split('@')[0];
+    }
+  } catch(e) {}
   if (session && session.user) afficherDashboard(session.user);
   // ══════════════════════════════════════════
 // ONBOARDING
