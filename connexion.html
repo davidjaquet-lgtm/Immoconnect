@@ -524,6 +524,30 @@ async function souscrireInvestisseur() {
   } catch(e) { alert('Erreur : ' + e.message); }
 }
 
+async function enregistrerCriteres(isInv) {
+  var msg = document.getElementById('crit-msg');
+  function show(txt,ok){ msg.style.display='block'; msg.style.color = ok?'#1E7A62':'#C0392B'; msg.textContent = txt; }
+  try {
+    var id = document.getElementById('crit-id').value;
+    var patch = {
+      type_bien:         document.getElementById('crit-type_bien').value || null,
+      localisation:      document.getElementById('crit-localisation').value.trim() || null,
+      surface_souhaitee: document.getElementById('crit-surface_souhaitee').value ? parseInt(document.getElementById('crit-surface_souhaitee').value) : null,
+      budget_envisage:   document.getElementById('crit-budget_envisage').value ? parseInt(document.getElementById('crit-budget_envisage').value) : null
+    };
+    if (isInv) {
+      var r = document.getElementById('crit-rendement_min');
+      var s = document.getElementById('crit-strategie');
+      if (r) patch.rendement_min = r.value ? parseFloat(r.value) : null;
+      if (s) patch.strategie = s.value || null;
+    }
+    var res = await db.from('projets_acheteurs').update(patch).eq('id', id).select('id');
+    if (res.error) { show('Erreur : ' + res.error.message, false); return; }
+    if (!res.data || res.data.length === 0) { show('Mise à jour bloquée (droits). Réessayez en vous reconnectant.', false); return; }
+    show('✅ Critères enregistrés. Vos alertes utiliseront ces nouveaux critères.', true);
+  } catch(e) { show('Erreur : ' + e.message, false); }
+}
+
 async function allerEspaceVendeur() {
   try {
     var { data: { session } } = await db.auth.getSession();
@@ -1090,18 +1114,29 @@ function buildAcheteurPanel(projets, isInv) {
     h += '<div style="font-size:11px;color:var(--muted)">' + (parseFloat(p.taux_endettement)<=35 ? '✅ Dossier dans les normes bancaires' : '⚠️ Taux d\'endettement trop élevé') + '</div></div>';
   }
 
-  h += '<div class="projet-box"><div class="projet-titre">Mon projet</div><div class="projet-grid">';
-  h += '<div class="pj-item"><div class="pj-lbl">Type de bien</div><div class="pj-val">' + (p.type_bien||'—') + '</div></div>';
-  h += '<div class="pj-item"><div class="pj-lbl">Localisation</div><div class="pj-val">' + (p.localisation||'—') + '</div></div>';
-  h += '<div class="pj-item"><div class="pj-lbl">Surface min.</div><div class="pj-val">' + (p.surface_souhaitee||'—') + (p.surface_souhaitee?' m²':'') + '</div></div>';
-  h += '<div class="pj-item"><div class="pj-lbl">Budget envisagé</div><div class="pj-val">' + (p.budget_envisage?Math.round(p.budget_envisage).toLocaleString('fr-FR')+' €':'—') + '</div></div>';
+  function esc(v){ return (v==null?'':String(v)).replace(/"/g,'&quot;'); }
+  var types = ['Maison','Appartement','Terrain','Immeuble','Local commercial','Autre'];
+  var optType = types.map(function(t){ return '<option value="'+t+'"'+((p.type_bien===t)?' selected':'')+'>'+t+'</option>'; }).join('');
+  var inStyle = 'width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;background:#fff;box-sizing:border-box';
+
+  h += '<div class="projet-box"><div class="projet-titre">Mon projet — modifiable directement</div>';
+  h += '<input type="hidden" id="crit-id" value="' + esc(p.id) + '">';
+  h += '<div class="projet-grid">';
+  h += '<div class="pj-item"><div class="pj-lbl">Type de bien</div><select id="crit-type_bien" style="'+inStyle+'"><option value="">—</option>'+optType+'</select></div>';
+  h += '<div class="pj-item"><div class="pj-lbl">Localisation</div><input id="crit-localisation" style="'+inStyle+'" value="' + esc(p.localisation) + '" placeholder="Toulouse, Pau, Bordeaux…"></div>';
+  h += '<div class="pj-item"><div class="pj-lbl">Surface min. (m²)</div><input id="crit-surface_souhaitee" type="number" min="0" style="'+inStyle+'" value="' + esc(p.surface_souhaitee) + '" placeholder="45"></div>';
+  h += '<div class="pj-item"><div class="pj-lbl">Budget envisagé (€)</div><input id="crit-budget_envisage" type="number" min="0" style="'+inStyle+'" value="' + esc(p.budget_envisage) + '" placeholder="250000"></div>';
   if (isInv) {
-    h += '<div class="pj-item"><div class="pj-lbl">Rendement min.</div><div class="pj-val">' + (p.rendement_min||'—') + (p.rendement_min?' %':'') + '</div></div>';
-    h += '<div class="pj-item"><div class="pj-lbl">Stratégie</div><div class="pj-val">' + (p.strategie||'—') + '</div></div>';
+    h += '<div class="pj-item"><div class="pj-lbl">Rendement min. (%)</div><input id="crit-rendement_min" type="number" min="0" step="0.5" style="'+inStyle+'" value="' + esc(p.rendement_min) + '" placeholder="5"></div>';
+    var strats = ['Locatif classique','Colocation','Saisonnier','Déficit foncier','Revente'];
+    var optStrat = strats.map(function(s){ return '<option value="'+s+'"'+((p.strategie===s)?' selected':'')+'>'+s+'</option>'; }).join('');
+    h += '<div class="pj-item"><div class="pj-lbl">Stratégie</div><select id="crit-strategie" style="'+inStyle+'"><option value="">—</option>'+optStrat+'</select></div>';
   }
-  h += '</div></div>';
-  h += '<a href="questionnaire-acheteur.html" class="btn-add ba-'+color+'" style="margin-top:8px">Modifier mes critères de recherche</a>';
-  h += '<button onclick="allerEspaceVendeur()" class="btn-add ba-teal" style="margin-top:8px;margin-left:8px;cursor:pointer;border:none">🏠 Espace vendeur</button>';
+  h += '</div>';
+  h += '<div id="crit-msg" style="font-size:12px;margin-top:10px;display:none"></div>';
+  h += '<button onclick="enregistrerCriteres('+(isInv?'true':'false')+')" class="btn-add ba-'+color+'" style="margin-top:12px;cursor:pointer;border:none">💾 Enregistrer mes critères</button>';
+  h += '<button onclick="allerEspaceVendeur()" class="btn-add ba-teal" style="margin-top:12px;margin-left:8px;cursor:pointer;border:none">🏠 Espace vendeur</button>';
+  h += '</div>';
   return h;
 }
 
