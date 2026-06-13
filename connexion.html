@@ -683,6 +683,8 @@ async function afficherDashboard(user) {
     var hash = (window.location.hash || '').replace('#','');
     if (hash && document.getElementById('dtab-'+hash)) switchDashTab(hash);
   } catch(e) {}
+  // Charger les favoris de l'acheteur (section "Mes favoris")
+  try { if (profils.indexOf('acheteur') !== -1 || profils.indexOf('investisseur') !== -1) chargerFavoris(); } catch(e) {}
   // Onboarding non bloquant : une erreur ici ne doit jamais masquer le dashboard
   try { checkOnboarding(profils); } catch(e) { console.warn('onboarding:', e); }
   } catch (errDash) {
@@ -785,6 +787,7 @@ function buildVendeurPanel(annonces, messages) {
       h += '<div class="kpi"><div class="kpi-val">'+(a.nb_vues||0)+'</div><div class="kpi-lbl">👁 Vues</div></div>';
       h += '<div class="kpi"><div class="kpi-val">'+(a.nb_visites||0)+'</div><div class="kpi-lbl">🗓 Visites</div></div>';
       h += '<div class="kpi"><div class="kpi-val">'+(a.nb_contacts||0)+'</div><div class="kpi-lbl">💬 Contacts</div></div>';
+      h += '<div class="kpi"><div class="kpi-val">'+(a.nb_favoris||0)+'</div><div class="kpi-lbl">❤️ Favoris</div></div>';
       h += '<div class="kpi"><div class="kpi-val">'+(a.statut_annonce==='publiee'?'✅':'⏳')+'</div><div class="kpi-lbl">'+(a.statut_annonce==='publiee'?'En ligne':'En attente')+'</div></div>';
       h += '</div><div class="ann-acts">';
       h += '<button class="btn-a" onclick="editAnnonce(\''+a.id+'\')">✏️ Modifier</button>';
@@ -1132,7 +1135,54 @@ function buildAcheteurPanel(projets, isInv) {
   h += '<button onclick="enregistrerCriteres('+(isInv?'true':'false')+')" class="btn-add ba-'+color+'" style="margin-top:12px;cursor:pointer;border:none">💾 Enregistrer mes critères</button>';
   h += '<button onclick="allerEspaceVendeur()" class="btn-add ba-teal" style="margin-top:12px;margin-left:8px;cursor:pointer;border:none">🏠 Espace vendeur</button>';
   h += '</div>';
+  h += '<div class="favoris-box" style="margin-top:18px"></div>';
   return h;
+}
+
+// ── FAVORIS ACHETEUR ──
+async function chargerFavoris() {
+  var boxes = document.querySelectorAll('.favoris-box');
+  if (!boxes.length) return;
+  var html = '';
+  try {
+    var u = (await db.auth.getUser()).data.user;
+    if (!u) return;
+    var { data: favs } = await db.from('favoris').select('annonce_id, created_at').eq('email', u.email).order('created_at', { ascending: false });
+    if (!favs || !favs.length) {
+      html = '<div class="sec-head"><div class="sec-ttl">❤️ Mes favoris</div></div>'
+           + '<div class="empty"><div class="empty-ico">❤️</div>Aucun favori pour l\'instant.<br>'
+           + '<span style="font-size:12px;color:var(--muted)">Cliquez sur le cœur d\'une annonce pour l\'ajouter ici.</span></div>';
+    } else {
+      var ids = favs.map(function(f){ return f.annonce_id; });
+      var { data: anns } = await db.from('annonces_vendeurs')
+        .select('id, titre, type_bien, ville, surface, prix, photo_principale').in('id', ids);
+      var byId = {}; (anns || []).forEach(function(a){ byId[a.id] = a; });
+      html = '<div class="sec-head"><div class="sec-ttl">❤️ Mes favoris</div></div>';
+      favs.forEach(function(f){
+        var a = byId[f.annonce_id]; if (!a) return; // annonce retirée
+        var titre = a.titre || ((a.type_bien || 'Bien') + ' · ' + (a.ville || ''));
+        var prix = a.prix ? Math.round(a.prix).toLocaleString('fr-FR') + ' €' : '—';
+        html += '<div class="ann-card"><div class="ann-top">';
+        html += a.photo_principale
+          ? '<img class="ann-img" src="' + a.photo_principale + '" alt="" style="width:60px;height:60px;border-radius:8px;object-fit:cover;flex-shrink:0">'
+          : '<div class="ann-img">🏠</div>';
+        html += '<div class="ann-info"><div class="ann-titre">' + titre + '</div>'
+              + '<div class="ann-meta">' + (a.surface || '—') + ' m² · ' + (a.ville || '—') + ' · ' + prix + '</div></div></div>';
+        html += '<div class="ann-acts">'
+              + '<a class="btn-a" href="bien.html?id=' + a.id + '" style="text-decoration:none">👁 Voir</a>'
+              + '<button class="btn-a red" onclick="retirerFavori(\'' + a.id + '\')">🗑 Retirer</button></div></div>';
+      });
+    }
+  } catch(e) { html = ''; }
+  boxes.forEach(function(b){ b.innerHTML = html; });
+}
+
+async function retirerFavori(id) {
+  try {
+    var u = (await db.auth.getUser()).data.user;
+    await db.from('favoris').delete().eq('email', u.email).eq('annonce_id', id);
+    chargerFavoris();
+  } catch(e) { alert('Erreur : ' + e.message); }
 }
 
 // ══ PANNEAU AGENT ══

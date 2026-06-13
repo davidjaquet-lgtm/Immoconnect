@@ -437,6 +437,7 @@ async function afficherBien(b, similaires) {
   // Vérifier exclusivité active et suivi baisse prix
   await checkExclusivite(b.id);
   await checkSuivi(b.id);
+  await checkFavori(b.id);
   currentNiv = niv;
   var contactHtml = buildContactButtons(b, niv);
 
@@ -924,6 +925,10 @@ function buildContactButtons(b, niv) {
     html += '<div style="margin-top:8px" id="suivi-wrap-' + b.id + '">';
     html += '<button id="btn-suivi-' + b.id + '" onclick="toggleSuivi(\'' + b.id + '\')" style="width:100%;padding:9px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:12px;cursor:pointer;color:var(--muted);transition:all .15s" onmouseover="this.style.borderColor=\'var(--ink)\'" onmouseout="this.style.borderColor=\'var(--line)\'">🔔 Alertes baisse de prix</button>';
     html += '</div>';
+    // BOUTON FAVORI
+    html += '<div style="margin-top:8px" id="favori-wrap-' + b.id + '">';
+    html += '<button id="btn-favori-' + b.id + '" onclick="toggleFavori(\'' + b.id + '\')" style="width:100%;padding:9px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:12px;cursor:pointer;color:var(--muted);transition:all .15s">🤍 Ajouter aux favoris</button>';
+    html += '</div>';
   }
 
   // BOUTON EXCLUSIVITÉ pour agents Expert et Platinium
@@ -1100,6 +1105,44 @@ async function toggleSuivi(bienId) {
     isSuivant = true;
   }
   majBtnSuivi(bienId);
+}
+
+// ── FAVORIS ──
+var isFavori = false;
+
+async function checkFavori(bienId) {
+  if (!currentUser) return;
+  var { data } = await db.from('favoris').select('id').eq('annonce_id', bienId).eq('email', currentUser.email).single().then(undefined, function(){ return { data: null }; });
+  isFavori = !!data;
+  majBtnFavori(bienId);
+}
+
+function majBtnFavori(bienId) {
+  var btn = document.getElementById('btn-favori-' + bienId);
+  if (!btn) return;
+  if (isFavori) {
+    btn.textContent = '❤️ Dans vos favoris — Cliquer pour retirer';
+    btn.style.borderColor = 'var(--coral, #C0392B)';
+    btn.style.color = 'var(--coral, #C0392B)';
+    btn.style.background = '#FAECE7';
+  } else {
+    btn.textContent = '🤍 Ajouter aux favoris';
+    btn.style.borderColor = 'var(--line)';
+    btn.style.color = 'var(--muted)';
+    btn.style.background = 'transparent';
+  }
+}
+
+async function toggleFavori(bienId) {
+  if (!currentUser) { alert('Connectez-vous pour ajouter ce bien à vos favoris.'); return; }
+  if (isFavori) {
+    await db.from('favoris').delete().eq('annonce_id', bienId).eq('email', currentUser.email);
+    isFavori = false;
+  } else {
+    await db.from('favoris').insert({ annonce_id: bienId, email: currentUser.email });
+    isFavori = true;
+  }
+  majBtnFavori(bienId);
 }
 
 // ── EXCLUSIVITÉ DE CONTACT ──
