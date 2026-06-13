@@ -625,7 +625,7 @@
     <a href="questionnaire-acheteur.html">Acheter</a>
     <a href="forfaits.html" onclick="localStorage.setItem('ic_tab','agents')">Agents immo</a>
     <a href="blog.html">Blog</a>
-    <a href="calendrier.html">📅</a><a href="messagerie.html">💬</a><a href="connexion.html" class="btn-nav">Se connecter</a>
+    <a href="calendrier.html">📅</a><a href="messagerie.html">💬</a><a href="connexion.html" class="btn-nav" id="nav-account">Connexion</a>
   </div>
 </nav>
 
@@ -1239,6 +1239,30 @@ const SB_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
 const SB_KEY = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
 const { createClient } = supabase;
 const db = createClient(SB_URL, SB_KEY);
+
+// Header dynamique : nom+prénom (-> dashboard) si connecté, sinon "Connexion"
+async function majHeaderCompte(session) {
+  var el = document.getElementById('nav-account');
+  if (!el) return;
+  try {
+    if (!session) { session = (await db.auth.getSession()).data.session; }
+    if (session && session.user) {
+      var m = session.user.user_metadata || {};
+      var nom = ((m.prenom || '') + ' ' + (m.nom || '')).trim() || (m.full_name || '') || session.user.email.split('@')[0];
+      el.textContent = nom;
+      el.setAttribute('href', 'connexion.html'); // mène au tableau de bord
+      el.title = 'Accéder à mon tableau de bord';
+    } else {
+      el.textContent = 'Connexion';
+      el.setAttribute('href', 'connexion.html');
+      el.title = 'Se connecter';
+    }
+  } catch(e) {}
+}
+// Exécution immédiate + relance quand la session est restaurée/modifiée
+// (onAuthStateChange émet INITIAL_SESSION au chargement → couvre le timing)
+majHeaderCompte();
+try { db.auth.onAuthStateChange(function(_evt, session){ majHeaderCompte(session); }); } catch(e) {}
 
 const agents = [
   { init:'SM', name:'Sophie Martin', spec:'Côte d\'Azur · Luxe', rating:4.9, deals:87 },
