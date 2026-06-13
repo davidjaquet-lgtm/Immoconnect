@@ -178,7 +178,7 @@ nav .nav-link{margin-right:18px}
     <a href="questionnaire-acheteur.html" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Acheter</a>
     <a href="index.html#agents" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Agents immo</a>
   </div>
-  <a href="index.html" style="text-decoration:none;padding:8px 20px;border:1px solid #444;color:#fff;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif;transition:all .2s" onmouseover="this.style.borderColor='#C09B5A';this.style.color='#C09B5A'" onmouseout="this.style.borderColor='#444';this.style.color='#fff'">Accueil</a>
+  <a href="connexion.html" style="text-decoration:none;padding:8px 16px;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;margin-right:6px" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">← Mon tableau de bord</a><a href="index.html" style="text-decoration:none;padding:8px 20px;border:1px solid #444;color:#fff;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif;transition:all .2s" onmouseover="this.style.borderColor='#C09B5A';this.style.color='#C09B5A'" onmouseout="this.style.borderColor='#444';this.style.color='#fff'">Accueil</a>
 </nav>
 <div class="page">
 
@@ -1631,10 +1631,10 @@ async function soumettre(){
     btn.textContent = '✓ Annonce publiée';
   }
 
-  // Envoyer alertes agents si Silver, Gold ou Platinium
-  if (['silver','gold','platinium'].includes(niveau)) {
-    await envoyerAlertesAgents(payload, niveau);
-  }
+  // NB : les alertes (agents + acheteurs) ne sont plus déclenchées ici.
+  // Elles partent depuis la modération (moderer-annonce), une fois l'annonce APPROUVÉE,
+  // pour ne jamais alerter sur une annonce en attente ou refusée. (envoyerAlertesAgents
+  // reste défini ci-dessus au cas où, mais n'est plus appelé à la création.)
 }
 
 // ── VALIDATION OCR DES DOCUMENTS VENDEUR (serveur) ────────────────────
