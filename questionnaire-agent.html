@@ -490,6 +490,8 @@ const SUPABASE_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
+// (l'attribution de l'offre de lancement se fait à la soumission, sans pré-sélection)
+
 var nbAcheteurs = 0;
 
 // ── NAVIGATION ÉTAPES ──
@@ -790,14 +792,49 @@ async function soumettre() {
 
     if (error) throw error;
 
-    // Enregistrer dans agents_validation
+    // ── ATTRIBUTION FORFAIT À L'INSCRIPTION ──
+    // Tous les agents s'inscrivent GRATUITEMENT (pay_per_use). Deux exceptions automatiques :
+    //   - email VIP -> Premium A VIE (et compte dans les 50)
+    //   - sinon, l'un des 50 premiers -> Pro OFFERT 3 mois (puis retour gratuit)
+    var EMAIL_VIP = 'abuccheri.immo@gmail.com';
+    var estVIP = (email || '').trim().toLowerCase() === EMAIL_VIP;
+
+    var forfaitFinal = 'pay_per_use';
+    var abonnementActif = false;
+    var rangLancement = null;
+    var forfaitExpireLe = null;
+    var offreType = null;
+
+    try {
+      var rc = await fetch(SUPABASE_URL + '/rest/v1/agents_validation?select=id&offre_lancement_rang=not.is.null', {
+        headers: { 'apikey': SUPABASE_ANON, 'Prefer': 'count=exact', 'Range-Unit': 'items', 'Range': '0-0' }
+      });
+      var dejaPris = parseInt((rc.headers.get('Content-Range')||'0/0').split('/')[1]) || 0;
+
+      if (estVIP) {
+        forfaitFinal = 'premium'; abonnementActif = true;
+        rangLancement = dejaPris + 1; offreType = 'vip_premium_avie';
+        forfaitExpireLe = null;
+      } else if (dejaPris < 50) {
+        forfaitFinal = 'pro'; abonnementActif = true;
+        rangLancement = dejaPris + 1; offreType = 'lancement_pro_3mois';
+        forfaitExpireLe = new Date(Date.now() + 90 * 86400000).toISOString();
+      }
+    } catch(e) { /* echec comptage -> inscription gratuite par defaut */ }
+
     await db.from('agents_validation').insert({
       user_id: data.user.id,
       email, nom: prenom + ' ' + nom,
       agence, carte_t: carteT,
       cci, carte_t_expiration: expiration || null,
       ocr_statut: document.getElementById('carte-ocr').textContent.includes('reconnue') ? 'ok' : 'en_attente',
-      statut: 'en_attente'
+      statut: 'en_attente',
+      forfait_agent: forfaitFinal,
+      abonnement_actif: abonnementActif,
+      offre_lancement_rang: rangLancement,
+      offre_lancement_type: offreType,
+      forfait_expire_le: forfaitExpireLe,
+      abonnement_depuis: abonnementActif ? new Date().toISOString() : null
     });
 
     // Enregistrer acheteurs en portefeuille dans projets_acheteurs
@@ -865,5 +902,6 @@ function showToast(msg, type) {
 function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
 function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
 </script>
+<script src="feedback.js" defer></script>
 </body>
 </html>

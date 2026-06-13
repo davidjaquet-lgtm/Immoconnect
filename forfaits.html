@@ -717,6 +717,7 @@ nav .nav-link{margin-right:18px}
 // ── EARLY ADOPTER COUNTER ────────────────────────────────────
 var EA_MAX = 50;
 var eaChannel = null;
+var offreLancementOuverte = null; // null = pas encore connu, true/false ensuite
 
 async function chargerEarlyAdopter() {
   try {
@@ -741,6 +742,7 @@ function majAffichageEA(count) {
   var restant = Math.max(EA_MAX - count, 0);
   var pct = Math.min(count / EA_MAX * 100, 100);
   var complet = count >= EA_MAX;
+  offreLancementOuverte = !complet; // mémorise pour souscrire()
 
   document.getElementById('ea-count').textContent = count;
   document.getElementById('ea-restant').textContent = restant;
@@ -884,6 +886,17 @@ async function emailConnecte() {
 }
 
 async function souscrire(priceId, forfait) {
+  var forfaitsAgents = ['starter','pro','premium'];
+  // Un agent doit d'abord avoir un compte. S'il n'est pas connecté et veut un forfait agent,
+  // on l'envoie vers l'inscription gratuite (le paiement éventuel se fera depuis son dashboard).
+  if (forfaitsAgents.indexOf(forfait) !== -1) {
+    var emailCo = await emailConnecte();
+    if (!emailCo) {
+      window.location.href = 'questionnaire-agent.html';
+      return;
+    }
+  }
+
   initStripe();
   if (!stripe) { alert('Stripe non chargé, rechargez la page.'); return; }
 
@@ -977,5 +990,6 @@ function icRefuser(){ localStorage.setItem('ic_cookie_consent','refused'); docum
 </script>
 
 <script src="/pwa.js"></script>
+<script src="feedback.js" defer></script>
 </body>
 </html>
