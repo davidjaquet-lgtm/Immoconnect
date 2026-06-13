@@ -596,9 +596,13 @@ var scoreEstime = 0;
     return;
   }
 
+  // Retour de paiement Stripe : vérification serveur AVANT de valider la candidature
+  var candSession = params.get('cand_session');
+  if (candSession) { await chargerBien(); await verifierRetourCandidature(candSession); return; }
+  if (params.get('annule')) { showToast('Paiement annulé — candidature non soumise.', 'err'); }
+
   await chargerBien();
-  demarrerTimer();
-})();
+  demarrerTimer();})();
 
 async function chargerBien() {
   var { data, error } = await db.from('annonces_vendeurs').select('*').eq('id', annonceId).single();
@@ -846,19 +850,46 @@ async function payer() {
     var { data: cand, error: candErr } = await db.from('candidatures_agents').insert(payload).select().single();
     if (candErr) throw candErr;
 
-    // 2. Ici viendrait l'appel Stripe (à intégrer quand Stripe est ouvert)
-    // Pour l'instant on simule le paiement accepté
-    await db.from('candidatures_agents').update({ paiement_statut: 'paye' }).eq('id', cand.id);
-
-    // 3. Déclencher le scorer si assez de candidatures
-    await db.functions.invoke('scorer-candidatures', { body: { annonce_id: annonceId } }).then(undefined, function(){});
-
-    goStep(4);
+    // 2. Paiement Stripe réel. La candidature ne sera validée (paiement_statut='paye')
+    //    et le scoring relancé QU'APRÈS vérification serveur du paiement (verifier-achat).
+    var ret = location.origin + '/candidature-agent.html?annonce=' + annonceId;
+    var res = await db.functions.invoke('creer-checkout', {
+      body: {
+        price_id: 'price_1TdFLERWjX9H4QylRNaXofVc', // candidature PPU — 9,99 €
+        mode: 'payment',
+        customer_email: currentUser.email,
+        success_url: ret + '&cand_session={CHECKOUT_SESSION_ID}',
+        cancel_url: ret + '&annule=1',
+        metadata: { action: 'candidature_ppu', candidature_id: cand.id }
+      }
+    });
+    if (res.error) throw new Error(res.error.message);
+    if (res.data && res.data.url) { window.location.href = res.data.url; return; }
+    throw new Error((res.data && res.data.error) || 'Stripe indisponible');
 
   } catch(e) {
     showToast('Erreur : ' + (e.message || 'Reessayez.'), 'err');
     btn.disabled = false;
     btn.innerHTML = 'Payer 9,99 € et soumettre ma candidature';
+  }
+}
+
+// ── RETOUR PAIEMENT CANDIDATURE : vérification serveur avant validation ──
+async function verifierRetourCandidature(sid) {
+  window.history.replaceState({}, '', 'candidature-agent.html?annonce=' + annonceId);
+  showToast('Vérification du paiement…', 'ok');
+  try {
+    var res = await db.functions.invoke('verifier-achat', { body: { session_id: sid } });
+    var d = res.data || {};
+    if (d.verified && d.action === 'candidature_ppu') {
+      goStep(4);
+    } else if (d.verified === false) {
+      showToast('Paiement non confirmé — candidature non validée.', 'err');
+    } else {
+      showToast('Vérification impossible : ' + (d.error || 'réessayez.'), 'err');
+    }
+  } catch(e) {
+    showToast('Erreur de vérification : ' + (e.message || 'réessayez.'), 'err');
   }
 }
 
@@ -871,5 +902,6 @@ function showToast(msg, type) {
 }
 </script>
 
+<script src="feedback.js" defer></script>
 </body>
 </html>

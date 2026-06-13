@@ -138,7 +138,7 @@ nav .nav-link{margin-right:18px}
     <a href="questionnaire-acheteur.html" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Acheter</a>
     <a href="index.html#agents" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Agents immo</a>
   </div>
-  <a href="index.html" style="text-decoration:none;padding:8px 20px;border:1px solid #444;color:#fff;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif;transition:all .2s" onmouseover="this.style.borderColor='#C09B5A';this.style.color='#C09B5A'" onmouseout="this.style.borderColor='#444';this.style.color='#fff'">Accueil</a>
+  <a href="connexion.html" style="text-decoration:none;padding:8px 16px;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;margin-right:6px" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">← Mon tableau de bord</a><a href="index.html" style="text-decoration:none;padding:8px 20px;border:1px solid #444;color:#fff;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif;transition:all .2s" onmouseover="this.style.borderColor='#C09B5A';this.style.color='#C09B5A'" onmouseout="this.style.borderColor='#444';this.style.color='#fff'">Accueil</a>
 </nav>
 <div class="page">
 
@@ -803,7 +803,7 @@ async function soumettre() {
   var tauxEndt    = revenuTotal > 0 ? (chargesTotal + Math.max(mensMax,0)) / revenuTotal * 100 : 0;
 
   var payload = {
-    forfait:               forfait,
+    forfait:               'gratuit', // SÉCURITÉ : 'investisseur' accordé uniquement après paiement Stripe (webhook)
     nom_acheteur:          document.getElementById('nom_acheteur').value,
     telephone:             document.getElementById('telephone').value,
     email:                 document.getElementById('email').value,
@@ -895,6 +895,28 @@ async function soumettre() {
   }
   showToast('✅ Projet déposé avec succès !', 'ok');
   btn.textContent = '✓ Projet déposé';
+
+  // Forfait Investisseur : redirection vers le paiement Stripe.
+  // Le forfait passera à 'investisseur' via le webhook une fois le paiement confirmé.
+  if (forfait === 'investisseur') {
+    showToast('Redirection vers le paiement de l\u2019abonnement Investisseur\u2026', 'ok');
+    try {
+      var r = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/creer-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          price_id: 'price_1TdFIGRWjX9H4QylcuF948q2', // Investisseur 29,99 €/mois
+          forfait: 'investisseur',
+          customer_email: payload.email,
+          success_url: 'https://immoconnect-agence.fr/connexion.html?stay=1&stripe=success#investisseur',
+          cancel_url: 'https://immoconnect-agence.fr/connexion.html?stay=1#acheteur'
+        })
+      });
+      var dd = await r.json();
+      if (dd.url) { window.location.href = dd.url; return; }
+    } catch(e) { /* échec checkout : le projet reste en gratuit, upgrade possible plus tard */ }
+    showToast('Projet créé en gratuit. Vous pourrez activer l\u2019abonnement Investisseur depuis votre espace.', 'ok');
+  }
 
   // Afficher le widget d\'alerte
   var alerteBox = document.getElementById('alerte-acheteur-box');
@@ -1059,5 +1081,6 @@ function clearAttestation() {
 function icAccepter() { localStorage.setItem('ic_cookie_consent','accepted'); document.getElementById('cookie-banner').style.display='none'; }
 function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); document.getElementById('cookie-banner').style.display='none'; }
 </script>
+<script src="feedback.js" defer></script>
 </body>
 </html>

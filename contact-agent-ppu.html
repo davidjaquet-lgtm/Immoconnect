@@ -112,6 +112,11 @@ var currentUser = null
   if (!user) { window.location.href = 'connexion.html'; return }
   currentUser = user
 
+  // Retour de paiement Stripe : on vérifie côté serveur AVANT d'accorder quoi que ce soit
+  var ppuSession = params.get('ppu_session')
+  if (ppuSession) { await verifierRetourPPU(ppuSession); return }
+  if (params.get('annule')) { showToast('Paiement annulé — aucun montant débité.', 'err') }
+
   var meta = user.user_metadata || {}
   if (!meta.profils?.includes('agent')) { showToast('Accès réservé aux agents.', 'err'); return }
 
@@ -156,51 +161,84 @@ async function payer() {
 
   var btn = document.getElementById('btn-payer')
   btn.disabled = true
-  btn.innerHTML = '<span class="spin"></span>Traitement...'
+  btn.innerHTML = '<span class="spin"></span>Redirection vers le paiement…'
 
   try {
-    // Enregistrer le contact payant
+    // 1) On enregistre la demande de contact EN ATTENTE de paiement.
+    //    Aucun droit n'est accordé ici : paiement_statut reste 'en_attente'.
     var { data: contact, error } = await db.from('contacts_semaine').insert({
       agent_email: currentUser.email,
       annonce_id: annonceId,
       type_contact: typeContact,
       message: message,
       paiement_montant: 4.99,
-      paiement_statut: 'en_attente', // → Stripe à brancher
+      paiement_statut: 'en_attente',
       statut: 'envoye'
     }).select().single()
 
     if (error) throw error
 
-    // Simuler paiement accepté (Stripe à intégrer)
-    await db.from('contacts_semaine').update({ paiement_statut: 'paye' }).eq('id', contact.id)
-
-    // Incrémenter leads utilisés
-    var meta = currentUser.user_metadata || {}
-    var leadsUtilises = parseInt(meta.leads_semaine_utilises || 0) + 1
-    await db.auth.updateUser({ data: { leads_semaine_utilises: leadsUtilises } })
-
-    // Notifier le vendeur
-    await db.functions.invoke('envoyer-email', {
+    // 2) Création de la session Stripe. Le contact ne sera validé (paiement_statut='paye')
+    //    et le vendeur notifié QU'APRÈS vérification serveur du paiement (verifier-achat).
+    var ret = location.origin + '/contact-agent-ppu.html?annonce=' + annonceId
+    var res = await db.functions.invoke('creer-checkout', {
       body: {
-        type: 'nouveau_message',
-        to: bien.email_contact,
-        subject: 'Un agent souhaite vous contacter - ImmoConnect',
-        expediteur: 'Agent ImmoConnect (via contact payant)',
-        message: message,
-        bien: bien.titre || bien.type_bien + ' ' + bien.ville,
-        lien: 'https://immoconnect-agence.fr/messagerie.html?annonce=' + annonceId
+        price_id: 'price_1TdFOERWjX9H4QylMeOASel8', // contact PPU — 4,99 €
+        mode: 'payment',
+        customer_email: currentUser.email,
+        success_url: ret + '&ppu_session={CHECKOUT_SESSION_ID}',
+        cancel_url: ret + '&annule=1',
+        metadata: { action: 'contact_ppu', contact_id: contact.id }
       }
-    }).then(undefined, function(){})
+    })
 
-    // Rediriger vers messagerie
-    showToast('Paiement confirmé ! Accès à la messagerie...', 'ok')
-    setTimeout(function(){ window.location.href = 'messagerie.html?annonce=' + annonceId }, 1500)
+    if (res.error) throw new Error(res.error.message)
+    if (res.data && res.data.url) { window.location.href = res.data.url; return }
+    throw new Error((res.data && res.data.error) || 'Stripe indisponible')
 
   } catch(e) {
     showToast('Erreur : ' + (e.message || 'Réessayez.'), 'err')
     btn.disabled = false
     btn.innerHTML = 'Payer 4,99 € et contacter ce vendeur'
+  }
+}
+
+// ── RETOUR PAIEMENT PPU : vérification serveur puis exécution de l'action ──
+async function verifierRetourPPU(sid) {
+  // Nettoie l'URL pour éviter tout rejeu au rechargement
+  window.history.replaceState({}, '', 'contact-agent-ppu.html?annonce=' + annonceId)
+  showToast('Vérification du paiement…', 'ok')
+  try {
+    var res = await db.functions.invoke('verifier-achat', { body: { session_id: sid } })
+    var d = res.data || {}
+    if (d.verified && d.action === 'contact_ppu') {
+      if (!d.already) {
+        // Incrémente le compteur d'usage de l'agent (non bloquant)
+        var meta = currentUser.user_metadata || {}
+        await db.auth.updateUser({ data: { leads_semaine_utilises: parseInt(meta.leads_semaine_utilises || 0) + 1 } })
+        // Notifie le vendeur — UNIQUEMENT après paiement confirmé
+        if (d.email_vendeur) {
+          db.functions.invoke('envoyer-email', { body: {
+            type: 'nouveau_message',
+            to: d.email_vendeur,
+            subject: 'Un agent souhaite vous contacter - ImmoConnect',
+            expediteur: 'Agent ImmoConnect (via contact payant)',
+            message: d.message || '',
+            bien: d.bien_titre || '',
+            lien: 'https://immoconnect-agence.fr/messagerie.html?annonce=' + (d.annonce_id || annonceId)
+          }}).then(undefined, function(){})
+        }
+      }
+      showToast('Paiement confirmé ! Accès à la messagerie…', 'ok')
+      setTimeout(function(){ window.location.href = 'messagerie.html?annonce=' + (d.annonce_id || annonceId) }, 1500)
+    } else if (d.verified === false) {
+      showToast('Paiement non confirmé — aucun accès accordé.', 'err')
+      var b = document.getElementById('btn-payer'); if (b) { b.disabled = false; b.innerHTML = 'Payer 4,99 € et contacter ce vendeur' }
+    } else {
+      showToast('Vérification impossible : ' + (d.error || 'réessayez.'), 'err')
+    }
+  } catch(e) {
+    showToast('Erreur de vérification : ' + (e.message || 'réessayez.'), 'err')
   }
 }
 
@@ -210,5 +248,6 @@ function showToast(msg, type) {
   setTimeout(function(){ t.style.display = 'none' }, 3500)
 }
 </script>
+<script src="feedback.js" defer></script>
 </body>
 </html>
