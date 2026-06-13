@@ -929,7 +929,7 @@ function buildContactButtons(b, niv) {
   // BOUTON EXCLUSIVITÉ pour agents Expert et Platinium
   if (isAgent && (userForfait === 'expert' || userForfait === 'platinium') && !exclusiviteActive) {
     var duree = userForfait === 'platinium' ? 96 : 48;
-    var prix = '9,99'; // contact vendeur = 9,99€ (dossier complet inclus)
+    var prix = '9,99'; // exclusivité agent : 9,99€ pour être seul à contacter le vendeur
     html += '<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">';
     html += '<button class="btn-excl" onclick="acheterExclusivite(' + duree + ',' + prix.replace(',','.') + ')">';
     html += '🔒 Exclusivité ' + duree + 'h — ' + prix + ' €</button>';
