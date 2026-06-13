@@ -911,7 +911,13 @@
         </select>
       </div>
     </div>
-    <div class="search-field" style="max-width:140px; border-right:none">
+    <div class="search-field" style="max-width:130px">
+      <div style="flex:1">
+        <label>Surface min</label>
+        <input type="number" id="hero-surfmin" min="0" placeholder="m²" style="width:100%">
+      </div>
+    </div>
+    <div class="search-field" style="max-width:130px">
       <div style="flex:1">
         <label>Pièces min.</label>
         <select id="hero-pieces">
@@ -921,6 +927,18 @@
           <option>3 pièces</option>
           <option>4 pièces</option>
           <option>5+ pièces</option>
+        </select>
+      </div>
+    </div>
+    <div class="search-field" style="max-width:150px; border-right:none">
+      <div style="flex:1">
+        <label>Niveau du bien</label>
+        <select id="hero-niveau">
+          <option value="">Tous</option>
+          <option value="standard">Standard</option>
+          <option value="silver">Silver</option>
+          <option value="gold">Gold</option>
+          <option value="platinium">Platinium</option>
         </select>
       </div>
     </div>
@@ -1271,11 +1289,15 @@ function goRecherche() {
   var ville = (document.getElementById('hero-ville')||{}).value;
   var type  = (document.getElementById('hero-type')||{}).value;
   var budg  = (document.getElementById('hero-budget')||{}).value;
+  var surf  = (document.getElementById('hero-surfmin')||{}).value;
   var piec  = (document.getElementById('hero-pieces')||{}).value;
+  var niv   = (document.getElementById('hero-niveau')||{}).value;
   if (ville && ville.trim()) p.set('ville', ville.trim());
   if (type && type !== 'Tous') p.set('type', type);
   if (budg && num(budg)) p.set('prixmax', num(budg));
+  if (surf && num(surf)) p.set('surfmin', num(surf));
   if (piec && num(piec)) p.set('pieces', num(piec));
+  if (niv) p.set('niveau', niv);
   window.location.href = 'recherche.html' + (p.toString() ? '?' + p.toString() : '');
 }
 

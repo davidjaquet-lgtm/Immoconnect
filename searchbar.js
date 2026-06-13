@@ -113,8 +113,18 @@
       '</div>';
 
     var anchor = document.querySelector('nav, header, .nav, .topbar, .header');
-    if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(bar, anchor.nextSibling);
-    else document.body.insertBefore(bar, document.body.firstChild);
+    if (anchor && anchor.parentNode) {
+      anchor.parentNode.insertBefore(bar, anchor.nextSibling);
+      // Si le bandeau est en position fixe, il recouvre la barre → on la décale vers le bas
+      try {
+        if (getComputedStyle(anchor).position === 'fixed') {
+          var h = anchor.getBoundingClientRect().height || anchor.offsetHeight || 70;
+          bar.style.marginTop = h + 'px';
+        }
+      } catch (e) {}
+    } else {
+      document.body.insertBefore(bar, document.body.firstChild);
+    }
 
     function go() {
       var p = new URLSearchParams();
