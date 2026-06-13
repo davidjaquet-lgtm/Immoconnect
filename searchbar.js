@@ -90,7 +90,7 @@
       '<div class="ic-sb-bar">' +
         '<div class="ic-sb-field ic-sb-loc">' + pin +
           '<div style="flex:1"><label>Localisation</label>' +
-          '<input id="ic-sb-ville" type="text" placeholder="Ville, code postal…"></div></div>' +
+          '<input id="ic-sb-ville" name="ic-ville" autocomplete="off" type="text" placeholder="Ville, code postal…"></div></div>' +
         '<div class="ic-sb-field"><div style="flex:1"><label>Type de bien</label>' +
           '<select id="ic-sb-type"><option value="">Tous</option><option>Maison</option><option>Appartement</option>' +
           '<option>Villa</option><option>Terrain</option><option>Immeuble</option><option>Local commercial</option></select></div></div>' +

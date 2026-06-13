@@ -99,9 +99,9 @@
 </div>
 
 <div class="filters">
-  <div class="f-field" style="flex:2">
+  <div class="f-field" style="flex:2;min-width:190px">
     <label>Localisation</label>
-    <input type="text" id="f-ville" placeholder="Ville, code postal…" onkeydown="if(event.key==='Enter')lancer()">
+    <input type="text" id="f-ville" name="ic-ville" autocomplete="off" placeholder="Ville, code postal…" onkeydown="if(event.key==='Enter')lancer()">
   </div>
   <div class="f-field">
     <label>Type de bien</label>
@@ -117,12 +117,20 @@
     </select>
   </div>
   <div class="f-field">
+    <label>Prix min (€)</label>
+    <input type="number" id="f-prixmin" min="0" step="10000" placeholder="0">
+  </div>
+  <div class="f-field">
     <label>Prix max (€)</label>
     <input type="number" id="f-prixmax" min="0" step="10000" placeholder="Sans limite">
   </div>
   <div class="f-field">
     <label>Surface min (m²)</label>
     <input type="number" id="f-surfmin" min="0" placeholder="0">
+  </div>
+  <div class="f-field">
+    <label>Surface max (m²)</label>
+    <input type="number" id="f-surfmax" min="0" placeholder="∞">
   </div>
   <div class="f-field">
     <label>Pièces min.</label>
@@ -135,7 +143,27 @@
       <option value="5">5+</option>
     </select>
   </div>
-  <div class="f-field" style="flex:0 0 auto;flex-direction:row;gap:8px">
+  <div class="f-field">
+    <label>Chambres min.</label>
+    <select id="f-chambres">
+      <option value="">Indifférent</option>
+      <option value="1">1+</option>
+      <option value="2">2+</option>
+      <option value="3">3+</option>
+      <option value="4">4+</option>
+      <option value="5">5+</option>
+    </select>
+  </div>
+  <div class="f-field">
+    <label>Niveau dossier</label>
+    <select id="f-niveau">
+      <option value="">Tous</option>
+      <option value="silver">Silver et +</option>
+      <option value="gold">Gold et +</option>
+      <option value="platinium">Platinium</option>
+    </select>
+  </div>
+  <div class="f-field" style="flex:0 0 auto;flex-direction:row;gap:8px;align-items:flex-end">
     <button class="btn-search" onclick="lancer()">Rechercher</button>
     <button class="btn-reset" onclick="reset()">Effacer</button>
   </div>
@@ -176,22 +204,27 @@ var favSet = {}; // annonce_id -> true
 // Pré-remplissage des filtres depuis l'URL (?ville=&type=&prixmax=&surfmin=&pieces=&tri=)
 function lireParams() {
   var p = new URLSearchParams(window.location.search);
-  if (p.get('ville'))    document.getElementById('f-ville').value = p.get('ville');
-  if (p.get('type'))     document.getElementById('f-type').value = p.get('type');
-  if (p.get('prixmax'))  document.getElementById('f-prixmax').value = p.get('prixmax');
-  if (p.get('surfmin'))  document.getElementById('f-surfmin').value = p.get('surfmin');
-  if (p.get('pieces'))   document.getElementById('f-pieces').value = p.get('pieces');
-  if (p.get('tri'))      document.getElementById('f-tri').value = p.get('tri');
+  function set(id, key){ if (p.get(key)) { var e=document.getElementById(id); if(e) e.value = p.get(key); } }
+  set('f-ville','ville'); set('f-type','type');
+  set('f-prixmin','prixmin'); set('f-prixmax','prixmax');
+  set('f-surfmin','surfmin'); set('f-surfmax','surfmax');
+  set('f-pieces','pieces'); set('f-chambres','chambres');
+  set('f-niveau','niveau'); set('f-tri','tri');
 }
 
 function valeurs() {
+  function v(id){ var e=document.getElementById(id); return e ? e.value : ''; }
   return {
-    ville:   document.getElementById('f-ville').value.trim(),
-    type:    document.getElementById('f-type').value,
-    prixmax: document.getElementById('f-prixmax').value,
-    surfmin: document.getElementById('f-surfmin').value,
-    pieces:  document.getElementById('f-pieces').value,
-    tri:     document.getElementById('f-tri').value
+    ville:    v('f-ville').trim(),
+    type:     v('f-type'),
+    prixmin:  v('f-prixmin'),
+    prixmax:  v('f-prixmax'),
+    surfmin:  v('f-surfmin'),
+    surfmax:  v('f-surfmax'),
+    pieces:   v('f-pieces'),
+    chambres: v('f-chambres'),
+    niveau:   v('f-niveau'),
+    tri:      v('f-tri')
   };
 }
 
@@ -205,9 +238,8 @@ function lancer() {
 }
 
 function reset() {
-  ['f-ville','f-prixmax','f-surfmin'].forEach(function(id){ document.getElementById(id).value=''; });
-  document.getElementById('f-type').value = '';
-  document.getElementById('f-pieces').value = '';
+  ['f-ville','f-prixmin','f-prixmax','f-surfmin','f-surfmax'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  ['f-type','f-pieces','f-chambres','f-niveau'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
   document.getElementById('f-tri').value = 'recent';
   lancer();
 }
@@ -222,9 +254,17 @@ async function chercher(v) {
 
   if (v.type)    q = q.eq('type_bien', v.type);
   if (v.ville)   q = q.or('ville.ilike.%' + v.ville + '%,code_postal.ilike.%' + v.ville + '%');
+  if (v.prixmin) q = q.gte('prix', parseInt(v.prixmin));
   if (v.prixmax) q = q.lte('prix', parseInt(v.prixmax));
   if (v.surfmin) q = q.gte('surface', parseInt(v.surfmin));
+  if (v.surfmax) q = q.lte('surface', parseInt(v.surfmax));
   if (v.pieces)  q = q.gte('nb_pieces', parseInt(v.pieces));
+  if (v.chambres) q = q.gte('nb_chambres', parseInt(v.chambres));
+  if (v.niveau) {
+    var tiers = ['standard', 'silver', 'gold', 'platinium'];
+    var idx = tiers.indexOf(v.niveau);
+    if (idx >= 0) q = q.in('niveau_valide', tiers.slice(idx));
+  }
 
   if (v.tri === 'prix_asc')          q = q.order('prix', { ascending: true });
   else if (v.tri === 'prix_desc')    q = q.order('prix', { ascending: false });
