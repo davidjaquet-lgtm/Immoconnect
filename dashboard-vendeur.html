@@ -162,7 +162,7 @@ nav .nav-link{margin-right:18px}
 <nav>
   <a href="index.html" class="nav-logo"><img src="logo-immoconnect.png" alt="ImmoConnect" style="height:38px;width:auto;object-fit:contain;vertical-align:middle"><span style="font-size:22px;font-weight:600;color:#0F0F0E;margin-left:8px">Immo<span style="color:#C09B5A">Connect</span></span></a>
   <a href="questionnaire-vendeur.html" class="nav-btn nav-secondary">+ Publier un bien</a>
-  <a href="connexion.html" class="nav-btn nav-secondary" style="text-decoration:none">🔑 Espace acheteur</a>
+  <button onclick="allerEspaceAcheteur()" class="nav-btn nav-secondary" style="cursor:pointer">🔑 Espace acheteur</button>
   <a href="blog.html" class="nav-btn nav-secondary" style="text-decoration:none">Blog</a>
   <button onclick="toggleNotifications()" title="Notifications" class="nav-btn nav-secondary" style="position:relative;margin-right:4px">🔔<span id="notif-badge" style="display:none;position:absolute;top:-6px;right:-6px;background:#A32D2D;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;line-height:16px;border-radius:8px;padding:0 3px;text-align:center">0</span></button>
   <button class="nav-btn nav-primary" onclick="deconnexion()">Déconnexion</button>
@@ -279,6 +279,30 @@ const SB_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
 const SB_KEY = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
 const { createClient } = supabase;
 const db = createClient(SB_URL, SB_KEY);
+
+// Bascule intelligente vers l'espace acheteur :
+//  - pas de projet acheteur -> questionnaire acheteur
+//  - projet existant -> dashboard acheteur (où l'on peut actualiser ses critères)
+async function allerEspaceAcheteur() {
+  try {
+    var { data: { session } } = await db.auth.getSession();
+    if (!session || !session.user) { window.location.href = 'connexion.html'; return; }
+    var email = session.user.email;
+    // S'assurer que le profil 'acheteur' est bien dans le compte
+    var meta = session.user.user_metadata || {};
+    var profils = meta.profils || [];
+    if (profils.indexOf('acheteur') === -1 && profils.indexOf('investisseur') === -1) {
+      profils.push('acheteur');
+      await db.auth.updateUser({ data: { profils: profils } });
+    }
+    var { data: projets } = await db.from('projets_acheteurs').select('id').eq('email', email).limit(1);
+    if (projets && projets.length > 0) {
+      window.location.href = 'connexion.html?stay=1#acheteur'; // dashboard acheteur
+    } else {
+      window.location.href = 'questionnaire-acheteur.html'; // pas encore de projet -> questionnaire
+    }
+  } catch(e) { window.location.href = 'questionnaire-acheteur.html'; }
+}
 
 var currentUser = null;
 var annoncesData = [];

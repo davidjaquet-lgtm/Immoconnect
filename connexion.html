@@ -498,6 +498,20 @@ async function renvoyerConfirmation() {
   document.getElementById('resend-confirm').style.display = 'none';
 }
 
+async function allerEspaceVendeur() {
+  try {
+    var { data: { session } } = await db.auth.getSession();
+    if (!session || !session.user) { window.location.href = 'connexion.html'; return; }
+    var email = session.user.email;
+    var meta = session.user.user_metadata || {};
+    var profils = meta.profils || [];
+    if (profils.indexOf('vendeur') === -1) { profils.push('vendeur'); await db.auth.updateUser({ data: { profils: profils } }); }
+    var { data: annonces } = await db.from('annonces_vendeurs').select('id').eq('email_contact', email).neq('statut_annonce','supprimee').limit(1);
+    if (annonces && annonces.length > 0) { window.location.href = 'dashboard-vendeur.html'; }
+    else { window.location.href = 'questionnaire-vendeur.html'; }
+  } catch(e) { window.location.href = 'questionnaire-vendeur.html'; }
+}
+
 async function ajouterProfilAcheteur() {
   try {
     var { data: { user } } = await db.auth.getUser();
@@ -619,6 +633,11 @@ async function afficherDashboard(user) {
   document.getElementById('dash-loading').style.display  = 'none';
 
   document.getElementById('dash-content').style.display  = 'block';
+  // Ouvrir l'onglet demandé via l'ancre (#acheteur, #investisseur, #vendeur)
+  try {
+    var hash = (window.location.hash || '').replace('#','');
+    if (hash && document.getElementById('dtab-'+hash)) switchDashTab(hash);
+  } catch(e) {}
   // Onboarding non bloquant : une erreur ici ne doit jamais masquer le dashboard
   try { checkOnboarding(profils); } catch(e) { console.warn('onboarding:', e); }
   } catch (errDash) {
@@ -1046,7 +1065,8 @@ function buildAcheteurPanel(projets, isInv) {
     h += '<div class="pj-item"><div class="pj-lbl">Stratégie</div><div class="pj-val">' + (p.strategie||'—') + '</div></div>';
   }
   h += '</div></div>';
-  h += '<a href="questionnaire-acheteur.html" class="btn-add ba-'+color+'" style="margin-top:8px">Modifier mon projet</a>';
+  h += '<a href="questionnaire-acheteur.html" class="btn-add ba-'+color+'" style="margin-top:8px">Modifier mes critères de recherche</a>';
+  h += '<button onclick="allerEspaceVendeur()" class="btn-add ba-teal" style="margin-top:8px;margin-left:8px;cursor:pointer;border:none">🏠 Espace vendeur</button>';
   return h;
 }
 
