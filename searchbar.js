@@ -90,17 +90,22 @@
       '<div class="ic-sb-bar">' +
         '<div class="ic-sb-field ic-sb-loc">' + pin +
           '<div style="flex:1"><label>Localisation</label>' +
-          '<input id="ic-sb-ville" name="ic-ville" autocomplete="off" type="text" placeholder="Ville, code postal…"></div></div>' +
+          '<input id="ic-sb-ville" name="ic-ville" autocomplete="off" type="search" placeholder="Ville, code postal…"></div></div>' +
         '<div class="ic-sb-field"><div style="flex:1"><label>Type de bien</label>' +
           '<select id="ic-sb-type"><option value="">Tous</option><option>Maison</option><option>Appartement</option>' +
           '<option>Villa</option><option>Terrain</option><option>Immeuble</option><option>Local commercial</option></select></div></div>' +
-        '<div class="ic-sb-field"><div style="flex:1"><label>Budget max</label>' +
-          '<select id="ic-sb-budget"><option value="">Sans limite</option>' +
-          '<option value="150000">150 000 €</option><option value="250000">250 000 €</option>' +
-          '<option value="350000">350 000 €</option><option value="500000">500 000 €</option>' +
-          '<option value="750000">750 000 €</option><option value="1000000">1 000 000 €</option></select></div></div>' +
-        '<div class="ic-sb-field ic-sb-last"><div style="flex:1"><label>Pièces min.</label>' +
-          '<select id="ic-sb-pieces"><option value="">Indifférent</option>' +
+        '<div class="ic-sb-field"><div style="flex:1"><label>Prix min</label>' +
+          '<input id="ic-sb-prixmin" type="number" min="0" step="10000" placeholder="0"></div></div>' +
+        '<div class="ic-sb-field"><div style="flex:1"><label>Prix max</label>' +
+          '<input id="ic-sb-prixmax" type="number" min="0" step="10000" placeholder="∞"></div></div>' +
+        '<div class="ic-sb-field"><div style="flex:1"><label>Surface min</label>' +
+          '<input id="ic-sb-surfmin" type="number" min="0" placeholder="m²"></div></div>' +
+        '<div class="ic-sb-field"><div style="flex:1"><label>Pièces min.</label>' +
+          '<select id="ic-sb-pieces"><option value="">Indif.</option>' +
+          '<option value="1">1+</option><option value="2">2+</option><option value="3">3+</option>' +
+          '<option value="4">4+</option><option value="5">5+</option></select></div></div>' +
+        '<div class="ic-sb-field ic-sb-last"><div style="flex:1"><label>Chambres min.</label>' +
+          '<select id="ic-sb-chambres"><option value="">Indif.</option>' +
           '<option value="1">1+</option><option value="2">2+</option><option value="3">3+</option>' +
           '<option value="4">4+</option><option value="5">5+</option></select></div></div>' +
         '<button class="ic-sb-btn" id="ic-sb-go">Rechercher →</button>' +
@@ -115,12 +120,21 @@
       var v = function (id) { var e = document.getElementById(id); return e ? e.value : ''; };
       if (v('ic-sb-ville').trim()) p.set('ville', v('ic-sb-ville').trim());
       if (v('ic-sb-type')) p.set('type', v('ic-sb-type'));
-      if (v('ic-sb-budget')) p.set('prixmax', v('ic-sb-budget'));
+      if (v('ic-sb-prixmin')) p.set('prixmin', v('ic-sb-prixmin'));
+      if (v('ic-sb-prixmax')) p.set('prixmax', v('ic-sb-prixmax'));
+      if (v('ic-sb-surfmin')) p.set('surfmin', v('ic-sb-surfmin'));
       if (v('ic-sb-pieces')) p.set('pieces', v('ic-sb-pieces'));
+      if (v('ic-sb-chambres')) p.set('chambres', v('ic-sb-chambres'));
       window.location.href = 'recherche.html' + (p.toString() ? '?' + p.toString() : '');
     }
     document.getElementById('ic-sb-go').addEventListener('click', go);
     document.getElementById('ic-sb-ville').addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+
+    // Garde-fou anti autofill : si le navigateur injecte l'email (ou tout texte avec @), on vide
+    var villeEl = document.getElementById('ic-sb-ville');
+    function antiMail(){ if (villeEl && villeEl.value && villeEl.value.indexOf('@') !== -1) villeEl.value = ''; }
+    setTimeout(antiMail, 150); setTimeout(antiMail, 500); setTimeout(antiMail, 1200);
+    villeEl.addEventListener('focus', antiMail);
   }
 
   function init() { try { majCompte(); } catch (e) {} try { buildBar(); } catch (e) {} }
