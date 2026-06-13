@@ -498,6 +498,27 @@ async function renvoyerConfirmation() {
   document.getElementById('resend-confirm').style.display = 'none';
 }
 
+async function souscrireInvestisseur() {
+  try {
+    var { data: { session } } = await db.auth.getSession();
+    var email = session && session.user ? session.user.email : null;
+    var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/creer-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        price_id: 'price_1TdFIGRWjX9H4QylcuF948q2',
+        forfait: 'investisseur',
+        customer_email: email,
+        success_url: 'https://immoconnect-agence.fr/connexion.html?stay=1&stripe=success#investisseur',
+        cancel_url: 'https://immoconnect-agence.fr/connexion.html?stay=1#acheteur'
+      })
+    });
+    var data = await res.json();
+    if (data.url) { window.location.href = data.url; }
+    else { alert('Impossible de démarrer le paiement. Réessayez.'); }
+  } catch(e) { alert('Erreur : ' + e.message); }
+}
+
 async function allerEspaceVendeur() {
   try {
     var { data: { session } } = await db.auth.getSession();
@@ -1040,6 +1061,15 @@ function buildAcheteurPanel(projets, isInv) {
   }
 
   var p = projets[0];
+
+  // Acheteur gratuit -> proposer la bascule vers le forfait Investisseur (29,99€/mois)
+  if (!isInv) {
+    h += '<div style="background:linear-gradient(135deg,#FAECE7,#FFF6F2);border:1.5px solid var(--coral);border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">';
+    h += '<div style="flex:1;min-width:230px"><div style="font-size:14px;font-weight:600;color:#A23C28;margin-bottom:3px">📈 Passez au forfait Investisseur</div><div style="font-size:12px;color:#8A4030;line-height:1.6">Matching automatique sur le rendement, dossiers et rapports Hanaé illimités, accès aux vendeurs Platinium. 29,99€/mois, sans engagement.</div></div>';
+    h += '<button onclick="souscrireInvestisseur()" style="white-space:nowrap;flex-shrink:0;background:var(--coral);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'Outfit\',sans-serif">Devenir investisseur →</button>';
+    h += '</div>';
+  }
+
   h += '<div class="stats-row s3">';
   h += '<div class="stat-box st-' + (isInv?'coral':'blue') + '"><div class="stat-val">' + (p.budget_total?Math.round(p.budget_total).toLocaleString('fr-FR')+' €':'—') + '</div><div class="stat-lbl">Budget total</div></div>';
   h += '<div class="stat-box"><div class="stat-val">' + (p.capacite_emprunt?Math.round(p.capacite_emprunt).toLocaleString('fr-FR')+' €':'—') + '</div><div class="stat-lbl">Capacité emprunt</div></div>';
