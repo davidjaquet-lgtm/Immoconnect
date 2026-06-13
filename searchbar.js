@@ -100,14 +100,15 @@
           '<input id="ic-sb-prixmax" type="number" min="0" step="10000" placeholder="∞"></div></div>' +
         '<div class="ic-sb-field"><div style="flex:1"><label>Surface min</label>' +
           '<input id="ic-sb-surfmin" type="number" min="0" placeholder="m²"></div></div>' +
+        '<div class="ic-sb-field"><div style="flex:1"><label>Surface max</label>' +
+          '<input id="ic-sb-surfmax" type="number" min="0" placeholder="m²"></div></div>' +
         '<div class="ic-sb-field"><div style="flex:1"><label>Pièces min.</label>' +
           '<select id="ic-sb-pieces"><option value="">Indif.</option>' +
           '<option value="1">1+</option><option value="2">2+</option><option value="3">3+</option>' +
           '<option value="4">4+</option><option value="5">5+</option></select></div></div>' +
-        '<div class="ic-sb-field ic-sb-last"><div style="flex:1"><label>Chambres min.</label>' +
-          '<select id="ic-sb-chambres"><option value="">Indif.</option>' +
-          '<option value="1">1+</option><option value="2">2+</option><option value="3">3+</option>' +
-          '<option value="4">4+</option><option value="5">5+</option></select></div></div>' +
+        '<div class="ic-sb-field ic-sb-last"><div style="flex:1"><label>Niveau du bien</label>' +
+          '<select id="ic-sb-niveau"><option value="">Tous</option><option value="standard">Standard</option>' +
+          '<option value="silver">Silver</option><option value="gold">Gold</option><option value="platinium">Platinium</option></select></div></div>' +
         '<button class="ic-sb-btn" id="ic-sb-go">Rechercher →</button>' +
       '</div>';
 
@@ -123,8 +124,9 @@
       if (v('ic-sb-prixmin')) p.set('prixmin', v('ic-sb-prixmin'));
       if (v('ic-sb-prixmax')) p.set('prixmax', v('ic-sb-prixmax'));
       if (v('ic-sb-surfmin')) p.set('surfmin', v('ic-sb-surfmin'));
+      if (v('ic-sb-surfmax')) p.set('surfmax', v('ic-sb-surfmax'));
       if (v('ic-sb-pieces')) p.set('pieces', v('ic-sb-pieces'));
-      if (v('ic-sb-chambres')) p.set('chambres', v('ic-sb-chambres'));
+      if (v('ic-sb-niveau')) p.set('niveau', v('ic-sb-niveau'));
       window.location.href = 'recherche.html' + (p.toString() ? '?' + p.toString() : '');
     }
     document.getElementById('ic-sb-go').addEventListener('click', go);

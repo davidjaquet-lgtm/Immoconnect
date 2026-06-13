@@ -158,8 +158,9 @@
     <label>Niveau dossier</label>
     <select id="f-niveau">
       <option value="">Tous</option>
-      <option value="silver">Silver et +</option>
-      <option value="gold">Gold et +</option>
+      <option value="standard">Standard</option>
+      <option value="silver">Silver</option>
+      <option value="gold">Gold</option>
       <option value="platinium">Platinium</option>
     </select>
   </div>
@@ -260,11 +261,7 @@ async function chercher(v) {
   if (v.surfmax) q = q.lte('surface', parseInt(v.surfmax));
   if (v.pieces)  q = q.gte('nb_pieces', parseInt(v.pieces));
   if (v.chambres) q = q.gte('nb_chambres', parseInt(v.chambres));
-  if (v.niveau) {
-    var tiers = ['standard', 'silver', 'gold', 'platinium'];
-    var idx = tiers.indexOf(v.niveau);
-    if (idx >= 0) q = q.in('niveau_valide', tiers.slice(idx));
-  }
+  if (v.niveau) q = q.ilike('niveau_valide', v.niveau);
 
   if (v.tri === 'prix_asc')          q = q.order('prix', { ascending: true });
   else if (v.tri === 'prix_desc')    q = q.order('prix', { ascending: false });
