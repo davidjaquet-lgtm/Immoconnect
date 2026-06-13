@@ -120,30 +120,20 @@ var currentUser = null
   var meta = user.user_metadata || {}
   if (!meta.profils?.includes('agent')) { showToast('Accès réservé aux agents.', 'err'); return }
 
-  var forfait = meta.forfait_agent || 'pay_per_use'
-  var quotaMax = { pay_per_use: 2, starter: 5, pro: 15, premium: 999 }
-  var leadsUtilises = parseInt(meta.leads_semaine_utilises || 0)
-  var quota = quotaMax[forfait] || 2
-  var PPU_GRATUITS = 2 // Les 2 premiers contacts PPU sont gratuits
-
-  // Abonné avec leads restants → messagerie directement sans payer
-  if (forfait !== 'pay_per_use' && leadsUtilises < quota) {
+  // Décision quota CÔTÉ SERVEUR (compteur infalsifiable, identité vérifiée par token).
+  // Dans le quota gratuit → messagerie directement ; sinon → formulaire de paiement 4,99€.
+  var sess = (await db.auth.getSession()).data.session
+  var dec = await db.functions.invoke('consommer-lead', { body: { annonce_id: annonceId, access_token: sess && sess.access_token } })
+  var decision = (dec && dec.data) || {}
+  if (decision.ok && decision.gratuit) {
     window.location.href = 'messagerie.html?annonce=' + annonceId
     return
   }
 
-  // PPU — 2 premiers contacts gratuits
-  if (forfait === 'pay_per_use' && leadsUtilises < PPU_GRATUITS) {
-    // Incrémenter et rediriger directement sans paiement
-    await db.auth.updateUser({ data: { leads_semaine_utilises: leadsUtilises + 1 } })
-    window.location.href = 'messagerie.html?annonce=' + annonceId
-    return
-  }
-
-  // Abonné quota dépassé → afficher message adapté
-  if (forfait !== 'pay_per_use' && leadsUtilises >= quota) {
+  // Quota gratuit épuisé → message + affichage du formulaire de paiement
+  if (decision.quota) {
     var header = document.querySelector('.card-header')
-    if (header) header.innerHTML += '<div style="background:rgba(192,155,90,.15);border-radius:6px;padding:6px 10px;margin-top:8px;font-size:11px;color:var(--gold)">Quota ' + forfait + ' atteint (' + quota + '/sem) — Contact supplémentaire à 4,99€</div>'
+    if (header) header.innerHTML += '<div style="background:rgba(192,155,90,.15);border-radius:6px;padding:6px 10px;margin-top:8px;font-size:11px;color:var(--gold)">Quota atteint (' + decision.quota + '/sem) — Contact supplémentaire à 4,99€</div>'
   }
 
   var { data: b } = await db.from('annonces_vendeurs').select('*').eq('id', annonceId).single()
@@ -213,9 +203,7 @@ async function verifierRetourPPU(sid) {
     var d = res.data || {}
     if (d.verified && d.action === 'contact_ppu') {
       if (!d.already) {
-        // Incrémente le compteur d'usage de l'agent (non bloquant)
-        var meta = currentUser.user_metadata || {}
-        await db.auth.updateUser({ data: { leads_semaine_utilises: parseInt(meta.leads_semaine_utilises || 0) + 1 } })
+        // Le lead payé est enregistré côté serveur par verifier-achat (table leads_agents).
         // Notifie le vendeur — UNIQUEMENT après paiement confirmé
         if (d.email_vendeur) {
           db.functions.invoke('envoyer-email', { body: {

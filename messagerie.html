@@ -507,13 +507,9 @@ async function envoyerMessage() {
 
   // Quota agent
   if (currentRole === 'agent' && !conv.contact_consomme) {
-    var semaine = getSemaine();
-    var { data: existing } = await db.from('contacts_semaine').select('*').eq('agent_id',currentUser.id).eq('semaine',semaine).single().then(undefined, function(){return{data:null};});
-    if (existing) {
-      await db.from('contacts_semaine').update({nb_contacts:existing.nb_contacts+1}).eq('id',existing.id);
-    } else {
-      await db.from('contacts_semaine').insert({agent_id:currentUser.id,semaine:semaine,nb_contacts:1});
-    }
+    // Comptage du lead CÔTÉ SERVEUR (source de vérité infalsifiable, identité par token)
+    var _sess = (await db.auth.getSession()).data.session;
+    await db.functions.invoke('consommer-lead', { body: { annonce_id: conv.annonce_id, access_token: _sess && _sess.access_token } }).then(undefined, function(){});
     await db.from('conversations').update({contact_consomme:true,date_contact:new Date().toISOString()}).eq('id',currentConvId);
     conv.contact_consomme = true;
     if (conv.annonce_id) db.rpc('incrementer_contacts',{annonce_uuid:conv.annonce_id}).then(undefined, function(){});

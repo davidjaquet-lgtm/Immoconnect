@@ -925,11 +925,29 @@ async function chargerCandidatures() {
 }
 
 // ── QUOTAS ──
-function afficherQuotas() {
+// Semaine ISO 'YYYY-Www' (identique au calcul des edge functions consommer-lead/verifier-achat)
+function getSemaine(d) {
+  d = d || new Date();
+  var date = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  var dayNum = (date.getUTCDay() + 6) % 7;
+  date.setUTCDate(date.getUTCDate() - dayNum + 3);
+  var firstThursday = new Date(Date.UTC(date.getUTCFullYear(), 0, 4));
+  var week = 1 + Math.round(((date.getTime() - firstThursday.getTime()) / 86400000 - 3 + ((firstThursday.getUTCDay() + 6) % 7)) / 7);
+  return date.getUTCFullYear() + '-W' + String(week).padStart(2, '0');
+}
+
+async function afficherQuotas() {
   var forfait = meta.forfait_agent || 'pay_per_use';
   var maxQ = QUOTAS_MAX[forfait] || QUOTAS_MAX.pay_per_use;
   var utilC = parseInt(meta.candidatures_mois_utilisees || 0);
-  var utilL = parseInt(meta.leads_semaine_utilises || 0);
+  // Leads de la semaine : compté CÔTÉ SERVEUR (table leads_agents), non falsifiable
+  var utilL = 0;
+  try {
+    var { count } = await db.from('leads_agents')
+      .select('id', { count: 'exact', head: true })
+      .eq('agent_email', currentUser.email).eq('semaine', getSemaine()).eq('type', 'gratuit');
+    utilL = count || 0;
+  } catch (e) { utilL = 0; }
 
   var pctC = maxQ.cands > 0 && maxQ.cands < 999 ? Math.min(100, Math.round(utilC / maxQ.cands * 100)) : 0;
   var pctL = maxQ.leads > 0 && maxQ.leads < 999 ? Math.min(100, Math.round(utilL / maxQ.leads * 100)) : 0;
@@ -1738,54 +1756,23 @@ function initStripeAgent() {
   }
 }
 
-// Appelée depuis n\'importe quelle action qui consomme un lead/contact
+// Appelée depuis n'importe quelle action qui consomme un lead/contact
 async function verifierEtPayerContact(annonceId, vendeurEmail) {
-  // Récupérer les quotas actuels de l\'agent
-  var { data: meta } = await db.from('agents_validation')
-    .select('leads_semaine_utilises, forfait_agent')
-    .eq('email', currentUser.email).single()
+  // Décision quota CÔTÉ SERVEUR (compteur infalsifiable, identité vérifiée par token).
+  var sess = (await db.auth.getSession()).data.session
+  var dec = await db.functions.invoke('consommer-lead', { body: { annonce_id: annonceId, access_token: sess && sess.access_token } })
+  var d = (dec && dec.data) || {}
 
-  if (!meta) { showToast('Impossible de vérifier votre forfait.', 'error'); return false }
+  // Dans le quota gratuit → on continue
+  if (d.ok && d.gratuit) return true
 
-  var forfait = meta.forfait_agent || 'pay_per_use'
-  var utilises = parseInt(meta.leads_semaine_utilises || 0)
-  var limites = { pay_per_use: 0, starter: 5, pro: 15, premium: 999 }
-  var limite = limites[forfait] || 0
-
-  // PPU ou quota dépassé → paiement Stripe
-  if (forfait === 'pay_per_use' || utilises >= limite) {
-    var priceId = 'price_1TdFQoRWjX9H4QylKiSmlAMM' // contact supplémentaire 4,99€
-    var label = forfait === 'pay_per_use' ? 'Contact vendeur — 4,99€' : 'Quota dépassé — contact supplémentaire 4,99€'
-
-    var confirm = window.confirm(label + '\n\nVoulez-vous procéder au paiement Stripe ?')
-    if (!confirm) return false
-
-    initStripeAgent()
-    try {
-      var res = await fetch('https://zxxhyefajfwqcxcfxpmg.supabase.co/functions/v1/creer-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          price_id: priceId,
-          forfait: 'contact_supp',
-          mode: 'payment',
-          success_url: 'https://immoconnect-agence.fr/dashboard-agent.html?stripe=success&type=contact_supp&annonce=' + (annonceId || ''),
-          cancel_url: 'https://immoconnect-agence.fr/dashboard-agent.html'
-        })
-      })
-      var data = await res.json()
-      if (data.url) { window.location.href = data.url; return false }
-      else { showToast('Erreur paiement : ' + (data.error || ''), 'error'); return false }
-    } catch(e) {
-      showToast('Erreur Stripe : ' + e.message, 'error'); return false
-    }
+  // Quota épuisé → tunnel de contact payant (paiement Stripe vérifié par verifier-achat)
+  if (annonceId) {
+    window.location.href = 'contact-agent-ppu.html?annonce=' + annonceId
+  } else {
+    showToast('Quota de contacts atteint — contact supplémentaire payant.', 'error')
   }
-
-  // Quota disponible → incrémenter et continuer
-  await db.from('agents_validation')
-    .update({ leads_semaine_utilises: utilises + 1 })
-    .eq('email', currentUser.email)
-  return true
+  return false
 }
 
 // Vérifier au chargement si retour Stripe success
@@ -1844,5 +1831,6 @@ function showToast(msg, type) {
 }
 </script>
 <script src="/pwa.js"></script>
+<script src="feedback.js" defer></script>
 </body>
 </html>
