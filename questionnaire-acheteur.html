@@ -896,6 +896,20 @@ async function soumettre() {
   showToast('✅ Projet déposé avec succès !', 'ok');
   btn.textContent = '✓ Projet déposé';
 
+  // Ajoute automatiquement le profil 'acheteur' au compte connecté.
+  // (Remplace l'ancien bouton « + Espace acheteur » : l'onglet « Mon projet achat »
+  //  apparaît désormais tout seul dans le dashboard après dépôt d'un projet.)
+  try {
+    var { data: { user: _u } } = await db.auth.getUser();
+    if (_u) {
+      var _profils = (_u.user_metadata && _u.user_metadata.profils) || [];
+      if (_profils.indexOf('acheteur') === -1) {
+        _profils.push('acheteur');
+        await db.auth.updateUser({ data: { profils: _profils } });
+      }
+    }
+  } catch(e) { /* non connecté ou erreur : on continue sans bloquer */ }
+
   // Forfait Investisseur : redirection vers le paiement Stripe.
   // Le forfait passera à 'investisseur' via le webhook une fois le paiement confirmé.
   if (forfait === 'investisseur') {
