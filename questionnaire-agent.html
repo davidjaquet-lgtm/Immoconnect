@@ -171,38 +171,11 @@ nav .nav-link{margin-right:18px}
   <!-- ÉTAPE 1 — PROFIL -->
   <div id="step1">
     <div class="tarif-info">
-      <div class="tarif-badge">🤝 Choisissez votre forfait</div>
-      <div style="font-size:14px;font-weight:500;margin-bottom:4px;color:var(--ink)">Commencez gratuitement ou choisissez un forfait</div>
-      <div style="font-size:12px;color:#085041;line-height:1.6;margin-bottom:14px">Inscription gratuite. Candidatez à 9,99€/unité en pay per use ou choisissez un forfait pour accéder aux alertes et augmenter votre volume.</div>
+      <div class="tarif-badge">✓ Inscription gratuite</div>
+      <div style="font-size:14px;font-weight:500;margin-bottom:4px;color:var(--ink)">Créez votre compte agent gratuitement</div>
+      <div style="font-size:12px;color:#085041;line-height:1.6;margin-bottom:4px">L'inscription est 100% gratuite et sans engagement. Une fois votre compte créé et validé, vous pourrez, si vous le souhaitez, choisir un forfait (Starter, Pro ou Premium) depuis votre tableau de bord pour débloquer les alertes et augmenter votre volume — ou rester en accès gratuit.</div>
+      <!-- Le choix du forfait se fait APRÈS l'inscription (dashboard / page forfaits). Compte créé en pay_per_use par défaut. -->
       <input type="hidden" id="forfait_agent" value="pay_per_use">
-      <div class="tarif-plans" style="grid-template-columns:repeat(4,1fr)">
-        <div class="tarif-plan selected-plan" id="fp-pay_per_use" onclick="selectForfaitAgent('pay_per_use')">
-          <div class="plan-name">Pay per use</div>
-          <div class="plan-price" style="font-size:14px">Gratuit</div>
-          <div class="plan-cadid">9,99€/candidature</div>
-          <div class="plan-cadid" style="margin-top:3px">Alerte mode top 3</div>
-        </div>
-        <div class="tarif-plan" id="fp-starter" onclick="selectForfaitAgent('starter')">
-          <div class="plan-name">Starter</div>
-          <div class="plan-price">49€</div>
-          <div class="plan-cadid">/mois · H+12</div>
-          <div class="plan-cadid" style="margin-top:3px">5 candidatures/mois</div>
-        </div>
-        <div class="tarif-plan recommended" id="fp-pro" onclick="selectForfaitAgent('pro')">
-          <div class="plan-name">Pro</div>
-          <div class="plan-price">99€</div>
-          <div class="plan-cadid">/mois · H+4</div>
-          <div class="plan-cadid" style="margin-top:3px">20 candidatures/mois</div>
-          <div class="plan-rec">Recommandé</div>
-        </div>
-        <div class="tarif-plan" id="fp-premium" onclick="selectForfaitAgent('premium')">
-          <div class="plan-name">Premium</div>
-          <div class="plan-price">199€</div>
-          <div class="plan-cadid">/mois · H+0</div>
-          <div class="plan-cadid" style="margin-top:3px">Illimité · +10 pts</div>
-        </div>
-      </div>
-      <div id="forfait-detail" style="margin-top:10px;font-size:11px;color:var(--muted);background:var(--bg);border-radius:6px;padding:8px 10px;line-height:1.6"></div>
     </div>
 
     <div class="section">
@@ -718,7 +691,7 @@ function checkPassword() {
 
 // ── SOUMETTRE ──
 function selectForfaitAgent(forfait) {
-  document.getElementById('forfait_agent').value = forfait;
+  var z = document.getElementById('forfait_agent'); if (z) z.value = forfait; else return;
   ['pay_per_use','starter','pro','premium'].forEach(function(f) {
     var el = document.getElementById('fp-' + f);
     if (el) el.classList.remove('selected-plan');
