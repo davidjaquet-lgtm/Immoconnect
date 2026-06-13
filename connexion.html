@@ -541,9 +541,13 @@ async function afficherDashboard(user) {
   var profils = meta.profils || ['vendeur'];
   var nom    = meta.nom || user.email.split('@')[0];
 
-  // (Plus de redirection forcée : tous les comptes voient le dashboard multi-profils
-  //  à onglets, ce qui permet de basculer entre vendeur / acheteur / investisseur.)
+  var urlParams = new URLSearchParams(window.location.search);
+  var forceIci = urlParams.get('stay') === '1';
+  var estVendeurPur = profils.length === 1 && profils[0] === 'vendeur';
+  if (estVendeurPur && !forceIci) { window.location.href = 'dashboard-vendeur.html'; return; }
 
+  // Construction du dashboard multi-profils — protégée (jamais de page blanche)
+  try {
   // Charger données selon profils
   var annonces = [], projets = [], messages = [], leads = [];
 
@@ -614,9 +618,17 @@ async function afficherDashboard(user) {
   document.getElementById('dash-content').innerHTML = html;
   document.getElementById('dash-loading').style.display  = 'none';
 
-  // Lancer l\'onboarding si première visite
-  checkOnboarding(profils);
   document.getElementById('dash-content').style.display  = 'block';
+  // Onboarding non bloquant : une erreur ici ne doit jamais masquer le dashboard
+  try { checkOnboarding(profils); } catch(e) { console.warn('onboarding:', e); }
+  } catch (errDash) {
+    console.error('Erreur dashboard multi-profils:', errDash);
+    var p0 = (profils && profils[0]) || 'vendeur';
+    if (p0 === 'agent') { window.location.href = 'dashboard-agent.html'; return; }
+    if (p0 === 'acheteur' || p0 === 'investisseur') { window.location.href = 'dashboard.html'; return; }
+    window.location.href = 'dashboard-vendeur.html'; return;
+  }
+
 }
 
 function switchDashTab(p) {
