@@ -652,11 +652,6 @@ async function afficherDashboard(user) {
     var icons = { vendeur:'🏠 Mes annonces', acheteur:'🔑 Mon projet achat', investisseur:'📈 Mon projet invest.', agent:'🤝 Espace agent' };
     html += '<button class="dash-tab' + (i===0?' active':'') + '" id="dtab-'+p+'" onclick="switchDashTab(\''+p+'\')">' + (icons[p]||p) + '</button>';
   });
-  // Bouton pour ajouter un profil manquant (ex. un vendeur veut aussi un espace acheteur)
-  var manquants = ['vendeur','acheteur','investisseur'].filter(function(x){ return profils.indexOf(x) === -1; });
-  if (manquants.indexOf('acheteur') !== -1 || manquants.indexOf('investisseur') !== -1) {
-    html += '<button class="dash-tab" style="margin-left:auto;color:#1E7A62" onclick="ajouterProfilAcheteur()">+ Espace acheteur</button>';
-  }
   html += '</div>';
 
   // Panneaux
