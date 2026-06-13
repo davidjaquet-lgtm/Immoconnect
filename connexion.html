@@ -498,6 +498,18 @@ async function renvoyerConfirmation() {
   document.getElementById('resend-confirm').style.display = 'none';
 }
 
+async function ajouterProfilAcheteur() {
+  try {
+    var { data: { user } } = await db.auth.getUser();
+    var meta = user.user_metadata || {};
+    var profils = meta.profils || [];
+    if (profils.indexOf('acheteur') === -1) profils.push('acheteur');
+    await db.auth.updateUser({ data: { profils: profils } });
+    // Rediriger vers le questionnaire acheteur pour renseigner le projet, puis revenir au dashboard
+    window.location.href = 'questionnaire-acheteur.html';
+  } catch(e) { alert('Impossible d\'ajouter l\'espace acheteur : ' + e.message); }
+}
+
 async function loginGoogle()   { await db.auth.signInWithOAuth({ provider:'google',   options:{ redirectTo: window.location.href } }); }
 async function loginFacebook() { await db.auth.signInWithOAuth({ provider:'facebook', options:{ redirectTo: window.location.href } }); }
 
@@ -529,14 +541,8 @@ async function afficherDashboard(user) {
   var profils = meta.profils || ['vendeur'];
   var nom    = meta.nom || user.email.split('@')[0];
 
-  // Redirection vendeur pur → dashboard-vendeur.html
-  var estVendeurPur = profils.length === 1 && profils[0] === 'vendeur';
-  var urlParams = new URLSearchParams(window.location.search);
-  var forceIci = urlParams.get('stay') === '1'; // ?stay=1 pour rester sur connexion.html
-  if (estVendeurPur && !forceIci) {
-    window.location.href = 'dashboard-vendeur.html';
-    return;
-  }
+  // (Plus de redirection forcée : tous les comptes voient le dashboard multi-profils
+  //  à onglets, ce qui permet de basculer entre vendeur / acheteur / investisseur.)
 
   // Charger données selon profils
   var annonces = [], projets = [], messages = [], leads = [];
@@ -578,6 +584,11 @@ async function afficherDashboard(user) {
     var icons = { vendeur:'🏠 Mes annonces', acheteur:'🔑 Mon projet achat', investisseur:'📈 Mon projet invest.', agent:'🤝 Espace agent' };
     html += '<button class="dash-tab' + (i===0?' active':'') + '" id="dtab-'+p+'" onclick="switchDashTab(\''+p+'\')">' + (icons[p]||p) + '</button>';
   });
+  // Bouton pour ajouter un profil manquant (ex. un vendeur veut aussi un espace acheteur)
+  var manquants = ['vendeur','acheteur','investisseur'].filter(function(x){ return profils.indexOf(x) === -1; });
+  if (manquants.indexOf('acheteur') !== -1 || manquants.indexOf('investisseur') !== -1) {
+    html += '<button class="dash-tab" style="margin-left:auto;color:#1E7A62" onclick="ajouterProfilAcheteur()">+ Espace acheteur</button>';
+  }
   html += '</div>';
 
   // Panneaux
@@ -1858,5 +1869,6 @@ function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); docu
 </div>
 
 <script src="/pwa.js"></script>
+<script src="feedback.js" defer></script>
 </body>
 </html>
