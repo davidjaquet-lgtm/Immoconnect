@@ -446,7 +446,8 @@ async function handleAuth() {
       document.getElementById('resend-email-val').value = email;
       return;
     }
-    window.location.href = 'index.html'; // après connexion -> page d'accueil avec les annonces
+    var _nx = null; try { _nx = sessionStorage.getItem('ic_next'); if (_nx) sessionStorage.removeItem('ic_next'); } catch(e) {}
+    window.location.href = _nx || 'index.html'; // après connexion -> next (dépôt) ou accueil
     return;
   } else {
     btn.textContent = 'Création…';
@@ -588,6 +589,12 @@ async function resetPassword() {
 // ── AFFICHER DASHBOARD ──
 async function afficherDashboard(user) {
   currentUser = user;
+
+  // Redirection demandée après création/connexion de compte (ex. dépôt d'annonce via "Vendre")
+  try {
+    var _nx = sessionStorage.getItem('ic_next');
+    if (_nx) { sessionStorage.removeItem('ic_next'); window.location.href = _nx; return; }
+  } catch(e) {}
 
   // Premier login via Google/Facebook — pas encore de profil configuré
   var meta = user.user_metadata || {};
@@ -1498,7 +1505,15 @@ async function logout() {
 
 // ── INIT ──
 (async function() {
-  switchTab('login');
+  var _qp = new URLSearchParams(window.location.search);
+  var _next = _qp.get('next');
+  if (_next) { try { sessionStorage.setItem('ic_next', _next); } catch(e){} }
+  if (_qp.get('signup') === '1') {
+    switchTab('signup');
+    if (_qp.get('profil') === 'agent' && selectedProfils.indexOf('agent') === -1) { try { toggleProfil('agent'); } catch(e){} }
+  } else {
+    switchTab('login');
+  }
   var { data: { session } } = await db.auth.getSession();
   // Header : nom prénom si connecté, sinon "Connexion"
   try {
