@@ -531,17 +531,28 @@ async function enregistrerCriteres(isInv) {
   function show(txt,ok){ msg.style.display='block'; msg.style.color = ok?'#1E7A62':'#C0392B'; msg.textContent = txt; }
   try {
     var id = document.getElementById('crit-id').value;
+    function _el(x){ return document.getElementById(x); }
+    function _v(x){ var e=_el(x); return e && e.value ? e.value : null; }
+    function _i(x){ var e=_el(x); return e && e.value ? parseInt(e.value) : null; }
+    function _f(x){ var e=_el(x); return e && e.value ? parseFloat(e.value) : null; }
+    var loc = _el('crit-localisation');
     var patch = {
-      type_bien:         document.getElementById('crit-type_bien').value || null,
-      localisation:      document.getElementById('crit-localisation').value.trim() || null,
-      surface_souhaitee: document.getElementById('crit-surface_souhaitee').value ? parseInt(document.getElementById('crit-surface_souhaitee').value) : null,
-      budget_envisage:   document.getElementById('crit-budget_envisage').value ? parseInt(document.getElementById('crit-budget_envisage').value) : null
+      type_bien:     _v('crit-type_bien'),
+      localisation:  (loc && loc.value.trim()) ? loc.value.trim() : null,
+      prix_min:      _i('crit-prix_min'),
+      prix_max:      _i('crit-prix_max'),
+      surface_min:   _i('crit-surface_min'),
+      surface_max:   _i('crit-surface_max'),
+      nb_pieces_min: _i('crit-nb_pieces_min'),
+      niveau:        _v('crit-niveau')
     };
+    patch.budget_envisage   = patch.prix_max;     // compat affichage existant
+    patch.surface_souhaitee = patch.surface_min;  // compat affichage existant
     if (isInv) {
-      var r = document.getElementById('crit-rendement_min');
-      var s = document.getElementById('crit-strategie');
-      if (r) patch.rendement_min = r.value ? parseFloat(r.value) : null;
-      if (s) patch.strategie = s.value || null;
+      patch.rendement_min = _f('crit-rendement_min');
+      var rni = _el('crit-rendement_net_impot');
+      if (rni && !rni.disabled) patch.rendement_min_net_impot = _f('crit-rendement_net_impot');
+      patch.strategie = _v('crit-strategie');
     }
     var res = await db.from('projets_acheteurs').update(patch).eq('id', id).select('id');
     if (res.error) { show('Erreur : ' + res.error.message, false); return; }
@@ -1141,22 +1152,36 @@ function buildAcheteurPanel(projets, isInv) {
   }
 
   function esc(v){ return (v==null?'':String(v)).replace(/"/g,'&quot;'); }
-  var types = ['Maison','Appartement','Terrain','Immeuble','Local commercial','Autre'];
-  var optType = types.map(function(t){ return '<option value="'+t+'"'+((p.type_bien===t)?' selected':'')+'>'+t+'</option>'; }).join('');
+  function pjItem(lbl, inner){ return '<div class="pj-item"><div class="pj-lbl">'+lbl+'</div>'+inner+'</div>'; }
+  var types = ['Maison','Appartement','Villa','Terrain','Immeuble','Local commercial','Autre'];
+  var optType = '<option value="">Tous</option>' + types.map(function(t){ return '<option value="'+t+'"'+((p.type_bien===t)?' selected':'')+'>'+t+'</option>'; }).join('');
+  var optPieces = '<option value="">Indifférent</option>' + ['1','2','3','4','5'].map(function(x){ return '<option value="'+x+'"'+((String(p.nb_pieces_min)===x)?' selected':'')+'>'+x+'+</option>'; }).join('');
+  var niveaux = [['','Tous'],['standard','Standard'],['silver','Silver'],['gold','Gold'],['platinium','Platinium']];
+  var optNiv = niveaux.map(function(n){ return '<option value="'+n[0]+'"'+((p.niveau===n[0])?' selected':'')+'>'+n[1]+'</option>'; }).join('');
   var inStyle = 'width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;background:#fff;box-sizing:border-box';
 
   h += '<div class="projet-box"><div class="projet-titre">Mon projet — modifiable directement</div>';
   h += '<input type="hidden" id="crit-id" value="' + esc(p.id) + '">';
   h += '<div class="projet-grid">';
-  h += '<div class="pj-item"><div class="pj-lbl">Type de bien</div><select id="crit-type_bien" style="'+inStyle+'"><option value="">—</option>'+optType+'</select></div>';
-  h += '<div class="pj-item"><div class="pj-lbl">Localisation</div><input id="crit-localisation" style="'+inStyle+'" value="' + esc(p.localisation) + '" placeholder="Toulouse, Pau, Bordeaux…"></div>';
-  h += '<div class="pj-item"><div class="pj-lbl">Surface min. (m²)</div><input id="crit-surface_souhaitee" type="number" min="0" style="'+inStyle+'" value="' + esc(p.surface_souhaitee) + '" placeholder="45"></div>';
-  h += '<div class="pj-item"><div class="pj-lbl">Budget envisagé (€)</div><input id="crit-budget_envisage" type="number" min="0" style="'+inStyle+'" value="' + esc(p.budget_envisage) + '" placeholder="250000"></div>';
+  h += pjItem('Localisation', '<input id="crit-localisation" autocomplete="off" style="'+inStyle+'" value="'+esc(p.localisation)+'" placeholder="Dax, Pau, Bordeaux…">');
+  h += pjItem('Type de bien', '<select id="crit-type_bien" style="'+inStyle+'">'+optType+'</select>');
+  h += pjItem('Prix min (€)', '<input id="crit-prix_min" type="number" min="0" step="10000" style="'+inStyle+'" value="'+esc(p.prix_min)+'" placeholder="0">');
+  h += pjItem('Prix max (€)', '<input id="crit-prix_max" type="number" min="0" step="10000" style="'+inStyle+'" value="'+esc(p.prix_max!=null?p.prix_max:p.budget_envisage)+'" placeholder="250000">');
+  h += pjItem('Surface min (m²)', '<input id="crit-surface_min" type="number" min="0" style="'+inStyle+'" value="'+esc(p.surface_min!=null?p.surface_min:p.surface_souhaitee)+'" placeholder="45">');
+  h += pjItem('Surface max (m²)', '<input id="crit-surface_max" type="number" min="0" style="'+inStyle+'" value="'+esc(p.surface_max)+'" placeholder="∞">');
+  h += pjItem('Pièces min.', '<select id="crit-nb_pieces_min" style="'+inStyle+'">'+optPieces+'</select>');
+  h += pjItem('Niveau du bien', '<select id="crit-niveau" style="'+inStyle+'">'+optNiv+'</select>');
   if (isInv) {
-    h += '<div class="pj-item"><div class="pj-lbl">Rendement min. (%)</div><input id="crit-rendement_min" type="number" min="0" step="0.5" style="'+inStyle+'" value="' + esc(p.rendement_min) + '" placeholder="5"></div>';
+    h += pjItem('Rendement min. sans impôt (%)', '<input id="crit-rendement_min" type="number" min="0" step="0.5" style="'+inStyle+'" value="'+esc(p.rendement_min)+'" placeholder="5">');
+    var fiscalOk = (p.tmi != null && p.tmi !== '');
+    if (fiscalOk) {
+      h += pjItem('Rendement min. avec impôt (%)', '<input id="crit-rendement_net_impot" type="number" min="0" step="0.5" style="'+inStyle+'" value="'+esc(p.rendement_min_net_impot)+'" placeholder="3.5">');
+    } else {
+      h += pjItem('Rendement min. avec impôt (%)', '<input id="crit-rendement_net_impot" type="number" disabled style="'+inStyle+';opacity:.5;cursor:not-allowed" placeholder="Fiscalité requise"><div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5">Renseignez votre <a href="questionnaire-acheteur.html" style="color:var(--coral)">fiscalité (TMI)</a> pour activer le rendement après impôt.</div>');
+    }
     var strats = ['Locatif classique','Colocation','Saisonnier','Déficit foncier','Revente'];
-    var optStrat = strats.map(function(s){ return '<option value="'+s+'"'+((p.strategie===s)?' selected':'')+'>'+s+'</option>'; }).join('');
-    h += '<div class="pj-item"><div class="pj-lbl">Stratégie</div><select id="crit-strategie" style="'+inStyle+'"><option value="">—</option>'+optStrat+'</select></div>';
+    var optStrat = '<option value="">—</option>' + strats.map(function(s){ return '<option value="'+s+'"'+((p.strategie===s)?' selected':'')+'>'+s+'</option>'; }).join('');
+    h += pjItem('Stratégie', '<select id="crit-strategie" style="'+inStyle+'">'+optStrat+'</select>');
   }
   h += '</div>';
   h += '<div id="crit-msg" style="font-size:12px;margin-top:10px;display:none"></div>';
