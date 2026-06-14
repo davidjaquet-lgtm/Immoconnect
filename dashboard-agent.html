@@ -325,7 +325,10 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 
     <!-- TABS -->
     <div class="tabs">
-      <button class="tab active" onclick="showTab('candidatures',this)">Mes candidatures</button>
+      <button class="tab active" onclick="showTab('favoris',this)">❤️ Favoris</button>
+      <button class="tab" onclick="showTab('criteres',this)">🎯 Mes critères</button>
+      <button class="tab" onclick="showTab('top3',this)">🏆 Hanaé top 3</button>
+      <button class="tab" onclick="showTab('candidatures',this)">Mes candidatures</button>
       <button class="tab" onclick="showTab('performance',this)">📊 Performance</button>
       <button class="tab" onclick="showTab('quotas',this)">Quotas & forfait</button>
       <button class="tab" onclick="showTab('mandats',this)">Mes mandats</button>
@@ -336,7 +339,26 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
     </div>
 
     <!-- CANDIDATURES -->
-    <div id="tab-candidatures">
+    <div id="tab-favoris">
+      <h2 style="font-size:18px;font-weight:600;margin-bottom:4px">❤️ Mes annonces favorites</h2>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6">Les biens que vous suivez. Ajoutez-en depuis n'importe quelle page d'annonce avec le bouton « Ajouter aux favoris ».</div>
+      <div id="favoris-list"><div class="empty"><div class="empty-icon">⏳</div><div style="font-size:13px">Chargement…</div></div></div>
+    </div>
+
+    <div id="tab-criteres" style="display:none">
+      <h2 style="font-size:18px;font-weight:600;margin-bottom:4px">🎯 Annonces selon mes critères</h2>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6">Définissez vos critères personnels (mis à jour quand vous voulez). ImmoConnect les croise avec vos mandats de recherche déclarés et affiche les annonces publiées qui correspondent.</div>
+      <div id="criteres-form"></div>
+      <div id="criteres-matches"></div>
+    </div>
+
+    <div id="tab-top3" style="display:none">
+      <h2 style="font-size:18px;font-weight:600;margin-bottom:4px">🏆 Sélections Hanaé (top 3)</h2>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6">Annonces (mode « Hanaé choisit ») pour lesquelles vous avez été retenu parmi les meilleurs agents. À vous de convaincre le vendeur.</div>
+      <div id="top3-list"><div class="empty"><div class="empty-icon">⏳</div><div style="font-size:13px">Chargement…</div></div></div>
+    </div>
+
+    <div id="tab-candidatures" style="display:none">
       <div class="card">
         <div class="card-title">
           <span>Mes candidatures</span>
@@ -674,7 +696,7 @@ const QUOTAS_MAX = { pay_per_use: { cands: 0, leads: 2, mandats: 2, acheteurs: 3
   if (!user) { window.location.href = 'connexion.html'; return; }
   currentUser = user;
   meta = user.user_metadata || {};
-  await Promise.all([chargerProfil(), chargerCandidatures(), chargerMandats(), chargerMandatsRecherche(), chargerPreuves()]);
+  await Promise.all([chargerProfil(), chargerCandidatures(), chargerMandats(), chargerMandatsRecherche(), chargerPreuves(), chargerFavoris()]);
 })();
 
 // ── PROFIL ──
@@ -1149,13 +1171,147 @@ async function genererConseils() {
 
 // ── TABS ──
 function showTab(tab, btn) {
-  var tabs = ['candidatures', 'quotas', 'mandats', 'conseils'];
-  var allTabs = ['candidatures','performance','quotas','mandats','cr','rapports','conseils'];
+  var allTabs = ['favoris','criteres','top3','candidatures','performance','quotas','mandats','cr','rapports','conseils'];
   allTabs.forEach(function(t){ var el = document.getElementById('tab-' + t); if(el) el.style.display = t === tab ? 'block' : 'none'; });
   document.querySelectorAll('.tab').forEach(function(b){ b.classList.remove('active'); });
   btn.classList.add('active');
   if (tab === 'quotas') afficherQuotas();
   if (tab === 'conseils') genererConseils();
+  if (tab === 'favoris') chargerFavoris();
+  if (tab === 'criteres') chargerCriteres();
+  if (tab === 'top3') chargerTop3();
+}
+
+// ════════ NOUVEAUX ONGLETS AGENT (Favoris · Critères · Hanaé top 3) ════════
+function afVal(id){ var e=document.getElementById(id); return e ? e.value.trim() : ''; }
+function afPrix(p){ return p ? Number(p).toLocaleString('fr-FR') + ' €' : '—'; }
+function afVide(t, s){ return '<div class="empty"><div class="empty-icon">📭</div><div style="font-size:13px">'+t+'</div>'+(s?'<div style="font-size:12px;margin-top:4px;color:var(--muted)">'+s+'</div>':'')+'</div>'; }
+function afCarte(a, actions){
+  var loc = (a.ville||'') + (a.code_postal ? ' '+a.code_postal : '');
+  var meta = [a.type_bien, a.surface? a.surface+' m²':'', a.nb_pieces? a.nb_pieces+' p.':''].filter(Boolean).join(' · ');
+  var niv = a.niveau_valide ? '<span style="font-size:10px;padding:2px 8px;border-radius:20px;background:var(--bg);color:var(--muted);text-transform:capitalize">'+a.niveau_valide+'</span>' : '';
+  return '<div style="border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px">'
+    + '<div style="flex:1;min-width:0">'
+    +   '<div style="font-weight:600;font-size:14px;margin-bottom:2px">'+(a.titre||'Annonce')+'</div>'
+    +   '<div style="font-size:12px;color:var(--muted)">'+loc+'</div>'
+    +   '<div style="font-size:12px;color:var(--muted);margin-top:2px">'+meta+'</div>'
+    + '</div>'
+    + '<div style="text-align:right;white-space:nowrap">'
+    +   '<div style="font-weight:600;font-size:15px;margin-bottom:6px">'+afPrix(a.prix)+'</div>'+niv
+    +   '<div style="margin-top:8px;display:flex;gap:6px;justify-content:flex-end;align-items:center">'
+    +     '<a href="bien.html?id='+a.id+'" style="font-size:11px;padding:6px 12px;border:1px solid var(--line);border-radius:6px;text-decoration:none;color:var(--ink)">Voir</a>'+(actions||'')
+    +   '</div>'
+    + '</div>'
+  + '</div>';
+}
+var AF_FIELDS = 'id,titre,type_bien,ville,code_postal,prix,surface,nb_pieces,niveau_valide,statut_annonce';
+
+// ── ❤️ FAVORIS ──
+async function chargerFavoris(){
+  var el = document.getElementById('favoris-list'); if(!el) return;
+  if(!currentUser){ el.innerHTML = afVide('Connectez-vous'); return; }
+  var { data: favs } = await db.from('favoris').select('annonce_id, created_at').eq('email', currentUser.email).order('created_at',{ascending:false}).then(undefined,function(){return {data:[]};});
+  if(!favs || !favs.length){ el.innerHTML = afVide('Aucun favori', 'Ajoutez des biens depuis leur page avec « Ajouter aux favoris ».'); return; }
+  var ids = favs.map(function(f){ return f.annonce_id; });
+  var { data: anns } = await db.from('annonces_vendeurs').select(AF_FIELDS).in('id', ids).then(undefined,function(){return {data:[]};});
+  var byId = {}; (anns||[]).forEach(function(a){ byId[a.id]=a; });
+  var html = '';
+  favs.forEach(function(f){
+    var a = byId[f.annonce_id]; if(!a) return;
+    html += afCarte(a, '<button onclick="retirerFavori(\''+a.id+'\')" style="font-size:11px;padding:6px 12px;border:1px solid var(--line);border-radius:6px;background:transparent;cursor:pointer;color:var(--muted)">Retirer</button>');
+  });
+  el.innerHTML = html || afVide('Aucun favori actif');
+}
+async function retirerFavori(id){
+  await db.from('favoris').delete().eq('email', currentUser.email).eq('annonce_id', id);
+  showToast('Retiré des favoris', 'ok'); chargerFavoris();
+}
+async function ajouterFavori(id){
+  await db.from('favoris').insert({ email: currentUser.email, annonce_id: id }).then(undefined,function(){});
+  showToast('Ajouté à vos favoris ❤️', 'ok');
+}
+
+// ── 🎯 CRITÈRES + MATCHING ──
+async function chargerCriteres(){
+  var form = document.getElementById('criteres-form'); if(!form) return;
+  var { data: ag } = await db.from('agents_validation').select('criteres_perso').eq('email', currentUser.email).single().then(undefined,function(){return {data:null};});
+  var c = (ag && ag.criteres_perso) || {};
+  function opt(v,label,sel){ return '<option value="'+v+'"'+(sel===v?' selected':'')+'>'+label+'</option>'; }
+  var niv = c.niveau||'';
+  form.innerHTML =
+    '<div style="border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:18px;background:var(--warm,transparent)">'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">'
+    +   champCrit('Localisation','<input id="ca-ville" type="text" value="'+(c.ville||'')+'" placeholder="Ville, CP" autocomplete="off" style="'+styleInput()+'">')
+    +   champCrit('Type de bien','<select id="ca-type" style="'+styleInput()+'"><option value="">Tous</option>'+['Maison','Appartement','Villa','Terrain','Immeuble','Local commercial'].map(function(t){return opt(t,t,c.type_bien||'');}).join('')+'</select>')
+    +   champCrit('Prix max (€)','<input id="ca-prixmax" type="number" min="0" step="10000" value="'+(c.prix_max||'')+'" placeholder="Sans limite" style="'+styleInput()+'">')
+    +   champCrit('Surface min (m²)','<input id="ca-surfmin" type="number" min="0" value="'+(c.surface_min||'')+'" placeholder="0" style="'+styleInput()+'">')
+    +   champCrit('Pièces min.','<select id="ca-pieces" style="'+styleInput()+'"><option value="">Indif.</option>'+['1','2','3','4','5'].map(function(p){return opt(p,p+'+',c.pieces_min||'');}).join('')+'</select>')
+    +   champCrit('Niveau du bien','<select id="ca-niveau" style="'+styleInput()+'"><option value="">Tous</option>'+[['standard','Standard'],['silver','Silver'],['gold','Gold'],['platinium','Platinium']].map(function(x){return opt(x[0],x[1],niv);}).join('')+'</select>')
+    + '</div>'
+    + '<button onclick="enregistrerCriteresAgent()" style="margin-top:14px;padding:10px 18px;background:var(--ink,#1C1C1A);color:#fff;border:none;border-radius:6px;font-family:Outfit,sans-serif;font-size:13px;cursor:pointer">💾 Mettre à jour mes critères</button>'
+    + '</div>';
+  await afficherMatches();
+}
+function champCrit(label, inner){ return '<div><label style="display:block;font-size:11px;color:var(--muted);margin-bottom:4px">'+label+'</label>'+inner+'</div>'; }
+function styleInput(){ return 'width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:6px;font-family:Outfit,sans-serif;font-size:13px;background:#fff'; }
+async function enregistrerCriteresAgent(){
+  var c = { ville: afVal('ca-ville'), type_bien: afVal('ca-type'), prix_max: afVal('ca-prixmax'), surface_min: afVal('ca-surfmin'), pieces_min: afVal('ca-pieces'), niveau: afVal('ca-niveau') };
+  var { error } = await db.from('agents_validation').update({ criteres_perso: c }).eq('email', currentUser.email);
+  if (error) { showToast('Erreur : ' + error.message, 'err'); return; }
+  showToast('Critères mis à jour', 'ok');
+  await afficherMatches();
+}
+async function afficherMatches(){
+  var out = document.getElementById('criteres-matches'); if(!out) return;
+  out.innerHTML = '<div class="empty"><div class="empty-icon">🔎</div><div style="font-size:13px">Recherche…</div></div>';
+  var { data: ag } = await db.from('agents_validation').select('criteres_perso').eq('email', currentUser.email).single().then(undefined,function(){return {data:null};});
+  var perso = (ag && ag.criteres_perso) || null;
+  var { data: mrs } = await db.from('mandats_recherche').select('type_bien,secteur,budget_max,surface_min,nb_pieces_min,statut').eq('agent_email', currentUser.email).eq('statut','actif').then(undefined,function(){return {data:[]};});
+  var { data: anns } = await db.from('annonces_vendeurs').select(AF_FIELDS).eq('statut_annonce','publiee').then(undefined,function(){return {data:[]};});
+  anns = anns || [];
+  var criteres = [];
+  if (perso && (perso.ville||perso.type_bien||perso.prix_max||perso.surface_min||perso.pieces_min||perso.niveau)) {
+    criteres.push({ ville:perso.ville, type_bien:perso.type_bien, budget_max:perso.prix_max, surface_min:perso.surface_min, nb_pieces_min:perso.pieces_min, niveau:perso.niveau });
+  }
+  (mrs||[]).forEach(function(m){ criteres.push({ ville:m.secteur, type_bien:m.type_bien, budget_max:m.budget_max, surface_min:m.surface_min, nb_pieces_min:m.nb_pieces_min }); });
+  if (!criteres.length) { out.innerHTML = afVide('Aucun critère défini', 'Renseignez vos critères ci-dessus, ou déclarez un mandat de recherche dans l’onglet « Mes mandats ».'); return; }
+  function match(a, c){
+    if (c.ville && (''+(a.ville||'')+' '+(a.code_postal||'')).toLowerCase().indexOf((''+c.ville).toLowerCase()) === -1) return false;
+    if (c.type_bien && a.type_bien && (''+a.type_bien).toLowerCase() !== (''+c.type_bien).toLowerCase()) return false;
+    if (c.budget_max && a.prix && Number(a.prix) > Number(c.budget_max)) return false;
+    if (c.surface_min && a.surface && Number(a.surface) < Number(c.surface_min)) return false;
+    if (c.nb_pieces_min && a.nb_pieces && Number(a.nb_pieces) < Number(c.nb_pieces_min)) return false;
+    if (c.niveau && a.niveau_valide && (''+a.niveau_valide).toLowerCase() !== (''+c.niveau).toLowerCase()) return false;
+    return true;
+  }
+  var seen = {}, html = '';
+  anns.forEach(function(a){
+    if (criteres.some(function(c){ return match(a,c); }) && !seen[a.id]) {
+      seen[a.id] = 1;
+      html += afCarte(a, '<button onclick="ajouterFavori(\''+a.id+'\')" style="font-size:11px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:transparent;cursor:pointer" title="Ajouter aux favoris">🤍</button>');
+    }
+  });
+  var n = Object.keys(seen).length;
+  out.innerHTML = '<div style="font-size:12px;color:var(--muted);margin:8px 0 12px">'+n+' annonce'+(n>1?'s':'')+' correspondante'+(n>1?'s':'')+'</div>' + (html || afVide('Aucune annonce ne correspond pour l’instant', 'Vous serez aussi alerté par email dès qu’un bien correspond.'));
+}
+
+// ── 🏆 HANAÉ TOP 3 ──
+async function chargerTop3(){
+  var el = document.getElementById('top3-list'); if(!el) return;
+  var { data: cands } = await db.from('candidatures_agents')
+    .select('statut, annonce_id, annonces_vendeurs(titre,type_bien,ville,code_postal,prix,surface,nb_pieces,niveau_valide)')
+    .eq('agent_email', currentUser.email).in('statut', ['selectionne','gagnant'])
+    .then(undefined,function(){return {data:[]};});
+  if(!cands || !cands.length){ el.innerHTML = afVide('Aucune sélection Hanaé', 'Quand Hanaé vous retient dans son top 3 pour une annonce, elle apparaît ici.'); return; }
+  var html = '';
+  cands.forEach(function(c){
+    var a = c.annonces_vendeurs; if(!a) return; a.id = c.annonce_id;
+    var badge = c.statut === 'gagnant'
+      ? '<span style="font-size:10px;padding:3px 9px;border-radius:20px;background:#E1F5EE;color:#1E7A62;font-weight:600">🏆 Choisi</span>'
+      : '<span style="font-size:10px;padding:3px 9px;border-radius:20px;background:#FAEEDA;color:#854F0B;font-weight:600">Top 3 Hanaé</span>';
+    html += afCarte(a, badge);
+  });
+  el.innerHTML = html;
 }
 
 // ── ACTIONS ──

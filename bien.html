@@ -925,7 +925,10 @@ function buildContactButtons(b, niv) {
     html += '<div style="margin-top:8px" id="suivi-wrap-' + b.id + '">';
     html += '<button id="btn-suivi-' + b.id + '" onclick="toggleSuivi(\'' + b.id + '\')" style="width:100%;padding:9px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:12px;cursor:pointer;color:var(--muted);transition:all .15s" onmouseover="this.style.borderColor=\'var(--ink)\'" onmouseout="this.style.borderColor=\'var(--line)\'">🔔 Alertes baisse de prix</button>';
     html += '</div>';
-    // BOUTON FAVORI
+  }
+
+  // BOUTON FAVORI — tout utilisateur connecté (acheteurs ET agents)
+  if (currentUser) {
     html += '<div style="margin-top:8px" id="favori-wrap-' + b.id + '">';
     html += '<button id="btn-favori-' + b.id + '" onclick="toggleFavori(\'' + b.id + '\')" style="width:100%;padding:9px;border-radius:8px;border:1px solid var(--line);background:transparent;font-family:Outfit,sans-serif;font-size:12px;cursor:pointer;color:var(--muted);transition:all .15s">🤍 Ajouter aux favoris</button>';
     html += '</div>';
