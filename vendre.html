@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Vendre un bien</title>
+<meta name="description" content="Vendez votre bien sur ImmoConnect : particulier ou agent immobilier, déposez votre annonce en quelques minutes.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--charcoal:#1C1C1A;--cream:#FAFAF7;--gold:#C09B5A;--gold-d:#A8854A;--stone:#8A8478;--line:rgba(28,28,26,.12);--teal:#1E7A62}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Outfit','DM Sans',system-ui,sans-serif;background:var(--cream);color:var(--charcoal);min-height:100vh}
+  .top{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;border-bottom:1px solid var(--line)}
+  .logo{display:flex;align-items:center;gap:8px;text-decoration:none}
+  .logo span{font-size:21px;font-weight:600;color:#0F0F0E}
+  .logo span em{color:var(--gold);font-style:normal}
+  .top a.cnx{font-size:13px;color:var(--stone);text-decoration:none}
+  .top a.cnx:hover{color:var(--charcoal)}
+  .wrap{max-width:880px;margin:0 auto;padding:56px 24px 72px}
+  .eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-d);text-align:center;margin-bottom:12px}
+  h1{font-size:34px;font-weight:300;text-align:center;line-height:1.2;margin-bottom:10px}
+  h1 em{font-style:italic;color:var(--gold-d)}
+  .sub{text-align:center;color:var(--stone);font-size:15px;margin-bottom:44px;line-height:1.6}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:32px 28px;text-decoration:none;color:inherit;transition:transform .2s,box-shadow .2s,border-color .2s;display:flex;flex-direction:column}
+  .card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(28,28,26,.1);border-color:var(--gold)}
+  .ico{font-size:34px;margin-bottom:16px}
+  .card h2{font-size:20px;font-weight:600;margin-bottom:8px}
+  .card p{font-size:13px;color:var(--stone);line-height:1.7;flex:1}
+  .tag{display:inline-block;margin-top:18px;font-size:12px;font-weight:600;color:var(--charcoal);background:var(--cream);border:1px solid var(--line);border-radius:3px;padding:9px 16px;align-self:flex-start}
+  .card.agent .tag{background:#FBF5E9;border-color:var(--gold);color:var(--gold-d)}
+  .note{font-size:12px;color:var(--gold-d);margin-top:10px;font-weight:500}
+  .loading{text-align:center;color:var(--stone);font-size:14px;padding:80px 0}
+  .spin{width:26px;height:26px;border:2px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite;margin:0 auto 14px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @media(max-width:640px){.cards{grid-template-columns:1fr}h1{font-size:27px}.wrap{padding:36px 18px 56px}}
+</style>
+</head>
+<body>
+  <div class="top">
+    <a class="logo" href="index.html"><img src="logo-immoconnect.png" alt="ImmoConnect" style="height:34px;width:auto;object-fit:contain"><span>Immo<em>Connect</em></span></a>
+    <a class="cnx" href="connexion.html">Se connecter</a>
+  </div>
+
+  <div class="wrap">
+    <div id="loading" class="loading"><div class="spin"></div>Vérification de votre session…</div>
+
+    <div id="choix" style="display:none">
+      <div class="eyebrow">Déposer une annonce</div>
+      <h1>Qui <em>vend</em> ce bien ?</h1>
+      <div class="sub">Choisissez votre profil pour accéder au bon formulaire.</div>
+      <div class="cards">
+        <a class="card" href="questionnaire-vendeur.html">
+          <div class="ico">🏠</div>
+          <h2>Je suis un particulier</h2>
+          <p>Vous vendez votre propre bien, sans agence. Estimation IA gratuite par Hanaé, annonce publiée gratuitement, prix affiché en clair.</p>
+          <span class="tag">Remplir le questionnaire vendeur →</span>
+        </a>
+        <a class="card agent" href="questionnaire-agent.html">
+          <div class="ico">🏢</div>
+          <h2>Je suis un agent immo</h2>
+          <p>Vous êtes un professionnel et souhaitez publier des mandats. Vous créez votre profil agent (carte T, secteurs, forfait).</p>
+          <span class="tag">Créer mon profil agent →</span>
+          <div class="note">ℹ️ Ce questionnaire ne se remplit qu'une seule fois.</div>
+        </a>
+      </div>
+      <div style="text-align:center;margin-top:28px;font-size:13px;color:var(--stone)">
+        Déjà inscrit ? <a href="connexion.html" style="color:var(--gold-d);font-weight:500;text-decoration:none">Connectez-vous</a> pour déposer directement.
+      </div>
+    </div>
+  </div>
+
+<script>
+const SUPABASE_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+(async function () {
+  try {
+    var { data: { session } } = await db.auth.getSession();
+    if (session) {
+      // Déjà connecté → dépôt direct. Le questionnaire vendeur détecte les agents
+      // (annonce pro + frais d'agence) et s'adapte selon le profil.
+      window.location.replace('questionnaire-vendeur.html');
+      return;
+    }
+  } catch (e) {}
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('choix').style.display = 'block';
+})();
+</script>
+</body>
+</html>

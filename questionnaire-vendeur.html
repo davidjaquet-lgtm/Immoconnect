@@ -173,7 +173,7 @@ nav .nav-link{margin-right:18px}
   <a href="index.html" style="text-decoration:none;margin-right:32px"><img src="logo-immoconnect.png" alt="ImmoConnect" style="height:38px;width:auto;object-fit:contain;vertical-align:middle"><span style="font-size:22px;font-weight:600;color:#0F0F0E;margin-left:8px">Immo<span style="color:#C09B5A">Connect</span></span></a>
   <div style="display:flex;gap:24px;align-items:center;flex:1">
     <a href="forfaits.html" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Forfaits</a>
-    <a href="questionnaire-vendeur.html" style="text-decoration:none;padding:7px 16px;background:#C09B5A;color:#0F0F0E;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif">Vendre</a>
+    <a href="vendre.html" style="text-decoration:none;padding:7px 16px;background:#C09B5A;color:#0F0F0E;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif">Vendre</a>
   <a href="blog.html" style="color:rgba(255,255,255,.6);text-decoration:none;font-size:13px">Blog</a>
     <a href="questionnaire-acheteur.html" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Acheter</a>
     <a href="index.html#agents" style="text-decoration:none;color:#888780;font-size:13px;font-family:'Outfit',sans-serif;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888780'">Agents immo</a>
@@ -786,6 +786,40 @@ const SUPABASE_URL  = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ── DÉPÔT PAR UN AGENT : annonce pro + frais d'agence ──
+var estAgentVendeur = false, agentEmailVendeur = null, agentForfaitVendeur = null;
+(async function initAgentVendeur(){
+  try {
+    var { data: { session } } = await db.auth.getSession();
+    if (!session) return;
+    agentEmailVendeur = session.user.email;
+    var { data: ag } = await db.from('agents_validation')
+      .select('forfait_agent, abonnement_actif')
+      .eq('email', session.user.email).single()
+      .then(undefined, function(){ return { data: null }; });
+    var profils = (session.user.user_metadata || {}).profils || [];
+    var isAgent = !!ag || (Array.isArray(profils) && profils.indexOf('agent') !== -1);
+    if (!isAgent) return;
+    estAgentVendeur = true;
+    agentForfaitVendeur = ag ? ag.forfait_agent : null;
+    injecterChampFraisAgence();
+  } catch (e) {}
+})();
+
+function injecterChampFraisAgence(){
+  var prix = document.getElementById('prix');
+  if (!prix || document.getElementById('frais_agence')) return;
+  var wrap = document.createElement('div');
+  wrap.style.cssText = 'margin-top:14px;padding:14px 16px;border:1px solid #C09B5A;border-radius:8px;background:#FBF5E9';
+  wrap.innerHTML =
+    '<div style="font-size:13px;font-weight:600;color:#7A5A1E;margin-bottom:6px">🏢 Annonce professionnelle (agent)</div>'
+    + '<div style="font-size:12px;color:#7A5A1E;margin-bottom:10px;line-height:1.5">Votre annonce sera publiée avec la mention <strong>« Pro »</strong> et vos frais d\'agence affichés aux acheteurs.</div>'
+    + '<label style="display:block;font-size:12px;color:#8A8478;margin-bottom:4px">Frais d\'agence</label>'
+    + '<input id="frais_agence" type="text" placeholder="Ex : 4 % TTC ou 6 000 €" style="width:100%;padding:10px;border:1px solid rgba(28,28,26,.15);border-radius:6px;font-family:Outfit,sans-serif;font-size:14px;box-sizing:border-box">'
+    + '<div style="font-size:11px;color:#A89878;margin-top:6px">Montant ou pourcentage, charge vendeur ou acquéreur selon votre mandat.</div>';
+  prix.parentNode.insertBefore(wrap, prix.nextSibling);
+}
 const BUCKET = 'immoconnect-docs';
 
 var niveau='standard', photos=[], docs={}, maxPhotos=3;
@@ -1555,6 +1589,9 @@ async function soumettre(){
     dpe_doc_url:null, // justificatif non stocke (securite)
     niveau_vendeur:niveau,
     statut_annonce:'en_attente',
+    est_pro: estAgentVendeur,
+    frais_agence: (estAgentVendeur && document.getElementById('frais_agence')) ? (document.getElementById('frais_agence').value || null) : null,
+    agent_email: estAgentVendeur ? agentEmailVendeur : null,
     latitude: null,
     longitude: null,
     created_at:new Date().toISOString()

@@ -213,7 +213,7 @@ nav .nav-link{margin-right:18px}
   <div class="nav-links">
     <a href="index.html">Annonces</a>
     <a href="carte.html">Carte</a>
-    <a href="questionnaire-vendeur.html" class="nav-gold">Vendre</a>
+    <a href="vendre.html" class="nav-gold">Vendre</a>
   </div>
   <a href="blog.html" class="nav-link">Blog</a>
   <a href="connexion.html" class="nav-out">Se connecter</a>
@@ -505,6 +505,9 @@ async function afficherBien(b, similaires) {
   html += '<h1 class="bien-titre">' + titre + '</h1>';
   html += '<div class="bien-localisation">' + adresseHtml + '</div>';
   html += '<div class="bien-prix">' + prixFmt + '</div>';
+  if (b.est_pro) {
+    html += '<div style="display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;font-weight:600;color:#7A5A1E;background:#FBF5E9;border:1px solid #C09B5A;border-radius:3px;padding:5px 10px">🏢 Annonce pro' + (b.frais_agence ? ' · Frais d\'agence : ' + b.frais_agence : '') + '</div>';
+  }
   if (pm2) html += '<div class="bien-pm2">' + pm2 + '</div>';
 
   // BOUTONS DE PARTAGE

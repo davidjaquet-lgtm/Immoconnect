@@ -86,7 +86,7 @@
   <a href="index.html" class="logo" style="text-decoration:none"><img src="logo-immoconnect.png" alt="">Immo<span>Connect</span></a>
   <div class="nav-links">
     <a href="forfaits.html">Forfaits</a>
-    <a href="questionnaire-vendeur.html">Vendre</a>
+    <a href="vendre.html">Vendre</a>
     <a href="recherche.html" class="active">Acheter</a>
     <a href="blog.html">Blog</a>
     <a href="connexion.html" class="btn-nav" id="nav-account">Connexion</a>
@@ -250,7 +250,7 @@ async function chercher(v) {
   grid.innerHTML = '<div class="loading">Recherche en cours…</div>';
 
   var q = db.from('annonces_vendeurs')
-    .select('id, titre, type_bien, ville, code_postal, prix, surface, nb_pieces, photo_principale, niveau_valide, created_at')
+    .select('id, titre, type_bien, ville, code_postal, prix, surface, nb_pieces, photo_principale, niveau_valide, est_pro, frais_agence, created_at')
     .eq('statut_annonce', 'publiee');
 
   if (v.type)    q = q.eq('type_bien', v.type);
@@ -295,12 +295,15 @@ function afficher(annonces) {
     var fav = favSet[a.id];
     var favBtn = '<button class="card-fav" title="Favori" onclick="toggleFav(event,\'' + a.id + '\')">' + (fav ? '❤️' : '🤍') + '</button>';
     var img = a.photo_principale ? '<img src="' + a.photo_principale + '" alt="">' : '🏠';
+    var proTag = a.est_pro ? '<div style="position:absolute;top:14px;left:50%;transform:translateX(-50%);padding:3px 10px;border-radius:2px;font-size:10px;font-weight:700;letter-spacing:1px;background:#C09B5A;color:#1C1C1A">PRO</div>' : '';
+    var fraisLine = (a.est_pro && a.frais_agence) ? '<div style="font-size:11px;color:#A8854A;margin-top:4px">🏢 Frais d\'agence : ' + a.frais_agence + '</div>' : '';
     return '<div class="card">'
-      + nivLabel + favBtn
+      + nivLabel + favBtn + proTag
       + '<a class="card-link" href="bien.html?id=' + a.id + '">'
       + '<div class="card-img">' + img + '</div>'
       + '<div class="card-body">'
       + '<div class="card-price">' + prix + ' <span>€</span></div>'
+      + fraisLine
       + '<div class="card-title">' + (a.titre || (a.type_bien || 'Bien')) + '</div>'
       + '<div class="card-loc">📍 ' + ville + '</div>'
       + '<div class="card-feats">'
