@@ -709,7 +709,7 @@ async function afficherDashboard(user) {
     }
     if (p === 'acheteur') html += buildAcheteurPanel(projets, false); // forfait 'gratuit' en base
     if (p === 'investisseur') html += buildAcheteurPanel(projets, true);
-    if (p === 'agent') html += buildAgentPanel(leads, meta);
+    if (p === 'agent') html += '<div id="agent-panel-async"><div class="empty"><div class="empty-ico">⏳</div>Chargement de l\'espace agent…</div></div>';
     html += '</div>';
   });
 
@@ -717,6 +717,14 @@ async function afficherDashboard(user) {
   document.getElementById('dash-loading').style.display  = 'none';
 
   document.getElementById('dash-content').style.display  = 'block';
+
+  // Espace agent : panneau asynchrone (sinon "[object Promise]")
+  if (profils.indexOf('agent') !== -1) {
+    buildAgentPanel(leads, meta).then(function(agentHtml){
+      var el = document.getElementById('agent-panel-async');
+      if (el) el.innerHTML = agentHtml;
+    }).catch(function(e){ console.warn('agent panel:', e); });
+  }
   // Ouvrir l'onglet demandé via l'ancre (#acheteur, #investisseur, #vendeur)
   try {
     var hash = (window.location.hash || '').replace('#','');
@@ -1246,7 +1254,7 @@ async function buildAgentPanel(leads, meta) {
   // Compteur contacts semaine
   var semaine = getSemaine();
   var { data: quota } = await db.from('contacts_semaine')
-    .select('nb_contacts').eq('agent_id', user.id).eq('semaine', semaine).single().then(undefined, function(){return{data:null};});
+    .select('nb_contacts').eq('agent_id', currentUser.id).eq('semaine', semaine).single().then(undefined, function(){return{data:null};});
   var nbContacts = quota ? quota.nb_contacts : 0;
   var forfaitLabel = meta.forfait_agent || 'starter';
   var maxContacts = {starter:10, pro:15, expert:30, platinium:999}[forfaitLabel] || 10;

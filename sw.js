@@ -1,8 +1,8 @@
 // ImmoConnect — Service Worker v1.0
 // Cache offline + notifications push
 
-const CACHE_NAME = 'immoconnect-v9';
-const CACHE_STATIC = 'immoconnect-static-v9';
+const CACHE_NAME = 'immoconnect-v10';
+const CACHE_STATIC = 'immoconnect-static-v10';
 
 // Pages à mettre en cache pour fonctionnement offline
 const STATIC_ASSETS = [
