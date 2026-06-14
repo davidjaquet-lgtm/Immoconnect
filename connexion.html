@@ -1514,7 +1514,12 @@ async function logout() {
   if (_next) { try { sessionStorage.setItem('ic_next', _next); } catch(e){} }
   if (_qp.get('signup') === '1') {
     switchTab('signup');
-    if (_qp.get('profil') === 'agent' && selectedProfils.indexOf('agent') === -1) { try { toggleProfil('agent'); } catch(e){} }
+    if (_qp.get('profil') === 'agent') {
+      try {
+        if (selectedProfils.indexOf('agent') === -1) toggleProfil('agent');   // -> ['vendeur','agent']
+        if (selectedProfils.indexOf('vendeur') !== -1) toggleProfil('vendeur'); // -> ['agent'] (agent sans profil vendeur)
+      } catch(e){}
+    }
   } else {
     switchTab('login');
   }
