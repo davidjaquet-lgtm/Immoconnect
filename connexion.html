@@ -613,9 +613,14 @@ async function afficherDashboard(user) {
   var profils = meta.profils || ['vendeur'];
   var nom    = meta.nom || user.email.split('@')[0];
 
+  // Accès admin : voit tous les dashboards, pas de redirection automatique
+  var ADMIN_EMAILS = ['davidjaquet@live.fr', 'davidjaquet.lgtm@gmail.com'];
+  var isAdmin = ADMIN_EMAILS.indexOf((user.email || '').toLowerCase()) !== -1;
+  if (isAdmin) profils = ['vendeur', 'acheteur', 'investisseur', 'agent'];
+
   var urlParams = new URLSearchParams(window.location.search);
   var forceIci = urlParams.get('stay') === '1';
-  if (!forceIci) {
+  if (!forceIci && !isAdmin) {
     if (profils.indexOf('agent') !== -1) { window.location.href = 'dashboard-agent.html'; return; }
     var estVendeurPur = profils.length === 1 && profils[0] === 'vendeur';
     if (estVendeurPur) { window.location.href = 'dashboard-vendeur.html'; return; }
@@ -656,6 +661,18 @@ async function afficherDashboard(user) {
   html += '<div class="dash-info"><div class="dash-name">Bonjour, ' + nom + ' ' + badgesHtml + '</div>';
   html += '<div class="dash-sub">' + user.email + (meta.agence ? ' · ' + meta.agence : '') + '</div></div>';
   html += '<a href="calendrier.html" style="padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-family:\'Outfit\',sans-serif;font-size:12px;cursor:pointer;color:var(--ink);text-decoration:none;margin-right:8px">📅 Visites</a><a href="messagerie.html" style="padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-family:\'Outfit\',sans-serif;font-size:12px;cursor:pointer;color:var(--ink);text-decoration:none;margin-right:8px">💬 Messagerie</a><button class="btn-logout" onclick="logout()">Déconnexion</button></div>';
+
+  // Barre admin : accès direct à tous les dashboards
+  if (isAdmin) {
+    var lkA = 'font-size:12px;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:6px;padding:6px 12px;text-decoration:none;white-space:nowrap';
+    html += '<div style="background:#1C1C1A;border-radius:8px;padding:12px 16px;margin:0 0 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">'
+      + '<span style="font-size:12px;font-weight:600;color:#C09B5A;margin-right:4px">🔑 Admin — tous les dashboards :</span>'
+      + '<a href="dashboard-vendeur.html" style="'+lkA+'">🏠 Vendeur</a>'
+      + '<a href="dashboard-agent.html" style="'+lkA+'">🤝 Agent</a>'
+      + '<a href="dashboard.html" style="'+lkA+'">🔑 Acheteur</a>'
+      + '<span style="font-size:11px;color:rgba(255,255,255,.5);margin-left:4px">(les onglets ci-dessous = vue particulier intégrée)</span>'
+      + '</div>';
+  }
 
   // Onglets selon profils
   html += '<div class="dash-tabs">';
