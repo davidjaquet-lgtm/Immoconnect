@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoConnect — Admin · Tests alertes</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--charcoal:#1C1C1A;--cream:#FAFAF7;--gold:#C09B5A;--gold-d:#A8854A;--stone:#8A8478;--line:rgba(28,28,26,.12);--teal:#1E7A62;--red:#C0392B}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Outfit','DM Sans',system-ui,sans-serif;background:var(--cream);color:var(--charcoal);min-height:100vh}
+  .top{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid var(--line);background:#fff}
+  .top .logo{font-size:19px;font-weight:600;text-decoration:none;color:var(--charcoal)}
+  .top .logo em{color:var(--gold);font-style:normal}
+  .top a.back{font-size:13px;color:var(--stone);text-decoration:none}
+  .wrap{max-width:760px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:24px;font-weight:300;margin-bottom:6px}
+  h1 em{font-style:italic;color:var(--gold-d)}
+  .lead{color:var(--stone);font-size:14px;margin-bottom:28px;line-height:1.6}
+  .card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:20px}
+  .card h2{font-size:16px;font-weight:600;margin-bottom:4px}
+  .card .sub{font-size:12px;color:var(--stone);line-height:1.6;margin-bottom:16px}
+  label{display:block;font-size:11px;color:var(--stone);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+  input,select{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:14px;background:#fff;margin-bottom:12px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .btn{padding:11px 20px;background:var(--charcoal);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer}
+  .btn:hover{background:#000}
+  .btn:disabled{opacity:.5;cursor:wait}
+  .out{margin-top:14px;background:#0F0F0E;color:#D7E7C8;border-radius:8px;padding:14px;font-family:ui-monospace,Menlo,monospace;font-size:12px;white-space:pre-wrap;word-break:break-word;display:none;line-height:1.5}
+  .out.show{display:block}
+  .warn{background:#FBF5E9;border:1px solid var(--gold);border-radius:8px;padding:10px 12px;font-size:12px;color:#7A5A1E;line-height:1.5;margin-bottom:14px}
+  .chk{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+  .chk input{width:auto;margin:0}
+  .chk label{margin:0;text-transform:none;letter-spacing:0;font-size:13px;color:var(--charcoal)}
+  .gate{text-align:center;color:var(--stone);font-size:14px;padding:90px 20px}
+  .spin{width:26px;height:26px;border:2px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite;margin:0 auto 14px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @media(max-width:560px){.grid,.grid-3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <div class="top">
+    <a class="logo" href="index.html">Immo<em>Connect</em> · Admin</a>
+    <a class="back" href="connexion.html">← Mon espace</a>
+  </div>
+
+  <div id="gate" class="gate"><div class="spin"></div>Vérification de l'accès…</div>
+
+  <div id="panel" class="wrap" style="display:none">
+    <h1>Tests <em>alertes</em></h1>
+    <div class="lead">Vérifiez que les emails d'alerte partent bien. Commencez par le test direct (isole Resend), puis testez la chaîne complète.</div>
+
+    <!-- A : test email direct -->
+    <div class="card">
+      <h2>① Test email direct (Resend)</h2>
+      <div class="sub">Envoie un email de test via la fonction <code>envoyer-email</code>. Si vous le recevez, Resend + le domaine expéditeur fonctionnent. C'est la cause n°1 des alertes manquantes.</div>
+      <label>Envoyer à</label>
+      <input id="t-email" type="email" placeholder="vous@exemple.fr">
+      <button class="btn" id="btn-email" onclick="testEmail()">Envoyer l'email de test</button>
+      <div id="out-email" class="out"></div>
+    </div>
+
+    <!-- B : test chaîne d'alerte -->
+    <div class="card">
+      <h2>② Test de la chaîne d'alerte</h2>
+      <div class="sub">Invoque <code>alerter-agents</code> avec un bien fictif et affiche combien d'alertes partent (agents, investisseurs, acheteurs, mandats de recherche).</div>
+      <div class="warn">⚠️ Si « Envoyer réellement » est coché, des emails partent <strong>vraiment</strong> aux comptes qui correspondent. En pré-lancement c'est sans risque ; sinon, utilisez une ville fictive pour ne matcher personne.</div>
+      <div class="grid">
+        <div><label>Ville</label><input id="b-ville" value="Pau"></div>
+        <div><label>Code postal</label><input id="b-cp" value="64000"></div>
+      </div>
+      <div class="grid-3">
+        <div><label>Prix (€)</label><input id="b-prix" type="number" value="200000"></div>
+        <div><label>Surface (m²)</label><input id="b-surface" type="number" value="70"></div>
+        <div><label>Pièces</label><input id="b-pieces" type="number" value="3"></div>
+      </div>
+      <div class="grid-3">
+        <div><label>Type</label>
+          <select id="b-type"><option>Appartement</option><option>Maison</option><option>Villa</option><option>Terrain</option><option>Immeuble</option></select>
+        </div>
+        <div><label>Niveau</label>
+          <select id="b-niveau"><option value="standard">Standard</option><option value="silver">Silver</option><option value="gold" selected>Gold</option><option value="platinium">Platinium</option></select>
+        </div>
+        <div><label>Mode contact</label>
+          <select id="b-mode"><option value="acheteurs_agents">acheteurs_agents</option><option value="comparatif">comparatif</option><option value="acheteurs">acheteurs</option></select>
+        </div>
+      </div>
+      <label>ID d'une vraie annonce (optionnel — pour un lien valide)</label>
+      <input id="b-id" placeholder="laisser vide pour un id de test">
+      <div class="chk"><input type="checkbox" id="b-reel"><label for="b-reel">Envoyer réellement les emails (sinon : juste compter)</label></div>
+      <button class="btn" id="btn-chaine" onclick="testChaine()">Lancer le test de matching</button>
+      <div id="out-chaine" class="out"></div>
+    </div>
+  </div>
+
+<script>
+const SUPABASE_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const ADMIN_EMAILS = ['davidjaquet@live.fr', 'davidjaquet.lgtm@gmail.com'];
+var MOI = null;
+
+(async function () {
+  try {
+    var { data: { session } } = await db.auth.getSession();
+    if (!session) { refus('Vous devez être connecté.'); return; }
+    MOI = session.user.email;
+    if (ADMIN_EMAILS.indexOf((MOI || '').toLowerCase()) === -1) { refus('Accès réservé à l\'administrateur.'); return; }
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('panel').style.display = 'block';
+    document.getElementById('t-email').value = MOI;
+  } catch (e) { refus('Erreur : ' + e.message); }
+})();
+
+function refus(msg) {
+  document.getElementById('gate').innerHTML = '<div style="font-size:15px;color:#C0392B;margin-bottom:10px">⛔ ' + msg + '</div><a href="connexion.html" style="color:#A8854A">Se connecter</a>';
+}
+
+function show(id, obj, ok) {
+  var el = document.getElementById(id);
+  el.className = 'out show';
+  el.style.color = ok ? '#D7E7C8' : '#F5B7B1';
+  el.textContent = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2);
+}
+
+async function testEmail() {
+  var to = document.getElementById('t-email').value.trim();
+  if (!to) { show('out-email', 'Indiquez une adresse.', false); return; }
+  var btn = document.getElementById('btn-email'); btn.disabled = true;
+  show('out-email', 'Envoi en cours…', true);
+  try {
+    var { data, error } = await db.functions.invoke('envoyer-email', {
+      body: {
+        type: 'alerte_mandat_agent',
+        to: to,
+        subject: '🧪 Test ImmoConnect · alerte agent',
+        acheteur: 'TEST — Famille Démo',
+        bien: { id: 'test', titre: 'Bien de test', ville: 'Pau', code_postal: '64000', surface: 70, prix: 200000 },
+        lien: 'https://immoconnect-agence.fr/index.html'
+      }
+    });
+    if (error) { show('out-email', '❌ Erreur : ' + error.message, false); }
+    else { show('out-email', '✅ Réponse de envoyer-email :\n' + JSON.stringify(data, null, 2) + '\n\nVérifiez la boîte « ' + to + ' » (et les spams) + le dashboard Resend.', true); }
+  } catch (e) { show('out-email', '❌ ' + e.message, false); }
+  btn.disabled = false;
+}
+
+async function testChaine() {
+  var btn = document.getElementById('btn-chaine'); btn.disabled = true;
+  show('out-chaine', 'Matching en cours…', true);
+  var v = function (id) { return document.getElementById(id).value; };
+  var reel = document.getElementById('b-reel').checked;
+  var payload = {
+    niveau: v('b-niveau'),
+    delais: { pay_per_use: 0, starter: 1, pro: 0, premium: 0 },
+    dry_run: !reel,
+    bien: {
+      id: v('b-id').trim() || 'test-' + Date.now(),
+      titre: 'Bien de test', ville: v('b-ville'), code_postal: v('b-cp'),
+      prix: parseFloat(v('b-prix')) || 0, surface: parseFloat(v('b-surface')) || 0,
+      nb_pieces: parseInt(v('b-pieces')) || 0, type_bien: v('b-type'),
+      mode_contact: v('b-mode'), niveau_vendeur: v('b-niveau')
+    }
+  };
+  try {
+    var { data, error } = await db.functions.invoke('alerter-agents', { body: payload });
+    if (error) { show('out-chaine', '❌ Erreur : ' + error.message, false); }
+    else {
+      var resume = '✅ Résultat :\n' + JSON.stringify(data, null, 2)
+        + '\n\n— agents_notifies : agents éligibles balayés'
+        + '\n— investisseurs_alertes / acheteurs_alertes / alertes_criteres / mandats_alertes : emails ' + (reel ? 'envoyés' : 'qui SERAIENT envoyés (simulation)')
+        + (reel ? '' : '\n\n(Simulation : aucun email réel envoyé.)');
+      show('out-chaine', resume, true);
+    }
+  } catch (e) { show('out-chaine', '❌ ' + e.message, false); }
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>
