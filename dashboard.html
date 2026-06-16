@@ -1574,7 +1574,21 @@ function submitDemande(){
   const prenom=document.getElementById('fPrenom')?.value?.trim();
   const nom=document.getElementById('fNom')?.value?.trim();
   const email=document.getElementById('fEmail')?.value?.trim();
-  if(!prenom||!nom||!email){showToast('Renseignez prénom, nom et email','error');return;}
+  // Validation guidée : surligne les champs requis manquants et y ramène l'utilisateur
+  var requis=[['fPrenom',prenom],['fNom',nom],['fEmail',email]];
+  var manquant=null;
+  requis.forEach(function(r){
+    var el=document.getElementById(r[0]);
+    if(!el) return;
+    if(!r[1]){ el.style.borderColor='#A32D2D'; el.style.background='#FCEDED'; if(!manquant) manquant=el; }
+    else { el.style.borderColor=''; el.style.background=''; }
+  });
+  if(manquant){
+    showToast('Renseignez prénom, nom et email (section « Informations de contact », en haut)','error');
+    manquant.scrollIntoView({behavior:'smooth',block:'center'});
+    setTimeout(function(){ try{ manquant.focus(); }catch(e){} },300);
+    return;
+  }
 
   const base={
     id:currentProfile[0]+Date.now(), profile:currentProfile,
@@ -1614,7 +1628,7 @@ function submitDemande(){
 }
 
 function resetForm(){
-  ['fPrenom','fNom','fEmail','fTel','fVilles','fAdresse','fBudgetMin','fBudgetMax','fSurfMin','fPieces','fSurface','fPrix','fNotes','fPiecesV'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['fPrenom','fNom','fEmail','fTel','fVilles','fAdresse','fBudgetMin','fBudgetMax','fSurfMin','fPieces','fSurface','fPrix','fNotes','fPiecesV'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.value=''; el.style.borderColor=''; el.style.background=''; } });
   currentType='';currentProfile='Acheteur';currentPrio='Moyenne';
   document.querySelectorAll('.type-opt').forEach(o=>o.classList.remove('sel'));
   document.querySelectorAll('.prio-opt').forEach(o=>o.classList.remove('sel'));
