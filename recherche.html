@@ -164,6 +164,14 @@
       <option value="platinium">Platinium</option>
     </select>
   </div>
+  <div class="f-field" id="f-rendement-wrap" style="display:none">
+    <label>Rendement net min (%)</label>
+    <input type="number" id="f-rendement" min="0" step="0.1" placeholder="Ex : 5" onkeydown="if(event.key==='Enter')lancer()">
+  </div>
+  <div class="f-field" id="f-rendement-lock" style="display:none">
+    <label>Rendement net min (%)</label>
+    <a href="forfaits.html" title="Filtre réservé aux abonnés" style="display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px dashed var(--border);border-radius:3px;font-size:12px;color:#A8854A;text-decoration:none;background:#FBF7EF;white-space:nowrap">🔒 Réservé aux abonnés</a>
+  </div>
   <div class="f-field" style="flex:0 0 auto;flex-direction:row;gap:8px;align-items:flex-end">
     <button class="btn-search" onclick="lancer()">Rechercher</button>
     <button class="btn-reset" onclick="reset()">Effacer</button>
@@ -201,6 +209,43 @@ const db = supabase.createClient(SB_URL, SB_KEY);
 
 var currentUser = null;
 var favSet = {}; // annonce_id -> true
+var currentMeta = {};
+var aForfait = false; // l'utilisateur a-t-il un forfait (investisseur ou agent abonné) ?
+
+// L'utilisateur dispose-t-il d'un forfait donnant accès au filtre rendement ?
+function aUnForfait(m){
+  m = m || {};
+  var f  = String(m.forfait || '').toLowerCase();        // acheteur / investisseur
+  var fa = String(m.forfait_agent || '').toLowerCase();  // agent
+  if (f === 'investisseur') return true;
+  if (['starter','pro','premium','expert','platinium'].indexOf(fa) !== -1) return true;
+  return false;
+}
+
+// Rendement net estimé — même formule que le serveur (alerter-agents).
+// Fiable uniquement sur les dossiers Gold/Platinium (DPE + taxe foncière disponibles) ;
+// renvoie null sinon.
+function rendementNetBien(a){
+  var niv = String(a.niveau_valide || '').toLowerCase();
+  if (niv !== 'gold' && niv !== 'platinium') return null;
+  var prix = parseFloat(a.prix) || 0;
+  var surface = parseFloat(a.surface) || 0;
+  var loyer = parseFloat(a.loyer_mensuel) || 0;
+  var charges = (parseFloat(a.charges_syndic) || 0) * 12 + (parseFloat(a.taxe_fonciere_montant) || 0);
+  var loyerM2 = String(a.type_bien || '').toLowerCase().indexOf('maison') !== -1 ? 8.5 : 11;
+  var loyerEffectif = loyer > 0 ? loyer : (surface > 0 ? loyerM2 * surface : 0);
+  var loyerAnnuel = loyerEffectif * 12;
+  if (!prix || !loyerAnnuel) return null;
+  return parseFloat(((loyerAnnuel - charges) / prix * 100).toFixed(2));
+}
+
+// Affiche le champ rendement aux abonnés, et un cadenas (lien forfaits) aux autres.
+function appliquerGateRendement(){
+  var wrap = document.getElementById('f-rendement-wrap');
+  var lock = document.getElementById('f-rendement-lock');
+  if (wrap) wrap.style.display = aForfait ? '' : 'none';
+  if (lock) lock.style.display = aForfait ? 'none' : '';
+}
 
 // Pré-remplissage des filtres depuis l'URL (?ville=&type=&prixmax=&surfmin=&pieces=&tri=)
 function lireParams() {
@@ -211,6 +256,7 @@ function lireParams() {
   set('f-surfmin','surfmin'); set('f-surfmax','surfmax');
   set('f-pieces','pieces'); set('f-chambres','chambres');
   set('f-niveau','niveau'); set('f-tri','tri');
+  set('f-rendement','rendement');
 }
 
 function valeurs() {
@@ -225,6 +271,7 @@ function valeurs() {
     pieces:   v('f-pieces'),
     chambres: v('f-chambres'),
     niveau:   v('f-niveau'),
+    rendement: v('f-rendement'),
     tri:      v('f-tri')
   };
 }
@@ -239,7 +286,7 @@ function lancer() {
 }
 
 function reset() {
-  ['f-ville','f-prixmin','f-prixmax','f-surfmin','f-surfmax'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  ['f-ville','f-prixmin','f-prixmax','f-surfmin','f-surfmax','f-rendement'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
   ['f-type','f-pieces','f-chambres','f-niveau'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
   document.getElementById('f-tri').value = 'recent';
   lancer();
@@ -250,7 +297,7 @@ async function chercher(v) {
   grid.innerHTML = '<div class="loading">Recherche en cours…</div>';
 
   var q = db.from('annonces_vendeurs')
-    .select('id, titre, type_bien, ville, code_postal, prix, surface, nb_pieces, photo_principale, niveau_valide, est_pro, frais_agence, created_at')
+    .select('id, titre, type_bien, ville, code_postal, prix, surface, nb_pieces, photo_principale, niveau_valide, est_pro, frais_agence, created_at, loyer_mensuel, charges_syndic, taxe_fonciere_montant')
     .eq('statut_annonce', 'publiee');
 
   if (v.type)    q = q.eq('type_bien', v.type);
@@ -271,7 +318,16 @@ async function chercher(v) {
   var { data, error } = await q.limit(60);
   if (error) { grid.innerHTML = '<div class="empty"><div class="ico">⚠️</div>Erreur de chargement. Réessayez.</div>'; document.getElementById('count').textContent=''; return; }
 
-  afficher(data || []);
+  var liste = data || [];
+  // Filtre rendement : réservé aux abonnés, appliqué côté client (calcul net Gold/Platinium)
+  if (aForfait && v.rendement) {
+    var rmin = parseFloat(v.rendement);
+    if (!isNaN(rmin)) {
+      liste = liste.filter(function(a){ var r = rendementNetBien(a); return r != null && r >= rmin; });
+    }
+  }
+
+  afficher(liste);
 }
 
 function nivClass(n){ n=(n||'standard').toLowerCase(); return ['platinium','gold','silver'].indexOf(n)!==-1 ? 'nv-'+n : ''; }
@@ -297,6 +353,8 @@ function afficher(annonces) {
     var img = a.photo_principale ? '<img src="' + a.photo_principale + '" alt="">' : '🏠';
     var proTag = a.est_pro ? '<div style="position:absolute;top:14px;left:50%;transform:translateX(-50%);padding:3px 10px;border-radius:2px;font-size:10px;font-weight:700;letter-spacing:1px;background:#C09B5A;color:#1C1C1A">PRO</div>' : '';
     var fraisLine = (a.est_pro && a.frais_agence) ? '<div style="font-size:11px;color:#A8854A;margin-top:4px">🏢 Frais d\'agence : ' + a.frais_agence + '</div>' : '';
+    var rdt = aForfait ? rendementNetBien(a) : null;
+    var rdtLine = (rdt != null) ? '<div style="font-size:11px;color:#1E7A62;font-weight:600;margin-top:4px">📈 Rendement net estimé : ' + rdt + ' %</div>' : '';
     return '<div class="card">'
       + nivLabel + favBtn + proTag
       + '<a class="card-link" href="bien.html?id=' + a.id + '">'
@@ -304,6 +362,7 @@ function afficher(annonces) {
       + '<div class="card-body">'
       + '<div class="card-price">' + prix + ' <span>€</span></div>'
       + fraisLine
+      + rdtLine
       + '<div class="card-title">' + (a.titre || (a.type_bien || 'Bien')) + '</div>'
       + '<div class="card-loc">📍 ' + ville + '</div>'
       + '<div class="card-feats">'
@@ -357,7 +416,13 @@ async function majHeaderCompte(session) {
 
 (async function init() {
   lireParams();
-  try { var { data: { user } } = await db.auth.getUser(); currentUser = user || null; } catch(e) {}
+  try {
+    var { data: { user } } = await db.auth.getUser();
+    currentUser = user || null;
+    currentMeta = (user && user.user_metadata) ? user.user_metadata : {};
+    aForfait = aUnForfait(currentMeta);
+  } catch(e) {}
+  appliquerGateRendement();
   majHeaderCompte();
   try { db.auth.onAuthStateChange(function(_e, s){ majHeaderCompte(s); }); } catch(e) {}
   await chargerFavSet();
