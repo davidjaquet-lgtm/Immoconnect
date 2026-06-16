@@ -804,6 +804,7 @@ var estAgentVendeur = false, agentEmailVendeur = null, agentForfaitVendeur = nul
     estAgentVendeur = true;
     agentForfaitVendeur = ag ? ag.forfait_agent : null;
     injecterChampFraisAgence();
+    injecterImportAnnonce();
   } catch (e) {}
 })();
 
@@ -819,6 +820,97 @@ function injecterChampFraisAgence(){
     + '<input id="frais_agence" type="text" placeholder="Ex : 4 % TTC ou 6 000 €" style="width:100%;padding:10px;border:1px solid rgba(28,28,26,.15);border-radius:6px;font-family:Outfit,sans-serif;font-size:14px;box-sizing:border-box">'
     + '<div style="font-size:11px;color:#A89878;margin-top:6px">Montant ou pourcentage, charge vendeur ou acquéreur selon votre mandat.</div>';
   prix.parentNode.insertBefore(wrap, prix.nextSibling);
+}
+
+// ── IMPORT RAPIDE D'ANNONCE (agents) ──
+// L'agent colle le texte de son annonce (ou une URL) → Hanaé extrait les champs
+// via l'edge function importer-annonce → le formulaire se pré-remplit.
+function injecterImportAnnonce(){
+  if (document.getElementById('ic-import-panel')) return;
+  var pg = document.querySelector('.page') || document.body;
+  var panel = document.createElement('div');
+  panel.id = 'ic-import-panel';
+  panel.style.cssText = 'max-width:760px;margin:0 auto 22px;border:1px solid #C09B5A;border-radius:12px;background:linear-gradient(180deg,#FFF8EC,#FBF5E9);overflow:hidden;font-family:Outfit,sans-serif';
+  panel.innerHTML = `
+    <div style="padding:16px 18px;border-bottom:1px solid rgba(192,155,90,.35)">
+      <div style="font-size:15px;font-weight:700;color:#7A5A1E;display:flex;align-items:center;gap:8px">✨ Importer une annonce existante</div>
+      <div style="font-size:12.5px;color:#8A6A28;margin-top:5px;line-height:1.55">Collez le texte de votre annonce (logiciel d'agence, autre portail, mail, Word…) ou son URL. Hanaé remplit le formulaire automatiquement — vous n'avez plus qu'à vérifier, ajouter vos photos et publier.</div>
+    </div>
+    <div style="padding:16px 18px">
+      <label style="display:block;font-size:12px;color:#8A8478;margin-bottom:5px">Texte de l'annonce</label>
+      <textarea id="ic-import-texte" rows="6" placeholder="Collez ici le descriptif complet de votre bien (type, surface, pièces, prix, ville, DPE, atouts…)" style="width:100%;padding:11px;border:1px solid rgba(28,28,26,.18);border-radius:8px;font-family:Outfit,sans-serif;font-size:13.5px;box-sizing:border-box;resize:vertical"></textarea>
+      <div style="display:flex;align-items:center;gap:10px;margin:12px 0 4px;color:#A89878;font-size:11px">
+        <span style="flex:1;height:1px;background:rgba(192,155,90,.35)"></span>OU<span style="flex:1;height:1px;background:rgba(192,155,90,.35)"></span>
+      </div>
+      <label style="display:block;font-size:12px;color:#8A8478;margin:6px 0 5px">URL de l'annonce <span style="color:#B7A576">(facultatif — certains portails bloquent la lecture automatique)</span></label>
+      <input id="ic-import-url" type="url" placeholder="https://…" style="width:100%;padding:10px 11px;border:1px solid rgba(28,28,26,.18);border-radius:8px;font-family:Outfit,sans-serif;font-size:13.5px;box-sizing:border-box">
+      <button id="ic-import-btn" type="button" onclick="lancerImportAnnonce()" style="margin-top:14px;width:100%;padding:12px;border:none;border-radius:8px;background:#C09B5A;color:#1C1C1A;font-family:Outfit,sans-serif;font-weight:600;font-size:14px;cursor:pointer">✨ Importer avec Hanaé</button>
+      <div id="ic-import-status" style="font-size:12.5px;margin-top:10px;line-height:1.5"></div>
+    </div>`;
+  pg.insertBefore(panel, pg.firstChild);
+}
+
+async function lancerImportAnnonce(){
+  var btn = document.getElementById('ic-import-btn');
+  var status = document.getElementById('ic-import-status');
+  var texte = (document.getElementById('ic-import-texte').value || '').trim();
+  var url   = (document.getElementById('ic-import-url').value || '').trim();
+  if (!texte && !url){
+    status.style.color = '#B4452F';
+    status.textContent = '↳ Collez d\'abord le texte de votre annonce ou son URL.';
+    return;
+  }
+  var orig = btn.textContent;
+  btn.disabled = true; btn.style.opacity = '.6'; btn.textContent = '⏳ Hanaé analyse votre annonce…';
+  status.style.color = '#8A6A28'; status.textContent = '';
+  try {
+    var { data, error } = await db.functions.invoke('importer-annonce', { body: { texte: texte, url: url } });
+    if (error) {
+      // Récupère le message renvoyé par la fonction (422/400/502…)
+      var msg = 'Import impossible.';
+      try { var ctx = await error.context.json(); if (ctx && ctx.error) msg = ctx.error; } catch(e){ if (error.message) msg = error.message; }
+      status.style.color = '#B4452F'; status.textContent = '⚠️ ' + msg;
+      return;
+    }
+    var champs = (data && data.champs) ? data.champs : {};
+    var n = appliquerChampsImportes(champs);
+    if (n === 0){
+      status.style.color = '#B4452F';
+      status.textContent = '⚠️ Aucune information exploitable trouvée. Vérifiez le texte collé.';
+      return;
+    }
+    status.style.color = '#1E7A3E';
+    status.innerHTML = '✅ <strong>' + n + ' champ(s) pré-rempli(s).</strong> Vérifiez les informations ci-dessous, ajoutez vos photos, puis publiez. <span style="color:#8A6A28">Rien n\'est publié tant que vous ne validez pas.</span>';
+    var titre = document.getElementById('titre');
+    if (titre) titre.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } catch (e) {
+    status.style.color = '#B4452F'; status.textContent = '⚠️ Erreur : ' + (e.message || e);
+  } finally {
+    btn.disabled = false; btn.style.opacity = '1'; btn.textContent = orig;
+  }
+}
+
+// Applique les champs extraits sur le formulaire via les helpers existants.
+function appliquerChampsImportes(c){
+  var n = 0;
+  var champsTexte = ['titre','description','type_bien','statut_occupation','prix','surface',
+    'nb_pieces','nb_chambres','etage','nb_etages','annee_construction','ville','code_postal',
+    'adresse','chauffage','eau_chaude','charges_syndic','nb_lots_copro','taxe_fonciere_montant',
+    'classe_dpe','conso_energie','classe_ges','emission_ges','frais_agence','valeur_locative',
+    'loyer_mensuel','description_travaux'];
+  champsTexte.forEach(function(k){
+    if (c[k] !== undefined && c[k] !== null && c[k] !== ''){ icSetVal(k, c[k]); n++; }
+  });
+  // Boutons radio (valeurs renvoyées telles quelles)
+  var champsRadio = ['parking','exterieur','cave','digicode','negociable','ascenseur','piscine','travaux_bool'];
+  champsRadio.forEach(function(k){
+    if (c[k] !== undefined && c[k] !== null && c[k] !== ''){ icSetRadio(k, c[k]); n++; }
+  });
+  // is_copropriete → bouton radio nommé "is_copro"
+  if (c.is_copropriete !== undefined && c.is_copropriete !== null && c.is_copropriete !== ''){
+    icSetRadio('is_copro', c.is_copropriete); n++;
+  }
+  return n;
 }
 const BUCKET = 'immoconnect-docs';
 
