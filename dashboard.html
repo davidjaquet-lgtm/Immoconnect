@@ -1119,17 +1119,11 @@ function updateBadges(){
   const loc=demandes.filter(d=>d.profile==='Locataire').length;
   const tot=demandes.length;
   const matches=computeMatchCount();
-  document.getElementById('totalBadge').textContent=tot;
-  document.getElementById('achBadge').textContent=ach;
-  document.getElementById('venBadge').textContent=ven;
-  document.getElementById('locBadge').textContent=loc;
-  document.getElementById('matchBadge').textContent=matches;
-  document.getElementById('kpiTotal').textContent=tot;
-  document.getElementById('kpiAch').textContent=ach;
-  document.getElementById('kpiVen').textContent=ven;
-  document.getElementById('kpiMatch').textContent=matches;
-  document.getElementById('statToday').textContent=demandes.filter(d=>Date.now()-d.date<86400000).length;
-  document.getElementById('statMatchDay').textContent=matches;
+  const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('totalBadge',tot); set('achBadge',ach); set('venBadge',ven); set('locBadge',loc); set('matchBadge',matches);
+  set('kpiTotal',tot); set('kpiAch',ach); set('kpiVen',ven); set('kpiMatch',matches);
+  set('statToday',demandes.filter(d=>Date.now()-d.date<86400000).length);
+  set('statMatchDay',matches);
 }
 
 function computeMatchCount(){
