@@ -5,6 +5,9 @@
    Aucune dépendance : la session est lue directement depuis le stockage local. */
 (function () {
   var REF = 'zxxhyefajfwqcxcfxpmg';
+  var SB_URL = 'https://' + REF + '.supabase.co';
+  var PUBKEY = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+  var ADMINS = ['davidjaquet@live.fr', 'davidjaquet.lgtm@gmail.com'];
 
   // ── 1) NOM DU COMPTE CONNECTÉ ───────────────────────────────
   function readSession() {
@@ -60,6 +63,32 @@
     // Non connecté : on laisse "Connexion" tel quel.
   }
 
+  // Détecte si l'utilisateur a un forfait (investisseur / agent abonné) ou est admin.
+  // Lit la session dans le localStorage et interroge l'API REST Supabase (RLS = lecture de sa propre ligne).
+  function detecterForfait(cb) {
+    var sess = readSession();
+    var user = sess && sess.user ? sess.user : null;
+    if (!user || !user.email) { cb(false); return; }
+    var email = user.email;
+    if (ADMINS.indexOf(String(email).toLowerCase()) !== -1) { cb(true); return; }
+    var token = sess.access_token || (sess.currentSession && sess.currentSession.access_token);
+    if (!token) { cb(false); return; }
+    var H = { apikey: PUBKEY, Authorization: 'Bearer ' + token };
+    fetch(SB_URL + '/rest/v1/projets_acheteurs?select=forfait&email=eq.' + encodeURIComponent(email), { headers: H })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) {
+        if (rows && rows.length && rows[0].forfait === 'investisseur') { cb(true); return; }
+        fetch(SB_URL + '/rest/v1/agents_validation?select=forfait_agent,abonnement_actif&email=eq.' + encodeURIComponent(email), { headers: H })
+          .then(function (r) { return r.ok ? r.json() : []; })
+          .then(function (rows2) {
+            var ok = rows2 && rows2.length && rows2[0].abonnement_actif === true && rows2[0].forfait_agent && rows2[0].forfait_agent !== 'pay_per_use';
+            cb(!!ok);
+          })
+          .catch(function () { cb(false); });
+      })
+      .catch(function () { cb(false); });
+  }
+
   // ── 2) BARRE DE RECHERCHE (style accueil) ───────────────────
   function buildBar() {
     // Pas sur la page de résultats (barre complète déjà présente)
@@ -109,6 +138,8 @@
         '<div class="ic-sb-field ic-sb-last"><div style="flex:1"><label>Niveau du bien</label>' +
           '<select id="ic-sb-niveau"><option value="">Tous</option><option value="standard">Standard</option>' +
           '<option value="silver">Silver</option><option value="gold">Gold</option><option value="platinium">Platinium</option></select></div></div>' +
+        '<div class="ic-sb-field" id="ic-sb-rdt-field" style="display:none"><div style="flex:1"><label>Rendement min %</label>' +
+          '<input id="ic-sb-rendement" type="number" min="0" step="0.1" placeholder="Ex : 5"></div></div>' +
         '<button class="ic-sb-btn" id="ic-sb-go">Rechercher →</button>' +
       '</div>';
 
@@ -137,10 +168,26 @@
       if (v('ic-sb-surfmax')) p.set('surfmax', v('ic-sb-surfmax'));
       if (v('ic-sb-pieces')) p.set('pieces', v('ic-sb-pieces'));
       if (v('ic-sb-niveau')) p.set('niveau', v('ic-sb-niveau'));
+      var rdtField = document.getElementById('ic-sb-rdt-field');
+      var rdtVal = v('ic-sb-rendement');
+      if (rdtField && rdtField.style.display !== 'none' && rdtVal && !isNaN(parseFloat(rdtVal))) p.set('rendement', parseFloat(rdtVal));
       window.location.href = 'recherche.html' + (p.toString() ? '?' + p.toString() : '');
     }
     document.getElementById('ic-sb-go').addEventListener('click', go);
     document.getElementById('ic-sb-ville').addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+
+    // Filtre rendement : réservé aux abonnés (investisseur / agent abonné) ou admin.
+    try {
+      detecterForfait(function (ok) {
+        if (!ok) return;
+        var f = document.getElementById('ic-sb-rdt-field');
+        if (!f) return;
+        var nivSel = document.getElementById('ic-sb-niveau');
+        if (nivSel && nivSel.closest) { var nivField = nivSel.closest('.ic-sb-field'); if (nivField) nivField.classList.remove('ic-sb-last'); }
+        f.style.display = '';
+        f.classList.add('ic-sb-last');
+      });
+    } catch (e) {}
 
     // Garde-fou anti autofill : si le navigateur injecte l'email (ou tout texte avec @), on vide
     var villeEl = document.getElementById('ic-sb-ville');
