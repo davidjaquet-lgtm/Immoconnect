@@ -738,7 +738,7 @@ function calculerCapacite() {
 /* ══ RECAP SUBMIT ══ */
 function updateRecap() {
   var txt = '';
-  if (forfait === 'gratuit')      txt = 'Acheteur gratuit — annonces complètes, contact vendeur gratuit, alertes personnalisées.';
+  if (forfait === 'gratuit')      txt = 'Acheteur gratuit — annonces complètes et contact vendeur gratuit. Le matching et les alertes automatiques sont réservés au forfait Investisseur.';
   if (forfait === 'investisseur') txt = 'Forfait Investisseur 29,99€/mois — matching rendement automatique, dossiers et rapports inclus, vendeurs Platinium.';
   document.getElementById('submit-recap').textContent = txt;
 }
@@ -932,9 +932,9 @@ async function soumettre() {
     showToast('Projet créé en gratuit. Vous pourrez activer l\u2019abonnement Investisseur depuis votre espace.', 'ok');
   }
 
-  // Afficher le widget d\'alerte
+  // Afficher le widget d'alerte — RÉSERVÉ AUX INVESTISSEURS
   var alerteBox = document.getElementById('alerte-acheteur-box');
-  if (alerteBox) {
+  if (alerteBox && forfait === 'investisseur') {
     alerteBox.style.display = 'block';
     alerteBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
     // Pré-remplir l\'email
@@ -962,8 +962,8 @@ updateRecap();
 <div id="alerte-acheteur-box" style="display:none;position:fixed;bottom:24px;right:24px;width:340px;background:#FEFDFB;border:1px solid #E8E6E0;border-radius:12px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:1000;font-family:'Outfit',sans-serif">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
     <div>
-      <div style="font-size:13px;font-weight:500;color:#0F0F0E">🔔 Activer les alertes</div>
-      <div style="font-size:11px;color:#888780;margin-top:2px">Recevez un email dès qu'un bien correspond</div>
+      <div style="font-size:13px;font-weight:500;color:#0F0F0E">🔔 Alertes Investisseur</div>
+      <div style="font-size:11px;color:#888780;margin-top:2px">Réservé au forfait Investisseur — un email dès qu'un bien correspond</div>
     </div>
     <button onclick="document.getElementById('alerte-acheteur-box').style.display='none'" style="background:none;border:none;font-size:18px;cursor:pointer;color:#888780;padding:0 4px">×</button>
   </div>
@@ -1007,6 +1007,12 @@ updateRecap();
 
 <script>
 async function activerAlerte() {
+  // RÉSERVÉ AUX INVESTISSEURS — un acheteur gratuit ne peut pas activer d'alerte (aucun matching)
+  if (forfait !== 'investisseur') {
+    var stg = document.getElementById('alerte-status');
+    if (stg) { stg.textContent = 'Les alertes automatiques sont réservées au forfait Investisseur.'; stg.style.color = '#B4452F'; stg.style.display = 'block'; }
+    return;
+  }
   var email = document.getElementById('alerte-email').value.trim();
   if (!email) { alert('Entrez votre email.'); return; }
 
