@@ -212,15 +212,8 @@ var favSet = {}; // annonce_id -> true
 var currentMeta = {};
 var aForfait = false; // l'utilisateur a-t-il un forfait (investisseur ou agent abonné) ?
 
-// L'utilisateur dispose-t-il d'un forfait donnant accès au filtre rendement ?
-function aUnForfait(m){
-  m = m || {};
-  var f  = String(m.forfait || '').toLowerCase();        // acheteur / investisseur
-  var fa = String(m.forfait_agent || '').toLowerCase();  // agent
-  if (f === 'investisseur') return true;
-  if (['starter','pro','premium','expert','platinium'].indexOf(fa) !== -1) return true;
-  return false;
-}
+// Le statut abonné (investisseur / agent) est stocké EN BASE (projets_acheteurs, agents_validation),
+// pas dans user_metadata. La détection se fait dans init() ci-dessous.
 
 // Rendement net estimé — même formule que le serveur (alerter-agents).
 // Fiable uniquement sur les dossiers Gold/Platinium (DPE + taxe foncière disponibles) ;
@@ -445,9 +438,22 @@ async function majHeaderCompte(session) {
   try {
     var { data: { user } } = await db.auth.getUser();
     currentUser = user || null;
-    currentMeta = (user && user.user_metadata) ? user.user_metadata : {};
-    aForfait = aUnForfait(currentMeta);
   } catch(e) {}
+  // Détection du forfait EN BASE (même logique que bien.html) :
+  //  - investisseur : projets_acheteurs.forfait === 'investisseur'
+  //  - agent abonné : agents_validation.abonnement_actif && forfait_agent !== 'pay_per_use'
+  if (currentUser) {
+    try {
+      var _pa = await db.from('projets_acheteurs').select('forfait').eq('email', currentUser.email).maybeSingle();
+      if (_pa && _pa.data && _pa.data.forfait === 'investisseur') aForfait = true;
+    } catch(e) {}
+    if (!aForfait) {
+      try {
+        var _av = await db.from('agents_validation').select('forfait_agent, abonnement_actif').eq('email', currentUser.email).maybeSingle();
+        if (_av && _av.data && _av.data.abonnement_actif === true && _av.data.forfait_agent && _av.data.forfait_agent !== 'pay_per_use') aForfait = true;
+      } catch(e) {}
+    }
+  }
   appliquerGateRendement();
   majHeaderCompte();
   try { db.auth.onAuthStateChange(function(_e, s){ majHeaderCompte(s); }); } catch(e) {}
