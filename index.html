@@ -935,7 +935,7 @@
         </select>
       </div>
     </div>
-    <div class="search-field" style="max-width:150px; border-right:none">
+    <div class="search-field" style="max-width:150px">
       <div style="flex:1">
         <label>Niveau du bien</label>
         <select id="hero-niveau">
@@ -945,6 +945,18 @@
           <option value="gold">Gold</option>
           <option value="platinium">Platinium</option>
         </select>
+      </div>
+    </div>
+    <div class="search-field" id="hero-rendement-wrap" style="max-width:150px; border-right:none; display:none">
+      <div style="flex:1">
+        <label>Rendement min (%)</label>
+        <input type="number" id="hero-rendement" min="0" step="0.1" placeholder="Ex : 5" style="width:100%">
+      </div>
+    </div>
+    <div class="search-field" id="hero-rendement-lock" style="max-width:175px; border-right:none; display:none">
+      <div style="flex:1">
+        <label>Rendement min (%)</label>
+        <a href="forfaits.html" title="Réservé aux abonnés" style="display:block;font-size:12px;color:#C09B5A;text-decoration:none;padding-top:3px;white-space:nowrap">🔒 Réservé aux abonnés</a>
       </div>
     </div>
     <button class="btn-search" onclick="goRecherche()">Rechercher →</button>
@@ -1287,6 +1299,29 @@ async function majHeaderCompte(session) {
 majHeaderCompte();
 try { db.auth.onAuthStateChange(function(_evt, session){ majHeaderCompte(session); }); } catch(e) {}
 
+// ── Filtre rendement de la barre héro : réservé aux abonnés (investisseur / agent abonné) ou admin ──
+var heroForfait = false;
+async function majHeroRendement(){
+  try {
+    var { data: { user } } = await db.auth.getUser();
+    if (user) {
+      var ADMINS = ['davidjaquet@live.fr', 'davidjaquet.lgtm@gmail.com'];
+      if (ADMINS.indexOf(String(user.email || '').toLowerCase()) !== -1) heroForfait = true;
+      if (!heroForfait) {
+        try { var _pa = await db.from('projets_acheteurs').select('forfait').eq('email', user.email).maybeSingle(); if (_pa && _pa.data && _pa.data.forfait === 'investisseur') heroForfait = true; } catch(e){}
+      }
+      if (!heroForfait) {
+        try { var _av = await db.from('agents_validation').select('forfait_agent, abonnement_actif').eq('email', user.email).maybeSingle(); if (_av && _av.data && _av.data.abonnement_actif === true && _av.data.forfait_agent && _av.data.forfait_agent !== 'pay_per_use') heroForfait = true; } catch(e){}
+      }
+    }
+  } catch(e) {}
+  var wrap = document.getElementById('hero-rendement-wrap');
+  var lock = document.getElementById('hero-rendement-lock');
+  if (wrap) wrap.style.display = heroForfait ? '' : 'none';
+  if (lock) lock.style.display = heroForfait ? 'none' : '';
+}
+majHeroRendement();
+
 // Barre de recherche héro → page de résultats recherche.html avec filtres
 function goRecherche() {
   function num(v){ var n = (v||'').replace(/[^0-9]/g,''); return n || ''; }
@@ -1303,6 +1338,8 @@ function goRecherche() {
   if (surf && num(surf)) p.set('surfmin', num(surf));
   if (piec && num(piec)) p.set('pieces', num(piec));
   if (niv) p.set('niveau', niv);
+  var rdt = (document.getElementById('hero-rendement')||{}).value;
+  if (heroForfait && rdt && !isNaN(parseFloat(rdt))) p.set('rendement', parseFloat(rdt));
   window.location.href = 'recherche.html' + (p.toString() ? '?' + p.toString() : '');
 }
 
