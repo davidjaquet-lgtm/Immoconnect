@@ -38,7 +38,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 /* ═══════════════════════════════════════
    LAYOUT SHELL
 ═══════════════════════════════════════ */
-.shell{display:flex;height:100vh;overflow:hidden}
+.shell{display:flex;height:calc(100vh - 54px);overflow:hidden}
 
 /* ═══════════════════════════════════════
    SIDEBAR
@@ -549,15 +549,6 @@ nav .nav-link{margin-right:18px}
 </head>
 <body>
 
-<div class="shell">
-
-<!-- ═══════════ SIDEBAR ═══════════ -->
-<aside class="sidebar" id="sidebar">
-  <div class="sb-logo">
-    <div class="sb-logo-text">Immo<span>Connect</span></div>
-    <div class="sb-tagline">Espace Demandes</div>
-  </div>
-
   <nav style="background:#0F0F0E;height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100;gap:0">
   <a href="index.html" style="font-size:18px;font-weight:600;color:#fff;text-decoration:none;margin-right:32px;font-family:'Outfit',sans-serif">Immo<span style="color:#C09B5A">Connect</span></a>
   <div style="display:flex;gap:24px;align-items:center;flex:1">
@@ -568,6 +559,15 @@ nav .nav-link{margin-right:18px}
   </div>
   <a href="index.html" style="text-decoration:none;padding:8px 20px;border:1px solid #444;color:#fff;font-size:13px;font-weight:500;border-radius:4px;font-family:'Outfit',sans-serif;transition:all .2s" onmouseover="this.style.borderColor='#C09B5A';this.style.color='#C09B5A'" onmouseout="this.style.borderColor='#444';this.style.color='#fff'">Accueil</a>
 </nav>
+
+<div class="shell">
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-text">Immo<span>Connect</span></div>
+    <div class="sb-tagline">Espace Demandes</div>
+  </div>
 
   <div class="sb-footer">
     <div class="sb-user">
@@ -593,6 +593,19 @@ nav .nav-link{margin-right:18px}
   </header>
 
   <div class="content">
+
+    <!-- ══ Bandeau bascule vers l'espace vendeur (affiché uniquement si profil vendeur/admin) ══ -->
+    <div id="bandeau-vendeur" style="display:none;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:linear-gradient(90deg,#1C1C1A,#2A2A26);border:1px solid var(--gold,#C09B5A);border-radius:10px;padding:14px 20px;margin-bottom:22px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:22px">🏠</span>
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:#fff">Vous gérez aussi des biens en vente</div>
+          <div style="font-size:12.5px;color:rgba(255,255,255,.6)">Basculez vers votre espace vendeur pour suivre vos annonces et vos contacts.</div>
+        </div>
+      </div>
+      <a href="dashboard-vendeur.html" style="text-decoration:none;padding:10px 20px;background:#C09B5A;color:#1C1C1A;font-family:'Outfit',sans-serif;font-weight:600;font-size:13.5px;border-radius:8px;white-space:nowrap">Basculer vers l'espace vendeur →</a>
+    </div>
+
 
     <!-- ══════════════════════════
          PAGE : DASHBOARD
@@ -1644,6 +1657,25 @@ function exportData(){
 seedData();
 updateBadges();
 renderDashboard();
+</script>
+<!-- Bascule espace vendeur : afficher le bandeau si l'utilisateur a le profil vendeur (ou admin) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async function(){
+  try{
+    if(!window.supabase) return;
+    var SB_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
+    var SB_KEY='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+    var db=window.supabase.createClient(SB_URL,SB_KEY);
+    var { data:{ session } }=await db.auth.getSession();
+    if(!session||!session.user) return;
+    var profils=(session.user.user_metadata||{}).profils||[];
+    if(Array.isArray(profils)&&(profils.indexOf('vendeur')!==-1||profils.indexOf('admin')!==-1)){
+      var b=document.getElementById('bandeau-vendeur');
+      if(b) b.style.display='flex';
+    }
+  }catch(e){}
+})();
 </script>
 <script src="feedback.js" defer></script>
 </body>
