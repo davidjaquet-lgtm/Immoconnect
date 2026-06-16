@@ -239,6 +239,21 @@ function rendementNetBien(a){
   return parseFloat(((loyerAnnuel - charges) / prix * 100).toFixed(2));
 }
 
+// État du rendement pour l'affichage et le filtre, selon le niveau du dossier :
+//  - Gold/Platinium calculable -> { etat:'connu', valeur }
+//  - Silver (ou Gold/Platinium aux données locatives manquantes) -> { etat:'verifier' }
+//  - Standard -> { etat:'aucun' }
+function rendementAffichage(a){
+  var niv = String(a.niveau_valide || '').toLowerCase();
+  if (niv === 'gold' || niv === 'platinium') {
+    var r = rendementNetBien(a);
+    if (r != null) return { etat:'connu', valeur:r };
+    return { etat:'verifier' };
+  }
+  if (niv === 'silver') return { etat:'verifier' };
+  return { etat:'aucun' };
+}
+
 // Affiche le champ rendement aux abonnés, et un cadenas (lien forfaits) aux autres.
 function appliquerGateRendement(){
   var wrap = document.getElementById('f-rendement-wrap');
@@ -319,11 +334,18 @@ async function chercher(v) {
   if (error) { grid.innerHTML = '<div class="empty"><div class="ico">⚠️</div>Erreur de chargement. Réessayez.</div>'; document.getElementById('count').textContent=''; return; }
 
   var liste = data || [];
-  // Filtre rendement : réservé aux abonnés, appliqué côté client (calcul net Gold/Platinium)
+  // Filtre rendement : réservé aux abonnés, appliqué côté client.
+  // Gold/Platinium : rendement calculé, soumis au seuil. Silver : conservé avec « à vérifier ».
+  // Standard : écarté tant que le filtre est actif.
   if (aForfait && v.rendement) {
     var rmin = parseFloat(v.rendement);
     if (!isNaN(rmin)) {
-      liste = liste.filter(function(a){ var r = rendementNetBien(a); return r != null && r >= rmin; });
+      liste = liste.filter(function(a){
+        var info = rendementAffichage(a);
+        if (info.etat === 'connu')    return info.valeur >= rmin; // calculé (Gold/Platinium)
+        if (info.etat === 'verifier') return true;                // Silver → affiché « à vérifier »
+        return false;                                             // Standard → exclu
+      });
     }
   }
 
@@ -353,8 +375,12 @@ function afficher(annonces) {
     var img = a.photo_principale ? '<img src="' + a.photo_principale + '" alt="">' : '🏠';
     var proTag = a.est_pro ? '<div style="position:absolute;top:14px;left:50%;transform:translateX(-50%);padding:3px 10px;border-radius:2px;font-size:10px;font-weight:700;letter-spacing:1px;background:#C09B5A;color:#1C1C1A">PRO</div>' : '';
     var fraisLine = (a.est_pro && a.frais_agence) ? '<div style="font-size:11px;color:#A8854A;margin-top:4px">🏢 Frais d\'agence : ' + a.frais_agence + '</div>' : '';
-    var rdt = aForfait ? rendementNetBien(a) : null;
-    var rdtLine = (rdt != null) ? '<div style="font-size:11px;color:#1E7A62;font-weight:600;margin-top:4px">📈 Rendement net estimé : ' + rdt + ' %</div>' : '';
+    var rdtLine = '';
+    if (aForfait) {
+      var info = rendementAffichage(a);
+      if (info.etat === 'connu')         rdtLine = '<div style="font-size:11px;color:#1E7A62;font-weight:600;margin-top:4px">📈 Rendement net estimé : ' + info.valeur + ' %</div>';
+      else if (info.etat === 'verifier') rdtLine = '<div style="font-size:11px;color:#A86A1E;font-weight:600;margin-top:4px">📈 Rendement : à vérifier</div>';
+    }
     return '<div class="card">'
       + nivLabel + favBtn + proTag
       + '<a class="card-link" href="bien.html?id=' + a.id + '">'
