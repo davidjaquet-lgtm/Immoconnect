@@ -178,6 +178,19 @@ nav .nav-link{margin-right:18px}
 
 <div class="container" id="main-content" style="display:none">
 
+    <!-- ══ Bandeau bascule vers l'espace acheteur (même style que le dashboard agence) ══ -->
+    <div id="bandeau-acheteur" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:linear-gradient(90deg,#1C1C1A,#2A2A26);border:1px solid #C09B5A;border-radius:10px;padding:14px 20px;margin-bottom:22px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:22px">🔑</span>
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:#fff">Vous cherchez aussi à acheter ?</div>
+          <div style="font-size:12.5px;color:rgba(255,255,255,.6)">Accédez à votre espace acheteur pour suivre vos recherches et recevoir des alertes.</div>
+        </div>
+      </div>
+      <button onclick="allerEspaceAcheteur()" style="cursor:pointer;border:none;padding:10px 20px;background:#C09B5A;color:#1C1C1A;font-family:'Outfit',sans-serif;font-weight:600;font-size:13.5px;border-radius:8px;white-space:nowrap">Basculer vers l'espace acheteur →</button>
+    </div>
+
+
   <!-- BANNIÈRE NOTIFICATION NIVEAU -->
   <div id="notif-banner" style="display:none;align-items:center;gap:14px;background:linear-gradient(90deg,#FAEEDA,#FEFDFB);border:1px solid var(--gold);border-radius:12px;padding:16px 18px;margin-bottom:18px">
     <div style="font-size:26px;flex-shrink:0">🎉</div>
