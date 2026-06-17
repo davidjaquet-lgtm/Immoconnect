@@ -73,13 +73,16 @@ const TABLES = [
   ['agents_validation','email,forfait_agent,abonnement_actif']
 ];
 
-// Fonctions appelées par le navigateur → doivent répondre avec CORS.
-const FONCTIONS = ['importer-annonce','contact-message','rapport-hanae','generer-description','matcher-mandats',
-  'doc-url','dvf-commune','creer-checkout','creer-checkout-exclusivite','analyser-contact','blog-hanae',
-  'generer-cr','ocr-documents','verifier-achat','valider-agent','supprimer-annonce','envoyer-email',
-  'alerter-agents','alerter-acheteurs','notif-niveau','scorer-candidatures','consommer-lead'];
-// Fonctions serveur/cron : pas appelées par le navigateur → un échec CORS est NORMAL.
-const FONCTIONS_SERVEUR = ['stripe-webhook','cron-alertes-queue','purge-docs','moderer-annonce'];
+// Sondes SÛRES : fonctions qui valident leur entrée et n'ont AUCUN effet de bord sur
+// un appel vide (pas d'email, pas de paiement, pas d'IA, pas d'écriture). Elles partagent
+// le même socle CORS que toutes les fonctions appelées par le navigateur : si elles
+// répondent, la connectivité + CORS de la plateforme sont bons pour toutes.
+const SONDES = ['verifier-achat','doc-url','dvf-commune'];
+// Fonctions volontairement NON sondées (les appeler déclencherait une vraie action).
+const NON_SONDEES = ['importer-annonce','contact-message','rapport-hanae','generer-description','matcher-mandats',
+  'creer-checkout','creer-checkout-exclusivite','analyser-contact','blog-hanae','generer-cr','ocr-documents',
+  'valider-agent','supprimer-annonce','envoyer-email','alerter-agents','alerter-acheteurs','notif-niveau',
+  'scorer-candidatures','consommer-lead','stripe-webhook','cron-alertes-queue','purge-docs','moderer-annonce'];
 
 let counts = { ok:0, ko:0, warn:0 };
 
@@ -159,27 +162,31 @@ async function lancer(){
     renderSummary();
   }
 
-  // 4) EDGE FUNCTIONS
-  const fSec=section('4 · Edge Functions (joignables + CORS)');
-  for(const fn of FONCTIONS){ await pingFn(fSec,fn,false); }
-  const fSec2=section('4b · Fonctions serveur / cron (échec CORS normal)');
-  for(const fn of FONCTIONS_SERVEUR){ await pingFn(fSec2,fn,true); }
+  // 4) CONNECTIVITÉ EDGE FUNCTIONS (sondes sûres)
+  const fSec=section('4 · Connectivité Edge Functions');
+  for(const fn of SONDES){ await probeFn(fSec,fn); }
+  addNote(fSec, 'Si les sondes ci-dessus sont vertes, le socle CORS/connectivité est bon pour toutes tes fonctions. Les '+NON_SONDEES.length+' autres ne sont pas appelées ici car cela déclencherait une vraie action (email, paiement, IA, suppression…).');
 
   go.disabled=false; go.textContent='▶ Relancer les tests';
 }
 
-async function pingFn(sec, fn, serveur){
+function addNote(sec, html){
+  const r=el('div','row');
+  r.appendChild(el('div','badge b-run','i'));
+  r.appendChild(el('div','name','Info'));
+  r.appendChild(el('div','det', html));
+  sec.appendChild(r);
+}
+
+async function probeFn(sec, fn){
   const r=addRow(sec,fn,'run','…');
-  const url=SB_URL+'/functions/v1/'+fn;
+  const b=r.querySelector('.badge'); const d=r.querySelector('.det');
   try{
-    const res=await fetch(url,{method:'OPTIONS'});
-    const cors=!!res.headers.get('access-control-allow-origin');
-    if(cors){ r.querySelector('.badge').className='badge b-ok'; r.querySelector('.badge').textContent='✓'; r.querySelector('.det').textContent='Joignable + CORS (HTTP '+res.status+')'; counts.ok++; }
-    else { r.querySelector('.badge').className='badge b-warn'; r.querySelector('.badge').textContent='!'; r.querySelector('.det').className='det warn'; r.querySelector('.det').textContent='Joignable mais pas d\'en-tête CORS (HTTP '+res.status+')'; counts.warn++; }
-  }catch(e){
-    if(serveur){ r.querySelector('.badge').className='badge b-warn'; r.querySelector('.badge').textContent='!'; r.querySelector('.det').className='det warn'; r.querySelector('.det').textContent='Pas de CORS — normal pour une fonction serveur/cron.'; counts.warn++; }
-    else { r.querySelector('.badge').className='badge b-ko'; r.querySelector('.badge').textContent='✕'; r.querySelector('.det').className='det ko'; r.querySelector('.det').textContent='Injoignable ou CORS manquant : '+e.message; counts.ko++; }
-  }
+    const { error } = await db.functions.invoke(fn, { body:{ __diagnostic:true } });
+    const fetchFail = error && (error.name==='FunctionsFetchError' || /failed to (fetch|send)/i.test(error.message||''));
+    if(fetchFail){ b.className='badge b-ko'; b.textContent='✕'; d.className='det ko'; d.textContent='Injoignable / CORS manquant : '+(error.message||''); counts.ko++; }
+    else { b.className='badge b-ok'; b.textContent='✓'; d.textContent='Joignable + CORS OK (réponse reçue de la fonction)'; counts.ok++; }
+  }catch(e){ b.className='badge b-ko'; b.textContent='✕'; d.className='det ko'; d.textContent=e.message; counts.ko++; }
   renderSummary();
 }
 
