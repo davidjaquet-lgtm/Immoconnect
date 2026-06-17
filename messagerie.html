@@ -519,14 +519,19 @@ async function envoyerMessage() {
   var typingField = currentRole==='agent' ? 'typing_agent' : 'typing_vendeur';
   await db.from('conversations').update({[typingField]:null}).eq('id',currentConvId);
 
-  // Insérer message
-  await db.from('messages_conversation').insert({
+  // Insérer message — action réelle : on vérifie l'erreur (sinon le texte disparaît en silence)
+  var insM = await db.from('messages_conversation').insert({
     conversation_id: currentConvId,
     expediteur_email: currentUser.email,
     expediteur_role: currentRole,
     contenu: contenu,
     lu: false
   });
+  if (insM && insM.error) {
+    if (btn) { btn.disabled=false; btn.textContent='Envoyer →'; }
+    alert("Votre message n'a pas pu être envoyé : " + insM.error.message + "\nVotre texte est conservé, réessayez.");
+    return;
+  }
 
   // Email notification
   var destinataire = conv.email_agent===currentUser.email ? conv.email_vendeur : conv.email_agent;

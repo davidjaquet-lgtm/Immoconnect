@@ -1268,8 +1268,8 @@ async function envoyerContact() {
   } catch(e) {}
 
   try {
-    // Enregistrer dans messages_annonces
-    await db.from('messages_annonces').insert({
+    // Enregistrer dans messages_annonces — action réelle : on vérifie l'erreur (Supabase ne "throw" pas)
+    var ins = await db.from('messages_annonces').insert({
       annonce_id: bien.id,
       email_vendeur: bien.email_contact,
       nom_acheteur: nom,
@@ -1278,14 +1278,19 @@ async function envoyerContact() {
       message: msg,
       lu: false
     });
-    // Compteur du plafond hebdomadaire
+    if (ins && ins.error) {
+      err.textContent = "Votre message n'a pas pu être enregistré : " + ins.error.message;
+      err.style.display = 'block';
+      return;
+    }
+    // Compteur du plafond hebdomadaire (best-effort)
     await db.from('contacts_envoyes').insert({ user_id: currentUser.id, user_email: currentUser.email, annonce_id: bien.id, email_vendeur: bien.email_contact }).then(undefined, function(){});
 
-    // Incrémenter contacts
+    // Incrémenter contacts (best-effort)
     await db.rpc('incrementer_contacts', { annonce_uuid: bien.id }).then(undefined, function(){});
 
-    // Notifier le vendeur
-    await db.functions.invoke('envoyer-email', {
+    // Notifier le vendeur par email (best-effort : ne bloque pas, mais on reflète l'échec)
+    var mail = await db.functions.invoke('envoyer-email', {
       body: {
         type: 'nouveau_message',
         to: bien.email_contact,
@@ -1295,9 +1300,11 @@ async function envoyerContact() {
         bien: (bien.type_bien||'Bien') + ' · ' + (bien.ville||''),
         lien: 'https://immoconnect-agence.fr/connexion.html'
       }
-    }).then(undefined, function(){});
+    });
 
-    ok.textContent = '✅ Message envoyé ! Le vendeur vous répondra rapidement.';
+    ok.textContent = (mail && mail.error)
+      ? '✅ Votre message a bien été enregistré. Le vendeur le verra dans son espace (la notification email a rencontré un souci de notre côté).'
+      : '✅ Message envoyé ! Le vendeur vous répondra rapidement.';
     ok.style.display = 'block';
     document.getElementById('modal-form').style.display = 'none';
 
@@ -1369,12 +1376,13 @@ async function confirmerVisite(dispoId) {
   var bienLabel = (bien.type_bien||'Bien') + ' · ' + (bien.ville||'');
   var creneauLabel = window._creneauLabel || '';
   var urlBien = 'https://immoconnect-agence.fr/bien.html?id=' + bien.id;
-  await db.from('reservations_visites').insert({
+  var ins = await db.from('reservations_visites').insert({
     dispo_id: dispoId, annonce_id: bien.id, email_vendeur: bien.email_contact,
     email_acheteur: email, nom_acheteur: nom, bien_label: bienLabel,
     creneau_souhaite: creneauLabel, message: msg || null, statut: 'en_attente', type_demande: 'creneau'
   });
-  await db.from('disponibilites_visites').update({ statut: 'reserve' }).eq('id', dispoId);
+  if (ins && ins.error) { alert("Votre demande n'a pas pu être enregistrée : " + ins.error.message); return; }
+  await db.from('disponibilites_visites').update({ statut: 'reserve' }).eq('id', dispoId).then(undefined, function(){});
   // Notif vendeur
   await db.functions.invoke('envoyer-email', {
     body: {
@@ -1406,11 +1414,12 @@ async function envoyerDemandeLibre() {
   var creneau = new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'}) + (heure ? ' · ' + heure : '');
   var urlBien = 'https://immoconnect-agence.fr/bien.html?id=' + bien.id;
 
-  await db.from('reservations_visites').insert({
+  var insL = await db.from('reservations_visites').insert({
     dispo_id: null, annonce_id: bien.id, email_vendeur: bien.email_contact,
     email_acheteur: email, nom_acheteur: nom, bien_label: bienLabel,
     creneau_souhaite: creneau, message: msg || null, statut: 'en_attente', type_demande: 'libre'
   });
+  if (insL && insL.error) { alert("Votre demande n'a pas pu être enregistrée : " + insL.error.message); return; }
   await db.functions.invoke('envoyer-email', {
     body: { type: 'demande_visite', to: bien.email_contact, subject: '📅 Nouvelle demande de visite — ImmoConnect',
       acheteur: 'Un acheteur ImmoConnect (identité protégée — répondez depuis votre calendrier)', message: 'Créneau souhaité : ' + creneau + '. ' + (msg||''),
