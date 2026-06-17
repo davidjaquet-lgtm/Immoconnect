@@ -625,11 +625,15 @@ async function envoyerMessage() {
   var typingField = currentRole==='agent' ? 'typing_agent' : 'typing_vendeur';
   await db.from('conversations').update({[typingField]:null}).eq('id',currentConvId);
 
+  // Rôle de l'expéditeur DANS cette conversation (pas le rôle global du compte)
+  var monRole = (currentUser.email === conv.email_agent) ? 'agent'
+    : (currentUser.email === conv.email_acheteur) ? 'acheteur' : 'vendeur';
+
   // Insérer message — action réelle : on vérifie l'erreur (sinon le texte disparaît en silence)
   var insM = await db.from('messages_conversation').insert({
     conversation_id: currentConvId,
     expediteur_email: currentUser.email,
-    expediteur_role: currentRole,
+    expediteur_role: monRole,
     contenu: contenu,
     lu: false
   });
