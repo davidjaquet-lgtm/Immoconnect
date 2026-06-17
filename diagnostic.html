@@ -167,6 +167,34 @@ async function lancer(){
   for(const fn of SONDES){ await probeFn(fSec,fn); }
   addNote(fSec, 'Si les sondes ci-dessus sont vertes, le socle CORS/connectivité est bon pour toutes tes fonctions. Les '+NON_SONDEES.length+' autres ne sont pas appelées ici car cela déclencherait une vraie action (email, paiement, IA, suppression…).');
 
+  // 5) COHÉRENCE DES DONNÉES (lecture seule)
+  const dSec=section('5 · Cohérence des données');
+  try{
+    const a=await db.from('annonces_vendeurs').select('id,prix,ville,photo_principale,niveau_valide').limit(300);
+    if(a.error){ addRow(dSec,'Annonces complètes','warn','Lecture impossible : '+a.error.message); }
+    else {
+      const list=a.data||[];
+      const sansPrix=list.filter(x=>x.prix==null).length;
+      const sansVille=list.filter(x=>!x.ville).length;
+      const sansPhoto=list.filter(x=>!x.photo_principale).length;
+      const pb=sansPrix+sansVille+sansPhoto;
+      addRow(dSec,'Annonces complètes', pb?'warn':'ok',
+        list.length+' annonces lisibles · sans prix : '+sansPrix+' · sans ville : '+sansVille+' · sans photo : '+sansPhoto);
+    }
+  }catch(e){ addRow(dSec,'Annonces complètes','warn',e.message); }
+  try{
+    const m=await db.from('mandats_recherche').select('type_bien,secteur,budget_max,surface_min,nb_pieces_min,rendement_min,statut').eq('statut','actif').limit(300);
+    if(m.error){ addRow(dSec,'Mandats (3 critères)','warn','Lecture impossible (RLS) : '+m.error.message); }
+    else {
+      const list=m.data||[];
+      const cle=['type_bien','secteur','budget_max','surface_min','nb_pieces_min','rendement_min'];
+      const mauvais=list.filter(x=>cle.filter(k=>x[k]!=null && String(x[k]).trim()!=='').length!==3).length;
+      addRow(dSec,'Mandats (3 critères)', mauvais?'warn':'ok',
+        list.length+' mandats actifs lisibles · '+mauvais+' avec ≠ 3 critères (ne matcheront pas)');
+    }
+  }catch(e){ addRow(dSec,'Mandats (3 critères)','warn',e.message); }
+  addNote(dSec,'Les comptages portent sur les lignes que ta session peut lire (RLS). En admin tu en vois plus ; en investisseur/agent, surtout les tiennes.');
+
   go.disabled=false; go.textContent='▶ Relancer les tests';
 }
 
