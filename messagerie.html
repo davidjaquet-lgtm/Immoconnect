@@ -196,6 +196,18 @@ var realtimeChannel = null;
 var typingTimeout = null;
 var noteSelectionnee = 0;
 function escMsg(s){ return (s||'').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+// Interlocuteur robuste pour TOUT type de conversation (agent↔vendeur OU acheteur↔vendeur)
+function autreParticipant(c){
+  var parts = [c.email_agent, c.email_vendeur, c.email_acheteur].filter(Boolean);
+  for (var i=0;i<parts.length;i++){ if (parts[i] !== currentUser.email) return parts[i]; }
+  return '';
+}
+function libelleRole(email, c){
+  if (email === c.email_vendeur) return 'Vendeur';
+  if (email === c.email_acheteur) return 'Acheteur';
+  if (window.__agentsSet && window.__agentsSet.has(email)) return 'Agent immobilier';
+  return 'Acheteur';
+}
 var convPourNotation = null;
 
 // ── INIT ──
@@ -224,7 +236,7 @@ async function chargerConversations() {
   
   var { data: convs } = await db.from('conversations')
     .select('*, annonces_vendeurs(titre,type_bien,ville,surface,prix)')
-    .or('email_agent.eq.'+currentUser.email+',email_vendeur.eq.'+currentUser.email)
+    .or('email_agent.eq.'+currentUser.email+',email_vendeur.eq.'+currentUser.email+',email_acheteur.eq.'+currentUser.email)
     .order('dernier_message_at', { ascending: false, nullsFirst: false });
 
   allConvs = convs || [];
@@ -300,12 +312,11 @@ function afficherListeConvs(convs) {
   // — Conversations agent ↔ vendeur —
   if (convs.length && allContacts && allContacts.length) html += '<div class="conv-sec">💬 Conversations</div>';
   convs.forEach(function(c) {
-    var isAgent = c.email_agent === currentUser.email;
-    var emailTiers = isAgent ? c.email_vendeur : c.email_agent;
-    var nomInterlocuteur = roleDe(emailTiers, c);
+    var emailTiers = autreParticipant(c);
+    var nomInterlocuteur = libelleRole(emailTiers, c);
     var bien = c.annonces_vendeurs;
     var preview = c.dernier_message || (bien ? (bien.type_bien||'Bien')+' · '+(bien.ville||'') : '—');
-    var avatarClass = isAgent ? 'av-vendeur' : 'av-agent';
+    var avatarClass = (emailTiers === c.email_vendeur) ? 'av-vendeur' : 'av-agent';
     var initiale = nomInterlocuteur.charAt(0).toUpperCase();
     var date = c.dernier_message_at
       ? new Date(c.dernier_message_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'})
@@ -345,9 +356,47 @@ async function ouvrirContact(contactId) {
     +'<div class="ct-msg">'+escMsg(m.message||'')+'</div>'
     +'<div class="ct-meta">📧 '+escMsg(m.email_acheteur||'')+tel+'<br>🕓 '+dt+'</div>'
     +'</div>'
-    +'<div class="chat-input-zone"><a href="'+mailto+'" class="btn-send" style="display:inline-block;text-decoration:none;text-align:center">✉️ Répondre par email</a></div>';
+    +'<div class="chat-input-zone" style="display:flex;gap:8px;align-items:stretch">'
+    +'<button class="btn-send" style="flex:1" onclick="repondreEnMessagerie(\''+m.id+'\')">💬 Répondre dans la messagerie</button>'
+    +'<a href="'+mailto+'" class="btn-send" style="flex:0 0 auto;display:inline-flex;align-items:center;text-decoration:none;background:var(--warm);color:var(--ink);border:1px solid var(--line)" title="Répondre par email à la place">✉️ Email</a>'
+    +'</div>';
 
   afficherListeConvs(allConvs);
+}
+
+// ── RÉPONDRE EN MESSAGERIE : crée (ou retrouve) une conversation acheteur↔vendeur ──
+async function repondreEnMessagerie(contactId) {
+  var m = allContacts.find(function(x){ return String(x.id) === String(contactId); });
+  if (!m) return;
+  if (!m.email_acheteur) { alert("Cet acheteur n'a pas d'email enregistré : réponse en messagerie impossible. Utilise l'email."); return; }
+
+  // Conversation déjà existante pour ce bien + cet acheteur ?
+  var ex = await db.from('conversations').select('id')
+    .eq('annonce_id', m.annonce_id)
+    .eq('email_vendeur', m.email_vendeur)
+    .eq('email_acheteur', m.email_acheteur)
+    .limit(1);
+  var convId = (ex && ex.data && ex.data[0]) ? ex.data[0].id : null;
+
+  // Sinon on la crée
+  if (!convId) {
+    var ins = await db.from('conversations').insert({
+      annonce_id: m.annonce_id,
+      email_vendeur: m.email_vendeur,
+      email_acheteur: m.email_acheteur,
+      dernier_message: m.message || null,
+      dernier_message_at: new Date().toISOString()
+    }).select('id').single();
+    if (ins.error || !ins.data) {
+      alert("Impossible d'ouvrir la conversation : " + (ins.error ? ins.error.message : 'erreur inconnue'));
+      return;
+    }
+    convId = ins.data.id;
+  }
+
+  currentContactId = null;
+  await chargerConversations();
+  ouvrirConv(convId);
 }
 
 // ── OUVRIR CONVERSATION ──
@@ -422,10 +471,8 @@ async function onTyping() {
 async function afficherChat(conv) {
   var bien = conv.annonces_vendeurs;
   var isAgent = conv.email_agent === currentUser.email;
-  var emailTiersConv = isAgent ? conv.email_vendeur : conv.email_agent;
-  var nomInterlocuteur = (emailTiersConv === conv.email_vendeur) ? 'Vendeur'
-    : (window.__agentsSet && window.__agentsSet.has(emailTiersConv)) ? 'Agent immobilier' : 'Acheteur';
-  var emailInterlocuteur = isAgent ? conv.email_agent : conv.email_vendeur;
+  var emailInterlocuteur = autreParticipant(conv);
+  var nomInterlocuteur = libelleRole(emailInterlocuteur, conv);
 
   // Charger messages
   var { data: msgs } = await db.from('messages_conversation')
@@ -436,7 +483,7 @@ async function afficherChat(conv) {
   // Vérifier quota agent
   var peutEnvoyer = true;
   var quotaHtml = '';
-  if (currentRole === 'agent') {
+  if (currentRole === 'agent' && conv.email_agent === currentUser.email) {
     var semaine = getSemaine();
     var { data: q } = await db.from('contacts_semaine').select('nb_contacts').eq('agent_id',currentUser.id).eq('semaine',semaine).single().then(undefined, function(){return{data:null};});
     var nbContacts = q ? q.nb_contacts : 0;
@@ -505,8 +552,8 @@ async function afficherChat(conv) {
   html += '</div>';
   html += '<div class="chat-actions">';
   html += notationHtml;
-  // Bouton signalement visible uniquement par le vendeur
-  if (!isAgent) {
+  // Bouton signalement visible uniquement par le vendeur, dans une conversation AVEC un agent
+  if (!isAgent && conv.email_agent) {
     html += '<button onclick="signalerContact(\'' + conv.email_agent + '\',\'' + conv.id + '\')" title="Signaler un comportement suspect" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:11px;padding:4px 8px;border-radius:6px;border:1px solid var(--line)" onmouseover="this.style.background=\'#FAECE7\';this.style.color=\'#712B13\'" onmouseout="this.style.background=\'none\';this.style.color=\'var(--muted)\'">Signaler</button>';
   }
   html += '</div>';
@@ -532,7 +579,7 @@ async function afficherChat(conv) {
 
   // Zone saisie
   html += '<div class="chat-input-zone">';
-  if (currentRole === 'agent') {
+  if (currentRole === 'agent' && conv.email_agent === currentUser.email) {
     var semaine = getSemaine();
     var { data: q2 } = await db.from('contacts_semaine').select('nb_contacts').eq('agent_id',currentUser.id).eq('semaine',semaine).single().then(undefined, function(){return{data:null};});
     var nb = q2 ? q2.nb_contacts : 0;
@@ -565,7 +612,7 @@ async function envoyerMessage() {
   if (btn) { btn.disabled=true; btn.textContent='…'; }
 
   // Quota agent
-  if (currentRole === 'agent' && !conv.contact_consomme) {
+  if (currentRole === 'agent' && conv.email_agent === currentUser.email && !conv.contact_consomme) {
     // Comptage du lead CÔTÉ SERVEUR (source de vérité infalsifiable, identité par token)
     var _sess = (await db.auth.getSession()).data.session;
     await db.functions.invoke('consommer-lead', { body: { annonce_id: conv.annonce_id, access_token: _sess && _sess.access_token } }).then(undefined, function(){});
@@ -593,7 +640,7 @@ async function envoyerMessage() {
   }
 
   // Email notification
-  var destinataire = conv.email_agent===currentUser.email ? conv.email_vendeur : conv.email_agent;
+  var destinataire = autreParticipant(conv);
   var bien = conv.annonces_vendeurs;
   envoyerEmailNotif(destinataire, currentUser.email.split('@')[0], contenu, bien?(bien.type_bien||'Bien')+' · '+(bien.ville||''):'votre bien');
 
