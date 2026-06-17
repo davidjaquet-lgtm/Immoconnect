@@ -84,6 +84,9 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 
 .chat-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);font-size:13px;gap:12px}
 .chat-empty-icon{font-size:48px}
+.conv-sec{padding:12px 16px 4px;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.ct-msg{background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:14px;line-height:1.55;max-width:85%;align-self:flex-start;white-space:pre-wrap}
+.ct-meta{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.7}
 .spin{width:24px;height:24px;border:3px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin:40px auto}
 @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -186,10 +189,13 @@ var currentUser = null;
 var currentRole = 'vendeur';
 var currentForfait = 'starter';
 var allConvs = [];
+var allContacts = [];
 var currentConvId = null;
+var currentContactId = null;
 var realtimeChannel = null;
 var typingTimeout = null;
 var noteSelectionnee = 0;
+function escMsg(s){ return (s||'').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 var convPourNotation = null;
 
 // ── INIT ──
@@ -244,15 +250,19 @@ async function chargerConversations() {
   }
   allConvs.forEach(function(c){ c.ma_notation = notationsMap[c.id] || null; });
 
+  // Messages d'annonce (contacts acheteurs reçus sur tes biens) — affichés à côté des conversations
+  var rc = await db.from('messages_annonces')
+    .select('*')
+    .eq('email_vendeur', currentUser.email)
+    .order('created_at', { ascending:false })
+    .limit(50);
+  allContacts = (rc && rc.data) || [];
+
   afficherListeConvs(allConvs);
 }
 
 // ── AFFICHER LISTE ──
 function afficherListeConvs(convs) {
-  if (!convs.length) {
-    document.getElementById('conv-list').innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px">Aucune conversation</div>';
-    return;
-  }
   // CONFIDENTIALITÉ : les particuliers ne voient jamais le nom/email des autres.
   // On affiche des rôles ; seuls les agents (professionnels) restent identifiés comme tels.
   if (!window.__agentsSet) {
@@ -275,6 +285,20 @@ function afficherListeConvs(convs) {
     return 'Acheteur';
   }
   var html = '';
+
+  // — Messages sur vos annonces (contacts acheteurs) —
+  if (allContacts && allContacts.length) {
+    html += '<div class="conv-sec">📨 Messages sur vos annonces</div>';
+    allContacts.forEach(function(m) {
+      var ini = (m.nom_acheteur||'A').charAt(0).toUpperCase();
+      var d = m.created_at ? new Date(m.created_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '';
+      var ap = escMsg((m.message||'').slice(0,42));
+      html += '<div class="conv-item'+(currentContactId===m.id?' active':'')+'" onclick="ouvrirContact(\''+m.id+'\')"><div class="conv-avatar av-agent">'+ini+'</div><div class="conv-info"><div class="conv-name">Acheteur</div><div class="conv-preview">'+ap+'</div></div><div class="conv-meta"><div class="conv-date">'+d+'</div>'+(!m.lu?'<div class="conv-badge">!</div>':'')+'</div></div>';
+    });
+  }
+
+  // — Conversations agent ↔ vendeur —
+  if (convs.length && allContacts && allContacts.length) html += '<div class="conv-sec">💬 Conversations</div>';
   convs.forEach(function(c) {
     var isAgent = c.email_agent === currentUser.email;
     var emailTiers = isAgent ? c.email_vendeur : c.email_agent;
@@ -288,7 +312,42 @@ function afficherListeConvs(convs) {
       : '';
     html += '<div class="conv-item'+(c.id===currentConvId?' active':'')+'" onclick="ouvrirConv(\''+c.id+'\')"><div class="conv-avatar '+avatarClass+'">'+initiale+'</div><div class="conv-info"><div class="conv-name">'+nomInterlocuteur+'</div><div class="conv-preview">'+preview+'</div></div><div class="conv-meta"><div class="conv-date">'+date+'</div>'+(c.non_lus>0?'<div class="conv-badge">'+c.non_lus+'</div>':'')+'</div></div>';
   });
+
+  if (!html) html = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px">Aucun message</div>';
   document.getElementById('conv-list').innerHTML = html;
+}
+
+// ── OUVRIR UN MESSAGE D'ANNONCE (contact acheteur, lecture seule + répondre par email) ──
+async function ouvrirContact(contactId) {
+  currentContactId = contactId;
+  currentConvId = null;
+  if (realtimeChannel) { db.removeChannel(realtimeChannel); realtimeChannel = null; }
+  var m = allContacts.find(function(x){ return String(x.id) === String(contactId); });
+  if (!m) return;
+
+  if (!m.lu) {
+    db.from('messages_annonces').update({ lu:true }).eq('id', m.id).then(undefined, function(){});
+    m.lu = true;
+  }
+
+  var dt = m.created_at ? new Date(m.created_at).toLocaleString('fr-FR') : '';
+  var tel = m.telephone_acheteur ? ' · ' + escMsg(m.telephone_acheteur) : '';
+  var sujet = encodeURIComponent('Votre message sur ImmoConnect');
+  var corps = encodeURIComponent('Bonjour ' + (m.nom_acheteur||'') + ',\n\n');
+  var mailto = 'mailto:' + (m.email_acheteur||'') + '?subject=' + sujet + '&body=' + corps;
+  var ini = (m.nom_acheteur||'A').charAt(0).toUpperCase();
+
+  document.getElementById('chat-zone').innerHTML =
+    '<div class="chat-header"><div class="chat-avatar av-agent">'+ini+'</div>'
+    +'<div class="chat-info"><div class="chat-name">'+escMsg(m.nom_acheteur||'Acheteur')+'</div>'
+    +'<div class="chat-detail">Message reçu sur votre annonce</div></div></div>'
+    +'<div class="chat-messages">'
+    +'<div class="ct-msg">'+escMsg(m.message||'')+'</div>'
+    +'<div class="ct-meta">📧 '+escMsg(m.email_acheteur||'')+tel+'<br>🕓 '+dt+'</div>'
+    +'</div>'
+    +'<div class="chat-input-zone"><a href="'+mailto+'" class="btn-send" style="display:inline-block;text-decoration:none;text-align:center">✉️ Répondre par email</a></div>';
+
+  afficherListeConvs(allConvs);
 }
 
 // ── OUVRIR CONVERSATION ──
