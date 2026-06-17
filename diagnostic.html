@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Diagnostic — ImmoConnect</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{ --ink:#0F0F0E; --gold:#C09B5A; --bg:#FEFDFB; --warm:#F5F2EC; --line:#E8E6E0; --muted:#888780; --ok:#1E7A62; --ko:#C0392B; --warn:#A86A1E; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--warm);font-family:'Outfit',system-ui,Arial,sans-serif;color:var(--ink);line-height:1.5}
+  .wrap{max-width:880px;margin:0 auto;padding:28px 18px 80px}
+  header{background:var(--ink);color:#fff;border-radius:12px;padding:22px 26px;margin-bottom:18px}
+  header h1{margin:0;font-size:20px;font-weight:600}
+  header h1 span{color:var(--gold)}
+  header p{margin:6px 0 0;font-size:13px;color:#C9C7C0}
+  .bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+  button{font-family:inherit;font-size:14px;font-weight:500;border:none;border-radius:8px;padding:12px 20px;cursor:pointer}
+  .btn-go{background:var(--ink);color:#fff}
+  .btn-mail{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+  .btn-go:disabled{opacity:.5;cursor:default}
+  .summary{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;font-size:13px}
+  .pill{background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:5px 14px}
+  .pill b{font-weight:600}
+  .sec{background:var(--bg);border:1px solid var(--line);border-radius:12px;margin-bottom:14px;overflow:hidden}
+  .sec-h{padding:13px 18px;font-size:13px;font-weight:600;background:var(--warm);border-bottom:1px solid var(--line);text-transform:uppercase;letter-spacing:.5px}
+  .row{display:flex;align-items:flex-start;gap:12px;padding:11px 18px;border-bottom:1px solid var(--line);font-size:13px}
+  .row:last-child{border-bottom:none}
+  .badge{flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;margin-top:1px}
+  .b-ok{background:var(--ok)} .b-ko{background:var(--ko)} .b-warn{background:var(--warn)} .b-run{background:var(--muted)}
+  .row .name{font-weight:500;flex-shrink:0;min-width:200px}
+  .row .det{color:var(--muted);font-size:12px;word-break:break-word}
+  .det.ko{color:var(--ko)} .det.warn{color:var(--warn)}
+  .note{font-size:12px;color:var(--muted);margin:0 0 18px;line-height:1.7;background:var(--bg);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;padding:12px 14px}
+  #mailout{font-size:12px;white-space:pre-wrap;background:var(--ink);color:#D4D2CB;border-radius:8px;padding:14px;margin-top:8px;display:none;font-family:ui-monospace,Menlo,monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Diagnostic <span>ImmoConnect</span></h1>
+    <p>Vérifie en un clic ce qui marche et ce qui casse, avant chaque mise en ligne. Page interne (non indexée).</p>
+  </header>
+
+  <p class="note">À lancer <b>connecté avec ton compte admin</b> pour couvrir aussi les tests qui dépendent de la session. Les tests sont en <b>lecture seule</b> : ils ne modifient rien. Seul le bouton « Tester l'envoi d'un email » provoque une action (un email réel vers davidjaquet@live.fr).</p>
+
+  <div class="bar">
+    <button class="btn-go" id="go" onclick="lancer()">▶ Lancer les tests</button>
+    <button class="btn-mail" onclick="testMail()">✉ Tester l'envoi d'un email</button>
+  </div>
+  <div id="mailout"></div>
+
+  <div class="summary" id="summary"></div>
+  <div id="results"></div>
+</div>
+
+<script>
+const SB_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const ADMINS = ['davidjaquet@live.fr','davidjaquet.lgtm@gmail.com'];
+const db = supabase.createClient(SB_URL, SB_KEY);
+
+// ── Spécifications de test ──────────────────────────────────────────
+const PAGES = ['index.html','recherche.html','forfaits.html','vendre.html','questionnaire-acheteur.html',
+  'questionnaire-vendeur.html','questionnaire-agent.html','bien.html','dashboard-agent.html','contact.html',
+  'connexion.html','admin-moderation.html','portefeuille-investisseur.html'];
+
+const TABLES = [
+  ['annonces_vendeurs','id,prix,surface,ville,code_postal,niveau_valide,est_pro,loyer_mensuel,charges_syndic,taxe_fonciere_montant'],
+  ['projets_acheteurs','email,forfait,prix_max,localisation,rendement_min'],
+  ['mandats_recherche','agent_email,label,type_bien,secteur,budget_max,surface_min,nb_pieces_min,rendement_min,statut'],
+  ['agents_validation','email,forfait_agent,abonnement_actif']
+];
+
+// Fonctions appelées par le navigateur → doivent répondre avec CORS.
+const FONCTIONS = ['importer-annonce','contact-message','rapport-hanae','generer-description','matcher-mandats',
+  'doc-url','dvf-commune','creer-checkout','creer-checkout-exclusivite','analyser-contact','blog-hanae',
+  'generer-cr','ocr-documents','verifier-achat','valider-agent','supprimer-annonce','envoyer-email',
+  'alerter-agents','alerter-acheteurs','notif-niveau','scorer-candidatures','consommer-lead'];
+// Fonctions serveur/cron : pas appelées par le navigateur → un échec CORS est NORMAL.
+const FONCTIONS_SERVEUR = ['stripe-webhook','cron-alertes-queue','purge-docs','moderer-annonce'];
+
+let counts = { ok:0, ko:0, warn:0 };
+
+function el(tag, cls, html){ const e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
+function section(titre){ const s=el('div','sec'); s.appendChild(el('div','sec-h',titre)); document.getElementById('results').appendChild(s); return s; }
+function addRow(sec, name, state, detail){
+  const r=el('div','row');
+  const sym = state==='ok'?'✓':state==='ko'?'✕':state==='warn'?'!':'…';
+  r.appendChild(el('div','badge b-'+(state==='run'?'run':state), sym));
+  r.appendChild(el('div','name', name));
+  r.appendChild(el('div','det'+(state==='ko'?' ko':state==='warn'?' warn':''), detail||''));
+  sec.appendChild(r);
+  if(state==='ok')counts.ok++; else if(state==='ko')counts.ko++; else if(state==='warn')counts.warn++;
+  renderSummary();
+  return r;
+}
+function renderSummary(){
+  document.getElementById('summary').innerHTML =
+    '<div class="pill" style="border-color:var(--ok)">✓ Réussis : <b style="color:var(--ok)">'+counts.ok+'</b></div>'+
+    '<div class="pill" style="border-color:var(--ko)">✕ Échecs : <b style="color:var(--ko)">'+counts.ko+'</b></div>'+
+    '<div class="pill" style="border-color:var(--warn)">! À vérifier : <b style="color:var(--warn)">'+counts.warn+'</b></div>';
+}
+
+async function lancer(){
+  const go=document.getElementById('go'); go.disabled=true; go.textContent='Tests en cours…';
+  document.getElementById('results').innerHTML=''; counts={ok:0,ko:0,warn:0}; renderSummary();
+
+  // 1) SESSION & FORFAIT
+  const sSec=section('1 · Session & forfait');
+  let user=null;
+  try{ const r=await db.auth.getUser(); user=r.data.user||null; }catch(e){}
+  if(!user){ addRow(sSec,'Connexion','warn','Non connecté — connecte-toi en admin pour des tests complets.'); }
+  else {
+    addRow(sSec,'Connexion','ok', user.email);
+    const isAdmin = ADMINS.indexOf(String(user.email).toLowerCase())!==-1;
+    let forfait = isAdmin ? 'admin' : null;
+    if(!forfait){
+      try{ const pa=await db.from('projets_acheteurs').select('forfait').eq('email',user.email).maybeSingle(); if(pa.data&&pa.data.forfait==='investisseur')forfait='investisseur'; }catch(e){}
+    }
+    if(!forfait){
+      try{ const av=await db.from('agents_validation').select('forfait_agent,abonnement_actif').eq('email',user.email).maybeSingle(); if(av.data&&av.data.abonnement_actif&&av.data.forfait_agent&&av.data.forfait_agent!=='pay_per_use')forfait='agent abonné'; }catch(e){}
+    }
+    addRow(sSec,'Accès filtre rendement', forfait?'ok':'warn', forfait?('Oui ('+forfait+')'):'Non (compte sans forfait) — le champ rendement sera masqué.');
+  }
+
+  // 2) PAGES EN LIGNE
+  const pSec=section('2 · Pages accessibles (HTTP 200)');
+  for(const pg of PAGES){
+    const r=addRow(pSec,pg,'run','…');
+    try{
+      const res=await fetch(pg,{method:'GET',cache:'no-store'});
+      if(res.ok){ r.querySelector('.badge').className='badge b-ok'; r.querySelector('.badge').textContent='✓'; r.querySelector('.det').textContent='HTTP '+res.status; counts.ok++; }
+      else { r.querySelector('.badge').className='badge b-ko'; r.querySelector('.badge').textContent='✕'; r.querySelector('.det').className='det ko'; r.querySelector('.det').textContent='HTTP '+res.status; counts.ko++; }
+    }catch(e){ r.querySelector('.badge').className='badge b-ko'; r.querySelector('.badge').textContent='✕'; r.querySelector('.det').className='det ko'; r.querySelector('.det').textContent='Injoignable : '+e.message; counts.ko++; }
+    renderSummary();
+  }
+
+  // 3) TABLES & COLONNES
+  const tSec=section('3 · Tables & colonnes attendues');
+  for(const [table,cols] of TABLES){
+    const r=addRow(tSec,table,'run','…');
+    try{
+      const res=await db.from(table).select(cols).limit(1);
+      if(res.error){
+        const msg=res.error.message||'';
+        const colMissing=/column .* does not exist|colonne/i.test(msg);
+        r.querySelector('.badge').className='badge b-ko'; r.querySelector('.badge').textContent='✕';
+        r.querySelector('.det').className='det ko';
+        r.querySelector('.det').textContent=(colMissing?'Colonne manquante : ':'Erreur : ')+msg;
+        counts.ko++;
+      } else {
+        r.querySelector('.badge').className='badge b-ok'; r.querySelector('.badge').textContent='✓';
+        r.querySelector('.det').textContent='Colonnes OK ('+cols.split(',').length+') — '+(res.data.length?'1 ligne lue':'lisible (0 ligne via RLS)');
+        counts.ok++;
+      }
+    }catch(e){ r.querySelector('.badge').className='badge b-ko'; r.querySelector('.badge').textContent='✕'; r.querySelector('.det').className='det ko'; r.querySelector('.det').textContent=e.message; counts.ko++; }
+    renderSummary();
+  }
+
+  // 4) EDGE FUNCTIONS
+  const fSec=section('4 · Edge Functions (joignables + CORS)');
+  for(const fn of FONCTIONS){ await pingFn(fSec,fn,false); }
+  const fSec2=section('4b · Fonctions serveur / cron (échec CORS normal)');
+  for(const fn of FONCTIONS_SERVEUR){ await pingFn(fSec2,fn,true); }
+
+  go.disabled=false; go.textContent='▶ Relancer les tests';
+}
+
+async function pingFn(sec, fn, serveur){
+  const r=addRow(sec,fn,'run','…');
+  const url=SB_URL+'/functions/v1/'+fn;
+  try{
+    const res=await fetch(url,{method:'OPTIONS'});
+    const cors=!!res.headers.get('access-control-allow-origin');
+    if(cors){ r.querySelector('.badge').className='badge b-ok'; r.querySelector('.badge').textContent='✓'; r.querySelector('.det').textContent='Joignable + CORS (HTTP '+res.status+')'; counts.ok++; }
+    else { r.querySelector('.badge').className='badge b-warn'; r.querySelector('.badge').textContent='!'; r.querySelector('.det').className='det warn'; r.querySelector('.det').textContent='Joignable mais pas d\'en-tête CORS (HTTP '+res.status+')'; counts.warn++; }
+  }catch(e){
+    if(serveur){ r.querySelector('.badge').className='badge b-warn'; r.querySelector('.badge').textContent='!'; r.querySelector('.det').className='det warn'; r.querySelector('.det').textContent='Pas de CORS — normal pour une fonction serveur/cron.'; counts.warn++; }
+    else { r.querySelector('.badge').className='badge b-ko'; r.querySelector('.badge').textContent='✕'; r.querySelector('.det').className='det ko'; r.querySelector('.det').textContent='Injoignable ou CORS manquant : '+e.message; counts.ko++; }
+  }
+  renderSummary();
+}
+
+async function testMail(){
+  const out=document.getElementById('mailout'); out.style.display='block';
+  out.textContent='Envoi du test vers contact-message…';
+  try{
+    const { data, error } = await db.functions.invoke('contact-message', { body:{
+      nom:'Test diagnostic', email:'diagnostic@immoconnect-agence.fr',
+      sujet:'Test automatique', message:'Email de test envoyé depuis la page diagnostic le '+new Date().toLocaleString('fr-FR'), hp:''
+    }});
+    if(error){ out.textContent='❌ Erreur renvoyée :\n'+JSON.stringify(error,null,2)+'\n\n→ La fonction a refusé l\'envoi. Regarde les logs Supabase de contact-message.'; return; }
+    out.textContent='✅ Réponse de contact-message :\n'+JSON.stringify(data,null,2)+'\n\n→ Vérifie maintenant la boîte davidjaquet@live.fr (et les spams). Le statut réel est dans Resend → Emails.';
+  }catch(e){ out.textContent='❌ Échec de l\'appel : '+e.message; }
+}
+</script>
+</body>
+</html>
