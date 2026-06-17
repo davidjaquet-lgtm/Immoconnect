@@ -795,7 +795,7 @@ async function soumettre() {
       }
     } catch(e) { /* echec comptage -> inscription gratuite par defaut */ }
 
-    await db.from('agents_validation').insert({
+    var insAgent = await db.from('agents_validation').insert({
       user_id: data.user.id,
       email, nom: prenom + ' ' + nom,
       agence, carte_t: carteT,
@@ -809,6 +809,11 @@ async function soumettre() {
       forfait_expire_le: forfaitExpireLe,
       abonnement_depuis: abonnementActif ? new Date().toISOString() : null
     });
+    if (insAgent && insAgent.error) {
+      showToast("Votre compte a été créé, mais l'enregistrement de votre dossier agent a échoué : " + insAgent.error.message + " Contactez le support.", 'err');
+      btn.disabled = false; btn.innerHTML = 'Créer mon compte agent →';
+      return;
+    }
 
     // Enregistrer acheteurs en portefeuille dans projets_acheteurs
     for (var i = 0; i < acheteurs.length; i++) {

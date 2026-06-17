@@ -1044,13 +1044,14 @@ async function envoyerSignalement(annonceId) {
 
   try {
     // 1. Enregistrer le signalement en base
-    await db.from('signalements_agents').insert({
+    var insS = await db.from('signalements_agents').insert({
       annonce_id: annonceId,
       email_signalant: currentUser ? currentUser.email : null,
       email_signale: emailAgent || null,
       raison: description,
       statut: 'en_attente'
     });
+    if (insS && insS.error) { alert("Le signalement n'a pas pu être enregistré : " + insS.error.message); return; }
 
     // 2. Alerter l\'admin par email
     await db.functions.invoke('envoyer-email', {
