@@ -149,13 +149,11 @@ function buildCard(a) {
 async function validerAgent(id, email, userId) {
   if (!confirm('Valider le compte agent de ' + email + ' ?')) return;
 
-  // Mettre à jour la table agents_validation
-  await db.from('agents_validation').update({ statut: 'valide', valide_le: new Date().toISOString() }).eq('id', id);
-
-  // Mettre à jour les metadata utilisateur via Edge Function
-  await db.functions.invoke('valider-agent', {
-    body: { user_id: userId, email: email }
-  }).then(undefined, function(){});
+  // Validation entièrement côté serveur (statut + métadonnées)
+  var r = await db.functions.invoke('valider-agent', {
+    body: { action: 'valider', agent_id: id, user_id: userId, email: email }
+  });
+  if (r && r.error) { alert('Erreur lors de la validation : ' + r.error.message); return; }
 
   // Email de confirmation à l'agent
   await db.functions.invoke('envoyer-email', {
@@ -175,7 +173,10 @@ async function refuserAgent(id, email) {
   var raison = prompt('Raison du refus (sera envoyée à l\'agent) :');
   if (!raison) return;
 
-  await db.from('agents_validation').update({ statut: 'refuse', raison_refus: raison }).eq('id', id);
+  var r = await db.functions.invoke('valider-agent', {
+    body: { action: 'refuser', agent_id: id, raison: raison }
+  });
+  if (r && r.error) { alert('Erreur lors du refus : ' + r.error.message); return; }
 
   await db.functions.invoke('envoyer-email', {
     body: {
