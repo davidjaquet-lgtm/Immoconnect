@@ -227,20 +227,10 @@ async function soumettre() {
     return;
   }
 
-  // Mettre à jour la note moyenne de l'agent
+  // Mettre à jour la note moyenne de l'agent — côté serveur (service_role),
+  // pour ne pas écrire directement dans la fiche de l'agent depuis le navigateur.
   if (agentEmail) {
-    var { data: notations } = await db.from('reservations_visites')
-      .select('note_acheteur')
-      .eq('agent_email', agentEmail)
-      .not('note_acheteur', 'is', null);
-
-    if (notations && notations.length > 0) {
-      var moyenne = notations.reduce(function(s, r){ return s + r.note_acheteur; }, 0) / notations.length;
-      await db.from('agents_validation').update({
-        note_moyenne: Math.round(moyenne * 10) / 10,
-        nb_notations: notations.length
-      }).eq('email', agentEmail);
-    }
+    await db.functions.invoke('noter-agent', { body: { agent_email: agentEmail } }).then(undefined, function(){});
 
     // Envoyer un email de remerciement à l'agent si très bonne note
     if (noteSelectionnee >= 4) {
