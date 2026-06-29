@@ -55,6 +55,11 @@ self.addEventListener('activate', function(event) {
 self.addEventListener('fetch', function(event) {
   var url = new URL(event.request.url);
 
+  // Ignorer tout ce qui n'est pas http(s) (ex : chrome-extension://, blob:) — non cachable
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return;
+  }
+
   // Ignorer les requêtes Supabase et Stripe (toujours en live)
   if (url.hostname.includes('supabase.co') ||
       url.hostname.includes('stripe.com') ||
@@ -80,7 +85,8 @@ self.addEventListener('fetch', function(event) {
         return caches.match(event.request).then(function(cached) {
           if (cached) return cached;
           // Page offline générique
-          if (event.request.headers.get('accept').includes('text/html')) {
+          var accept = event.request.headers.get('accept') || '';
+          if (accept.includes('text/html')) {
             return caches.match('/index.html');
           }
         });
