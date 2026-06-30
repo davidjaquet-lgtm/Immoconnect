@@ -300,19 +300,35 @@ function afficherListeConvs(convs) {
   }
   var html = '';
 
-  // — Messages sur vos annonces (contacts acheteurs) —
-  if (allContacts && allContacts.length) {
-    html += '<div class="conv-sec">📨 Messages sur vos annonces</div>';
-    allContacts.forEach(function(m) {
-      var ini = (m.nom_acheteur||'A').charAt(0).toUpperCase();
-      var d = m.created_at ? new Date(m.created_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '';
-      var ap = escMsg((m.message||'').slice(0,42));
-      html += '<div class="conv-item'+(currentContactId===m.id?' active':'')+'" onclick="ouvrirContact(\''+m.id+'\')"><div class="conv-avatar av-agent">'+ini+'</div><div class="conv-info"><div class="conv-name">Acheteur</div><div class="conv-preview">'+ap+'</div></div><div class="conv-meta"><div class="conv-date">'+d+'</div>'+(!m.lu?'<div class="conv-badge">!</div>':'')+'<button class="conv-del" title="Supprimer ce message" onclick="event.stopPropagation();supprimerContact(\''+m.id+'\')">🗑</button></div></div>';
-    });
+  // Clés des conversations acheteur déjà existantes (bien + acheteur)
+  var convKeys = {};
+  convs.forEach(function(c){ if (c.annonce_id && c.email_acheteur) convKeys[c.annonce_id + '|' + c.email_acheteur] = true; });
+
+  // Contacts acheteurs PAS ENCORE transformés en conversation (1 seul par bien+acheteur, le plus récent)
+  var contactsSansConv = [];
+  var vus = {};
+  (allContacts || []).forEach(function(m){
+    if (!m.annonce_id || !m.email_acheteur) return;
+    var k = m.annonce_id + '|' + m.email_acheteur;
+    if (convKeys[k] || vus[k]) return;
+    vus[k] = true;
+    contactsSansConv.push(m);
+  });
+
+  // — Une seule liste : Discussions en cours —
+  if (convs.length || contactsSansConv.length) {
+    html += '<div class="conv-sec">💬 Discussions en cours</div>';
   }
 
-  // — Conversations agent ↔ vendeur —
-  if (convs.length && allContacts && allContacts.length) html += '<div class="conv-sec">💬 Conversations</div>';
+  // Nouveaux contacts (pas encore ouverts) — un clic ouvre/crée la conversation
+  contactsSansConv.forEach(function(m) {
+    var ini = (m.nom_acheteur||'A').charAt(0).toUpperCase();
+    var d = m.created_at ? new Date(m.created_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '';
+    var ap = escMsg((m.message||'').slice(0,42));
+    html += '<div class="conv-item" onclick="repondreEnMessagerie(\''+m.id+'\')"><div class="conv-avatar av-agent">'+ini+'</div><div class="conv-info"><div class="conv-name">Acheteur</div><div class="conv-preview">'+ap+'</div></div><div class="conv-meta"><div class="conv-date">'+d+'</div>'+(!m.lu?'<div class="conv-badge">!</div>':'')+'<button class="conv-del" title="Supprimer ce message" onclick="event.stopPropagation();supprimerContact(\''+m.id+'\')">🗑</button></div></div>';
+  });
+
+  // Conversations existantes
   convs.forEach(function(c) {
     var emailTiers = autreParticipant(c);
     var nomInterlocuteur = libelleRole(emailTiers, c);
@@ -593,7 +609,7 @@ async function afficherChat(conv) {
 
   html += '<div class="chat-header">';
   html += '<div class="chat-avatar '+(isAgent?'av-vendeur':'av-agent')+'">'+nomInterlocuteur.charAt(0).toUpperCase()+'</div>';
-  html += '<div class="chat-info"><div class="chat-name">'+nomInterlocuteur+'</div>';
+  html += '<div class="chat-info"><div class="chat-name">'+nomInterlocuteur+(conv.annonce_id?' <a href="bien.html?id='+conv.annonce_id+'" target="_blank" style="font-size:11px;font-weight:500;color:var(--teal);text-decoration:none;margin-left:8px">Voir l\'annonce ↗</a>':'')+'</div>';
   html += '<div class="chat-detail">'+(bien?(bien.type_bien||'Bien')+' · '+(bien.ville||''):'Conversation')+' '+noteMoyenneHtml+'</div>';
   if (financementHtml) html += '<div>' + financementHtml + '</div>';
   html += '</div>';
