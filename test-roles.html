@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test des rôles — ImmoConnect (admin)</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root { --bg:#0F0F0E; --card:#FAFAF7; --muted:#6b6b6b; --or:#C9A04E; }
+  * { box-sizing:border-box; font-family:'Outfit',system-ui,sans-serif; }
+  body { margin:0; background:#F3F1EC; color:#1a1a1a; }
+  header { background:var(--bg); color:#FAFAF7; padding:18px 24px; display:flex; align-items:center; gap:10px; }
+  header b { color:var(--or); }
+  .wrap { max-width:680px; margin:30px auto; padding:0 18px; }
+  .lead { color:var(--muted); font-size:14px; margin-bottom:22px; line-height:1.6; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .role { background:#fff; border:1px solid #e6e2d8; border-radius:12px; padding:16px; cursor:pointer; transition:.15s; text-align:left; }
+  .role:hover { border-color:var(--or); transform:translateY(-1px); }
+  .role h3 { margin:0 0 4px; font-size:15px; }
+  .role p { margin:0; font-size:12px; color:var(--muted); }
+  .role .emo { font-size:22px; }
+  #etat { margin:22px 0; padding:14px 16px; border-radius:10px; background:#fff; border:1px solid #e6e2d8; font-size:14px; min-height:20px; }
+  .ok { color:#1a7f45; } .ko { color:#b3261e; }
+  .liens { margin-top:18px; display:flex; flex-wrap:wrap; gap:8px; }
+  .liens a { font-size:13px; text-decoration:none; color:var(--bg); border:1px solid var(--bg); border-radius:8px; padding:7px 12px; }
+  .deny { text-align:center; padding:60px 20px; color:var(--muted); }
+</style>
+</head>
+<body>
+<header>🔧 <b>ImmoConnect</b> · Test des rôles <span style="font-size:12px;opacity:.6;margin-left:auto">admin</span></header>
+<div class="wrap" id="app" style="display:none">
+  <p class="lead">Bascule ton compte <b>davidjaquet@live.fr</b> entre les différents rôles pour tester l'expérience.
+  Ton accès <b>admin</b> (basé sur ton email) reste actif quel que soit le rôle choisi. Après un changement, <b>recharge</b> la page que tu veux tester.</p>
+
+  <div class="grid" id="grid"></div>
+
+  <div id="etat">Choisis un rôle ci-dessus.</div>
+
+  <div class="liens">
+    <a href="bien.html" target="_blank">Ouvrir une annonce →</a>
+    <a href="recherche.html" target="_blank">Recherche →</a>
+    <a href="connexion.html" target="_blank">Mon espace →</a>
+    <a href="index.html" target="_blank">Accueil →</a>
+  </div>
+</div>
+<div class="wrap deny" id="deny" style="display:none">Cette page est réservée à l'administrateur.</div>
+
+<script>
+const SB_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const ADMINS = ['davidjaquet@live.fr', 'davidjaquet.lgtm@gmail.com'];
+const db = supabase.createClient(SB_URL, SB_KEY);
+
+// rôle : profils metadata + forfait_agent metadata + état agents_validation (via fonction)
+const ROLES = [
+  { id:'acheteur',     emo:'🛒', titre:'Acheteur (sans forfait)', desc:'Profil acheteur standard', profils:[],               forfait:null,          av:'sans' },
+  { id:'vendeur',      emo:'🏠', titre:'Vendeur',                 desc:'Espace vendeur / mes annonces', profils:['vendeur'],   forfait:null,          av:'sans' },
+  { id:'investisseur', emo:'💼', titre:'Investisseur',            desc:'Abonné investisseur',         profils:['investisseur'], forfait:null,          av:'sans' },
+  { id:'agent_sans',   emo:'🪪', titre:'Agent sans forfait',      desc:'Agent en pay-per-use',        profils:['agent'],        forfait:'pay_per_use', av:'sans' },
+  { id:'agent_avec',   emo:'⭐', titre:'Agent avec forfait',      desc:'Agent abonné (premium)',      profils:['agent'],        forfait:'premium',     av:'avec' },
+  { id:'reset',        emo:'🔄', titre:'Réinitialiser (agent admin)', desc:'Agent + forfait premium', profils:['agent'],     forfait:'premium',     av:'avec' },
+];
+
+function etat(msg, cls){ var e=document.getElementById('etat'); e.textContent=msg; e.className = cls||''; }
+
+async function appliquer(role){
+  etat('Application du rôle « ' + role.titre + ' »…');
+  try {
+    // 1) Métadonnées (profils + forfait_agent)
+    var meta = { profils: role.profils };
+    if (role.forfait) meta.forfait_agent = role.forfait; else meta.forfait_agent = null;
+    var up = await db.auth.updateUser({ data: meta });
+    if (up.error) { etat('Erreur métadonnées : ' + up.error.message, 'ko'); return; }
+
+    // 2) État agents_validation (forfait premium) via la fonction admin
+    var fonc = await db.functions.invoke('test-forfait', { body: { mode: role.av } });
+    if (fonc.error || (fonc.data && !fonc.data.ok)) {
+      etat('Rôle métadonnées OK, mais le forfait n\'a pas pu être réglé : ' + ((fonc.data && fonc.data.error) || (fonc.error && fonc.error.message) || '?') + ' — (la fonction test-forfait est-elle déployée ?)', 'ko');
+      return;
+    }
+    etat('✅ Rôle « ' + role.titre + ' » appliqué. Recharge la page à tester pour voir l\'effet.', 'ok');
+  } catch(e){ etat('Erreur : ' + e.message, 'ko'); }
+}
+
+(async function init(){
+  var { data:{ user } } = await db.auth.getUser();
+  if (!user) { window.location.href = 'connexion.html'; return; }
+  if (!ADMINS.includes(user.email)) { document.getElementById('deny').style.display='block'; return; }
+  document.getElementById('app').style.display='block';
+
+  var grid = document.getElementById('grid');
+  ROLES.forEach(function(role){
+    var b = document.createElement('button');
+    b.className = 'role';
+    b.innerHTML = '<div class="emo">'+role.emo+'</div><h3>'+role.titre+'</h3><p>'+role.desc+'</p>';
+    b.onclick = function(){ appliquer(role); };
+    grid.appendChild(b);
+  });
+
+  var cur = (user.user_metadata && user.user_metadata.profils) || [];
+  etat('Profil actuel : ' + (cur.length ? cur.join(', ') : 'acheteur') + (user.user_metadata && user.user_metadata.forfait_agent ? ' · forfait ' + user.user_metadata.forfait_agent : ''));
+})();
+</script>
+</body>
+</html>
