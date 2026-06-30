@@ -284,7 +284,7 @@ function afficherListeConvs(convs) {
       convs.forEach(function(cv){ emailsTiers.push(cv.email_agent, cv.email_vendeur); });
       var uniq = Array.from(new Set(emailsTiers.filter(Boolean)));
       if (uniq.length) {
-        db.from('agents_validation').select('email').in('email', uniq).then(function(res){
+        db.from('agents_publics').select('email').in('email', uniq).then(function(res){
           ((res && res.data) || []).forEach(function(a){ window.__agentsSet.add(a.email); });
           try { afficherListeConvs(convs); } catch(e) {} // ré-affichage avec les rôles précis
         });
@@ -369,12 +369,14 @@ async function repondreEnMessagerie(contactId) {
   var m = allContacts.find(function(x){ return String(x.id) === String(contactId); });
   if (!m) return;
   if (!m.email_acheteur) { alert("Cet acheteur n'a pas d'email enregistré : réponse en messagerie impossible. Utilise l'email."); return; }
+  if (!m.annonce_id) { alert("Ce message n'est pas rattaché à une annonce : réponds par email."); return; }
 
-  // Conversation déjà existante pour ce bien + cet acheteur ?
+  // Conversation déjà existante pour ce bien + cet acheteur ? (la plus ancienne = la référence)
   var ex = await db.from('conversations').select('id')
     .eq('annonce_id', m.annonce_id)
     .eq('email_vendeur', m.email_vendeur)
     .eq('email_acheteur', m.email_acheteur)
+    .order('created_at', { ascending: true })
     .limit(1);
   var convId = (ex && ex.data && ex.data[0]) ? ex.data[0].id : null;
 
@@ -396,13 +398,22 @@ async function repondreEnMessagerie(contactId) {
 
   currentContactId = null;
   await chargerConversations();
-  ouvrirConv(convId);
+  await ouvrirConv(convId);
 }
 
 // ── OUVRIR CONVERSATION ──
 async function ouvrirConv(convId) {
   currentConvId = convId;
-  var conv = allConvs.find(function(c){ return c.id===convId; });
+  currentContactId = null;
+  var conv = allConvs.find(function(c){ return String(c.id) === String(convId); });
+  if (!conv) {
+    // Pas (encore) dans la liste filtrée : on va la chercher directement par son id
+    var r = await db.from('conversations')
+      .select('*, annonces_vendeurs(titre,type_bien,ville,surface,prix)')
+      .eq('id', convId).single().then(undefined, function(){ return { data:null }; });
+    conv = r && r.data;
+    if (conv) { conv.non_lus = 0; allConvs.unshift(conv); }
+  }
   if (!conv) return;
 
   // Arrêter l'ancien channel realtime
