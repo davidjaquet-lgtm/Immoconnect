@@ -335,15 +335,11 @@ nav .nav-link{margin-right:18px}
       <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Informations financières — débloquent vos avantages</div>
       <div class="info-grid">
         <div class="ib-silver info-box">
-          <div class="ib-title">🏅 Silver — Valeur locative / Loyer</div>
-          <div class="field" style="margin-bottom:6px">
-            <label class="lbl" style="color:var(--blue)">Valeur locative cadastrale (€/an)</label>
-            <input type="number" id="valeur_locative" placeholder="1 200" min="0" oninput="calcNiveau()">
-            <span class="hint">Sur votre avis de taxe foncière</span>
-          </div>
+          <div class="ib-title">🏅 Silver — Loyer mensuel</div>
           <div class="field">
             <label class="lbl" style="color:var(--blue)">Loyer mensuel actuel (€)</label>
-            <input type="number" id="loyer_mensuel" placeholder="850" min="0">
+            <input type="number" id="loyer_mensuel" placeholder="850" min="0" oninput="calcNiveau()">
+            <span class="hint">Renseignez le loyer pour passer Silver et apparaître dans les recherches investisseurs</span>
           </div>
         </div>
         <div class="ib-neutral info-box">
@@ -723,7 +719,7 @@ nav .nav-link{margin-right:18px}
       <!-- Cas Standard : choix verrouillé -->
       <div id="mode-standard-msg" style="display:none;background:#F1EFE8;border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.6;color:#555">
         Niveau <strong>Standard</strong> : seuls les <strong>acheteurs et investisseurs</strong> peuvent vous contacter (aucun agent ne peut vous démarcher).<br>
-        💡 Ajoutez votre <strong>valeur locative</strong> (ou un bail) plus haut pour atteindre le niveau Silver et débloquer la possibilité de faire intervenir des agents.
+        💡 Ajoutez votre <strong>loyer mensuel</strong> plus haut pour atteindre le niveau Silver et débloquer la possibilité de faire intervenir des agents.
       </div>
 
       <!-- Cas Silver+ : les 3 cartes -->
@@ -896,7 +892,7 @@ function appliquerChampsImportes(c){
   var champsTexte = ['titre','description','type_bien','statut_occupation','prix','surface',
     'nb_pieces','nb_chambres','etage','nb_etages','annee_construction','ville','code_postal',
     'adresse','chauffage','eau_chaude','charges_syndic','nb_lots_copro','taxe_fonciere_montant',
-    'classe_dpe','conso_energie','classe_ges','emission_ges','frais_agence','valeur_locative',
+    'classe_dpe','conso_energie','classe_ges','emission_ges','frais_agence',
     'loyer_mensuel','description_travaux'];
   champsTexte.forEach(function(k){
     if (c[k] !== undefined && c[k] !== null && c[k] !== ''){ icSetVal(k, c[k]); n++; }
@@ -1174,7 +1170,7 @@ function majModeContact() {
 }
 
 function afficherAlerteModeNiveau() {
-  var msg = 'Ce mode est disponible à partir du niveau Silver. Ajoutez votre valeur locative ou un bail pour passer Silver et accéder aux options agents.';
+  var msg = 'Ce mode est disponible à partir du niveau Silver. Ajoutez votre loyer mensuel pour passer Silver et accéder aux options agents.';
   alert(msg);
 }
 
@@ -1269,7 +1265,7 @@ function calcNiveau(){
   var isCopro=getRadio('is_copro')==='Oui';
   var _chEl=document.getElementById('charges_syndic');
   var aCharges=!!(_chEl && _chEl.value.trim()!=='');
-  var hasSilver=(+document.getElementById('valeur_locative').value>0) && (!isCopro || aCharges);
+  var hasSilver=(+document.getElementById('loyer_mensuel').value>0) && (!isCopro || aCharges);
   var hasTaxe=docs['taxe_fonciere_verifie']==='ok';
   var hasDpe=docs['dpe_verifie']==='ok';
   var aAdresse=!!(document.getElementById('adresse').value||'').trim();
@@ -1282,7 +1278,7 @@ function calcNiveau(){
 }
 
 var NIV={
-  standard:{prog:25,pb:'pb-standard',icon:'🏠',label:'Annonce de base',desc:'3 photos · Ville seule · Ajoutez le loyer estimé pour être proposé aux investisseurs',benefit:'➜ Prochaine étape : indiquez la valeur locative (et les charges si copropriété) pour apparaître dans les recherches investisseurs.',sn:'sn-standard'},
+  standard:{prog:25,pb:'pb-standard',icon:'🏠',label:'Annonce de base',desc:'3 photos · Ville seule · Ajoutez le loyer estimé pour être proposé aux investisseurs',benefit:'➜ Prochaine étape : indiquez le loyer mensuel (et les charges si copropriété) pour apparaître dans les recherches investisseurs.',sn:'sn-standard'},
   silver:{prog:50,pb:'pb-silver',icon:'📈',label:'Annonce enrichie',desc:'Rendement affiché · Visible des investisseurs',benefit:'➜ Prochaine étape : adresse exacte + avis de taxe foncière vérifié = badge « Dossier vérifié ✓ » et photos illimitées.',sn:'sn-silver'},
   gold:{prog:75,pb:'pb-gold',icon:'✓',label:'Dossier vérifié ✓',desc:'Photos illimitées · Adresse visible · Confiance acheteurs',benefit:'➜ Dernière étape : ajoutez votre DPE vérifié pour la visibilité maximale.',sn:'sn-gold'},
   platinium:{prog:100,pb:'pb-platinium',icon:'✓✓',label:'Dossier vérifié + DPE ✓✓',desc:'Visibilité maximale · Mise en avant',benefit:'🎉 Dossier complet — votre annonce a la visibilité maximale.',sn:'sn-platinium'}
@@ -1331,7 +1327,7 @@ function majScoreDossier() {
     { label:'Nb de pièces',             ok: !!nbPieces,                           pts:5  },
     { label:'Prix demandé',             ok: !!prix,                               pts:5  },
     { label:'Année construction',       ok: !!annee,                              pts:5  },
-    { label:'Valeur locative / Loyer',  ok: !!valeurLoc || !!loyer,               pts:10 },
+    { label:'Loyer renseigné',         ok: !!loyer,                              pts:10 },
     { label:'Taxe foncière',            ok: !!taxe || !!docs['taxe_fonciere_doc'],pts:15 },
     { label:'DPE renseigné',            ok: !!dpe || !!docs['dpe_doc'],           pts:15 },
     { label:'Adresse complète',         ok: !!adresse,                            pts:5  },
@@ -1664,7 +1660,6 @@ async function soumettre(){
     photos_urls:photoUrls,
     autres_documents:autresDocsUrls,
     photo_principale:photoUrls[0]||null,
-    valeur_locative:+document.getElementById('valeur_locative').value||null,
     loyer_mensuel:+document.getElementById('loyer_mensuel').value||null,
     valeur_locative_doc_url:null, // justificatif non stocke (securite)
     charges_syndic:+document.getElementById('charges_syndic').value||null,
@@ -1857,7 +1852,7 @@ async function chargerEdition(){
     }
     editAnnonceId=pid; niveauExistant=a.niveau_vendeur||'standard'; statutExistant=a.statut_annonce||null;
     // Champs texte / nombre / select
-    ['nom_vendeur','telephone','email_contact','type_bien','statut_occupation','titre','description','surface','nb_pieces','nb_chambres','etage','nb_etages','annee_construction','prix','date_achat','nature_travaux','annee_travaux','montant_travaux','description_travaux','ville','code_postal','adresse','chauffage','eau_chaude','valeur_locative','loyer_mensuel','charges_syndic','nb_lots_copro','taxe_fonciere_montant','conso_energie','classe_dpe','classe_ges','emission_ges','mode_contact']
+    ['nom_vendeur','telephone','email_contact','type_bien','statut_occupation','titre','description','surface','nb_pieces','nb_chambres','etage','nb_etages','annee_construction','prix','date_achat','nature_travaux','annee_travaux','montant_travaux','description_travaux','ville','code_postal','adresse','chauffage','eau_chaude','loyer_mensuel','charges_syndic','nb_lots_copro','taxe_fonciere_montant','conso_energie','classe_dpe','classe_ges','emission_ges','mode_contact']
       .forEach(function(k){icSetVal(k,a[k]);});
     // Radios booléens / chaînes
     icBoolRadio('negociable',a.negociable);icBoolRadio('travaux_bool',a.travaux);icBoolRadio('ascenseur',a.ascenseur);icBoolRadio('piscine',a.piscine);icBoolRadio('is_copro',a.is_copropriete);
