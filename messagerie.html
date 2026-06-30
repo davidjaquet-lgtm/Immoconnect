@@ -415,6 +415,36 @@ async function repondreEnMessagerie(contactId) {
     convId = ins.data.id;
   }
 
+  // ── DIAGNOSTIC TEMPORAIRE (à retirer après) ──
+  try {
+    var all = await db.from('conversations')
+      .select('id, annonce_id, email_vendeur, email_acheteur, dernier_message_at')
+      .eq('annonce_id', m.annonce_id)
+      .eq('email_vendeur', m.email_vendeur)
+      .eq('email_acheteur', m.email_acheteur);
+    var rows = (all && all.data) || [];
+    var chosen = await db.from('conversations')
+      .select('id, annonce_id, email_vendeur, email_acheteur')
+      .eq('id', convId).single().then(function(r){ return r.data; }, function(){ return null; });
+    console.log('DIAG contact cliqué =', m);
+    console.log('DIAG conversations correspondantes =', rows);
+    console.log('DIAG conv qui va s ouvrir =', chosen);
+    alert(
+      'DIAGNOSTIC « Répondre »\n\n' +
+      'MESSAGE CLIQUÉ :\n' +
+      '• annonce_id = ' + m.annonce_id + '\n' +
+      '• vendeur = ' + m.email_vendeur + '\n' +
+      '• acheteur = ' + m.email_acheteur + '\n\n' +
+      'Conversations correspondantes en base : ' + rows.length + '\n' +
+      rows.map(function(r){ return '   - ' + r.id; }).join('\n') + '\n\n' +
+      'CONVERSATION QUI VA S OUVRIR :\n' +
+      '• id = ' + (chosen ? chosen.id : convId) + '\n' +
+      '• acheteur de cette conv = ' + (chosen ? chosen.email_acheteur : '?') + '\n' +
+      '• annonce de cette conv = ' + (chosen ? chosen.annonce_id : '?') + '\n\n' +
+      'Mon email connecté = ' + currentUser.email
+    );
+  } catch(e) { console.log('DIAG err', e); }
+
   currentContactId = null;
   await chargerConversations();
   await ouvrirConv(convId);
