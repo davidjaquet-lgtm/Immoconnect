@@ -1322,7 +1322,7 @@ async function ouvrirVisite() {
 
   var today = new Date().toISOString().split('T')[0];
   var { data: dispos } = await db.from('disponibilites_visites')
-    .select('*').eq('email_vendeur', bien.email_contact)
+    .select('*')
     .eq('annonce_id', bien.id).eq('statut', 'libre')
     .gte('date', today).order('date', {ascending: true}).limit(20);
 
