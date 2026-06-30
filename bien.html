@@ -1269,43 +1269,23 @@ async function envoyerContact() {
   } catch(e) {}
 
   try {
-    // Enregistrer dans messages_annonces — action réelle : on vérifie l'erreur (Supabase ne "throw" pas)
-    var ins = await db.from('messages_annonces').insert({
-      annonce_id: bien.id,
-      email_vendeur: bien.email_contact,
-      nom_acheteur: nom,
-      email_acheteur: email,
-      telephone_acheteur: tel || null,
-      message: msg,
-      lu: false
+    var envoi = await db.functions.invoke('contacter-vendeur', {
+      body: {
+        action: 'message',
+        annonce_id: bien.id,
+        nom: nom, email: email, tel: tel || null, message: msg,
+        user_id: currentUser.id, user_email: currentUser.email
+      }
     });
-    if (ins && ins.error) {
-      err.textContent = "Votre message n'a pas pu être enregistré : " + ins.error.message;
+    var r = (envoi && envoi.data) ? envoi.data : null;
+    if (!r || !r.ok) {
+      err.textContent = "Votre message n'a pas pu être enregistré : " + ((r && r.error) || (envoi && envoi.error && envoi.error.message) || 'erreur');
       err.style.display = 'block';
       return;
     }
-    // Compteur du plafond hebdomadaire (best-effort)
-    await db.from('contacts_envoyes').insert({ user_id: currentUser.id, user_email: currentUser.email, annonce_id: bien.id, email_vendeur: bien.email_contact }).then(undefined, function(){});
-
-    // Incrémenter contacts (best-effort)
-    await db.rpc('incrementer_contacts', { annonce_uuid: bien.id }).then(undefined, function(){});
-
-    // Notifier le vendeur par email (best-effort : ne bloque pas, mais on reflète l'échec)
-    var mail = await db.functions.invoke('envoyer-email', {
-      body: {
-        type: 'nouveau_message',
-        to: bien.email_contact,
-        subject: '💬 Nouveau contact pour votre bien — ImmoConnect',
-        expediteur: 'Un acheteur ImmoConnect',
-        message: msg,
-        bien: (bien.type_bien||'Bien') + ' · ' + (bien.ville||''),
-        lien: 'https://immoconnect-agence.fr/connexion.html'
-      }
-    });
-
-    ok.textContent = (mail && mail.error)
-      ? '✅ Votre message a bien été enregistré. Le vendeur le verra dans son espace (la notification email a rencontré un souci de notre côté).'
-      : '✅ Message envoyé ! Le vendeur vous répondra rapidement.';
+    ok.textContent = r.email_sent
+      ? '✅ Message envoyé ! Le vendeur vous répondra rapidement.'
+      : '✅ Votre message a bien été enregistré. Le vendeur le verra dans son espace (la notification email a rencontré un souci de notre côté).';
     ok.style.display = 'block';
     document.getElementById('modal-form').style.display = 'none';
 
@@ -1377,26 +1357,15 @@ async function confirmerVisite(dispoId) {
   var bienLabel = (bien.type_bien||'Bien') + ' · ' + (bien.ville||'');
   var creneauLabel = window._creneauLabel || '';
   var urlBien = 'https://immoconnect-agence.fr/bien.html?id=' + bien.id;
-  var ins = await db.from('reservations_visites').insert({
-    dispo_id: dispoId, annonce_id: bien.id, email_vendeur: bien.email_contact,
-    email_acheteur: email, nom_acheteur: nom, bien_label: bienLabel,
-    creneau_souhaite: creneauLabel, message: msg || null, statut: 'en_attente', type_demande: 'creneau'
-  });
-  if (ins && ins.error) { alert("Votre demande n'a pas pu être enregistrée : " + ins.error.message); return; }
-  await db.from('disponibilites_visites').update({ statut: 'reserve' }).eq('id', dispoId).then(undefined, function(){});
-  // Notif vendeur
-  await db.functions.invoke('envoyer-email', {
+  var envoi = await db.functions.invoke('contacter-vendeur', {
     body: {
-      type: 'demande_visite', to: bien.email_contact,
-      subject: '📅 Nouvelle demande de visite — ImmoConnect',
-      acheteur: 'Un acheteur ImmoConnect (identité protégée — répondez depuis votre calendrier)', message: (creneauLabel ? 'Créneau : ' + creneauLabel + '. ' : '') + (msg||''),
-      bien: bienLabel, lien: 'https://immoconnect-agence.fr/calendrier.html'
+      action: 'visite', type_demande: 'creneau',
+      annonce_id: bien.id, dispo_id: dispoId,
+      nom: nom, email: email, message: msg || null, creneau_label: creneauLabel
     }
-  }).then(undefined, function(){});
-  // Accusé de réception acheteur
-  await db.functions.invoke('envoyer-email', {
-    body: { type: 'visite_accuse', to: email, subject: '📩 Demande de visite reçue — ImmoConnect', bien: bienLabel, creneau: creneauLabel, lien: urlBien }
-  }).then(undefined, function(){});
+  });
+  var r = (envoi && envoi.data) ? envoi.data : null;
+  if (!r || !r.ok) { alert("Votre demande n'a pas pu être enregistrée : " + ((r && r.error) || (envoi && envoi.error && envoi.error.message) || 'erreur')); return; }
 
   document.getElementById('visite-content').innerHTML =
     '<div style="text-align:center;padding:24px"><div style="font-size:48px;margin-bottom:14px">✅</div>' +
@@ -1415,20 +1384,15 @@ async function envoyerDemandeLibre() {
   var creneau = new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'}) + (heure ? ' · ' + heure : '');
   var urlBien = 'https://immoconnect-agence.fr/bien.html?id=' + bien.id;
 
-  var insL = await db.from('reservations_visites').insert({
-    dispo_id: null, annonce_id: bien.id, email_vendeur: bien.email_contact,
-    email_acheteur: email, nom_acheteur: nom, bien_label: bienLabel,
-    creneau_souhaite: creneau, message: msg || null, statut: 'en_attente', type_demande: 'libre'
+  var insL = await db.functions.invoke('contacter-vendeur', {
+    body: {
+      action: 'visite', type_demande: 'libre',
+      annonce_id: bien.id, dispo_id: null,
+      nom: nom, email: email, message: msg || null, creneau_label: creneau
+    }
   });
-  if (insL && insL.error) { alert("Votre demande n'a pas pu être enregistrée : " + insL.error.message); return; }
-  await db.functions.invoke('envoyer-email', {
-    body: { type: 'demande_visite', to: bien.email_contact, subject: '📅 Nouvelle demande de visite — ImmoConnect',
-      acheteur: 'Un acheteur ImmoConnect (identité protégée — répondez depuis votre calendrier)', message: 'Créneau souhaité : ' + creneau + '. ' + (msg||''),
-      bien: bienLabel, lien: 'https://immoconnect-agence.fr/calendrier.html' }
-  }).then(undefined, function(){});
-  await db.functions.invoke('envoyer-email', {
-    body: { type: 'visite_accuse', to: email, subject: '📩 Demande de visite reçue — ImmoConnect', bien: bienLabel, creneau: creneau, lien: urlBien }
-  }).then(undefined, function(){});
+  var rL = (insL && insL.data) ? insL.data : null;
+  if (!rL || !rL.ok) { alert("Votre demande n'a pas pu être enregistrée : " + ((rL && rL.error) || (insL && insL.error && insL.error.message) || 'erreur')); return; }
 
   document.getElementById('visite-content').innerHTML =
     '<div style="text-align:center;padding:24px"><div style="font-size:48px;margin-bottom:14px">✅</div>' +
