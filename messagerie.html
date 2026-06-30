@@ -415,36 +415,6 @@ async function repondreEnMessagerie(contactId) {
     convId = ins.data.id;
   }
 
-  // ── DIAGNOSTIC TEMPORAIRE (à retirer après) ──
-  try {
-    var all = await db.from('conversations')
-      .select('id, annonce_id, email_vendeur, email_acheteur, dernier_message_at')
-      .eq('annonce_id', m.annonce_id)
-      .eq('email_vendeur', m.email_vendeur)
-      .eq('email_acheteur', m.email_acheteur);
-    var rows = (all && all.data) || [];
-    var chosen = await db.from('conversations')
-      .select('id, annonce_id, email_vendeur, email_acheteur')
-      .eq('id', convId).single().then(function(r){ return r.data; }, function(){ return null; });
-    console.log('DIAG contact cliqué =', m);
-    console.log('DIAG conversations correspondantes =', rows);
-    console.log('DIAG conv qui va s ouvrir =', chosen);
-    alert(
-      'DIAGNOSTIC « Répondre »\n\n' +
-      'MESSAGE CLIQUÉ :\n' +
-      '• annonce_id = ' + m.annonce_id + '\n' +
-      '• vendeur = ' + m.email_vendeur + '\n' +
-      '• acheteur = ' + m.email_acheteur + '\n\n' +
-      'Conversations correspondantes en base : ' + rows.length + '\n' +
-      rows.map(function(r){ return '   - ' + r.id; }).join('\n') + '\n\n' +
-      'CONVERSATION QUI VA S OUVRIR :\n' +
-      '• id = ' + (chosen ? chosen.id : convId) + '\n' +
-      '• acheteur de cette conv = ' + (chosen ? chosen.email_acheteur : '?') + '\n' +
-      '• annonce de cette conv = ' + (chosen ? chosen.annonce_id : '?') + '\n\n' +
-      'Mon email connecté = ' + currentUser.email
-    );
-  } catch(e) { console.log('DIAG err', e); }
-
   currentContactId = null;
   await chargerConversations();
   await ouvrirConv(convId);
@@ -540,6 +510,23 @@ async function afficherChat(conv) {
     .eq('conversation_id', conv.id)
     .order('created_at', {ascending:true});
 
+  // Message(s) d'origine de l'acheteur (reçus via « Messages sur vos annonces ») — affichés en tête du fil
+  var msgsOrigine = [];
+  if (conv.annonce_id && conv.email_acheteur) {
+    var rco = await db.from('messages_annonces')
+      .select('message, created_at')
+      .eq('annonce_id', conv.annonce_id)
+      .eq('email_acheteur', conv.email_acheteur)
+      .order('created_at', { ascending: true })
+      .then(undefined, function(){ return { data: [] }; });
+    msgsOrigine = ((rco && rco.data) || []).map(function(c){
+      return { contenu: escMsg(c.message || ''), created_at: c.created_at, expediteur_email: conv.email_acheteur, lu: true };
+    });
+  }
+  var msgsAffiches = msgsOrigine.concat(msgs || []).sort(function(a,b){
+    return new Date(a.created_at) - new Date(b.created_at);
+  });
+
   // Vérifier quota agent
   var peutEnvoyer = true;
   var quotaHtml = '';
@@ -621,11 +608,11 @@ async function afficherChat(conv) {
 
   // Messages
   html += '<div class="chat-messages" id="chat-msgs">';
-  if (!msgs || !msgs.length) {
+  if (!msgsAffiches.length) {
     html += '<div style="text-align:center;color:var(--muted);font-size:12px;margin-top:40px">Démarrez la conversation !</div>';
   } else {
     var lastDate = '';
-    msgs.forEach(function(m) {
+    msgsAffiches.forEach(function(m) {
       var d = new Date(m.created_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
       if (d !== lastDate) { html += '<div class="msg-date-sep">'+d+'</div>'; lastDate = d; }
       var isOut = m.expediteur_email === currentUser.email;
