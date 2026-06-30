@@ -887,6 +887,16 @@ async function soumettre() {
     return;
   }
 
+  // SÉCURITÉ RLS : le projet doit être rattaché à l'utilisateur connecté.
+  // La policy d'insertion exige (auth.email() = email) → on force l'email de session.
+  var { data: { user: _ucur } } = await db.auth.getUser();
+  if (!_ucur || !_ucur.email) {
+    showToast('Veuillez vous connecter pour déposer votre projet.', 'err');
+    btn.disabled = false; btn.textContent = 'Déposer mon projet';
+    return;
+  }
+  payload.email = _ucur.email;
+
   var { error } = await db.from('projets_acheteurs').insert([payload]);
   if (error) {
     showToast('Erreur : ' + error.message, 'err');
@@ -956,6 +966,20 @@ function showToast(msg, type) {
 
 /* INIT */
 updateRecap();
+
+/* Pré-remplir l'email avec celui du compte connecté (cohérence + RLS) */
+(async function(){
+  try {
+    var { data: { user: _u } } = await db.auth.getUser();
+    var champEmail = document.getElementById('email');
+    if (_u && _u.email && champEmail) {
+      champEmail.value = _u.email;
+      champEmail.readOnly = true;
+      champEmail.style.background = '#F0EEE8';
+      champEmail.title = 'Email de votre compte connecté';
+    }
+  } catch(e) {}
+})();
 </script>
 
 <!-- WIDGET ALERTE ACHETEUR -->
