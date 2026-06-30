@@ -208,7 +208,7 @@ async function chargerRapport() {
 
   try {
     // 1. Charger l\'annonce depuis Supabase
-    var { data: annonce, error } = await db.from('annonces_vendeurs').select('*').eq('id', id).single();
+    var { data: annonce, error } = await db.from('annonces_vendeurs').select('id,type_bien,statut_occupation,titre,description,surface,nb_pieces,nb_chambres,etage,nb_etages,annee_construction,prix,negociable,ville,code_postal,adresse,chauffage,eau_chaude,parking,exterieur,cave,ascenseur,digicode,piscine,photos_urls,photo_principale,valeur_locative,loyer_mensuel,valeur_locative_doc_url,taxe_fonciere_montant,taxe_fonciere_doc_url,is_copropriete,charges_copro,nb_lots_copro,copro_doc_url,classe_dpe,classe_ges,conso_energie,emission_ges,dpe_doc_url,niveau_vendeur,statut_annonce,vendeur_id,created_at,updated_at,date_achat,travaux,nature_travaux,annee_travaux,montant_travaux,travaux_par,description_travaux,charges_syndic,nb_vues,nb_visites,nb_contacts,latitude,longitude,sous_mandat_exclusif,mandat_id,prix_initial,prix_precedent,date_derniere_baisse,nb_baisses,historique_prix,visite_virtuelle_url,mode_contact,estimation_hanae,statut_selection,agent_choisi_email,mandat_deadline,date_expiration,rappel_j15_envoye,rappel_j7_envoye,nb_renouvellements,fenetre_statut,fenetre_candidature_cloture_le,fenetre_candidature_ouverte_le,rappel_candidature_envoye,rappel_documents_envoye,retrograde_auto,deadline_documents,niveau_valide,mandat_signe,statut,taxe_fonciere_verifie,valeur_locative_verifie,copro_verifie,dpe_verifie,moderation_statut,moderation_motif,moderee_le,autres_documents,supprimee_le,alertes_envoyees,nb_favoris,est_pro').eq('id', id).single();
 
     // CONFIDENTIALITÉ : un agent (autre que le vendeur) ne doit pas voir l'estimation Hanaé
     // — son estimation personnelle est un critère de sélection des agents.
@@ -222,10 +222,20 @@ async function chargerRapport() {
     } catch(e) {}
     if (error || !annonce) {
       // Essai par code postal
-      var { data: annonces } = await db.from('annonces_vendeurs').select('*').eq('code_postal', id).order('created_at', {ascending:false}).limit(1);
+      var { data: annonces } = await db.from('annonces_vendeurs').select('id,type_bien,statut_occupation,titre,description,surface,nb_pieces,nb_chambres,etage,nb_etages,annee_construction,prix,negociable,ville,code_postal,adresse,chauffage,eau_chaude,parking,exterieur,cave,ascenseur,digicode,piscine,photos_urls,photo_principale,valeur_locative,loyer_mensuel,valeur_locative_doc_url,taxe_fonciere_montant,taxe_fonciere_doc_url,is_copropriete,charges_copro,nb_lots_copro,copro_doc_url,classe_dpe,classe_ges,conso_energie,emission_ges,dpe_doc_url,niveau_vendeur,statut_annonce,vendeur_id,created_at,updated_at,date_achat,travaux,nature_travaux,annee_travaux,montant_travaux,travaux_par,description_travaux,charges_syndic,nb_vues,nb_visites,nb_contacts,latitude,longitude,sous_mandat_exclusif,mandat_id,prix_initial,prix_precedent,date_derniere_baisse,nb_baisses,historique_prix,visite_virtuelle_url,mode_contact,estimation_hanae,statut_selection,agent_choisi_email,mandat_deadline,date_expiration,rappel_j15_envoye,rappel_j7_envoye,nb_renouvellements,fenetre_statut,fenetre_candidature_cloture_le,fenetre_candidature_ouverte_le,rappel_candidature_envoye,rappel_documents_envoye,retrograde_auto,deadline_documents,niveau_valide,mandat_signe,statut,taxe_fonciere_verifie,valeur_locative_verifie,copro_verifie,dpe_verifie,moderation_statut,moderation_motif,moderee_le,autres_documents,supprimee_le,alertes_envoyees,nb_favoris,est_pro').eq('code_postal', id).order('created_at', {ascending:false}).limit(1);
       annonce = annonces && annonces[0];
     }
     if (!annonce) { document.getElementById('rapport-content').innerHTML = '<div class="empty">Annonce introuvable</div>'; return; }
+
+    // email_contact est masqué aux visiteurs non connectés : on le re-récupère
+    // uniquement pour l'utilisateur CONNECTÉ (propriétaire, agent, admin…).
+    try {
+      var { data: { session: _sessEC } } = await db.auth.getSession();
+      if (_sessEC && _sessEC.user && annonce.id) {
+        var _ecH = await db.from('annonces_vendeurs').select('email_contact').eq('id', annonce.id).maybeSingle();
+        if (_ecH && _ecH.data) annonce.email_contact = _ecH.data.email_contact;
+      }
+    } catch (e) {}
 
     // ── INCRÉMENTER LES VUES (ne pas compter le propriétaire) ──
     await incrementerVues(annonce.id, annonce.email_contact);
@@ -421,7 +431,6 @@ async function chargerDisposVendeur(emailVendeur, annonceId) {
     var today = new Date().toISOString().split('T')[0];
     var { data: dispos } = await db.from('disponibilites_visites')
       .select('*')
-      .eq('email_vendeur', emailVendeur)
       .eq('annonce_id', annonceId)
       .eq('statut', 'libre')
       .gte('date', today)
