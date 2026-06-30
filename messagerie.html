@@ -31,6 +31,8 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 .conv-item{padding:14px 16px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:12px}
 .conv-item:hover{background:var(--bg)}
 .conv-item.active{background:#E1F5EE;border-left:3px solid var(--teal)}
+.conv-del{background:none;border:none;cursor:pointer;font-size:13px;line-height:1;opacity:.4;padding:2px 4px;margin-left:2px}
+.conv-del:hover{opacity:1}
 .conv-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;flex-shrink:0;color:#fff}
 .av-agent{background:var(--blue)}
 .av-vendeur{background:var(--teal)}
@@ -305,7 +307,7 @@ function afficherListeConvs(convs) {
       var ini = (m.nom_acheteur||'A').charAt(0).toUpperCase();
       var d = m.created_at ? new Date(m.created_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '';
       var ap = escMsg((m.message||'').slice(0,42));
-      html += '<div class="conv-item'+(currentContactId===m.id?' active':'')+'" onclick="ouvrirContact(\''+m.id+'\')"><div class="conv-avatar av-agent">'+ini+'</div><div class="conv-info"><div class="conv-name">Acheteur</div><div class="conv-preview">'+ap+'</div></div><div class="conv-meta"><div class="conv-date">'+d+'</div>'+(!m.lu?'<div class="conv-badge">!</div>':'')+'</div></div>';
+      html += '<div class="conv-item'+(currentContactId===m.id?' active':'')+'" onclick="ouvrirContact(\''+m.id+'\')"><div class="conv-avatar av-agent">'+ini+'</div><div class="conv-info"><div class="conv-name">Acheteur</div><div class="conv-preview">'+ap+'</div></div><div class="conv-meta"><div class="conv-date">'+d+'</div>'+(!m.lu?'<div class="conv-badge">!</div>':'')+'<button class="conv-del" title="Supprimer ce message" onclick="event.stopPropagation();supprimerContact(\''+m.id+'\')">🗑</button></div></div>';
     });
   }
 
@@ -321,7 +323,7 @@ function afficherListeConvs(convs) {
     var date = c.dernier_message_at
       ? new Date(c.dernier_message_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'})
       : '';
-    html += '<div class="conv-item'+(c.id===currentConvId?' active':'')+'" onclick="ouvrirConv(\''+c.id+'\')"><div class="conv-avatar '+avatarClass+'">'+initiale+'</div><div class="conv-info"><div class="conv-name">'+nomInterlocuteur+'</div><div class="conv-preview">'+preview+'</div></div><div class="conv-meta"><div class="conv-date">'+date+'</div>'+(c.non_lus>0?'<div class="conv-badge">'+c.non_lus+'</div>':'')+'</div></div>';
+    html += '<div class="conv-item'+(c.id===currentConvId?' active':'')+'" onclick="ouvrirConv(\''+c.id+'\')"><div class="conv-avatar '+avatarClass+'">'+initiale+'</div><div class="conv-info"><div class="conv-name">'+nomInterlocuteur+'</div><div class="conv-preview">'+preview+'</div></div><div class="conv-meta"><div class="conv-date">'+date+'</div>'+(c.non_lus>0?'<div class="conv-badge">'+c.non_lus+'</div>':'')+'<button class="conv-del" title="Supprimer cette conversation" onclick="event.stopPropagation();supprimerConversation(\''+c.id+'\')">🗑</button></div></div>';
   });
 
   if (!html) html = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px">Aucun message</div>';
@@ -364,6 +366,23 @@ async function ouvrirContact(contactId) {
   afficherListeConvs(allConvs);
 }
 
+// ── SUPPRESSION (vendeur / acheteur / agent / admin) ──
+async function supprimerConversation(convId){
+  if(!confirm("Supprimer définitivement cette conversation et tous ses messages ?\n\n(Action irréversible — elle disparaît aussi pour l'autre participant.)")) return;
+  await db.from('messages_conversation').delete().eq('conversation_id', convId).then(undefined, function(){});
+  var r = await db.from('conversations').delete().eq('id', convId);
+  if(r && r.error){ alert('Suppression impossible : '+r.error.message); return; }
+  if(String(currentConvId)===String(convId)){ currentConvId=null; document.getElementById('chat-zone').innerHTML=''; }
+  await chargerConversations();
+}
+async function supprimerContact(contactId){
+  if(!confirm('Supprimer ce message reçu ?')) return;
+  var r = await db.from('messages_annonces').delete().eq('id', contactId);
+  if(r && r.error){ alert('Suppression impossible : '+r.error.message); return; }
+  if(String(currentContactId)===String(contactId)){ currentContactId=null; document.getElementById('chat-zone').innerHTML=''; }
+  await chargerConversations();
+}
+
 // ── RÉPONDRE EN MESSAGERIE : crée (ou retrouve) une conversation acheteur↔vendeur ──
 async function repondreEnMessagerie(contactId) {
   var m = allContacts.find(function(x){ return String(x.id) === String(contactId); });
@@ -371,12 +390,12 @@ async function repondreEnMessagerie(contactId) {
   if (!m.email_acheteur) { alert("Cet acheteur n'a pas d'email enregistré : réponse en messagerie impossible. Utilise l'email."); return; }
   if (!m.annonce_id) { alert("Ce message n'est pas rattaché à une annonce : réponds par email."); return; }
 
-  // Conversation déjà existante pour ce bien + cet acheteur ? (la plus ancienne = la référence)
+  // Conversation déjà existante pour ce bien + cet acheteur ? (la plus récemment active = la bonne)
   var ex = await db.from('conversations').select('id')
     .eq('annonce_id', m.annonce_id)
     .eq('email_vendeur', m.email_vendeur)
     .eq('email_acheteur', m.email_acheteur)
-    .order('created_at', { ascending: true })
+    .order('dernier_message_at', { ascending: false, nullsFirst: false })
     .limit(1);
   var convId = (ex && ex.data && ex.data[0]) ? ex.data[0].id : null;
 
