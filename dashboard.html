@@ -594,6 +594,16 @@ nav .nav-link{margin-right:18px}
 
   <div class="content">
 
+    <!-- ══ Retour des demandes de visite (réponse du vendeur) — notification acheteur ══ -->
+    <div id="visite-retour" style="display:none;align-items:center;gap:12px;flex-wrap:wrap;background:linear-gradient(90deg,#E1F5EE,#FEFDFB);border:1px solid #1E7A62;border-radius:10px;padding:14px 20px;margin-bottom:22px">
+      <span style="font-size:22px;flex-shrink:0">📅</span>
+      <div style="flex:1;min-width:0">
+        <div id="vr-titre" style="font-weight:600;font-size:14.5px;color:#0F0F0E"></div>
+        <div id="vr-liste" style="font-size:12.5px;color:#5b5b55;line-height:1.6;margin-top:4px"></div>
+      </div>
+      <a href="calendrier.html" style="text-decoration:none;padding:9px 16px;background:#1E7A62;color:#fff;font-weight:600;font-size:13px;border-radius:8px;white-space:nowrap;flex-shrink:0">Voir mes visites →</a>
+    </div>
+
     <!-- ══ Bandeau bascule vers l'espace vendeur (affiché uniquement si profil vendeur/admin) ══ -->
     <div id="bandeau-vendeur" style="display:none;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:linear-gradient(90deg,#1C1C1A,#2A2A26);border:1px solid var(--gold,#C09B5A);border-radius:10px;padding:14px 20px;margin-bottom:22px">
       <div style="display:flex;align-items:center;gap:12px">
@@ -1682,6 +1692,33 @@ renderDashboard();
       var b=document.getElementById('bandeau-vendeur');
       if(b) b.style.display='flex';
     }
+
+    // Retour des demandes de visite (réponse du vendeur) — notification acheteur
+    try {
+      var rv = await db.from('reservations_visites')
+        .select('bien_label, creneau_souhaite, statut, created_at')
+        .eq('email_acheteur', session.user.email)
+        .in('statut', ['confirme','refuse'])
+        .order('created_at', { ascending: false });
+      var visites = (rv && rv.data) || [];
+      var boxV = document.getElementById('visite-retour');
+      if (boxV && visites.length) {
+        var escV = function(s){ return (s||'').toString().replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}); };
+        var nbOk = visites.filter(function(v){ return v.statut==='confirme'; }).length;
+        var nbRef = visites.filter(function(v){ return v.statut==='refuse'; }).length;
+        document.getElementById('vr-titre').textContent =
+          'Réponses à vos demandes de visite'
+          + (nbOk ? ' · ' + nbOk + ' confirmée' + (nbOk>1?'s':'') : '')
+          + (nbRef ? ' · ' + nbRef + ' refusée' + (nbRef>1?'s':'') : '');
+        document.getElementById('vr-liste').innerHTML = visites.slice(0,5).map(function(v){
+          var ico = v.statut==='confirme' ? '✅' : '❌';
+          var bien = v.bien_label ? escV(v.bien_label) : 'Bien';
+          var cr = v.creneau_souhaite ? ' — ' + escV(v.creneau_souhaite) : '';
+          return ico + ' ' + bien + cr;
+        }).join('<br>');
+        boxV.style.display = 'flex';
+      }
+    } catch(e){}
   }catch(e){}
 })();
 </script>
