@@ -671,7 +671,7 @@ async function payer() {
     var payload = {
       annonce_id: annonceId,
       agent_email: currentUser.email,
-      flux: flux,
+      flux: (flux === 'mandat' ? 'A' : 'B'),
       statut: 'en_attente',
       paiement_statut: 'en_attente',
       paiement_montant: 9.99,
