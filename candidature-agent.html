@@ -267,6 +267,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--ink)}
         </div>
         
     </div>
+    </div>
 
     <!-- FLUX B -->
     <div id="form-flux-portefeuille" style="display:none">
@@ -333,7 +334,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--ink)}
       <button class="btn-submit" style="flex:0 0 120px;background:var(--bg);color:var(--ink);border:1px solid var(--line)" onclick="goStep(1)">← Retour</button>
       <button class="btn-submit" id="btn-next-2" style="flex:1" onclick="goStep(3)">Continuer vers le paiement →</button>
     </div>
-  </div>
   </div>
 
   <!-- ETAPE 3 — PAIEMENT -->
@@ -680,9 +680,9 @@ async function payer() {
 
     if (flux === 'mandat') {
       payload.honoraires_proposes = document.getElementById('honoraires-A').value;
-      payload.message_vendeur = document.getElementById('message-vendeur-A').value;
       payload.estimation_agent = parseFloat(document.getElementById('estimation-agent').value) || null;
       payload.strategie_agent = document.getElementById('strategie-A').value;
+      payload.message_vendeur = payload.strategie_agent; // pas de champ message dédié en flux mandat : la stratégie fait office de message
     } else {
       payload.acheteur_budget = parseFloat(document.getElementById('acheteur-budget').value) || null;
       payload.acheteur_type = document.getElementById('acheteur-type').value;
