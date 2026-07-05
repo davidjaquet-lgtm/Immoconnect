@@ -520,11 +520,11 @@ function goStep(n) {
 // ── CHOIX FLUX ──
 function selectFlux(f) {
   flux = f;
-  document.getElementById('flux-A').className = 'flux-card' + (f === 'mandat' ? ' selected-A' : '');
-  document.getElementById('flux-B').className = 'flux-card' + (f === 'portefeuille' ? ' selected-B' : '');
+  document.getElementById('flux-mandat').className = 'flux-card' + (f === 'mandat' ? ' selected-A' : '');
+  document.getElementById('flux-portefeuille').className = 'flux-card' + (f === 'portefeuille' ? ' selected-B' : '');
   document.getElementById('btn-next-1').disabled = false;
-  document.getElementById('form-flux-A').style.display = f === 'mandat' ? 'block' : 'none';
-  document.getElementById('form-flux-B').style.display = f === 'portefeuille' ? 'block' : 'none';
+  document.getElementById('form-flux-mandat').style.display = f === 'mandat' ? 'block' : 'none';
+  document.getElementById('form-flux-portefeuille').style.display = f === 'portefeuille' ? 'block' : 'none';
 }
 
 // ── VALIDATIONS ──
