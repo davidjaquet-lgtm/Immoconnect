@@ -211,6 +211,14 @@ nav .nav-link{margin-right:18px}
     <a href="calendrier.html" style="padding:9px 16px;background:var(--teal);color:#fff;border-radius:8px;font-size:13px;font-weight:500;text-decoration:none;flex-shrink:0">Gérer les visites →</a>
   </div>
 
+  <!-- ACCÈS ADMIN (visible uniquement pour les emails admin) -->
+  <div id="admin-shortcut" style="display:none;align-items:center;gap:10px;flex-wrap:wrap;background:#1a1a1a;color:#fff;border-radius:10px;padding:10px 16px;margin-bottom:18px">
+    <span style="font-size:11px;font-weight:700;background:#C0392B;padding:2px 8px;border-radius:20px">ADMIN</span>
+    <span style="font-size:13px;color:#e8e8e8;flex:1;min-width:0">Accès administrateur — valider les comptes agents et modérer les annonces.</span>
+    <a href="admin-agents.html" style="font-size:12px;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:7px;padding:6px 12px;text-decoration:none;white-space:nowrap">Valider les agents →</a>
+    <a href="admin-moderation.html" style="font-size:12px;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:7px;padding:6px 12px;text-decoration:none;white-space:nowrap">Modération →</a>
+  </div>
+
   <!-- HEADER VENDEUR -->
   <div class="vendeur-header">
     <div class="vendeur-avatar" id="vendeur-initiale">V</div>
@@ -338,6 +346,12 @@ window.addEventListener('DOMContentLoaded', async function() {
   var { data: { session } } = await db.auth.getSession();
   if (!session) { window.location.href = 'connexion.html'; return; }
   currentUser = session.user;
+
+  // Accès admin conservé (contrôle par email) même en profil vendeur
+  var ADMIN_EMAILS = ['davidjaquet@live.fr', 'davidjaquet.lgtm@gmail.com'];
+  if (ADMIN_EMAILS.indexOf((currentUser.email || '').toLowerCase()) !== -1) {
+    var _adm = document.getElementById('admin-shortcut'); if (_adm) _adm.style.display = 'flex';
+  }
 
   var meta = currentUser.user_metadata || {};
   var profils = meta.profils || [];

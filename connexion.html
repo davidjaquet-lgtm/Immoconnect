@@ -627,11 +627,12 @@ async function afficherDashboard(user) {
   // Accès admin : voit tous les dashboards, pas de redirection automatique
   var ADMIN_EMAILS = ['davidjaquet@live.fr', 'davidjaquet.lgtm@gmail.com'];
   var isAdmin = ADMIN_EMAILS.indexOf((user.email || '').toLowerCase()) !== -1;
-  if (isAdmin) profils = ['vendeur', 'acheteur', 'investisseur', 'agent'];
+  // L'admin suit ses propres profils (ex. vendeur) pour l'affichage ; son pouvoir admin
+  // (valider les comptes agents, modérer) reste accessible via les pages admin, contrôlées par email.
 
   var urlParams = new URLSearchParams(window.location.search);
   var forceIci = urlParams.get('stay') === '1';
-  if (!forceIci && !isAdmin) {
+  if (!forceIci) {
     if (profils.indexOf('agent') !== -1) { window.location.href = 'dashboard-agent.html'; return; }
     var estVendeurPur = profils.length === 1 && profils[0] === 'vendeur';
     if (estVendeurPur) { window.location.href = 'dashboard-vendeur.html'; return; }
