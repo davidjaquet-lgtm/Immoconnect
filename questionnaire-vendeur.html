@@ -1865,7 +1865,12 @@ async function chargerEdition(){
     var ad=a.autres_documents;if(typeof ad==='string'){try{ad=JSON.parse(ad);}catch(e){ad=[];}}
     (Array.isArray(ad)?ad:[]).forEach(function(d){if(d)autresDocs.push(d);});
     renderAutresDocs();
-    updateUI();
+    // Reflète les documents déjà VÉRIFIÉS (pour conserver Gold/Platinium), puis recalcule le niveau
+    if(a.taxe_fonciere_verifie) docs['taxe_fonciere_verifie']='ok';
+    if(a.dpe_verifie) docs['dpe_verifie']='ok';
+    if(a.valeur_locative_verifie) docs['valeur_locative_verifie']='ok';
+    if(a.copro_verifie) docs['copro_verifie']='ok';
+    calcNiveau();  // recalcul explicite depuis les valeurs préchargées (sinon la barre reste sur Standard)
     // Bandeau d'information
     var b=document.createElement('div');
     b.style.cssText='background:#FFF8EC;border:1px solid var(--gold);border-radius:10px;padding:12px 16px;margin:0 auto 18px;max-width:760px;font-size:13px';
