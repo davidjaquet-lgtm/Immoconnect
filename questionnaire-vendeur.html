@@ -1675,6 +1675,7 @@ async function soumettre(){
     emission_ges:+document.getElementById('emission_ges').value||null,
     dpe_doc_url:null, // justificatif non stocke (securite)
     niveau_vendeur:niveau,
+    mode_contact:document.getElementById('mode_contact').value||'acheteurs',
     statut_annonce:'en_attente',
     est_pro: estAgentVendeur,
     frais_agence: (estAgentVendeur && document.getElementById('frais_agence')) ? (document.getElementById('frais_agence').value || null) : null,
