@@ -871,9 +871,10 @@ function buildContactButtons(b, niv) {
 
   // ── FENÊTRE 48H COMPTE À REBOURS ──
   if (isAgent && modeContact === 'comparatif') {
-    var datePublication = b.created_at ? new Date(b.created_at) : null;
     var now = new Date();
-    var deadline48h = datePublication ? new Date(datePublication.getTime() + 48 * 60 * 60 * 1000) : null;
+    var deadline48h = b.fenetre_candidature_cloture_le
+      ? new Date(b.fenetre_candidature_cloture_le)
+      : (b.created_at ? new Date(new Date(b.created_at).getTime() + 48 * 60 * 60 * 1000) : null);
     var msRestants = deadline48h ? (deadline48h - now) : 0;
     var fenetreOuverte = msRestants > 0;
     var statutSelection = b.statut_selection || 'en_attente';

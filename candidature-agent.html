@@ -468,8 +468,12 @@ async function chargerBien() {
 
 // ── TIMER 48H ──
 function demarrerTimer() {
-  if (!bien || !bien.created_at) return;
-  var deadline = new Date(new Date(bien.created_at).getTime() + 48 * 3600000);
+  if (!bien) return;
+  // Fenêtre 48h calée sur l'ouverture du mode comparatif (fallback : création de l'annonce)
+  var deadline = bien.fenetre_candidature_cloture_le
+    ? new Date(bien.fenetre_candidature_cloture_le)
+    : (bien.created_at ? new Date(new Date(bien.created_at).getTime() + 48 * 3600000) : null);
+  if (!deadline) return;
 
   function tick() {
     var now = new Date();
