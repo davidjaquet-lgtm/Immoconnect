@@ -164,6 +164,7 @@ nav .nav-link{margin-right:18px}
   <a href="questionnaire-vendeur.html" class="nav-btn nav-secondary">+ Publier un bien</a>
   <button onclick="allerEspaceAcheteur()" class="nav-btn nav-secondary" style="cursor:pointer">🔑 Espace acheteur</button>
   <a href="blog.html" class="nav-btn nav-secondary" style="text-decoration:none">Blog</a>
+  <a href="messagerie.html" class="nav-btn nav-secondary" style="position:relative;text-decoration:none;margin-right:4px">💬 Messagerie<span id="msg-badge-vendeur" style="display:none;position:absolute;top:-6px;right:-6px;background:#A32D2D;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;line-height:16px;border-radius:8px;padding:0 3px;text-align:center">0</span></a>
   <button onclick="toggleNotifications()" title="Notifications" class="nav-btn nav-secondary" style="position:relative;margin-right:4px">🔔<span id="notif-badge" style="display:none;position:absolute;top:-6px;right:-6px;background:#A32D2D;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;line-height:16px;border-radius:8px;padding:0 3px;text-align:center">0</span></button>
   <button class="nav-btn nav-primary" onclick="deconnexion()">Déconnexion</button>
 </nav>
@@ -193,11 +194,12 @@ nav .nav-link{margin-right:18px}
 
   <!-- BANNIÈRE NOTIFICATION NIVEAU -->
   <div id="notif-banner" style="display:none;align-items:center;gap:14px;background:linear-gradient(90deg,#FAEEDA,#FEFDFB);border:1px solid var(--gold);border-radius:12px;padding:16px 18px;margin-bottom:18px">
-    <div style="font-size:26px;flex-shrink:0">🎉</div>
+    <div id="notif-banner-icon" style="font-size:26px;flex-shrink:0">🎉</div>
     <div style="flex:1;min-width:0">
       <div id="notif-banner-titre" style="font-weight:600;font-size:15px;color:var(--ink)"></div>
       <div id="notif-banner-msg" style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:2px"></div>
     </div>
+    <a id="notif-banner-cta" href="messagerie.html" style="display:none;font-size:12px;background:var(--teal);color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none;font-weight:600;flex-shrink:0">Ouvrir la messagerie</a>
     <button onclick="fermerBanner()" title="Fermer" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;flex-shrink:0;align-self:flex-start;line-height:1">×</button>
   </div>
 
@@ -370,7 +372,8 @@ window.addEventListener('DOMContentLoaded', async function() {
     chargerAnnonces(),
     chargerRapports(),
     chargerNotifications(),
-    chargerVisitesEnAttente()
+    chargerVisitesEnAttente(),
+    chargerMessagesVendeurNonLus()
   ]);
 
   // Supabase Realtime
@@ -812,7 +815,9 @@ function activerRealtime() {
       notifications.unshift(payload.new);
       majBadge();
       afficherBanner(payload.new);
-      showToast('🎉 ' + (payload.new.titre || 'Nouvelle notification'));
+      if (payload.new.type === 'message') chargerMessagesVendeurNonLus();
+      // Le titre porte déjà son propre emoji (🎉 niveau, 📩 message) → pas de préfixe forcé
+      showToast(payload.new.titre || 'Nouvelle notification');
     })
     .subscribe();
 }
@@ -855,10 +860,42 @@ function majBadge() {
   else { badge.style.display = 'none'; }
 }
 
+// Compte les non-lus vendeur : messages agents (conversations) + contacts acheteurs (messages_annonces)
+async function chargerMessagesVendeurNonLus() {
+  if (!currentUser) return;
+  var total = 0;
+  try {
+    var { data: convs } = await db.from('conversations').select('id').eq('email_vendeur', currentUser.email);
+    var ids = (convs || []).map(function(c){ return c.id; });
+    if (ids.length) {
+      var { count } = await db.from('messages_conversation')
+        .select('*', { count: 'exact', head: true })
+        .in('conversation_id', ids).eq('lu', false).neq('expediteur_email', currentUser.email);
+      total += count || 0;
+    }
+  } catch(e) {}
+  try {
+    var { count: c2 } = await db.from('messages_annonces')
+      .select('*', { count: 'exact', head: true })
+      .eq('email_vendeur', currentUser.email).eq('lu', false);
+    total += c2 || 0;
+  } catch(e) {}
+  var badge = document.getElementById('msg-badge-vendeur');
+  if (badge) {
+    if (total > 0) { badge.textContent = total > 9 ? '9+' : String(total); badge.style.display = 'block'; }
+    else badge.style.display = 'none';
+  }
+}
+
 function afficherBanner(notif) {
   if (!notif) return;
+  var icones = { message: '💬', mandat: '✍️', niveau: '🎉' };
+  var iconEl = document.getElementById('notif-banner-icon');
+  if (iconEl) iconEl.textContent = icones[notif.type] || '🔔';
   document.getElementById('notif-banner-titre').textContent = notif.titre || '';
   document.getElementById('notif-banner-msg').textContent = notif.message || '';
+  var cta = document.getElementById('notif-banner-cta');
+  if (cta) cta.style.display = (notif.type === 'message' || notif.type === 'mandat') ? 'inline-block' : 'none';
   document.getElementById('notif-banner').style.display = 'flex';
 }
 

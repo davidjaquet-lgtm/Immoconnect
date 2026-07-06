@@ -135,6 +135,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
     <a href="index.html">Annonces</a>
     <a href="comment-ca-marche-agents.html">Comment ca marche</a>
     <a href="forfaits.html">Forfaits</a>
+    <a href="messagerie.html" id="lien-messagerie" style="position:relative">💬 Messagerie<span id="msg-badge" style="display:none;position:absolute;top:-8px;right:-12px;background:#A32D2D;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;line-height:16px;border-radius:8px;padding:0 3px;text-align:center">0</span></a>
   </div>
   <a href="#" onclick="deconnexion()" class="nav-out">Deconnexion</a>
   <a href="blog.html" style="color:rgba(255,255,255,.6);text-decoration:none;font-size:13px;padding:0 8px">Blog</a>
@@ -177,6 +178,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
     <!-- TABS -->
     <div class="tabs">
       <button class="tab active" onclick="showTab('annonces',this)">🏠 Mes annonces</button>
+      <button class="tab" onclick="showTab('messages',this)">💬 Messages<span id="tab-msg-badge" style="display:none;margin-left:6px;background:#A32D2D;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;line-height:16px;border-radius:8px;padding:0 4px;text-align:center">0</span></button>
       <button class="tab" onclick="showTab('favoris',this)">❤️ Favoris</button>
       <button class="tab" onclick="showTab('pourmoi',this)">🎯 Annonces pour moi</button>
       <button class="tab" onclick="showTab('candidatures',this)">Mes candidatures</button>
@@ -189,11 +191,30 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
       <button id="btn-notifs" onclick="activerNotifications()" style="margin-left:auto;padding:6px 12px;background:transparent;border:1px solid var(--line);border-radius:6px;font-size:11px;cursor:pointer;font-family:Outfit,sans-serif;color:var(--muted);display:flex;align-items:center;gap:5px">🔔 Activer les alertes push</button>
     </div>
 
+    <!-- Bandeau : message reçu -->
+    <div id="msg-banner" style="display:none;align-items:center;gap:14px;background:linear-gradient(90deg,#EAF3FB,#FEFDFB);border:1px solid var(--teal);border-radius:12px;padding:14px 16px;margin-bottom:16px">
+      <div onclick="ouvrirOngletMessages()" style="display:flex;align-items:center;gap:14px;flex:1;cursor:pointer">
+        <span style="font-size:22px">💬</span>
+        <div style="flex:1">
+          <div id="msg-banner-titre" style="font-weight:600;font-size:14px;color:var(--ink)">Nouveau message</div>
+          <div id="msg-banner-msg" style="font-size:12px;color:var(--muted);margin-top:2px"></div>
+        </div>
+      </div>
+      <button onclick="ouvrirOngletMessages()" style="font-size:12px;background:var(--teal);color:#fff;padding:7px 12px;border:none;border-radius:8px;font-weight:600;cursor:pointer">Ouvrir</button>
+      <button onclick="document.getElementById('msg-banner').style.display='none'" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer" title="Fermer">×</button>
+    </div>
+
     <!-- CANDIDATURES -->
     <div id="tab-annonces">
       <h2 style="font-size:18px;font-weight:600;margin-bottom:4px">🏠 Mes annonces publiées</h2>
       <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6">Vos biens publiés sur ImmoConnect (annonces pro). Gérez-les comme dans un espace vendeur. Pour en publier une nouvelle, utilisez « Vendre ».</div>
       <div id="annonces-list"><div class="empty"><div class="empty-icon">⏳</div><div style="font-size:13px">Chargement…</div></div></div>
+    </div>
+
+    <div id="tab-messages" style="display:none">
+      <h2 style="font-size:18px;font-weight:600;margin-bottom:4px">💬 Messagerie</h2>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">Vos échanges avec les vendeurs et les acheteurs, directement ici.</div>
+      <iframe id="frame-messagerie" src="about:blank" title="Messagerie" style="width:100%;height:76vh;border:1px solid var(--line);border-radius:12px;background:#fff"></iframe>
     </div>
 
     <div id="tab-favoris" style="display:none">
@@ -552,8 +573,58 @@ const QUOTAS_MAX = { pay_per_use: { cands: 0, leads: 2, mandats: 2, acheteurs: 3
   if (!user) { window.location.href = 'connexion.html'; return; }
   currentUser = user;
   meta = user.user_metadata || {};
-  await Promise.all([chargerProfil(), chargerCandidatures(), chargerMandats(), chargerMandatsRecherche(), chargerPreuves(), chargerMesAnnonces()]);
+  await Promise.all([chargerProfil(), chargerCandidatures(), chargerMandats(), chargerMandatsRecherche(), chargerPreuves(), chargerMesAnnonces(), chargerMessagesAgentNonLus()]);
+  abonnerMessagesAgent();
 })();
+
+// ── MESSAGES REÇUS (pastille nav + bandeau + temps réel) ──
+var _agentConvIds = [];
+async function chargerMessagesAgentNonLus() {
+  if (!currentUser) return;
+  var { data: convs } = await db.from('conversations').select('id').eq('email_agent', currentUser.email);
+  _agentConvIds = (convs || []).map(function(c){ return c.id; });
+  if (!_agentConvIds.length) { majBadgesMessages(0); return; }
+  var { count } = await db.from('messages_conversation')
+    .select('*', { count: 'exact', head: true })
+    .in('conversation_id', _agentConvIds)
+    .eq('lu', false)
+    .neq('expediteur_email', currentUser.email);
+  var nb = count || 0;
+  majBadgesMessages(nb);
+  if (nb > 0) {
+    document.getElementById('msg-banner-titre').textContent = nb === 1 ? '1 message non lu' : nb + ' messages non lus';
+    document.getElementById('msg-banner-msg').textContent = 'Un vendeur vous a écrit. Cliquez pour ouvrir la messagerie.';
+    document.getElementById('msg-banner').style.display = 'flex';
+  }
+}
+function majBadgesMessages(nb) {
+  [document.getElementById('msg-badge'), document.getElementById('tab-msg-badge')].forEach(function(badge){
+    if (!badge) return;
+    if (nb > 0) { badge.textContent = nb > 9 ? '9+' : String(nb); badge.style.display = 'inline-block'; }
+    else badge.style.display = 'none';
+  });
+}
+function abonnerMessagesAgent() {
+  if (!currentUser) return;
+  db.channel('agent-msgs-' + currentUser.id)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages_conversation' }, async function(payload) {
+      var m = payload.new;
+      if (!m || m.expediteur_email === currentUser.email) return;
+      var estAMoi = _agentConvIds.indexOf(m.conversation_id) !== -1;
+      if (!estAMoi) {
+        var { data: conv } = await db.from('conversations').select('email_agent').eq('id', m.conversation_id).maybeSingle();
+        estAMoi = !!(conv && conv.email_agent === currentUser.email);
+        if (estAMoi) _agentConvIds.push(m.conversation_id);
+      }
+      if (!estAMoi) return;
+      document.getElementById('msg-banner-titre').textContent = 'Nouveau message';
+      document.getElementById('msg-banner-msg').textContent = (m.contenu || '').slice(0, 90) || 'Vous avez reçu un message.';
+      document.getElementById('msg-banner').style.display = 'flex';
+      if (typeof showToast === 'function') showToast('💬 Nouveau message reçu');
+      chargerMessagesAgentNonLus();
+    })
+    .subscribe();
+}
 
 // ── PROFIL ──
 async function chargerProfil() {
@@ -1092,7 +1163,7 @@ async function genererConseils() {
 
 // ── TABS ──
 function showTab(tab, btn) {
-  var allTabs = ['annonces','favoris','pourmoi','candidatures','performance','quotas','mandats','cr','rapports','conseils'];
+  var allTabs = ['annonces','messages','favoris','pourmoi','candidatures','performance','quotas','mandats','cr','rapports','conseils'];
   allTabs.forEach(function(t){ var el = document.getElementById('tab-' + t); if(el) el.style.display = t === tab ? 'block' : 'none'; });
   document.querySelectorAll('.tab').forEach(function(b){ b.classList.remove('active'); });
   btn.classList.add('active');
@@ -1101,6 +1172,16 @@ function showTab(tab, btn) {
   if (tab === 'annonces') chargerMesAnnonces();
   if (tab === 'favoris') chargerFavoris();
   if (tab === 'pourmoi') { chargerCriteres(); chargerTop3(); }
+  if (tab === 'messages') {
+    var fr = document.getElementById('frame-messagerie');
+    if (fr && fr.src.indexOf('messagerie.html') === -1) fr.src = 'messagerie.html';
+    var b = document.getElementById('msg-banner'); if (b) b.style.display = 'none';
+  }
+}
+// Ouvre l'onglet Messages depuis une notification/bannière
+function ouvrirOngletMessages() {
+  var btn = document.querySelector('.tab[onclick*="messages"]');
+  if (btn) showTab('messages', btn);
 }
 
 // ════════ NOUVEAUX ONGLETS AGENT (Favoris · Critères · Hanaé top 3) ════════
