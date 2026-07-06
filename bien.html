@@ -243,6 +243,7 @@ nav .nav-link{margin-right:18px}
       <button class="btn-contact bc-teal" onclick="envoyerContact()">Envoyer mon message →</button>
       <button class="btn-contact bc-out" style="margin-top:6px" onclick="fermerModal()">Annuler</button>
     </div>
+    <button class="btn-contact bc-out" id="modal-fermer-ok" style="display:none;margin-top:6px" onclick="fermerModal()">Fermer</button>
   </div>
 </div>
 
@@ -1241,10 +1242,20 @@ async function ouvrirDocVendeur(path) {
 
 // ── CONTACT ──
 function ouvrirContact() {
+  resetModalContact();
   document.getElementById('modal-contact').classList.add('open');
 }
 function fermerModal() {
   document.getElementById('modal-contact').classList.remove('open');
+  resetModalContact();
+}
+// Remet le modal dans son état initial (formulaire visible, confirmations masquées)
+function resetModalContact() {
+  var f = document.getElementById('modal-form');   if (f) f.style.display = 'block';
+  var o = document.getElementById('modal-ok');     if (o) { o.style.display = 'none'; o.textContent = ''; }
+  var e = document.getElementById('modal-err');    if (e) { e.style.display = 'none'; e.textContent = ''; }
+  var b = document.getElementById('modal-fermer-ok'); if (b) b.style.display = 'none';
+  var m = document.getElementById('c-message');    if (m) m.value = '';
 }
 
 async function envoyerContact() {
@@ -1298,6 +1309,9 @@ async function envoyerContact() {
       : '✅ Votre message a bien été enregistré. Le vendeur le verra dans son espace (la notification email a rencontré un souci de notre côté).';
     ok.style.display = 'block';
     document.getElementById('modal-form').style.display = 'none';
+    document.getElementById('modal-fermer-ok').style.display = 'block';
+    // Fermeture automatique de la confirmation au bout de 3,5 s
+    setTimeout(fermerModal, 3500);
 
   } catch(e) {
     err.textContent = 'Erreur : ' + e.message;
