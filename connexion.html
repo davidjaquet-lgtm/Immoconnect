@@ -487,6 +487,29 @@ async function handleAuth() {
       }}
     });
     if (error) { showErr('Erreur : ' + error.message); btn.disabled=false; btn.textContent='Créer mon compte'; return; }
+
+    // Profil agent → créer la fiche agents_validation côté serveur (service_role).
+    // signUp ne crée pas de session (confirmation email active) : l'insert client
+    // échouerait. inscrire-agent l'écrit de façon fiable, en statut 'en_attente'.
+    if (selectedProfils.indexOf('agent') !== -1) {
+      var reg = await db.functions.invoke('inscrire-agent', { body: {
+        user_id: data.user && data.user.id,
+        email: email,
+        nom: nom,
+        agence: agence || null,
+        carte_t: carteT || null,
+        cci: cci || null,
+        carte_t_expiration: expiration || null,
+        ocr_statut: 'en_attente',
+        forfait_agent: 'starter'
+      }});
+      if (!reg.data || !reg.data.ok) {
+        var em = (reg.data && reg.data.error) || (reg.error && reg.error.message) || 'erreur inconnue';
+        showErr("Compte créé, mais l'enregistrement de votre dossier agent a échoué : " + em + " Contactez le support.");
+        btn.disabled=false; btn.textContent='Créer mon compte'; return;
+      }
+    }
+
     if (selectedProfils.indexOf('agent') !== -1) {
       showOk('Compte créé ! Confirmez votre email. Votre carte T sera vérifiée sous 48h maximum — vous recevrez un email de confirmation d\'activation de votre espace agent.');
     } else {
