@@ -852,22 +852,19 @@ function buildContactButtons(b, niv) {
     html += '<a href="forfaits.html" class="btn-contact bc-out" style="display:block;text-align:center;text-decoration:none">📅 Réserver une visite — abonnés</a>';
   }
 
-  // AFFICHAGE QUOTA CONTACTS VENDEUR pour agents (mode acheteurs_agents)
+  // CONTACT VENDEUR pour agents (mode acheteurs_agents)
+  // La décision gratuit/payant est prise CÔTÉ SERVEUR par consommer-lead (corrélé aux
+  // forfaits + Stripe), via contact-agent-ppu.html. On ne duplique pas les quotas ici.
   if (isAgent && modeContact === 'acheteurs_agents') {
     var forfaitAgent = currentUser ? (currentUser.user_metadata?.forfait_agent || 'pay_per_use') : 'pay_per_use'
-    var maxLeads = { pay_per_use: 2, starter: 8, pro: 15, premium: '∞' }
-    var isAgentPPU = forfaitAgent === 'pay_per_use'
+    // Quota hebdo de contacts inclus par forfait — ALIGNÉ sur consommer-lead
+    var quotaForfait = { pay_per_use: 2, starter: 5, pro: 15, premium: '∞' }
+    var quota = (quotaForfait[forfaitAgent] != null) ? quotaForfait[forfaitAgent] : 2
+    var labelForfait = ({ pay_per_use: 'Pay per use', starter: 'Starter', pro: 'Pro', premium: 'Premium' })[forfaitAgent] || 'Pay per use'
 
-    if (isAgentPPU) {
-      // PPU : pas d\'accès au dossier, pas de contact en mode acheteurs_agents
-      html += '<div style="background:#FAECE7;border:1px solid #F5C4B3;border-radius:8px;padding:12px 14px;text-align:center">'
-        + '<div style="font-size:13px;font-weight:600;color:#712B13;margin-bottom:4px">Accès non disponible</div>'
-        + '<div style="font-size:11px;color:#712B13;line-height:1.6">Ce mode de contact est réservé aux agents abonnés (Starter, Pro, Premium). En pay per use, vous êtes alerté uniquement lorsque le vendeur demande une sélection top 3.</div>'
-        + '</div>'
-    } else {
-      html += '<div class="quota-agent"><span>Contacts vendeur disponibles cette semaine</span><span style="font-weight:600;color:var(--teal)">' + (maxLeads[forfaitAgent] || '?') + ' max</span></div>'
-      html += '<a href="messagerie.html?annonce=' + b.id + '" class="btn-contact bc-teal" style="display:block;text-align:center;text-decoration:none;padding:12px;margin-top:8px;border-radius:8px;font-weight:500">Contacter ce vendeur →</a>'
-    }
+    html += '<div class="quota-agent"><span>Contacts inclus / semaine (' + labelForfait + ')</span><span style="font-weight:600;color:var(--teal)">' + quota + '</span></div>'
+    html += '<a href="contact-agent-ppu.html?annonce=' + b.id + '" class="btn-contact bc-teal" style="display:block;text-align:center;text-decoration:none;padding:12px;margin-top:8px;border-radius:8px;font-weight:500">💬 Contacter ce vendeur →</a>'
+    html += '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px">Gratuit dans votre quota hebdomadaire, puis 4,99 € par contact supplémentaire.</div>'
   }
 
   // ── FENÊTRE 48H COMPTE À REBOURS ──
