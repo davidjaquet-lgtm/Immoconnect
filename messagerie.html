@@ -711,10 +711,9 @@ async function envoyerMessage() {
     return;
   }
 
-  // Email notification
-  var destinataire = autreParticipant(conv);
-  var bien = conv.annonces_vendeurs;
-  envoyerEmailNotif(destinataire, currentUser.email.split('@')[0], contenu, bien?(bien.type_bien||'Bien')+' · '+(bien.ville||''):'votre bien');
+  // Email notification — envoyée au MAIL DU COMPTE du destinataire
+  // (résolu côté serveur via user_id, pas l'email stocké qui peut être erroné)
+  db.functions.invoke('notifier-nouveau-message', { body: { conversation_id: currentConvId, expediteur_email: currentUser.email } }).then(function(){}, function(){});
 
   if (input) { input.value=''; input.style.height='42px'; }
   if (btn) { btn.disabled=false; btn.textContent='Envoyer →'; }
