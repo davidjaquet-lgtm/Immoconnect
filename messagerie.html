@@ -236,10 +236,13 @@ async function chargerConversations() {
   var field = currentRole === 'agent' ? 'email_agent' : 'email_vendeur';
   if (currentRole === 'gratuit' || currentRole === 'investisseur') field = 'email_vendeur';
   
+  var uid = currentUser.id;
   var mail = (currentUser.email || '').trim();
+  var filtre = 'agent_id.eq.'+uid+',vendeur_id.eq.'+uid+',acheteur_id.eq.'+uid
+             + ',email_agent.ilike.'+mail+',email_vendeur.ilike.'+mail+',email_acheteur.ilike.'+mail;
   var { data: convs } = await db.from('conversations')
     .select('*, annonces_vendeurs(titre,type_bien,ville,surface,prix)')
-    .or('email_agent.ilike.'+mail+',email_vendeur.ilike.'+mail+',email_acheteur.ilike.'+mail)
+    .or(filtre)
     .order('dernier_message_at', { ascending: false, nullsFirst: false });
 
   allConvs = convs || [];
@@ -420,6 +423,7 @@ async function repondreEnMessagerie(contactId) {
   if (!convId) {
     var ins = await db.from('conversations').insert({
       annonce_id: m.annonce_id,
+      vendeur_id: currentUser.id,
       email_vendeur: m.email_vendeur,
       email_acheteur: m.email_acheteur,
       dernier_message: m.message || null,

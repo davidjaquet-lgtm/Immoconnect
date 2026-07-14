@@ -8,7 +8,7 @@
 (function () {
   var SB_URL = 'https://zxxhyefajfwqcxcfxpmg.supabase.co';
   var SB_KEY = 'sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
-  var db, myEmail, convIds = [];
+  var db, myEmail, myUid, convIds = [];
 
   function ensureSupabase(cb) {
     if (window.supabase && window.supabase.createClient) return cb();
@@ -50,7 +50,8 @@
     var total = 0;
     try {
       var r1 = await db.from('conversations').select('id')
-        .or('email_agent.ilike.' + myEmail + ',email_vendeur.ilike.' + myEmail + ',email_acheteur.ilike.' + myEmail);
+        .or('agent_id.eq.' + myUid + ',vendeur_id.eq.' + myUid + ',acheteur_id.eq.' + myUid
+          + ',email_agent.ilike.' + myEmail + ',email_vendeur.ilike.' + myEmail + ',email_acheteur.ilike.' + myEmail);
       convIds = (r1.data || []).map(function (c) { return c.id; });
       if (convIds.length) {
         var r2 = await db.from('messages_conversation').select('*', { count: 'exact', head: true })
@@ -89,6 +90,7 @@
       var s = res && res.data && res.data.session;
       if (!s || !s.user) return;               // pas connecté → pas de pastille
       myEmail = (s.user.email || '').trim().toLowerCase();
+      myUid = s.user.id;
       compter();
       abonner();
     });
