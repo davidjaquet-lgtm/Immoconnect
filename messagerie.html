@@ -206,9 +206,12 @@ function autreParticipant(c){
 }
 function libelleRole(email, c){
   if (email === c.email_vendeur) return 'Vendeur';
-  if (email === c.email_acheteur) return 'Acheteur';
-  if (window.__agentsSet && window.__agentsSet.has(email)) return 'Agent immobilier';
-  return 'Acheteur';
+  // Agent → nom + prénom (professionnel, identifié)
+  if (window.__agentsSet && window.__agentsSet.has(email)) {
+    return (window.__nomsAgents && window.__nomsAgents[email]) || 'Agent immobilier';
+  }
+  // Acheteur → prénom uniquement
+  return (window.__prenomsAcheteurs && window.__prenomsAcheteurs[email]) || 'Acheteur';
 }
 var convPourNotation = null;
 
@@ -319,18 +322,26 @@ function afficherListeConvs(convs) {
   // On affiche des rôles ; seuls les agents (professionnels) restent identifiés comme tels.
   if (!window.__agentsSet) {
     window.__agentsSet = new Set();
+    window.__nomsAgents = {};
     try {
       var emailsTiers = [];
       convs.forEach(function(cv){ emailsTiers.push(cv.email_agent, cv.email_vendeur); });
       var uniq = Array.from(new Set(emailsTiers.filter(Boolean)));
       if (uniq.length) {
-        db.from('agents_publics').select('email').in('email', uniq).then(function(res){
-          ((res && res.data) || []).forEach(function(a){ window.__agentsSet.add(a.email); });
-          try { afficherListeConvs(convs); } catch(e) {} // ré-affichage avec les rôles précis
+        db.from('agents_publics').select('email, nom').in('email', uniq).then(function(res){
+          ((res && res.data) || []).forEach(function(a){ window.__agentsSet.add(a.email); if (a.nom) window.__nomsAgents[a.email] = a.nom; });
+          try { afficherListeConvs(convs); } catch(e) {} // ré-affichage avec les noms
         });
       }
     } catch(e) {}
   }
+  // Prénoms des acheteurs (depuis les contacts reçus : nom_acheteur → prénom)
+  window.__prenomsAcheteurs = window.__prenomsAcheteurs || {};
+  (allContacts || []).forEach(function(m){
+    if (m.email_acheteur && m.nom_acheteur) {
+      window.__prenomsAcheteurs[m.email_acheteur] = (String(m.nom_acheteur).trim().split(/\s+/)[0] || '');
+    }
+  });
   function roleDe(emailTiers, conv) {
     if (emailTiers === conv.email_vendeur) return 'Vendeur';
     if (window.__agentsSet.has(emailTiers)) return 'Agent immobilier';
