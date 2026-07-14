@@ -229,7 +229,41 @@ var convPourNotation = null;
   document.getElementById('user-role-label').textContent = roleLabels[currentRole] || '🏠 Vendeur';
 
   await chargerConversations();
+  await ouvrirDepuisAnnonceAgent();
 })();
+
+// Ouvre (ou crée) la conversation agent↔vendeur quand un agent arrive avec ?annonce=
+// (le parcours contact-agent-ppu redirige ici après consommation/paiement du lead)
+async function ouvrirDepuisAnnonceAgent() {
+  var annonceId = new URLSearchParams(location.search).get('annonce');
+  if (!annonceId || currentRole !== 'agent') return;
+  var annRes = await db.from('annonces_vendeurs').select('id, email_contact').eq('id', annonceId).maybeSingle();
+  var ann = annRes && annRes.data;
+  if (!ann) return;
+  var emailVendeur = (ann.email_contact || '').trim();
+
+  // Conversation agent↔vendeur déjà existante pour ce bien ?
+  var exRes = await db.from('conversations').select('id')
+    .eq('annonce_id', annonceId)
+    .or('agent_id.eq.' + currentUser.id + ',email_agent.ilike.' + currentUser.email)
+    .order('dernier_message_at', { ascending: false, nullsFirst: false }).limit(1);
+  var convId = (exRes && exRes.data && exRes.data[0]) ? exRes.data[0].id : null;
+
+  if (!convId) {
+    var ins = await db.from('conversations').insert({
+      annonce_id: annonceId,
+      agent_id: currentUser.id,
+      email_agent: currentUser.email,
+      email_vendeur: emailVendeur,
+      dernier_message_at: new Date().toISOString()
+    }).select('id').single();
+    if (ins.error || !ins.data) { console.warn('création conv agent:', ins.error ? ins.error.message : ''); return; }
+    convId = ins.data.id;
+  }
+  await chargerConversations();
+  var conv = allConvs.find(function(c){ return String(c.id) === String(convId); });
+  if (conv) await afficherChat(conv);
+}
 
 // ── CHARGER CONVERSATIONS ──
 async function chargerConversations() {
