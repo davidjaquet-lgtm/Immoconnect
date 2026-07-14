@@ -1276,7 +1276,7 @@ async function envoyerContact() {
     try {
       var _depuis = new Date(Date.now() - 7*24*3600*1000).toISOString();
       var _cpt = await db.from('contacts_envoyes').select('id').eq('user_id', currentUser.id).gte('created_at', _depuis);
-      if (_cpt && _cpt.data && _cpt.data.length >= 5) { err.textContent = 'Limite de 5 contacts par semaine atteinte. Passez à un abonnement pour contacter sans limite.'; err.style.display='block'; return; }
+      if (_cpt && _cpt.data && _cpt.data.length >= 2) { err.textContent = 'Limite de 2 contacts par semaine atteinte. Passez à un abonnement pour contacter sans limite.'; err.style.display='block'; return; }
     } catch(e) {}
   }
 
@@ -1630,5 +1630,6 @@ function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); docu
 <script src="/pwa.js"></script>
 <script src="feedback.js" defer></script>
   <script src="searchbar.js" defer></script>
+<script src="messagerie-badge.js" defer></script>
 </body>
 </html>
