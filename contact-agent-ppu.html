@@ -157,6 +157,7 @@ async function payer() {
     // 1) On enregistre la demande de contact EN ATTENTE de paiement.
     //    Aucun droit n'est accordé ici : paiement_statut reste 'en_attente'.
     var { data: contact, error } = await db.from('contacts_semaine').insert({
+      agent_id: currentUser.id,
       agent_email: currentUser.email,
       annonce_id: annonceId,
       type_contact: typeContact,
@@ -238,5 +239,6 @@ function showToast(msg, type) {
 </script>
 <script src="feedback.js" defer></script>
   <script src="searchbar.js" defer></script>
+<script src="messagerie-badge.js" defer></script>
 </body>
 </html>
