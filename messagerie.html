@@ -206,11 +206,12 @@ function autreParticipant(c){
 }
 function libelleRole(email, c){
   if (email === c.email_vendeur) return 'Vendeur';
-  // Agent → nom + prénom (professionnel, identifié)
+  // Agent → nom + prénom
   if (window.__agentsSet && window.__agentsSet.has(email)) {
     return (window.__nomsAgents && window.__nomsAgents[email]) || 'Agent immobilier';
   }
-  // Acheteur → prénom uniquement
+  // Acheteur → prénom (nom stocké sur la conversation, sinon depuis les contacts reçus)
+  if (c && c.nom_acheteur) return String(c.nom_acheteur).trim().split(/\s+/)[0] || 'Acheteur';
   return (window.__prenomsAcheteurs && window.__prenomsAcheteurs[email]) || 'Acheteur';
 }
 var convPourNotation = null;
@@ -239,28 +240,41 @@ var convPourNotation = null;
 // (le parcours contact-agent-ppu redirige ici après consommation/paiement du lead)
 async function ouvrirDepuisAnnonceAgent() {
   var annonceId = new URLSearchParams(location.search).get('annonce');
-  if (!annonceId || currentRole !== 'agent') return;
+  if (!annonceId) return;
   var annRes = await db.from('annonces_vendeurs').select('id, email_contact').eq('id', annonceId).maybeSingle();
   var ann = annRes && annRes.data;
   if (!ann) return;
   var emailVendeur = (ann.email_contact || '').trim();
+  var uid = currentUser.id;
+  var estAgent = (currentRole === 'agent');
 
-  // Conversation agent↔vendeur déjà existante pour ce bien ?
+  // Conversation déjà existante pour ce bien avec MOI ?
+  var monChamp = estAgent
+    ? 'agent_id.eq.' + uid + ',email_agent.ilike.' + currentUser.email
+    : 'acheteur_id.eq.' + uid + ',email_acheteur.ilike.' + currentUser.email;
   var exRes = await db.from('conversations').select('id')
-    .eq('annonce_id', annonceId)
-    .or('agent_id.eq.' + currentUser.id + ',email_agent.ilike.' + currentUser.email)
+    .eq('annonce_id', annonceId).or(monChamp)
     .order('dernier_message_at', { ascending: false, nullsFirst: false }).limit(1);
   var convId = (exRes && exRes.data && exRes.data[0]) ? exRes.data[0].id : null;
 
   if (!convId) {
-    var ins = await db.from('conversations').insert({
-      annonce_id: annonceId,
-      agent_id: currentUser.id,
-      email_agent: currentUser.email,
-      email_vendeur: emailVendeur,
-      dernier_message_at: new Date().toISOString()
-    }).select('id').single();
-    if (ins.error || !ins.data) { console.warn('création conv agent:', ins.error ? ins.error.message : ''); return; }
+    // Quota ACHETEUR : 2 ANNONCES distinctes / semaine (recontacter une annonce déjà contactée = gratuit)
+    if (!estAgent) {
+      var depuis = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+      var qRes = await db.from('conversations').select('annonce_id').eq('acheteur_id', uid).gte('created_at', depuis);
+      var annoncesDistinctes = new Set((qRes.data || []).map(function(c){ return c.annonce_id; }));
+      if (annoncesDistinctes.size >= 2 && !annoncesDistinctes.has(annonceId)) {
+        alert('Limite de 2 contacts vendeurs par semaine atteinte. Passez à un abonnement pour contacter sans limite.');
+        window.location.href = 'forfaits.html';
+        return;
+      }
+    }
+    var nom = (currentUser.user_metadata && (currentUser.user_metadata.nom || currentUser.user_metadata.prenom)) || '';
+    var nouvelle = estAgent
+      ? { annonce_id: annonceId, agent_id: uid, email_agent: currentUser.email, email_vendeur: emailVendeur, dernier_message_at: new Date().toISOString() }
+      : { annonce_id: annonceId, acheteur_id: uid, email_acheteur: currentUser.email, nom_acheteur: nom, email_vendeur: emailVendeur, dernier_message_at: new Date().toISOString() };
+    var ins = await db.from('conversations').insert(nouvelle).select('id').single();
+    if (ins.error || !ins.data) { console.warn('création conv:', ins.error ? ins.error.message : ''); return; }
     convId = ins.data.id;
   }
   await chargerConversations();
