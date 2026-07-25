@@ -258,15 +258,23 @@ async function ouvrirDepuisAnnonceAgent() {
   var convId = (exRes && exRes.data && exRes.data[0]) ? exRes.data[0].id : null;
 
   if (!convId) {
-    // Quota ACHETEUR : 2 ANNONCES distinctes / semaine (recontacter une annonce déjà contactée = gratuit)
+    // Quota ACHETEUR : 2 ANNONCES distinctes / semaine, comptées dans un JOURNAL
+    // non supprimable (contacts_envoyes) — supprimer une conversation ne rend PAS le crédit.
     if (!estAgent) {
       var depuis = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
-      var qRes = await db.from('conversations').select('annonce_id').eq('acheteur_id', uid).gte('created_at', depuis);
-      var annoncesDistinctes = new Set((qRes.data || []).map(function(c){ return c.annonce_id; }));
-      if (annoncesDistinctes.size >= 2 && !annoncesDistinctes.has(annonceId)) {
+      var qRes = await db.from('contacts_envoyes').select('annonce_id').eq('user_id', uid).gte('created_at', depuis);
+      var dejaContactees = new Set((qRes.data || []).map(function(c){ return c.annonce_id; }));
+      var nouvelleAnnonce = !dejaContactees.has(annonceId);
+      if (nouvelleAnnonce && dejaContactees.size >= 2) {
         alert('Limite de 2 contacts vendeurs par semaine atteinte. Passez à un abonnement pour contacter sans limite.');
         window.location.href = 'forfaits.html';
         return;
+      }
+      // Trace non supprimable : 1 ligne par annonce distincte
+      if (nouvelleAnnonce) {
+        await db.from('contacts_envoyes').insert({
+          user_id: uid, user_email: currentUser.email, annonce_id: annonceId, email_vendeur: emailVendeur
+        }).then(undefined, function(){});
       }
     }
     var nom = (currentUser.user_metadata && (currentUser.user_metadata.nom || currentUser.user_metadata.prenom)) || '';
