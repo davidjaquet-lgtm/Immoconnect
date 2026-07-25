@@ -278,8 +278,7 @@ async function ouvrirDepuisAnnonceAgent() {
     convId = ins.data.id;
   }
   await chargerConversations();
-  var conv = allConvs.find(function(c){ return String(c.id) === String(convId); });
-  if (conv) await afficherChat(conv);
+  if (convId) await ouvrirConv(convId);
 }
 
 // ── CHARGER CONVERSATIONS ──
