@@ -259,8 +259,9 @@ async function ouvrirDepuisAnnonceAgent() {
 
   if (!convId) {
     // Quota ACHETEUR : 2 ANNONCES distinctes / semaine, comptées dans un JOURNAL
-    // non supprimable (contacts_envoyes) — supprimer une conversation ne rend PAS le crédit.
-    if (!estAgent) {
+    // non supprimable (contacts_envoyes). Les INVESTISSEURS (abonnés) sont ILLIMITÉS.
+    var estInvestisseur = (currentRole === 'investisseur');
+    if (!estAgent && !estInvestisseur) {
       var depuis = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
       var qRes = await db.from('contacts_envoyes').select('annonce_id').eq('user_id', uid).gte('created_at', depuis);
       var dejaContactees = new Set((qRes.data || []).map(function(c){ return c.annonce_id; }));
