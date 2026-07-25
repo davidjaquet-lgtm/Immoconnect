@@ -448,8 +448,9 @@ async function ouvrirContact(contactId) {
 async function supprimerConversation(convId){
   if(!confirm("Supprimer définitivement cette conversation et tous ses messages ?\n\n(Action irréversible — elle disparaît aussi pour l'autre participant.)")) return;
   await db.from('messages_conversation').delete().eq('conversation_id', convId).then(undefined, function(){});
-  var r = await db.from('conversations').delete().eq('id', convId);
+  var r = await db.from('conversations').delete().eq('id', convId).select('id');
   if(r && r.error){ alert('Suppression impossible : '+r.error.message); return; }
+  if(!r || !r.data || r.data.length===0){ alert("Suppression impossible : vous n'avez pas les droits, ou la conversation a déjà été supprimée."); await chargerConversations(); return; }
   if(String(currentConvId)===String(convId)){ currentConvId=null; document.getElementById('chat-zone').innerHTML=''; }
   await chargerConversations();
 }
