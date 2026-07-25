@@ -156,7 +156,7 @@ async function payer() {
   try {
     // 1) On enregistre la demande de contact EN ATTENTE de paiement.
     //    Aucun droit n'est accordé ici : paiement_statut reste 'en_attente'.
-    var { data: contact, error } = await db.from('contacts_semaine').insert({
+    var { data: contact, error } = await db.from('contacts_ppu').insert({
       agent_id: currentUser.id,
       agent_email: currentUser.email,
       annonce_id: annonceId,
