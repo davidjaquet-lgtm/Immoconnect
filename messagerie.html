@@ -464,8 +464,9 @@ async function supprimerConversation(convId){
 }
 async function supprimerContact(contactId){
   if(!confirm('Supprimer ce message reçu ?')) return;
-  var r = await db.from('messages_annonces').delete().eq('id', contactId);
+  var r = await db.from('messages_annonces').delete().eq('id', contactId).select('id');
   if(r && r.error){ alert('Suppression impossible : '+r.error.message); return; }
+  if(!r || !r.data || r.data.length===0){ alert("Suppression impossible : droits insuffisants ou déjà supprimé."); await chargerConversations(); return; }
   if(String(currentContactId)===String(contactId)){ currentContactId=null; document.getElementById('chat-zone').innerHTML=''; }
   await chargerConversations();
 }
