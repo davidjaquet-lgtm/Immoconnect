@@ -686,6 +686,9 @@ async function majContactsRestants(b) {
     } else {
       var el2 = document.getElementById('quota-acheteur');
       if (!el2) return;
+      // Investisseur / abonné → PAS de compteur (contacts illimités)
+      var estInvest = profils.includes('investisseur') || (window._estAbonne === true);
+      if (estInvest) { el2.style.display = 'none'; return; }
       var r2 = await db.from('contacts_envoyes').select('annonce_id')
         .eq('user_id', currentUser.id).gte('created_at', glissant7);
       var distinctes = new Set((r2.data || []).map(function(c){ return c.annonce_id; }));
