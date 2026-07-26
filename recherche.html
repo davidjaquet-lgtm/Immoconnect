@@ -99,6 +99,10 @@
 </div>
 
 <div class="filters">
+  <div class="f-field" style="flex:0 0 100%;flex-direction:row;gap:8px;margin-bottom:2px">
+    <button type="button" id="mode-achat" class="btn-search" onclick="setMode('achat')" style="flex:0 0 auto">🏠 Acheter</button>
+    <button type="button" id="mode-location" class="btn-reset" onclick="setMode('location')" style="flex:0 0 auto">🔑 Louer</button>
+  </div>
   <div class="f-field" style="flex:2;min-width:190px">
     <label>Localisation</label>
     <input type="text" id="f-ville" name="ic-ville" autocomplete="off" placeholder="Ville, code postal…" onkeydown="if(event.key==='Enter')lancer()">
@@ -115,6 +119,10 @@
       <option>Local commercial</option>
       <option>Autre</option>
     </select>
+  </div>
+  <div class="f-field" id="f-meuble-wrap" style="display:none">
+    <label>Meublé</label>
+    <select id="f-meuble"><option value="">Indifférent</option><option value="meuble">Meublé</option><option value="non_meuble">Non meublé</option></select>
   </div>
   <div class="f-field">
     <label>Prix min (€)</label>
@@ -267,6 +275,51 @@ function lireParams() {
   set('f-rendement','rendement');
 }
 
+var mode = 'achat';
+function setMode(m){
+  mode = m;
+  document.getElementById('mode-achat').className = (m==='achat')?'btn-search':'btn-reset';
+  document.getElementById('mode-location').className = (m==='location')?'btn-search':'btn-reset';
+  // Champs propres à la VENTE : masqués en location
+  ['f-niveau','f-chambres'].forEach(function(id){ var e=document.getElementById(id); if(e){ var w=e.closest('.f-field'); if(w) w.style.display=(m==='location')?'none':''; } });
+  // Champ propre à la LOCATION
+  var mw=document.getElementById('f-meuble-wrap'); if(mw) mw.style.display=(m==='location')?'':'none';
+  // Relabel prix → loyer
+  var pmin=document.getElementById('f-prixmin').closest('.f-field').querySelector('label');
+  var pmax=document.getElementById('f-prixmax').closest('.f-field').querySelector('label');
+  if(m==='location'){ pmin.textContent='Loyer min (€/mois)'; pmax.textContent='Loyer max (€/mois)';
+    var rw=document.getElementById('f-rendement-wrap'); var rl=document.getElementById('f-rendement-lock');
+    if(rw)rw.style.display='none'; if(rl)rl.style.display='none';
+  } else { pmin.textContent='Prix min (€)'; pmax.textContent='Prix max (€)'; if(typeof appliquerGateRendement==='function') appliquerGateRendement(); }
+  lancer();
+}
+
+async function chercherLocation(v){
+  var q = db.from('biens_location')
+    .select('id,titre,type_bien,ville,code_postal,surface,nb_pieces,loyer,charges,dpe,meuble,photos,created_at,statut')
+    .eq('statut','actif');
+  if (v.type)    q = q.eq('type_bien', (v.type||'').toLowerCase());
+  if (v.ville)   q = q.or('ville.ilike.%'+v.ville+'%,code_postal.ilike.%'+v.ville+'%');
+  if (v.prixmin) q = q.gte('loyer', parseInt(v.prixmin));
+  if (v.prixmax) q = q.lte('loyer', parseInt(v.prixmax));
+  if (v.surfmin) q = q.gte('surface', parseInt(v.surfmin));
+  if (v.surfmax) q = q.lte('surface', parseInt(v.surfmax));
+  if (v.pieces)  q = q.gte('nb_pieces', parseInt(v.pieces));
+  if (v.meuble==='meuble')     q = q.eq('meuble', true);
+  if (v.meuble==='non_meuble') q = q.eq('meuble', false);
+  if (v.tri==='prix_asc')      q = q.order('loyer',{ascending:true});
+  else if (v.tri==='prix_desc') q = q.order('loyer',{ascending:false});
+  else                          q = q.order('created_at',{ascending:false});
+  var { data, error } = await q.limit(60);
+  if (error) { document.getElementById('grid').innerHTML='<div class="empty"><div class="ico">⚠️</div>Erreur de chargement. Réessayez.</div>'; document.getElementById('count').textContent=''; return; }
+  var liste = (data||[]).map(function(b){
+    return { id:b.id, titre:b.titre, type_bien:b.type_bien, ville:b.ville, code_postal:b.code_postal,
+      surface:b.surface, nb_pieces:b.nb_pieces, prix:(b.loyer||0)+(b.charges||0),
+      photo_principale:(b.photos&&b.photos[0])||null, _location:true, _meuble:b.meuble, _dpe:b.dpe };
+  });
+  afficher(liste);
+}
+
 function valeurs() {
   function v(id){ var e=document.getElementById(id); return e ? e.value : ''; }
   return {
@@ -279,6 +332,7 @@ function valeurs() {
     pieces:   v('f-pieces'),
     chambres: v('f-chambres'),
     niveau:   v('f-niveau'),
+    meuble:   v('f-meuble'),
     rendement: v('f-rendement'),
     tri:      v('f-tri')
   };
@@ -303,6 +357,8 @@ function reset() {
 async function chercher(v) {
   var grid = document.getElementById('grid');
   grid.innerHTML = '<div class="loading">Recherche en cours…</div>';
+
+  if (mode === 'location') { return chercherLocation(v); }
 
   var q = db.from('annonces_vendeurs')
     .select('id, titre, type_bien, ville, code_postal, prix, surface, nb_pieces, photo_principale, niveau_valide, est_pro, frais_agence, created_at, loyer_mensuel, charges_syndic, taxe_fonciere_montant')
@@ -359,6 +415,27 @@ function afficher(annonces) {
   }
 
   grid.innerHTML = annonces.map(function(a){
+    if (a._location) {
+      var villeL = (a.ville || '—') + (a.code_postal ? ' · ' + a.code_postal : '');
+      var imgL = a.photo_principale ? '<img src="' + a.photo_principale + '" alt="">' : '🔑';
+      var infoL = [];
+      if (a._dpe) infoL.push('DPE ' + a._dpe);
+      if (a._meuble) infoL.push('meublé');
+      return '<div class="card">'
+        + '<div class="card-niv" style="background:#FBE7DA;color:#D4732A">À louer</div>'
+        + '<a class="card-link" href="location.html">'
+        + '<div class="card-img">' + imgL + '</div>'
+        + '<div class="card-body">'
+        + '<div class="card-price">' + Number(a.prix||0).toLocaleString('fr-FR') + ' <span>€/mois</span></div>'
+        + (infoL.length ? '<div style="font-size:11px;color:#888;margin-top:4px">' + infoL.join(' · ') + '</div>' : '')
+        + '<div class="card-title">' + (a.titre || (a.type_bien || 'Bien')) + '</div>'
+        + '<div class="card-loc">📍 ' + villeL + '</div>'
+        + '<div class="card-feats">'
+        + '<span>📐 ' + (a.surface != null ? a.surface + ' m²' : '— m²') + '</span>'
+        + '<span>🏠 ' + (a.nb_pieces != null ? a.nb_pieces + ' pièces' : '— pièces') + '</span>'
+        + '<span>🏷️ ' + (a.type_bien || '—') + '</span>'
+        + '</div></div></a></div>';
+    }
     var prix = a.prix ? Number(a.prix).toLocaleString('fr-FR') : 'Prix NC';
     var ville = (a.ville || '—') + (a.code_postal ? ' · ' + a.code_postal : '');
     var niv = (a.niveau_valide || '').toLowerCase();
@@ -439,20 +516,33 @@ async function majHeaderCompte(session) {
     var { data: { user } } = await db.auth.getUser();
     currentUser = user || null;
   } catch(e) {}
-  // Détection du forfait EN BASE (même logique que bien.html) :
-  //  - investisseur : projets_acheteurs.forfait === 'investisseur'
-  //  - agent abonné : agents_validation.abonnement_actif && forfait_agent !== 'pay_per_use'
+  // Détection du forfait. Admin = accès direct. Sinon, statut lu EN BASE (comme bien.html).
+  var _dbgInv = false, _dbgAgent = false, _dbgAdmin = false;
   if (currentUser) {
-    try {
-      var _pa = await db.from('projets_acheteurs').select('forfait').eq('email', currentUser.email).maybeSingle();
-      if (_pa && _pa.data && _pa.data.forfait === 'investisseur') aForfait = true;
-    } catch(e) {}
+    var ADMINS = ['davidjaquet@live.fr', 'davidjaquet.lgtm@gmail.com'];
+    if (ADMINS.indexOf(String(currentUser.email || '').toLowerCase()) !== -1) { aForfait = true; _dbgAdmin = true; }
+    if (!aForfait) {
+      try {
+        var _pa = await db.from('projets_acheteurs').select('forfait').eq('email', currentUser.email).maybeSingle();
+        if (_pa && _pa.data && _pa.data.forfait === 'investisseur') { aForfait = true; _dbgInv = true; }
+      } catch(e) {}
+    }
     if (!aForfait) {
       try {
         var _av = await db.from('agents_validation').select('forfait_agent, abonnement_actif').eq('email', currentUser.email).maybeSingle();
-        if (_av && _av.data && _av.data.abonnement_actif === true && _av.data.forfait_agent && _av.data.forfait_agent !== 'pay_per_use') aForfait = true;
+        if (_av && _av.data && _av.data.abonnement_actif === true && _av.data.forfait_agent && _av.data.forfait_agent !== 'pay_per_use') { aForfait = true; _dbgAgent = true; }
       } catch(e) {}
     }
+  }
+  // Mode diagnostic : ouvre recherche.html?debugforfait=1 pour voir le résultat de la détection
+  if (new URLSearchParams(location.search).get('debugforfait')) {
+    alert('Diagnostic forfait\n\n'
+      + 'Connecté : ' + (currentUser ? currentUser.email : 'NON CONNECTÉ') + '\n'
+      + 'Champ rendement visible : ' + (aForfait ? 'OUI' : 'NON') + '\n\n'
+      + 'Détail :\n'
+      + '· Admin : ' + _dbgAdmin + '\n'
+      + '· Investisseur (projets_acheteurs) : ' + _dbgInv + '\n'
+      + '· Agent abonné (agents_validation) : ' + _dbgAgent);
   }
   appliquerGateRendement();
   majHeaderCompte();
@@ -462,5 +552,6 @@ async function majHeaderCompte(session) {
 })();
 </script>
 <script src="feedback.js" defer></script>
+<script src="messagerie-badge.js" defer></script>
 </body>
 </html>
