@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je cherche à louer — Déposer mon dossier locataire — ImmoConnect</title>
+<meta name="description" content="Déposez votre dossier de location sur ImmoConnect. Recevez des biens correspondant à vos critères et contactez les bailleurs. Gratuit.">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--coral:#993C1D;--amber:#D4732A;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100;gap:16px}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}.nav-logo span{color:var(--gold)}
+.nav-sp{flex:1}
+nav a.nl{color:#fff;text-decoration:none;font-size:13px;opacity:.85}
+.page{max-width:780px;margin:0 auto;padding:32px 24px 80px}
+h1{font-size:26px;font-weight:600;margin-bottom:6px}
+.sub{color:var(--muted);margin-bottom:24px;line-height:1.6}
+.card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:22px;margin-bottom:16px}
+.card-t{font-size:15px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{margin-bottom:14px}
+label{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:6px}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;background:#fff;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
+.hint{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chk{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:9px 11px;cursor:pointer;font-size:13px}
+.chk input{width:auto}
+.toggle-row{display:flex;gap:10px;flex-wrap:wrap}
+.toggle{flex:1;min-width:120px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center;cursor:pointer;font-size:13px}
+.toggle.on{border-color:var(--teal);background:#EAF5F1;font-weight:600}
+.score-box{background:linear-gradient(135deg,#EAF5F1,#F5F2EC);border:1px solid var(--teal);border-radius:var(--r);padding:16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.score-val{font-size:28px;font-weight:600;color:var(--teal)}
+.rgpd{font-size:11px;color:var(--muted);line-height:1.6;background:#F1EFE8;border-radius:8px;padding:12px;margin-bottom:16px}
+.btn{width:100%;background:var(--teal);color:#fff;border:none;border-radius:9px;padding:15px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.msg{padding:12px;border-radius:8px;margin-bottom:14px;font-size:13px;display:none}
+.msg.err{background:#FBE9E7;color:#993C1D;display:block}
+.msg.ok{background:#EAF5F1;color:#1E7A62;display:block}
+@media(max-width:640px){.row,.checks{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-sp"></div>
+  <a href="location.html" class="nl">← Retour location</a>
+</nav>
+
+<div class="page">
+  <h1>🔑 Je cherche à louer</h1>
+  <p class="sub">Déposez votre dossier une seule fois. Les bailleurs dont le bien correspond à vos critères pourront vous contacter — <strong>c'est gratuit</strong>. Plus votre dossier est complet, plus vous ressortez.</p>
+
+  <div id="msg" class="msg"></div>
+
+  <div class="score-box">
+    <div><div style="font-size:12px;color:var(--muted)">Score de votre dossier</div><div style="font-size:12px">Complétez pour le faire monter</div></div>
+    <div class="score-val" id="score">0<span style="font-size:14px;color:var(--muted)">/100</span></div>
+  </div>
+
+  <!-- IDENTITÉ -->
+  <div class="card">
+    <div class="card-t">👤 Vos coordonnées</div>
+    <div class="row">
+      <div class="field"><label>Nom et prénom *</label><input id="nom" oninput="calcScore()"></div>
+      <div class="field"><label>Téléphone</label><input id="tel" oninput="calcScore()"></div>
+    </div>
+    <div class="field"><label>Email *</label><input id="email" type="email" oninput="calcScore()"></div>
+    <div class="field"><label>Nombre d'occupants</label><input id="occupants" type="number" min="1" value="1"></div>
+  </div>
+
+  <!-- RECHERCHE -->
+  <div class="card">
+    <div class="card-t">🏠 Ce que vous cherchez</div>
+    <div class="row">
+      <div class="field"><label>Type de bien</label>
+        <select id="type_bien"><option value="appartement">Appartement</option><option value="maison">Maison</option><option value="studio">Studio</option><option value="colocation">Colocation</option></select></div>
+      <div class="field"><label>Meublé ?</label>
+        <select id="meuble"><option value="indifferent">Indifférent</option><option value="meuble">Meublé</option><option value="non_meuble">Non meublé</option></select></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Localisation souhaitée</label><input id="localisation" placeholder="Ville, secteur"></div>
+      <div class="field"><label>Rayon</label><select id="rayon"><option value="0">Ville uniquement</option><option value="5">+ 5 km</option><option value="10">+ 10 km</option><option value="20">+ 20 km</option></select></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Loyer max (charges comprises) *</label><input id="loyer_max" type="number" oninput="calcScore()" placeholder="€ / mois"></div>
+      <div class="field"><label>Surface min</label><input id="surface_min" type="number" placeholder="m²"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Pièces min</label><input id="pieces_min" type="number" min="1"></div>
+      <div class="field"><label>Date d'emménagement</label><input id="date_emm" type="date"></div>
+    </div>
+  </div>
+
+  <!-- SITUATION -->
+  <div class="card">
+    <div class="card-t">💼 Votre situation (fait la solidité du dossier)</div>
+    <div class="row">
+      <div class="field"><label>Situation professionnelle *</label>
+        <select id="situation_pro" onchange="calcScore()">
+          <option value="">— Choisir —</option>
+          <option value="cdi">CDI</option><option value="fonctionnaire">Fonctionnaire</option>
+          <option value="cdd">CDD</option><option value="independant">Indépendant</option>
+          <option value="retraite">Retraité</option><option value="etudiant">Étudiant</option>
+          <option value="interim">Intérim</option>
+        </select></div>
+      <div class="field"><label>Ancienneté (mois)</label><input id="anciennete" type="number" oninput="calcScore()"></div>
+    </div>
+    <div class="field"><label>Revenus nets mensuels du foyer * <span class="hint">(sert au calcul du ratio d'effort)</span></label><input id="revenus" type="number" oninput="calcScore()" placeholder="€ / mois"></div>
+    <div class="field"><label>Avez-vous un garant ?</label>
+      <div class="toggle-row">
+        <div class="toggle on" id="g-non" onclick="setGarant('aucun')">Pas de garant</div>
+        <div class="toggle" id="g-phy" onclick="setGarant('physique')">Garant physique</div>
+        <div class="toggle" id="g-vis" onclick="setGarant('visale')">Visale</div>
+      </div>
+    </div>
+    <div class="field" id="rev-garant-wrap" style="display:none"><label>Revenus du garant (si physique)</label><input id="revenus_garant" type="number" placeholder="€ / mois"></div>
+  </div>
+
+  <!-- PRÉFÉRENCES -->
+  <div class="card">
+    <div class="card-t">🐾 À titre informatif</div>
+    <div class="checks">
+      <label class="chk"><input type="checkbox" id="fumeur"> Fumeur</label>
+      <label class="chk"><input type="checkbox" id="animaux" onchange="document.getElementById('ani-d').style.display=this.checked?'block':'none'"> J'ai un animal</label>
+    </div>
+    <div class="field" id="ani-d" style="display:none;margin-top:10px"><label>Précisez (type d'animal)</label><input id="animaux_detail" placeholder="ex : chat, petit chien"></div>
+    <div class="hint" style="margin-top:8px">Ces informations sont purement indicatives et ne bloquent pas votre candidature. La loi encadre strictement le refus d'un animal domestique.</div>
+  </div>
+
+  <!-- DOSSIER -->
+  <div class="card">
+    <div class="card-t">📎 Pièces que vous pouvez fournir</div>
+    <div class="hint" style="margin-bottom:12px">Cochez ce que vous avez sous la main. Un dossier complet = badge « dossier vérifié » et priorité dans les propositions.</div>
+    <div class="checks" id="pieces">
+      <label class="chk"><input type="checkbox" value="identite" onchange="calcScore()"> Pièce d'identité</label>
+      <label class="chk"><input type="checkbox" value="bulletins" onchange="calcScore()"> 3 derniers bulletins de salaire</label>
+      <label class="chk"><input type="checkbox" value="avis_imposition" onchange="calcScore()"> Avis d'imposition</label>
+      <label class="chk"><input type="checkbox" value="justif_domicile" onchange="calcScore()"> Justificatif de domicile</label>
+      <label class="chk"><input type="checkbox" value="contrat_travail" onchange="calcScore()"> Contrat de travail</label>
+      <label class="chk"><input type="checkbox" value="justif_garant" onchange="calcScore()"> Justificatifs du garant</label>
+    </div>
+  </div>
+
+  <div class="rgpd">
+    🔒 <strong>Vos documents ne sont pas stockés.</strong> ImmoConnect ne conserve que le résultat de la vérification (badge « dossier vérifié ») et les informations nécessaires au matching. Vos coordonnées ne sont transmises à un bailleur qu'avec votre accord.
+    <label class="chk" style="margin-top:10px"><input type="checkbox" id="consent" onchange="calcScore()"> J'accepte que mon profil (données minimisées) soit proposé aux bailleurs correspondant à mes critères.</label>
+  </div>
+
+  <button class="btn" id="submit" onclick="envoyer()">Déposer mon dossier locataire →</button>
+</div>
+
+<script src="messagerie-badge.js" defer></script>
+<script>
+const SUPABASE_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SUPABASE_ANON='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+var currentUser=null, garant='aucun';
+
+(async function(){
+  var {data:{session}}=await db.auth.getSession();
+  if(!session){ window.location.href='connexion.html?next=questionnaire-locataire.html'; return; }
+  currentUser=session.user;
+  document.getElementById('email').value=currentUser.email||'';
+  var m=currentUser.user_metadata||{};
+  if(m.nom) document.getElementById('nom').value=m.nom;
+  calcScore();
+})();
+
+function setGarant(g){
+  garant=g;
+  document.getElementById('g-non').classList.toggle('on',g==='aucun');
+  document.getElementById('g-phy').classList.toggle('on',g==='physique');
+  document.getElementById('g-vis').classList.toggle('on',g==='visale');
+  document.getElementById('rev-garant-wrap').style.display=(g==='physique')?'block':'none';
+  calcScore();
+}
+function piecesCochees(){ return Array.from(document.querySelectorAll('#pieces input:checked')).map(function(c){return c.value;}); }
+
+function calcScore(){
+  var s=0;
+  if(document.getElementById('nom').value.trim()) s+=5;
+  if(document.getElementById('tel').value.trim()) s+=5;
+  if(document.getElementById('loyer_max').value) s+=5;
+  // Solidité pro
+  var pro=document.getElementById('situation_pro').value;
+  if(pro==='cdi'||pro==='fonctionnaire') s+=20; else if(pro==='cdd'||pro==='independant'||pro==='retraite') s+=12; else if(pro) s+=6;
+  var anc=parseInt(document.getElementById('anciennete').value)||0;
+  if(anc>=24) s+=8; else if(anc>=6) s+=4;
+  // Ratio d'effort
+  var rev=parseFloat(document.getElementById('revenus').value)||0;
+  var loyer=parseFloat(document.getElementById('loyer_max').value)||0;
+  if(rev>0&&loyer>0){ var ratio=loyer/rev; if(ratio<=0.33) s+=20; else if(ratio<=0.4) s+=10; }
+  // Garant
+  if(garant==='physique'||garant==='visale') s+=12;
+  // Pièces
+  s+=Math.min(15, piecesCochees().length*3);
+  // Consentement
+  if(document.getElementById('consent').checked) s+=5;
+  s=Math.min(100,s);
+  document.getElementById('score').innerHTML=s+'<span style="font-size:14px;color:var(--muted)">/100</span>';
+  return s;
+}
+
+async function envoyer(){
+  var msg=document.getElementById('msg');
+  var nom=document.getElementById('nom').value.trim();
+  var email=document.getElementById('email').value.trim();
+  var loyer=parseFloat(document.getElementById('loyer_max').value)||null;
+  var rev=parseFloat(document.getElementById('revenus').value)||null;
+  var pro=document.getElementById('situation_pro').value;
+  if(!nom||!email||!loyer||!pro||!rev){ msg.className='msg err'; msg.textContent='Merci de remplir les champs obligatoires (nom, email, loyer max, situation pro, revenus).'; window.scrollTo(0,0); return; }
+  if(!document.getElementById('consent').checked){ msg.className='msg err'; msg.textContent='Merci de cocher le consentement de partage pour être proposé aux bailleurs.'; window.scrollTo(0,0); return; }
+
+  var btn=document.getElementById('submit'); btn.disabled=true; btn.textContent='Enregistrement…';
+  var score=calcScore();
+  var pieces=piecesCochees();
+  var payload={
+    user_id:currentUser.id, email:email, telephone:document.getElementById('tel').value.trim()||null, nom_locataire:nom,
+    type_bien:document.getElementById('type_bien').value, meuble:document.getElementById('meuble').value,
+    localisation:document.getElementById('localisation').value.trim()||null, rayon:document.getElementById('rayon').value,
+    loyer_max:loyer, surface_min:parseFloat(document.getElementById('surface_min').value)||null,
+    nb_pieces_min:parseInt(document.getElementById('pieces_min').value)||null,
+    date_emmenagement:document.getElementById('date_emm').value||null,
+    nb_occupants:parseInt(document.getElementById('occupants').value)||1,
+    situation_pro:pro, anciennete_mois:parseInt(document.getElementById('anciennete').value)||null,
+    revenus_nets:rev, ratio_effort:(rev&&loyer)?Math.round((loyer/rev)*100)/100:null,
+    garant:(garant!=='aucun'), type_garant:garant, revenus_garant:parseFloat(document.getElementById('revenus_garant').value)||null,
+    fumeur:document.getElementById('fumeur').checked, animaux:document.getElementById('animaux').checked,
+    animaux_detail:document.getElementById('animaux_detail').value.trim()||null,
+    pieces_disponibles:pieces, badge_verifie:(pieces.length>=4), score_dossier:score,
+    consentement_partage:true, statut:'actif'
+  };
+  var {error}=await db.from('projets_locataires').insert([payload]);
+  if(error){ msg.className='msg err'; msg.textContent='Erreur : '+error.message; btn.disabled=false; btn.textContent='Déposer mon dossier locataire →'; window.scrollTo(0,0); return; }
+  msg.className='msg ok'; msg.textContent='✅ Dossier déposé ! Les bailleurs correspondants pourront vous contacter. Vous serez notifié par email.'; window.scrollTo(0,0);
+  btn.textContent='Dossier enregistré ✓';
+}
+</script>
+</body>
+</html>
