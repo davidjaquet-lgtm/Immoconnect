@@ -125,11 +125,22 @@ nav .nav-link{margin-right:18px}
           <div class="couche-info">
             <div class="couche-dot" style="background:#1E7A62"></div>
             <div>
-              <div class="couche-name">Biens ImmoConnect</div>
+              <div class="couche-name">🏠 Biens à vendre</div>
               <div class="couche-count" id="count-immo">— annonces</div>
             </div>
           </div>
           <button class="toggle-sw on" id="toggle-immo" onclick="toggleCouche('immo')"><div class="toggle-thumb"></div></button>
+        </div>
+
+        <div class="couche-toggle" style="margin-top:8px">
+          <div class="couche-info">
+            <div class="couche-dot" style="background:#D4732A"></div>
+            <div>
+              <div class="couche-name">🔑 Biens à louer</div>
+              <div class="couche-count" id="count-location">— annonces</div>
+            </div>
+          </div>
+          <button class="toggle-sw on" id="toggle-location" onclick="toggleCouche('location')"><div class="toggle-thumb"></div></button>
         </div>
 
       </div>
@@ -228,6 +239,9 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 layerImmo = L.layerGroup().addTo(map);
+var layerLocation = L.layerGroup().addTo(map);
+var allLocations = [];
+var coucheLocation = true;
 
 
 // ── ICÔNES ──
@@ -301,6 +315,48 @@ function afficherBiens(biens) {
   majResultats();
 }
 
+// ── ICÔNE + CHARGEMENT DES BIENS À LOUER ──
+var iconLocation = L.divIcon({
+  className: '',
+  html: '<div style="width:15px;height:15px;border-radius:50%;background:#D4732A;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 4px rgba(0,0,0,.3)"></div>',
+  iconSize: [15, 15], iconAnchor: [7, 7]
+});
+
+async function chargerLocations() {
+  var { data } = await db.from('biens_location')
+    .select('id,titre,type_bien,surface,nb_pieces,loyer,charges,dpe,ville,code_postal,adresse,latitude,longitude,meuble,statut')
+    .eq('statut', 'actif');
+  allLocations = data || [];
+  document.getElementById('count-location').textContent = allLocations.length + ' annonces';
+}
+
+function afficherLocations(locs) {
+  layerLocation.clearLayers();
+  locs.forEach(function(b) {
+    if (!b.latitude || !b.longitude) return;
+    var marker = L.marker([b.latitude, b.longitude], { icon: iconLocation });
+    var loyerCC = (b.loyer || 0) + (b.charges || 0);
+    var loyerFmt = loyerCC ? Math.round(loyerCC).toLocaleString('fr-FR') + ' € CC/mois' : '—';
+    marker.bindPopup(
+      '<div class="popup-bien">' +
+      '<span class="popup-badge" style="background:#FBE7DA;color:#D4732A">À LOUER</span>' +
+      '<div class="popup-titre">' + (b.titre || b.type_bien + ' · ' + b.ville) + '</div>' +
+      '<div class="popup-meta">' +
+        (b.surface ? b.surface + ' m²' : '') +
+        (b.nb_pieces ? ' · ' + b.nb_pieces + ' pièces' : '') +
+        (b.meuble ? ' · meublé' : '') +
+        (b.dpe ? ' · DPE ' + b.dpe : '') +
+        '<br>📍 ' + (b.adresse ? b.adresse + ', ' : '') + (b.ville || '') +
+      '</div>' +
+      '<div class="popup-prix">' + loyerFmt + '</div>' +
+      '<a href="location.html" class="popup-btn" style="background:#D4732A">Voir / contacter →</a>' +
+      '</div>',
+      { maxWidth: 240 }
+    );
+    layerLocation.addLayer(marker);
+  });
+}
+
 // ── FILTRES ──
 function setChip(el, group) {
   document.querySelectorAll('[data-filter="'+group+'"]').forEach(function(c){ c.classList.remove('active'); });
@@ -341,6 +397,13 @@ function resetFiltres() {
 
 // ── TOGGLE COUCHE IMMO ──
 function toggleCouche(couche) {
+  if (couche === 'location') {
+    var btnL = document.getElementById('toggle-location');
+    coucheLocation = !coucheLocation;
+    btnL.classList.toggle('on', coucheLocation);
+    if (coucheLocation) map.addLayer(layerLocation); else map.removeLayer(layerLocation);
+    return;
+  }
   var btn = document.getElementById('toggle-immo');
   coucheImmo = !coucheImmo;
   btn.classList.toggle('on', coucheImmo);
@@ -370,8 +433,9 @@ async function geocoderBien(bien) {
 // ── INIT ──
 (async function() {
   await chargerBiens();
+  await chargerLocations();
 
-  // Géocoder les biens sans coordonnées
+  // Géocoder les biens (vente) sans coordonnées
   var sansCoords = allBiens.filter(function(b){ return !b.latitude || !b.longitude; });
   for (var i = 0; i < Math.min(sansCoords.length, 20); i++) {
     await geocoderBien(sansCoords[i]);
@@ -379,8 +443,16 @@ async function geocoderBien(bien) {
   }
   afficherBiens(allBiens);
 
-  // Si des biens ont des coordonnées, centrer la carte dessus
-  var avecCoords = allBiens.filter(function(b){ return b.latitude && b.longitude; });
+  // Géocoder les biens (location) sans coordonnées
+  var locSansCoords = allLocations.filter(function(b){ return !b.latitude || !b.longitude; });
+  for (var j = 0; j < Math.min(locSansCoords.length, 20); j++) {
+    await geocoderBien(locSansCoords[j]);
+    await new Promise(function(r){ setTimeout(r, 200); });
+  }
+  afficherLocations(allLocations);
+
+  // Centrer sur l'ensemble (vente + location)
+  var avecCoords = allBiens.concat(allLocations).filter(function(b){ return b.latitude && b.longitude; });
   if (avecCoords.length > 0) {
     var bounds = L.latLngBounds(avecCoords.map(function(b){ return [b.latitude, b.longitude]; }));
     map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
@@ -406,5 +478,6 @@ function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); docu
 </script>
 <script src="feedback.js" defer></script>
   <script src="searchbar.js" defer></script>
+<script src="messagerie-badge.js" defer></script>
 </body>
 </html>
