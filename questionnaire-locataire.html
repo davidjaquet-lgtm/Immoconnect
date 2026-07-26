@@ -29,6 +29,16 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
 .checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .chk{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:9px 11px;cursor:pointer;font-size:13px}
 .chk input{width:auto}
+.uz{border:1.5px dashed var(--line);border-radius:8px;padding:12px;position:relative;background:#fff;display:flex;align-items:center;gap:10px;margin-bottom:8px;cursor:pointer}
+.uz:hover{border-color:var(--teal)}
+.uz input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.uz-ic{font-size:18px}
+.uz-txt{flex:1;font-size:13px}
+.uz-st{font-size:12px;font-weight:600;color:var(--muted)}
+.uz.ok{border-color:var(--teal);border-style:solid;background:#EAF5F1}
+.uz.ok .uz-st{color:var(--teal)}
+.uz.ko{border-color:var(--coral);background:#FBE9E7}
+.uz.ko .uz-st{color:var(--coral)}
 .toggle-row{display:flex;gap:10px;flex-wrap:wrap}
 .toggle{flex:1;min-width:120px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center;cursor:pointer;font-size:13px}
 .toggle.on{border-color:var(--teal);background:#EAF5F1;font-weight:600}
@@ -133,15 +143,32 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
 
   <!-- DOSSIER -->
   <div class="card">
-    <div class="card-t">📎 Pièces que vous pouvez fournir</div>
-    <div class="hint" style="margin-bottom:12px">Cochez ce que vous avez sous la main. Un dossier complet = badge « dossier vérifié » et priorité dans les propositions.</div>
-    <div class="checks" id="pieces">
-      <label class="chk"><input type="checkbox" value="identite" onchange="calcScore()"> Pièce d'identité</label>
-      <label class="chk"><input type="checkbox" value="bulletins" onchange="calcScore()"> 3 derniers bulletins de salaire</label>
-      <label class="chk"><input type="checkbox" value="avis_imposition" onchange="calcScore()"> Avis d'imposition</label>
-      <label class="chk"><input type="checkbox" value="justif_domicile" onchange="calcScore()"> Justificatif de domicile</label>
-      <label class="chk"><input type="checkbox" value="contrat_travail" onchange="calcScore()"> Contrat de travail</label>
-      <label class="chk"><input type="checkbox" value="justif_garant" onchange="calcScore()"> Justificatifs du garant</label>
+    <div class="card-t">📎 Vos pièces justificatives</div>
+    <div class="hint" style="margin-bottom:12px">Glissez vos documents : ils sont <strong>vérifiés à la volée puis abandonnés</strong> (jamais stockés). Chaque pièce validée renforce votre dossier et débloque le badge « vérifié ».</div>
+
+    <div class="uz" id="uz-identite">
+      <input type="file" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc(this,'identite')">
+      <span class="uz-ic">🪪</span><span class="uz-txt">Pièce d'identité</span><span class="uz-st" id="st-identite">Glisser</span>
+    </div>
+    <div class="uz" id="uz-bulletin_salaire">
+      <input type="file" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc(this,'bulletin_salaire')">
+      <span class="uz-ic">💶</span><span class="uz-txt">Bulletin de salaire</span><span class="uz-st" id="st-bulletin_salaire">Glisser</span>
+    </div>
+    <div class="uz" id="uz-avis_imposition">
+      <input type="file" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc(this,'avis_imposition')">
+      <span class="uz-ic">🧾</span><span class="uz-txt">Avis d'imposition</span><span class="uz-st" id="st-avis_imposition">Glisser</span>
+    </div>
+    <div class="uz" id="uz-contrat_travail">
+      <input type="file" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc(this,'contrat_travail')">
+      <span class="uz-ic">📄</span><span class="uz-txt">Contrat de travail</span><span class="uz-st" id="st-contrat_travail">Glisser</span>
+    </div>
+    <div class="uz" id="uz-justif_domicile">
+      <input type="file" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc(this,'justif_domicile')">
+      <span class="uz-ic">🏠</span><span class="uz-txt">Justificatif de domicile</span><span class="uz-st" id="st-justif_domicile">Glisser</span>
+    </div>
+    <div class="uz" id="uz-justif_garant">
+      <input type="file" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc(this,'justif_garant')">
+      <span class="uz-ic">🤝</span><span class="uz-txt">Justificatif du garant</span><span class="uz-st" id="st-justif_garant">Glisser</span>
     </div>
   </div>
 
@@ -178,7 +205,32 @@ function setGarant(g){
   document.getElementById('rev-garant-wrap').style.display=(g==='physique')?'block':'none';
   calcScore();
 }
-function piecesCochees(){ return Array.from(document.querySelectorAll('#pieces input:checked')).map(function(c){return c.value;}); }
+var docsVerifies = {}; // doc_type -> extrait (vérifié à la volée, JAMAIS stocké)
+function piecesCochees(){ return Object.keys(docsVerifies); }
+
+async function uploadDoc(input, docType){
+  var file = input.files[0]; if(!file) return;
+  var zone = document.getElementById('uz-'+docType);
+  var st = document.getElementById('st-'+docType);
+  zone.classList.remove('ok','ko'); st.textContent='⏳ Vérification…';
+  try {
+    var b64 = await new Promise(function(res,rej){var r=new FileReader();r.onload=function(e){res(e.target.result.split(',')[1]);};r.onerror=rej;r.readAsDataURL(file);});
+    var mt = file.type==='application/pdf'?'application/pdf':(file.type||'image/jpeg');
+    var resp = await db.functions.invoke('ocr-documents', { body:{ type:'valider_doc_locataire', doc_type:docType, image_base64:b64, media_type:mt } });
+    var rr = (resp && resp.data) || {};
+    if (rr.statut === 'ok') {
+      docsVerifies[docType] = rr.extrait || {};
+      zone.classList.add('ok'); st.textContent='✅ Vérifié';
+    } else {
+      delete docsVerifies[docType]; input.value='';
+      zone.classList.add('ko'); st.textContent='❌ Non reconnu';
+    }
+  } catch(e){
+    delete docsVerifies[docType]; input.value='';
+    zone.classList.add('ko'); st.textContent='❌ Erreur';
+  }
+  calcScore();
+}
 
 function calcScore(){
   var s=0;
