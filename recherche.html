@@ -88,6 +88,8 @@
     <a href="forfaits.html">Forfaits</a>
     <a href="vendre.html">Vendre</a>
     <a href="recherche.html" class="active">Acheter</a>
+    <a href="location.html">Louer</a>
+    <a href="questionnaire-bailleur.html">Mettre en location</a>
     <a href="blog.html">Blog</a>
     <a href="connexion.html" class="btn-nav" id="nav-account">Connexion</a>
   </div>
@@ -548,6 +550,8 @@ async function majHeaderCompte(session) {
   majHeaderCompte();
   try { db.auth.onAuthStateChange(function(_e, s){ majHeaderCompte(s); }); } catch(e) {}
   await chargerFavSet();
+  var _mp = new URLSearchParams(location.search);
+  if (_mp.get('mode') === 'location') { setMode('location'); return; }
   chercher(valeurs());
 })();
 </script>

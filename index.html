@@ -623,6 +623,8 @@
     <a href="forfaits.html">Forfaits</a>
     <a href="vendre.html" class="btn-nav-gold">Vendre</a>
     <a href="questionnaire-acheteur.html">Acheter</a>
+    <a href="location.html">Louer</a>
+    <a href="questionnaire-bailleur.html">Mettre en location</a>
     <a href="forfaits.html" onclick="localStorage.setItem('ic_tab','agents')">Agents immo</a>
     <a href="blog.html">Blog</a>
     <a href="calendrier.html">📅</a><a href="messagerie.html">💬</a><a href="connexion.html" class="btn-nav" id="nav-account">Connexion</a>
@@ -1319,6 +1321,13 @@ async function majHeroRendement(){
   var lock = document.getElementById('hero-rendement-lock');
   if (wrap) wrap.style.display = heroForfait ? '' : 'none';
   if (lock) lock.style.display = heroForfait ? 'none' : '';
+  if (new URLSearchParams(location.search).get('debugforfait')) {
+    var _u = null; try { _u = (await db.auth.getUser()).data.user; } catch(e){}
+    alert('Diagnostic forfait (ACCUEIL)\n\n'
+      + 'Connecté : ' + (_u ? _u.email : 'NON CONNECTÉ') + '\n'
+      + 'Champ rendement visible : ' + (heroForfait ? 'OUI' : 'NON') + '\n\n'
+      + 'Si tu es connecté en davidjaquet@live.fr et que c\'est NON,\nc\'est que cette version n\'est pas encore en ligne (déploiement/cache).');
+  }
 }
 majHeroRendement();
 
@@ -1395,7 +1404,7 @@ async function renderAgents() {
   const grid = document.getElementById('agentsGrid');
   let agents = [];
   try {
-    const { data } = await db.from('agents_validation')
+    const { data } = await db.from('agents_publics')
       .select('nom, prenom, agence, note_moyenne, nb_notations, secteurs')
       .eq('statut', 'valide')
       .order('note_moyenne', { ascending: false })
@@ -1581,5 +1590,6 @@ function htEstimer(){
 </script>
 <script src="feedback.js" defer></script>
   <script src="searchbar.js" defer></script>
+<script src="messagerie-badge.js" defer></script>
 </body>
 </html>
