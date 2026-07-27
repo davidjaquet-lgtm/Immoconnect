@@ -145,13 +145,49 @@ const db=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
 var currentUser=null;
 var bailleurCoords={lat:null,lng:null};
 
+var editId = null;
 (async function(){
   var {data:{session}}=await db.auth.getSession();
-  if(!session){ window.location.href='connexion.html?next=questionnaire-bailleur.html'; return; }
+  if(!session){ window.location.href='connexion.html?next=questionnaire-bailleur.html'+(location.search||''); return; }
   currentUser=session.user;
   initAutocompleteAdresse({input:'adresse', inputVille:'ville', inputCP:'cp', onSelect:function(r){ bailleurCoords={lat:r.lat,lng:r.lng}; }});
-  renderPhotos();
+  editId = new URLSearchParams(location.search).get('edit');
+  if(editId){ await chargerBienEdition(editId); } else { renderPhotos(); }
 })();
+
+async function chargerBienEdition(id){
+  var {data:b,error}=await db.from('biens_location').select('*').eq('id',id).single();
+  if(error||!b){ renderPhotos(); return; }
+  document.getElementById('titre').value=b.titre||'';
+  (b.type_bien||'').split(',').forEach(function(t){ var cb=document.querySelector('.tb[value="'+t.trim()+'"]'); if(cb) cb.checked=true; });
+  document.getElementById('meuble').value=b.meuble?'true':'false';
+  document.getElementById('adresse').value=b.adresse||'';
+  document.getElementById('ville').value=b.ville||'';
+  document.getElementById('cp').value=b.code_postal||'';
+  document.getElementById('surface').value=b.surface||'';
+  document.getElementById('pieces').value=b.nb_pieces||'';
+  document.getElementById('etage').value=b.etage||'';
+  document.getElementById('loyer').value=b.loyer||'';
+  document.getElementById('charges').value=b.charges||'';
+  document.getElementById('type_charges').value=b.type_charges||'provision';
+  document.getElementById('dpe').value=b.dpe||'';
+  document.getElementById('date_dispo').value=b.date_disponibilite||'';
+  document.getElementById('description').value=b.description||'';
+  document.getElementById('contrat').value=b.type_contrat_souhaite||'tous';
+  document.getElementById('ratio').value=b.ratio_revenus_min||3;
+  document.getElementById('occ_max').value=b.nb_occupants_max||'';
+  document.getElementById('gli').checked=!!b.gli;
+  document.getElementById('garant_exige').checked=!!b.garant_exige;
+  document.getElementById('visale_ok').checked=(b.garant_visale_ok!==false);
+  document.getElementById('fumeur_ok').checked=(b.fumeur_accepte!==false);
+  document.getElementById('animaux_ok').checked=(b.animaux_accepte!==false);
+  if(b.latitude&&b.longitude) bailleurCoords={lat:b.latitude,lng:b.longitude};
+  photosBailleur=(b.photos||[]).map(function(u){ return {existante:u, url:u}; });
+  renderPhotos();
+  var h1=document.querySelector('h1'); if(h1) h1.textContent='✏️ Modifier mon bien';
+  document.getElementById('submit').textContent='Mettre à jour →';
+  var banner=document.querySelector('.banner'); if(banner) banner.style.display='none';
+}
 
 const BUCKET='immoconnect-docs';
 var photosBailleur=[]; // {file,url}
@@ -170,6 +206,7 @@ function delPhoto(i){ photosBailleur.splice(i,1); renderPhotos(); }
 async function uploadPhotosBailleur(){
   var urls=[];
   for(var i=0;i<photosBailleur.length;i++){
+    if(photosBailleur[i].existante){ urls.push(photosBailleur[i].existante); continue; }
     var f=photosBailleur[i].file, ext=(f.name.split('.').pop()||'jpg');
     var path='location/photos/'+Date.now()+'_'+i+'.'+ext;
     var {error}=await db.storage.from(BUCKET).upload(path,f,{upsert:true});
@@ -205,15 +242,23 @@ async function envoyer(){
     animaux_accepte:document.getElementById('animaux_ok').checked,
     nb_occupants_max:parseInt(document.getElementById('occ_max').value)||null,
     latitude:bailleurCoords.lat, longitude:bailleurCoords.lng,
-    photos:photoUrls,
-    forfait:'gratuit', statut:'actif'
+    photos:photoUrls
   };
-  var {data:ins, error}=await db.from('biens_location').insert([payload]).select('id').single();
-  if(error){ msg.className='msg err'; msg.textContent='Erreur : '+error.message; btn.disabled=false; btn.textContent='Publier mon bien en location →'; window.scrollTo(0,0); return; }
-  // Prévenir les locataires dont la recherche correspond (best-effort, non bloquant)
-  if(ins && ins.id){ db.functions.invoke('alerter-location',{body:{type:'nouveau_bien',bien_id:ins.id}}).catch(function(){}); }
-  msg.className='msg ok'; msg.textContent='✅ Bien publié ! Vous recevrez les dossiers locataires correspondant à vos critères.'; window.scrollTo(0,0);
-  btn.textContent='Bien publié ✓';
+
+  var reponse;
+  if(editId){
+    reponse = await db.from('biens_location').update(payload).eq('id',editId).select('id').single();
+  } else {
+    payload.forfait='gratuit'; payload.statut='actif';
+    reponse = await db.from('biens_location').insert([payload]).select('id').single();
+  }
+  var ins=reponse.data, error=reponse.error;
+  if(error){ msg.className='msg err'; msg.textContent='Erreur : '+error.message; btn.disabled=false; btn.textContent=editId?'Mettre à jour →':'Publier mon bien en location →'; window.scrollTo(0,0); return; }
+  // Notifier les locataires uniquement à la PREMIÈRE publication
+  if(ins && ins.id && !editId){ db.functions.invoke('alerter-location',{body:{type:'nouveau_bien',bien_id:ins.id}}).catch(function(){}); }
+  msg.className='msg ok'; msg.textContent=editId?'✅ Bien mis à jour !':'✅ Bien publié ! Vous recevrez les dossiers locataires correspondant à vos critères.'; window.scrollTo(0,0);
+  btn.textContent=editId?'Mis à jour ✓':'Bien publié ✓';
+  if(editId){ setTimeout(function(){ window.location.href='dashboard-bailleur.html'; }, 1200); }
 }
 </script>
 </body>
