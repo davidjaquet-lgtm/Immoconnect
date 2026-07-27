@@ -236,6 +236,8 @@ var convPourNotation = null;
 
   await chargerConversations();
   await ouvrirDepuisAnnonceAgent();
+  var _cv = new URLSearchParams(location.search).get('conv');
+  if (_cv) { try { await ouvrirConv(_cv); } catch(e){} }
 })();
 
 // Ouvre (ou crée) la conversation agent↔vendeur quand un agent arrive avec ?annonce=
