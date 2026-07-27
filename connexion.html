@@ -641,6 +641,14 @@ async function afficherDashboard(user) {
     return;
   }
 
+  // Hub « Mon espace » = destination par défaut après connexion (gère le multi-rôles).
+  // On honore d'abord un ?next= explicite (ex. retour vers un questionnaire/dashboard précis).
+  var _npParam = new URLSearchParams(window.location.search).get('next');
+  if (_npParam) { window.location.href = _npParam; return; }
+  if (new URLSearchParams(window.location.search).get('stay') !== '1') {
+    window.location.href = 'mon-espace.html'; return;
+  }
+
   document.getElementById('login-page').style.display  = 'none';
   document.getElementById('dash-page').style.display   = 'block';
   document.getElementById('dash-loading').style.display = 'block';

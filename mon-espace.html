@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon espace — ImmoConnect</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--amber:#D4732A;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}.nav-logo span{color:var(--gold)}
+.nav-sp{flex:1}
+nav a.nl{color:#fff;text-decoration:none;font-size:13px;opacity:.85}nav a.nl:hover{opacity:1}
+.page{max-width:900px;margin:0 auto;padding:36px 20px 80px}
+h1{font-size:26px;font-weight:600;margin-bottom:4px}
+.hi{color:var(--muted);margin-bottom:8px}
+.section-t{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:26px 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:20px;text-decoration:none;color:var(--ink);display:flex;flex-direction:column;gap:6px;transition:box-shadow .2s,transform .2s}
+.card:hover{box-shadow:0 8px 26px rgba(0,0,0,.07);transform:translateY(-2px)}
+.card .ic{font-size:26px}
+.card .t{font-size:16px;font-weight:600}
+.card .d{font-size:12px;color:var(--muted);line-height:1.5}
+.card .cta{font-size:12px;font-weight:600;color:var(--teal);margin-top:4px}
+.card.add{border-style:dashed;background:transparent}
+.loading{text-align:center;padding:60px;color:var(--muted)}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-sp"></div>
+  <a href="index.html" class="nl">Accueil</a>
+  <a href="messagerie.html" class="nl">💬</a>
+  <a href="#" class="nl" onclick="deconnexion();return false">Déconnexion</a>
+</nav>
+
+<div class="page">
+  <h1 id="titre">Mon espace</h1>
+  <p class="hi" id="hi"></p>
+  <div id="contenu"><div class="loading">Chargement…</div></div>
+</div>
+
+<script src="messagerie-badge.js" defer></script>
+<script>
+const SB_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const db=supabase.createClient(SB_URL,SB_KEY);
+var currentUser=null;
+
+(async function(){
+  var {data:{session}}=await db.auth.getSession();
+  if(!session){ window.location.href='connexion.html?next=mon-espace.html'; return; }
+  currentUser=session.user;
+  var meta=currentUser.user_metadata||{};
+  var prenom=(meta.nom||'').split(' ')[0]||'';
+  document.getElementById('hi').textContent='Bonjour'+(prenom?' '+prenom:'')+' — voici vos espaces.';
+  await construire(meta);
+})();
+
+async function construire(meta){
+  var profils = Array.isArray(meta.profils)?meta.profils:[];
+
+  // Détecter la présence de données location
+  var aBiensLoc=false, aDossierLoc=false;
+  try{ var rb=await db.from('biens_location').select('id').or('user_id.eq.'+currentUser.id+',email_bailleur.ilike.'+currentUser.email).limit(1); aBiensLoc=!!(rb.data&&rb.data.length); }catch(e){}
+  try{ var rl=await db.from('projets_locataires').select('id').or('user_id.eq.'+currentUser.id+',email.ilike.'+currentUser.email).limit(1); aDossierLoc=!!(rl.data&&rl.data.length); }catch(e){}
+
+  var cartes=[];
+
+  // ── Espaces selon profils (métadonnées) ──
+  if(profils.indexOf('vendeur')!==-1)
+    cartes.push(carte('🏠','Espace vendeur','Gérez vos annonces de vente et vos messages.','dashboard-vendeur.html','Ouvrir'));
+  if(profils.indexOf('agent')!==-1)
+    cartes.push(carte('🤝','Espace agent','Vos annonces suivies, contacts et prospection.','dashboard-agent.html','Ouvrir'));
+  if(profils.indexOf('acheteur')!==-1 || profils.indexOf('investisseur')!==-1)
+    cartes.push(carte('🔑','Espace acheteur','Votre projet d\'achat et vos biens favoris.','dashboard.html','Ouvrir'));
+
+  var htmlAchatVente = cartes.length ? '<div class="section-t">Achat / Vente</div><div class="grid">'+cartes.join('')+'</div>' : '';
+
+  // ── Espaces location (toujours proposés) ──
+  var loc=[];
+  loc.push(aBiensLoc
+    ? carte('🏠','Mes biens en location','Gérez vos biens, dossiers reçus et disponibilité.','dashboard-bailleur.html','Ouvrir')
+    : carte('🏠','Mettre en location','Publiez un bien et recevez des dossiers qualifiés.','questionnaire-bailleur.html','Commencer'));
+  loc.push(aDossierLoc
+    ? carte('🔑','Mon dossier location','Suivez votre dossier et les biens qui correspondent.','dashboard-locataire.html','Ouvrir')
+    : carte('🔑','Je cherche à louer','Déposez votre dossier et soyez contacté par les bailleurs.','questionnaire-locataire.html','Commencer'));
+  var htmlLoc = '<div class="section-t">Location</div><div class="grid">'+loc.join('')+'</div>';
+
+  var out = htmlAchatVente + htmlLoc;
+  // Si aucun profil achat/vente, proposer d'en démarrer un
+  if(!cartes.length){
+    out += '<div class="section-t">Autres espaces</div><div class="grid">'
+      + carte('🏠','Vendre un bien','Estimez et publiez votre bien à la vente.','questionnaire-vendeur.html','Commencer')
+      + carte('🔑','Acheter','Déposez votre projet d\'achat.','questionnaire-acheteur.html','Commencer')
+      + '</div>';
+  }
+  document.getElementById('contenu').innerHTML=out;
+}
+
+function carte(ic,t,d,href,cta){
+  return '<a class="card" href="'+href+'"><div class="ic">'+ic+'</div>'
+    +'<div class="t">'+t+'</div><div class="d">'+d+'</div>'
+    +'<div class="cta">'+cta+' →</div></a>';
+}
+
+async function deconnexion(){ await db.auth.signOut(); window.location.href='index.html'; }
+</script>
+</body>
+</html>
