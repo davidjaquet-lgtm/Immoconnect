@@ -186,18 +186,48 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
 const SUPABASE_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
 const SUPABASE_ANON='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
-var currentUser=null, garant='aucun';
+var currentUser=null, garant='aucun', editId=null, editPieces=[], editBadge=false;
 
 (async function(){
   var {data:{session}}=await db.auth.getSession();
-  if(!session){ window.location.href='connexion.html?next=questionnaire-locataire.html'; return; }
+  if(!session){ window.location.href='connexion.html?next=questionnaire-locataire.html'+(location.search||''); return; }
   currentUser=session.user;
   document.getElementById('email').value=currentUser.email||'';
   var m=currentUser.user_metadata||{};
   if(m.nom) document.getElementById('nom').value=m.nom;
   initAutocompleteAdresse({input:'localisation', type:'municipality', fillLabel:true});
+  editId = new URLSearchParams(location.search).get('edit');
+  if(editId){ await chargerDossierEdition(editId); }
   calcScore();
 })();
+
+async function chargerDossierEdition(id){
+  var {data:d,error}=await db.from('projets_locataires').select('*').eq('id',id).single();
+  if(error||!d) return;
+  document.getElementById('nom').value=d.nom_locataire||'';
+  document.getElementById('tel').value=d.telephone||'';
+  document.getElementById('email').value=d.email||currentUser.email||'';
+  document.getElementById('occupants').value=d.nb_occupants||1;
+  document.getElementById('type_bien').value=d.type_bien||'appartement';
+  document.getElementById('meuble').value=d.meuble||'indifferent';
+  document.getElementById('localisation').value=d.localisation||'';
+  document.getElementById('rayon').value=d.rayon||'0';
+  document.getElementById('loyer_max').value=d.loyer_max||'';
+  document.getElementById('surface_min').value=d.surface_min||'';
+  document.getElementById('pieces_min').value=d.nb_pieces_min||'';
+  document.getElementById('date_emm').value=d.date_emmenagement||'';
+  document.getElementById('situation_pro').value=d.situation_pro||'';
+  document.getElementById('anciennete').value=d.anciennete_mois||'';
+  document.getElementById('revenus').value=d.revenus_nets||'';
+  if(d.type_garant) setGarant(d.type_garant);
+  if(d.revenus_garant) document.getElementById('revenus_garant').value=d.revenus_garant;
+  document.getElementById('fumeur').checked=!!d.fumeur;
+  if(d.animaux){ document.getElementById('animaux').checked=true; document.getElementById('ani-d').style.display='block'; document.getElementById('animaux_detail').value=d.animaux_detail||''; }
+  document.getElementById('consent').checked=!!d.consentement_partage;
+  editPieces=d.pieces_disponibles||[]; editBadge=!!d.badge_verifie;
+  var h1=document.querySelector('h1'); if(h1) h1.textContent='✏️ Modifier mon dossier';
+  document.getElementById('submit').textContent='Mettre à jour →';
+}
 
 function setGarant(g){
   garant=g;
@@ -272,6 +302,7 @@ async function envoyer(){
   var btn=document.getElementById('submit'); btn.disabled=true; btn.textContent='Enregistrement…';
   var score=calcScore();
   var pieces=piecesCochees();
+  if(editId && !pieces.length){ pieces=editPieces; } // garder les pièces déjà vérifiées si pas de nouvel upload
   var payload={
     user_id:currentUser.id, email:email, telephone:document.getElementById('tel').value.trim()||null, nom_locataire:nom,
     type_bien:document.getElementById('type_bien').value, meuble:document.getElementById('meuble').value,
@@ -285,15 +316,23 @@ async function envoyer(){
     garant:(garant!=='aucun'), type_garant:garant, revenus_garant:parseFloat(document.getElementById('revenus_garant').value)||null,
     fumeur:document.getElementById('fumeur').checked, animaux:document.getElementById('animaux').checked,
     animaux_detail:document.getElementById('animaux_detail').value.trim()||null,
-    pieces_disponibles:pieces, badge_verifie:(pieces.length>=4), score_dossier:score,
-    consentement_partage:true, statut:'actif'
+    pieces_disponibles:pieces, badge_verifie:(pieces.length>=4)||(editId&&editBadge), score_dossier:score,
+    consentement_partage:true
   };
-  var {data:ins, error}=await db.from('projets_locataires').insert([payload]).select('id').single();
-  if(error){ msg.className='msg err'; msg.textContent='Erreur : '+error.message; btn.disabled=false; btn.textContent='Déposer mon dossier locataire →'; window.scrollTo(0,0); return; }
-  // Prévenir les bailleurs dont le bien correspond (best-effort, non bloquant)
-  if(ins && ins.id){ db.functions.invoke('alerter-location',{body:{type:'nouveau_locataire',locataire_id:ins.id}}).catch(function(){}); }
-  msg.className='msg ok'; msg.textContent='✅ Dossier déposé ! Les bailleurs correspondants pourront vous contacter. Vous serez notifié par email.'; window.scrollTo(0,0);
-  btn.textContent='Dossier enregistré ✓';
+  var reponse;
+  if(editId){
+    reponse = await db.from('projets_locataires').update(payload).eq('id',editId).select('id').single();
+  } else {
+    payload.statut='actif';
+    reponse = await db.from('projets_locataires').insert([payload]).select('id').single();
+  }
+  var ins=reponse.data, error=reponse.error;
+  if(error){ msg.className='msg err'; msg.textContent='Erreur : '+error.message; btn.disabled=false; btn.textContent=editId?'Mettre à jour →':'Déposer mon dossier locataire →'; window.scrollTo(0,0); return; }
+  // Notifier les bailleurs uniquement au PREMIER dépôt
+  if(ins && ins.id && !editId){ db.functions.invoke('alerter-location',{body:{type:'nouveau_locataire',locataire_id:ins.id}}).catch(function(){}); }
+  msg.className='msg ok'; msg.textContent=editId?'✅ Dossier mis à jour !':'✅ Dossier déposé ! Les bailleurs correspondants pourront vous contacter. Vous serez notifié par email.'; window.scrollTo(0,0);
+  btn.textContent=editId?'Mis à jour ✓':'Dossier enregistré ✓';
+  if(editId){ setTimeout(function(){ window.location.href='dashboard-locataire.html'; }, 1200); }
 }
 </script>
 </body>

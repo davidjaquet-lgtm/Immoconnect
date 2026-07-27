@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon dossier de location — ImmoConnect</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--amber:#D4732A;--red:#A32D2D;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}.nav-logo span{color:var(--gold)}
+.nav-sp{flex:1}
+nav a.nl{color:#fff;text-decoration:none;font-size:13px;opacity:.85}nav a.nl:hover{opacity:1}
+.page{max-width:920px;margin:0 auto;padding:28px 20px 80px}
+.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+h1{font-size:24px;font-weight:600}
+h2{font-size:17px;font-weight:600;margin:26px 0 12px}
+.btn-add{background:var(--teal);color:#fff;text-decoration:none;padding:11px 18px;border-radius:9px;font-weight:600;font-size:14px}
+.card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:14px}
+.doss-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.doss-t{font-size:16px;font-weight:600}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px}
+.badge.actif{background:#EAF5F1;color:var(--teal)}.badge.pause{background:#F1EFE8;color:var(--muted)}
+.badge.verif{background:#E6F1FB;color:var(--blue);margin-left:6px}
+.doss-meta{font-size:13px;color:var(--muted);line-height:1.9;margin:8px 0}
+.score{font-size:13px;font-weight:600;color:var(--teal)}
+.bar{height:7px;background:#EFECE4;border-radius:4px;overflow:hidden;margin:6px 0 12px;max-width:260px}
+.bar span{display:block;height:100%;background:var(--teal)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.act{font-size:12px;padding:7px 12px;border-radius:7px;border:1px solid var(--line);background:#fff;cursor:pointer;font-family:inherit;color:var(--ink);text-decoration:none;display:inline-block}
+.act:hover{border-color:var(--muted)}
+.act.danger{color:var(--red);border-color:#EBD3D3}
+.bien{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px;display:flex;gap:14px}
+.bien-img{width:110px;height:82px;border-radius:8px;object-fit:cover;background:#EFECE4;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--muted)}
+.bien-body{flex:1;min-width:0}
+.bien-titre{font-size:15px;font-weight:600}
+.bien-loyer{font-size:15px;font-weight:600;color:var(--amber)}
+.bien-meta{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.6}
+.empty{text-align:center;padding:50px 20px;color:var(--muted)}.empty .ic{font-size:38px;margin-bottom:12px}
+.loading{text-align:center;padding:40px;color:var(--muted)}
+@media(max-width:600px){.bien{flex-direction:column}.bien-img{width:100%;height:150px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-sp"></div>
+  <a href="recherche.html?mode=location" class="nl">Louer</a>
+  <a href="messagerie.html" class="nl">💬</a>
+  <a href="connexion.html" class="nl">Mon compte</a>
+</nav>
+
+<div class="page">
+  <div class="head">
+    <h1>🔑 Mon dossier de location</h1>
+    <a href="questionnaire-locataire.html" class="btn-add" id="btn-new" style="display:none">+ Déposer un dossier</a>
+  </div>
+
+  <div id="dossier"><div class="loading">Chargement…</div></div>
+
+  <div id="matchs-wrap" style="display:none">
+    <h2>🏠 Biens correspondant à votre recherche</h2>
+    <div id="matchs"><div class="loading">Recherche…</div></div>
+  </div>
+</div>
+
+<script src="messagerie-badge.js" defer></script>
+<script>
+const SB_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const db=supabase.createClient(SB_URL,SB_KEY);
+var currentUser=null, monDossier=null;
+
+(async function(){
+  var {data:{session}}=await db.auth.getSession();
+  if(!session){ window.location.href='connexion.html?next=dashboard-locataire.html'; return; }
+  currentUser=session.user;
+  await charger();
+})();
+
+async function charger(){
+  var {data,error}=await db.from('projets_locataires').select('*')
+    .or('user_id.eq.'+currentUser.id+',email.ilike.'+currentUser.email)
+    .order('created_at',{ascending:false}).limit(1);
+  if(error){ document.getElementById('dossier').innerHTML='<div class="empty">Erreur de chargement.</div>'; return; }
+  monDossier=(data&&data[0])||null;
+  render();
+}
+
+function render(){
+  var wrap=document.getElementById('dossier');
+  if(!monDossier){
+    document.getElementById('btn-new').style.display='none';
+    wrap.innerHTML='<div class="empty"><div class="ic">🔑</div>Vous n\'avez pas encore déposé de dossier de location.<br><br><a href="questionnaire-locataire.html" class="btn-add">+ Déposer mon dossier</a></div>';
+    return;
+  }
+  var d=monDossier;
+  var enPause=(d.statut!=='actif');
+  var meuble=d.meuble==='meuble'?'meublé':(d.meuble==='non_meuble'?'non meublé':'indifférent');
+  wrap.innerHTML='<div class="card">'
+    +'<div class="doss-top"><div>'
+    +'<span class="doss-t">'+(d.nom_locataire||'Mon dossier')+'</span>'
+    +'<span class="badge '+(enPause?'pause':'actif')+'">'+(enPause?'En pause':'Actif')+'</span>'
+    +(d.badge_verifie?'<span class="badge verif">✅ Vérifié</span>':'')+'</div></div>'
+    +'<div class="score">Score du dossier : '+(d.score_dossier||0)+'/100</div>'
+    +'<div class="bar"><span style="width:'+(d.score_dossier||0)+'%"></span></div>'
+    +'<div class="doss-meta">'
+    +'🔎 Recherche : '+(d.type_bien||'—')+' · '+(d.localisation||'—')+' · '+meuble+'<br>'
+    +'💶 Budget : '+(d.loyer_max?Math.round(d.loyer_max).toLocaleString('fr-FR')+' € CC/mois':'—')
+    +' · 📐 '+(d.surface_min?d.surface_min+' m² min':'—')+' · '+(d.nb_pieces_min?d.nb_pieces_min+' pièces min':'—')+'<br>'
+    +'💼 '+(d.situation_pro||'—')+' · Revenus '+(d.revenus_nets?Math.round(d.revenus_nets).toLocaleString('fr-FR')+' €':'—')
+    +' · 🤝 Garant : '+(d.garant?(d.type_garant||'oui'):'non')
+    +'</div>'
+    +'<div class="actions">'
+    +'<a class="act" href="questionnaire-locataire.html?edit='+d.id+'">✏️ Modifier</a>'
+    +'<button class="act" onclick="togglePause('+enPause+')">'+(enPause?'▶️ Réactiver':'⏸️ Mettre en pause')+'</button>'
+    +'<button class="act danger" onclick="supprimer()">🗑️ Supprimer</button>'
+    +'</div></div>';
+  document.getElementById('btn-new').style.display='none';
+  chargerMatchs();
+}
+
+async function chargerMatchs(){
+  document.getElementById('matchs-wrap').style.display='block';
+  var box=document.getElementById('matchs');
+  var {data}=await db.rpc('matcher_biens_pour_locataire',{p_locataire_id:monDossier.id});
+  var biens=data||[];
+  if(!biens.length){ box.innerHTML='<div class="empty" style="padding:30px">Aucun bien compatible pour l\'instant. Vous serez notifié par email dès qu\'un bien correspond.</div>'; return; }
+  box.innerHTML=biens.map(function(b){
+    var loyerCC=(Number(b.loyer)||0)+(Number(b.charges)||0);
+    var img=(b.photos&&b.photos[0])?'<img class="bien-img" src="'+b.photos[0]+'">':'<div class="bien-img">🏠</div>';
+    return '<div class="bien">'+img+'<div class="bien-body">'
+      +'<div style="display:flex;justify-content:space-between;gap:10px"><div class="bien-titre">'+(b.titre||b.type_bien||'Bien')+'</div>'
+      +'<div class="bien-loyer">'+(loyerCC?Math.round(loyerCC).toLocaleString('fr-FR')+' € CC':'—')+'</div></div>'
+      +'<div class="bien-meta">📍 '+(b.ville||'—')+' · '+(b.surface||'—')+' m² · '+(b.nb_pieces||'—')+' pièces'+(b.meuble?' · meublé':'')+(b.dpe?' · DPE '+b.dpe:'')+'</div>'
+      +'<a class="act" style="margin-top:8px" href="messagerie.html">💬 Contacter</a>'
+      +'</div></div>';
+  }).join('');
+}
+
+async function togglePause(enPause){
+  var nouveau=enPause?'actif':'pourvu';
+  var {error}=await db.from('projets_locataires').update({statut:nouveau}).eq('id',monDossier.id);
+  if(error){ alert('Erreur : '+error.message); return; }
+  await charger();
+}
+
+async function supprimer(){
+  if(!confirm('Supprimer définitivement votre dossier de location ?')) return;
+  var r=await db.from('projets_locataires').delete().eq('id',monDossier.id).select('id');
+  if(r.error){ alert('Erreur : '+r.error.message); return; }
+  if(!r.data||!r.data.length){ alert('Suppression impossible (droits).'); return; }
+  monDossier=null; render();
+  document.getElementById('matchs-wrap').style.display='none';
+}
+</script>
+</body>
+</html>
