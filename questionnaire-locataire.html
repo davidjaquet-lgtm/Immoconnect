@@ -286,8 +286,10 @@ async function envoyer(){
     pieces_disponibles:pieces, badge_verifie:(pieces.length>=4), score_dossier:score,
     consentement_partage:true, statut:'actif'
   };
-  var {error}=await db.from('projets_locataires').insert([payload]);
+  var {data:ins, error}=await db.from('projets_locataires').insert([payload]).select('id').single();
   if(error){ msg.className='msg err'; msg.textContent='Erreur : '+error.message; btn.disabled=false; btn.textContent='Déposer mon dossier locataire →'; window.scrollTo(0,0); return; }
+  // Prévenir les bailleurs dont le bien correspond (best-effort, non bloquant)
+  if(ins && ins.id){ db.functions.invoke('alerter-location',{body:{type:'nouveau_locataire',locataire_id:ins.id}}).catch(function(){}); }
   msg.className='msg ok'; msg.textContent='✅ Dossier déposé ! Les bailleurs correspondants pourront vous contacter. Vous serez notifié par email.'; window.scrollTo(0,0);
   btn.textContent='Dossier enregistré ✓';
 }

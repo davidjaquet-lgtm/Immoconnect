@@ -148,19 +148,17 @@ window.addEventListener('DOMContentLoaded', async function() {
     return;
   }
 
-  // Charger la réservation
-  var query = db.from('reservations_visites').select('*, annonces_vendeurs(titre, type_bien, surface, ville)');
-  if (reservationId) query = query.eq('id', reservationId);
+  // Charger la réservation via la fonction serveur (table verrouillée)
+  var charge = await db.functions.invoke('noter-visite', { body: { action: 'load', reservation_id: reservationId } });
+  var data = (charge && charge.data) ? charge.data : null;
 
-  var { data, error } = await query.single();
-
-  if (error || !data) {
+  if (!data || !data.ok) {
     afficherErreur('Visite introuvable', 'Impossible de trouver cette visite dans notre système.');
     return;
   }
 
   // Vérifier si déjà noté
-  if (data.note_acheteur) {
+  if (data.deja_note) {
     afficherErreur('Déjà noté', 'Vous avez déjà soumis un avis pour cette visite. Merci !');
     return;
   }
@@ -168,7 +166,7 @@ window.addEventListener('DOMContentLoaded', async function() {
   agentEmail = data.agent_email;
 
   // Afficher les infos du bien
-  var ann = data.annonces_vendeurs;
+  var ann = data.bien;
   if (ann) {
     var titre = ann.titre || ((ann.type_bien || 'Bien') + (ann.surface ? ' ' + ann.surface + 'm²' : '') + ' — ' + (ann.ville || ''));
     document.getElementById('bien-titre').textContent = titre;
@@ -213,17 +211,14 @@ async function soumettre() {
 
   var avisTexte = document.getElementById('avis-texte').value.trim();
 
-  // Enregistrer la note
-  var { error } = await db.from('reservations_visites').update({
-    note_acheteur: noteSelectionnee,
-    avis_acheteur: avisTexte || null,
-    note_demandee_le: new Date().toISOString()
-  }).eq('id', reservationId);
+  // Enregistrer la note via la fonction serveur (table verrouillée)
+  var envoi = await db.functions.invoke('noter-visite', { body: { action: 'submit', reservation_id: reservationId, note: noteSelectionnee, avis: avisTexte } });
+  var resp = (envoi && envoi.data) ? envoi.data : null;
 
-  if (error) {
+  if (!resp || !resp.ok) {
     btn.disabled = false;
     btn.textContent = 'Envoyer mon avis';
-    alert('Erreur : ' + error.message);
+    alert('Erreur : ' + ((resp && resp.error) || (envoi && envoi.error && envoi.error.message) || 'envoi impossible'));
     return;
   }
 
@@ -263,5 +258,6 @@ function afficherErreur(titre, msg) {
 
 <script src="feedback.js" defer></script>
   <script src="searchbar.js" defer></script>
+<script src="messagerie-badge.js" defer></script>
 </body>
 </html>

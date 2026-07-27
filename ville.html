@@ -118,6 +118,8 @@ nav .nav-link{margin-right:18px}
   <a href="index.html" class="nav-link">Accueil</a>
   <a href="vendre.html" class="nav-link">Vendre</a>
   <a href="questionnaire-acheteur.html" class="nav-link">Acheter</a>
+  <a href="location.html" class="nav-link">Louer</a>
+  <a href="questionnaire-bailleur.html" class="nav-link">Mettre en location</a>
   <a href="blog.html" class="nav-link">Blog</a>
   <a href="connexion.html" class="nav-cta">Mon espace</a>
 </nav>
@@ -440,7 +442,7 @@ async function chargerAnnonces(villeNom) {
 
 // ── AGENTS LOCAUX ──────────────────────────────────────────────────────
 async function chargerAgents(villeNom) {
-  var { data: agents } = await db.from('agents_validation')
+  var { data: agents } = await db.from('agents_publics')
     .select('email, nom, prenom, agence, note_moyenne, nb_notations, badges, forfait_agent, secteurs')
     .eq('statut', 'valide')
     .order('note_moyenne', { ascending: false })
@@ -542,5 +544,6 @@ function genererTexteSEO(villeNom) {
 </script>
 <script src="feedback.js" defer></script>
   <script src="searchbar.js" defer></script>
+<script src="messagerie-badge.js" defer></script>
 </body>
 </html>

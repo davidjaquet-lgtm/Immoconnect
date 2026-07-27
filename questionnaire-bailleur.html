@@ -156,8 +156,10 @@ async function envoyer(){
     nb_occupants_max:parseInt(document.getElementById('occ_max').value)||null,
     forfait:'gratuit', statut:'actif'
   };
-  var {error}=await db.from('biens_location').insert([payload]);
+  var {data:ins, error}=await db.from('biens_location').insert([payload]).select('id').single();
   if(error){ msg.className='msg err'; msg.textContent='Erreur : '+error.message; btn.disabled=false; btn.textContent='Publier mon bien en location →'; window.scrollTo(0,0); return; }
+  // Prévenir les locataires dont la recherche correspond (best-effort, non bloquant)
+  if(ins && ins.id){ db.functions.invoke('alerter-location',{body:{type:'nouveau_bien',bien_id:ins.id}}).catch(function(){}); }
   msg.className='msg ok'; msg.textContent='✅ Bien publié ! Vous recevrez les dossiers locataires correspondant à vos critères.'; window.scrollTo(0,0);
   btn.textContent='Bien publié ✓';
 }
