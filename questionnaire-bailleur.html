@@ -118,16 +118,19 @@ textarea{min-height:80px;resize:vertical}
 </div>
 
 <script src="messagerie-badge.js" defer></script>
+<script src="adresse-autocomplete.js"></script>
 <script>
 const SUPABASE_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
 const SUPABASE_ANON='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
 var currentUser=null;
+var bailleurCoords={lat:null,lng:null};
 
 (async function(){
   var {data:{session}}=await db.auth.getSession();
   if(!session){ window.location.href='connexion.html?next=questionnaire-bailleur.html'; return; }
   currentUser=session.user;
+  initAutocompleteAdresse({input:'adresse', inputVille:'ville', inputCP:'cp', onSelect:function(r){ bailleurCoords={lat:r.lat,lng:r.lng}; }});
 })();
 
 async function envoyer(){
@@ -154,6 +157,7 @@ async function envoyer(){
     gli:document.getElementById('gli').checked, fumeur_accepte:document.getElementById('fumeur_ok').checked,
     animaux_accepte:document.getElementById('animaux_ok').checked,
     nb_occupants_max:parseInt(document.getElementById('occ_max').value)||null,
+    latitude:bailleurCoords.lat, longitude:bailleurCoords.lng,
     forfait:'gratuit', statut:'actif'
   };
   var {data:ins, error}=await db.from('biens_location').insert([payload]).select('id').single();

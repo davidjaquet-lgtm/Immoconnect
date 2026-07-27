@@ -1065,6 +1065,11 @@ function switchVVTab(tab) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  window.__coordsSaisie = null;
+  if (typeof initAutocompleteAdresse === 'function') {
+    initAutocompleteAdresse({ input:'adresse', inputVille:'ville', inputCP:'code_postal',
+      onSelect:function(r){ window.__coordsSaisie = (r && r.lat) ? { lat:r.lat, lon:r.lng } : null; } });
+  }
   var urlInput = document.getElementById('visite_virtuelle_url');
   if (urlInput) {
     urlInput.addEventListener('input', function() {
@@ -1692,7 +1697,7 @@ async function soumettre(){
   var adresse = document.getElementById('adresse').value;
   var ville   = document.getElementById('ville').value;
   var cp      = document.getElementById('code_postal').value;
-  var coords  = await geocoderAdresse(adresse, ville, cp);
+  var coords  = window.__coordsSaisie || await geocoderAdresse(adresse, ville, cp);
   if (coords) {
     payload.latitude  = coords.lat;
     payload.longitude = coords.lon;
@@ -1900,5 +1905,6 @@ function icRefuser() { localStorage.setItem('ic_cookie_consent','refused'); docu
 <script src="feedback.js" defer></script>
   <script src="searchbar.js" defer></script>
 <script src="messagerie-badge.js" defer></script>
+<script src="adresse-autocomplete.js" defer></script>
 </body>
 </html>

@@ -181,6 +181,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
 </div>
 
 <script src="messagerie-badge.js" defer></script>
+<script src="adresse-autocomplete.js"></script>
 <script>
 const SUPABASE_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
 const SUPABASE_ANON='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
@@ -194,6 +195,7 @@ var currentUser=null, garant='aucun';
   document.getElementById('email').value=currentUser.email||'';
   var m=currentUser.user_metadata||{};
   if(m.nom) document.getElementById('nom').value=m.nom;
+  initAutocompleteAdresse({input:'localisation', type:'municipality', fillLabel:true});
   calcScore();
 })();
 
