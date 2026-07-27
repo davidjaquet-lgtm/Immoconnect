@@ -38,6 +38,13 @@ textarea{min-height:80px;resize:vertical}
 .msg{padding:12px;border-radius:8px;margin-bottom:14px;font-size:13px;display:none}
 .msg.err{background:#FBE9E7;color:#993C1D;display:block}
 .msg.ok{background:#EAF5F1;color:#1E7A62;display:block}
+.photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.photo-thumb{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-del{position:absolute;top:3px;right:3px;background:rgba(15,15,14,.75);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;line-height:1}
+.photo-add{aspect-ratio:1;border:1.5px dashed var(--line);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--muted);font-size:12px;position:relative;background:#fff}
+.photo-add:hover{border-color:var(--teal);color:var(--teal)}
+.photo-add input{position:absolute;inset:0;opacity:0;cursor:pointer}
 @media(max-width:640px){.row,.row3,.checks{grid-template-columns:1fr}}
 </style>
 </head>
@@ -61,8 +68,13 @@ textarea{min-height:80px;resize:vertical}
     <div class="card-t">🏠 Votre bien</div>
     <div class="field"><label>Titre de l'annonce</label><input id="titre" placeholder="ex : T2 lumineux proche centre"></div>
     <div class="row">
-      <div class="field"><label>Type de bien</label>
-        <select id="type_bien"><option value="appartement">Appartement</option><option value="maison">Maison</option><option value="studio">Studio</option><option value="colocation">Colocation</option></select></div>
+      <div class="field"><label>Type de bien <span style="font-weight:400;color:var(--muted)">(plusieurs choix possibles)</span></label>
+        <div class="checks" id="type-bien-checks">
+          <label class="chk"><input type="checkbox" class="tb" value="appartement"> Appartement</label>
+          <label class="chk"><input type="checkbox" class="tb" value="maison"> Maison</label>
+          <label class="chk"><input type="checkbox" class="tb" value="studio"> Studio</label>
+          <label class="chk"><input type="checkbox" class="tb" value="colocation"> Colocation</label>
+        </div></div>
       <div class="field"><label>Meublé ?</label>
         <select id="meuble"><option value="false">Non meublé</option><option value="true">Meublé</option></select></div>
     </div>
@@ -87,6 +99,13 @@ textarea{min-height:80px;resize:vertical}
       <div class="field"><label>Disponible à partir du</label><input id="date_dispo" type="date"></div>
     </div>
     <div class="field"><label>Description</label><textarea id="description" placeholder="Décrivez le bien, le quartier, les atouts…"></textarea></div>
+  </div>
+
+  <!-- PHOTOS -->
+  <div class="card">
+    <div class="card-t">📷 Photos du bien</div>
+    <div class="hint" style="margin-bottom:12px">Ajoutez quelques photos : les annonces avec photos reçoivent beaucoup plus de contacts.</div>
+    <div class="photos-grid" id="photos-grid"></div>
   </div>
 
   <!-- CRITÈRES -->
@@ -131,7 +150,33 @@ var bailleurCoords={lat:null,lng:null};
   if(!session){ window.location.href='connexion.html?next=questionnaire-bailleur.html'; return; }
   currentUser=session.user;
   initAutocompleteAdresse({input:'adresse', inputVille:'ville', inputCP:'cp', onSelect:function(r){ bailleurCoords={lat:r.lat,lng:r.lng}; }});
+  renderPhotos();
 })();
+
+const BUCKET='immoconnect-docs';
+var photosBailleur=[]; // {file,url}
+function renderPhotos(){
+  var g=document.getElementById('photos-grid'); if(!g) return;
+  var h='';
+  photosBailleur.forEach(function(p,i){ h+='<div class="photo-thumb"><img src="'+p.url+'"><button class="photo-del" type="button" onclick="delPhoto('+i+')">×</button></div>'; });
+  h+='<label class="photo-add"><input type="file" accept="image/*" multiple onchange="addPhotosBailleur(this)"><span style="font-size:22px">＋</span><span>Ajouter</span></label>';
+  g.innerHTML=h;
+}
+function addPhotosBailleur(inp){
+  Array.from(inp.files).forEach(function(f){ photosBailleur.push({file:f,url:URL.createObjectURL(f)}); });
+  renderPhotos();
+}
+function delPhoto(i){ photosBailleur.splice(i,1); renderPhotos(); }
+async function uploadPhotosBailleur(){
+  var urls=[];
+  for(var i=0;i<photosBailleur.length;i++){
+    var f=photosBailleur[i].file, ext=(f.name.split('.').pop()||'jpg');
+    var path='location/photos/'+Date.now()+'_'+i+'.'+ext;
+    var {error}=await db.storage.from(BUCKET).upload(path,f,{upsert:true});
+    if(!error){ var {data:pub}=db.storage.from(BUCKET).getPublicUrl(path); urls.push(pub.publicUrl); }
+  }
+  return urls;
+}
 
 async function envoyer(){
   var msg=document.getElementById('msg');
@@ -141,10 +186,12 @@ async function envoyer(){
   var dpe=document.getElementById('dpe').value;
   if(!ville||!surface||!loyer||!dpe){ msg.className='msg err'; msg.textContent='Merci de remplir : ville, surface, loyer et DPE (obligatoires).'; window.scrollTo(0,0); return; }
 
-  var btn=document.getElementById('submit'); btn.disabled=true; btn.textContent='Publication…';
+  var btn=document.getElementById('submit'); btn.disabled=true; btn.textContent='📷 Envoi des photos…';
+  var photoUrls=await uploadPhotosBailleur();
+  btn.textContent='Publication…';
   var payload={
     user_id:currentUser.id, email_bailleur:currentUser.email, telephone:null,
-    titre:document.getElementById('titre').value.trim()||null, type_bien:document.getElementById('type_bien').value,
+    titre:document.getElementById('titre').value.trim()||null, type_bien:Array.from(document.querySelectorAll('.tb:checked')).map(function(c){return c.value;}).join(',')||null,
     adresse:document.getElementById('adresse').value.trim()||null, ville:ville, code_postal:document.getElementById('cp').value.trim()||null,
     surface:surface, nb_pieces:parseInt(document.getElementById('pieces').value)||null, etage:document.getElementById('etage').value.trim()||null,
     meuble:(document.getElementById('meuble').value==='true'),
@@ -158,6 +205,7 @@ async function envoyer(){
     animaux_accepte:document.getElementById('animaux_ok').checked,
     nb_occupants_max:parseInt(document.getElementById('occ_max').value)||null,
     latitude:bailleurCoords.lat, longitude:bailleurCoords.lng,
+    photos:photoUrls,
     forfait:'gratuit', statut:'actif'
   };
   var {data:ins, error}=await db.from('biens_location').insert([payload]).select('id').single();
