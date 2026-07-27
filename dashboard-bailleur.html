@@ -141,26 +141,37 @@ async function render(){
 }
 
 async function compterMatchs(bienId){
-  try{ var {data}=await db.rpc('matcher_locataires_pour_bien',{p_bien_id:bienId}); return (data||[]).length; }
+  try{ var {data}=await db.rpc('matchs_bailleur',{p_bien_id:bienId}); return (data||[]).length; }
   catch(e){ return 0; }
 }
 
+var currentBienMatch=null;
 async function voirMatchs(bienId){
+  currentBienMatch=bienId;
   var box=document.getElementById('matchs-liste');
   box.innerHTML='<div class="loading">Chargement…</div>';
   document.getElementById('overlay').style.display='flex';
-  var {data}=await db.rpc('matcher_locataires_pour_bien',{p_bien_id:bienId});
+  var {data}=await db.rpc('matchs_bailleur',{p_bien_id:bienId});
   var l=data||[];
   if(!l.length){ box.innerHTML='<p style="padding:16px 0;color:var(--muted)">Aucun dossier compatible pour l\'instant.</p>'; return; }
   box.innerHTML=l.map(function(d){
     return '<div class="doss">'
-      +(d.badge_verifie?'<span class="v">✅ Dossier vérifié</span> ':'')+'Score '+(d.score_dossier||0)+'/100<br>'
+      +(d.badge_verifie?'<span class="v">✅ Dossier vérifié</span> ':'')+'Score '+(d.score||0)+'/100<br>'
       +'💼 '+(d.situation_pro||'—')+' · 💶 '+(d.revenus_nets?Math.round(d.revenus_nets).toLocaleString('fr-FR')+' €/mois':'—')+'<br>'
       +'🤝 Garant : '+(d.garant?(d.type_garant||'oui'):'non')+' · 👥 '+(d.nb_occupants||1)+' occupant(s)'
+      +'<div style="margin-top:10px"><button class="act" onclick="contacter(\''+d.dossier_id+'\',this)">💬 Contacter ce locataire</button></div>'
       +'</div>';
   }).join('');
 }
 function fermerMatchs(){ document.getElementById('overlay').style.display='none'; }
+
+async function contacter(dossierId, btn){
+  if(!currentBienMatch) return;
+  if(btn){ btn.disabled=true; btn.textContent='Envoi…'; }
+  var r=await db.functions.invoke('contacter-locataire',{body:{bien_id:currentBienMatch,dossier_id:dossierId}});
+  if(r.error || (r.data && r.data.error)){ alert('Erreur : '+(r.error?r.error.message:r.data.error)); if(btn){btn.disabled=false;btn.textContent='💬 Contacter ce locataire';} return; }
+  window.location.href='messagerie.html';
+}
 
 async function togglePause(bienId, enPause){
   var nouveau = enPause ? 'actif' : 'pourvu';

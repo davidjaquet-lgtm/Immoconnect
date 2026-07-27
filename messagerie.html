@@ -302,7 +302,7 @@ async function chargerConversations() {
   var filtre = 'agent_id.eq.'+uid+',vendeur_id.eq.'+uid+',acheteur_id.eq.'+uid
              + ',email_agent.ilike.'+mail+',email_vendeur.ilike.'+mail+',email_acheteur.ilike.'+mail;
   var { data: convs } = await db.from('conversations')
-    .select('*, annonces_vendeurs(titre,type_bien,ville,surface,prix)')
+    .select('*, annonces_vendeurs(titre,type_bien,ville,surface,prix), biens_location(titre,type_bien,ville,loyer)')
     .or(filtre)
     .order('dernier_message_at', { ascending: false, nullsFirst: false });
 
@@ -405,7 +405,7 @@ function afficherListeConvs(convs) {
   convs.forEach(function(c) {
     var emailTiers = autreParticipant(c);
     var nomInterlocuteur = libelleRole(emailTiers, c);
-    var bien = c.annonces_vendeurs;
+    var bien = c.annonces_vendeurs || c.biens_location;
     var preview = c.dernier_message || (bien ? (bien.type_bien||'Bien')+' · '+(bien.ville||'') : '—');
     var avatarClass = (emailTiers === c.email_vendeur) ? 'av-vendeur' : 'av-agent';
     var initiale = nomInterlocuteur.charAt(0).toUpperCase();
@@ -591,7 +591,7 @@ async function onTyping() {
 
 // ── AFFICHER CHAT ──
 async function afficherChat(conv) {
-  var bien = conv.annonces_vendeurs;
+  var bien = conv.annonces_vendeurs || conv.biens_location;
   var isAgent = conv.email_agent === currentUser.email;
   var emailInterlocuteur = autreParticipant(conv);
   var nomInterlocuteur = libelleRole(emailInterlocuteur, conv);
@@ -892,7 +892,7 @@ function getSemaine() {
 function filtrerConvs() {
   var q = document.getElementById('search-conv').value.toLowerCase();
   var filtered = allConvs.filter(function(c){
-    var b = c.annonces_vendeurs;
+    var b = c.annonces_vendeurs || c.biens_location;
     return (c.email_vendeur+c.email_agent+(b?b.ville+b.type_bien:'')).toLowerCase().includes(q);
   });
   afficherListeConvs(filtered);
