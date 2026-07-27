@@ -108,6 +108,7 @@
         '.ic-sb-field input,.ic-sb-field select{border:none;background:transparent;outline:none;font-family:"DM Sans","Outfit",system-ui,sans-serif;font-size:14px;color:#1C1C1A;width:100%;cursor:pointer}' +
         '.ic-sb-btn{padding:14px 26px;background:#B89A5E;color:#1C1C1A;border:none;border-radius:1px;font-family:"DM Sans","Outfit",system-ui,sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:background .2s;white-space:nowrap;letter-spacing:.3px}' +
         '.ic-sb-btn:hover{background:#D4B87A}' +
+        ".ic-sb-field select.ic-sb-mode{appearance:none;-webkit-appearance:none;-moz-appearance:none;padding-right:22px;background:url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231C1C1A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>\") no-repeat right 2px center;background-size:12px;cursor:pointer}" +
         '@media(max-width:760px){#ic-searchbar{padding:12px 16px}.ic-sb-bar{flex-wrap:wrap;padding:12px}.ic-sb-field{flex-basis:calc(50% - 6px);border-right:none;padding:6px 0}.ic-sb-field.ic-sb-loc{flex-basis:100%}.ic-sb-btn{flex-basis:100%}}';
       document.head.appendChild(st);
     }
@@ -118,7 +119,7 @@
     bar.innerHTML =
       '<div class="ic-sb-bar">' +
         '<div class="ic-sb-field"><div style="flex:1"><label>Projet</label>' +
-          '<select id="ic-sb-mode"><option value="achat">🏠 Acheter</option><option value="location">🔑 Louer</option></select></div></div>' +
+          '<select id="ic-sb-mode" class="ic-sb-mode"><option value="achat">Acheter</option><option value="location">Louer</option></select></div></div>' +
         '<div class="ic-sb-field ic-sb-loc">' + pin +
           '<div style="flex:1"><label>Localisation</label>' +
           '<input id="ic-sb-ville" name="ic-ville" autocomplete="off" type="search" placeholder="Ville, code postal…"></div></div>' +
