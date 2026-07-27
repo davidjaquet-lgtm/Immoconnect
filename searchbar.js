@@ -117,6 +117,8 @@
     bar.id = 'ic-searchbar';
     bar.innerHTML =
       '<div class="ic-sb-bar">' +
+        '<div class="ic-sb-field"><div style="flex:1"><label>Projet</label>' +
+          '<select id="ic-sb-mode"><option value="achat">🏠 Acheter</option><option value="location">🔑 Louer</option></select></div></div>' +
         '<div class="ic-sb-field ic-sb-loc">' + pin +
           '<div style="flex:1"><label>Localisation</label>' +
           '<input id="ic-sb-ville" name="ic-ville" autocomplete="off" type="search" placeholder="Ville, code postal…"></div></div>' +
@@ -160,6 +162,7 @@
     function go() {
       var p = new URLSearchParams();
       var v = function (id) { var e = document.getElementById(id); return e ? e.value : ''; };
+      if (v('ic-sb-mode') === 'location') p.set('mode', 'location');
       if (v('ic-sb-ville').trim()) p.set('ville', v('ic-sb-ville').trim());
       if (v('ic-sb-type')) p.set('type', v('ic-sb-type'));
       if (v('ic-sb-prixmin')) p.set('prixmin', v('ic-sb-prixmin'));

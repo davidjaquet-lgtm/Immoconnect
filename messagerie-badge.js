@@ -25,7 +25,7 @@
     a.id = 'mc-msg-pill';
     a.href = 'messagerie.html';
     a.title = 'Messagerie';
-    a.style.cssText = 'position:fixed;top:12px;right:14px;z-index:9500;display:none;' +
+    a.style.cssText = 'position:fixed;top:66px;right:14px;z-index:9500;display:none;' +
       'align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;' +
       'background:#0F3A6B;color:#fff;font-size:19px;text-decoration:none;' +
       'box-shadow:0 4px 14px rgba(0,0,0,.20)';
