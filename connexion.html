@@ -67,6 +67,8 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 .profil-card.checked.p-acheteur{border-color:var(--blue);background:#E6F1FB}
 .profil-card.checked.p-investisseur{border-color:var(--coral);background:#FAECE7}
 .profil-card.checked.p-agent{border-color:var(--amber);background:#FEF3E7}
+.profil-card.checked.p-bailleur{border-color:var(--amber);background:#FEF3E7}
+.profil-card.checked.p-locataire{border-color:var(--teal);background:#E1F5EE}
 .check-mark{position:absolute;top:6px;right:8px;font-size:12px;display:none}
 .profil-card.checked .check-mark{display:block}
 .profil-icon{font-size:20px;margin-bottom:3px}
@@ -236,6 +238,8 @@ input:focus,select:focus{border-color:var(--ink)}
 .popup-profil-card.checked.p-acheteur{border-color:var(--blue);background:#E6F1FB}
 .popup-profil-card.checked.p-investisseur{border-color:var(--coral);background:#FAECE7}
 .popup-profil-card.checked.p-agent{border-color:var(--amber);background:#FEF3E7}
+.popup-profil-card.checked.p-bailleur{border-color:var(--amber);background:#FEF3E7}
+.popup-profil-card.checked.p-locataire{border-color:var(--teal);background:#E1F5EE}
 .popup-check{position:absolute;top:8px;right:10px;font-size:14px;display:none;font-weight:700}
 .popup-profil-card.checked .popup-check{display:block;color:var(--teal)}
 .popup-profil-card.checked.p-acheteur .popup-check{color:var(--blue)}
@@ -329,6 +333,18 @@ nav .nav-link{margin-right:18px}
           <div class="profil-name">Agent immo</div>
           <div class="profil-desc">Je suis professionnel</div>
         </div>
+        <div class="profil-card p-bailleur" id="pc-bailleur" onclick="toggleProfil('bailleur')">
+          <div class="check-mark">✓</div>
+          <div class="profil-icon">🏠</div>
+          <div class="profil-name">Bailleur</div>
+          <div class="profil-desc">Je mets en location</div>
+        </div>
+        <div class="profil-card p-locataire" id="pc-locataire" onclick="toggleProfil('locataire')">
+          <div class="check-mark">✓</div>
+          <div class="profil-icon">🔑</div>
+          <div class="profil-name">Locataire</div>
+          <div class="profil-desc">Je cherche à louer</div>
+        </div>
       </div>
       <div class="field" id="field-agence" style="display:none">
         <label class="lbl">Agence immobilière</label>
@@ -415,7 +431,7 @@ function toggleProfil(p) {
   var idx = selectedProfils.indexOf(p);
   if (idx === -1) selectedProfils.push(p);
   else if (selectedProfils.length > 1) selectedProfils.splice(idx, 1);
-  ['vendeur','acheteur','investisseur','agent'].forEach(function(k) { // acheteur = forfait 'gratuit' en base
+  ['vendeur','acheteur','investisseur','agent','bailleur','locataire'].forEach(function(k) { // acheteur = forfait 'gratuit' en base
     var el = document.getElementById('pc-' + k);
     el.classList.toggle('checked', selectedProfils.indexOf(k) !== -1);
   });
@@ -2032,6 +2048,18 @@ db.auth.onAuthStateChange(function(event, session) {
         <div class="popup-name">Agent immo</div>
         <div class="popup-desc">Je suis professionnel</div>
       </div>
+      <div class="popup-profil-card p-bailleur" id="pp-bailleur" onclick="togglePopupProfil('bailleur')">
+        <div class="popup-check">✓</div>
+        <div class="popup-icon">🏠</div>
+        <div class="popup-name">Bailleur</div>
+        <div class="popup-desc">Je mets en location</div>
+      </div>
+      <div class="popup-profil-card p-locataire" id="pp-locataire" onclick="togglePopupProfil('locataire')">
+        <div class="popup-check">✓</div>
+        <div class="popup-icon">🔑</div>
+        <div class="popup-name">Locataire</div>
+        <div class="popup-desc">Je cherche à louer</div>
+      </div>
     </div>
 
     <div class="popup-field" id="popup-field-agence" style="display:none">
@@ -2056,7 +2084,7 @@ function togglePopupProfil(p) {
   var idx = popupProfils.indexOf(p);
   if (idx === -1) popupProfils.push(p);
   else if (popupProfils.length > 1) popupProfils.splice(idx, 1);
-  ['vendeur','acheteur','investisseur','agent'].forEach(function(k) { // acheteur = forfait 'gratuit' en base
+  ['vendeur','acheteur','investisseur','agent','bailleur','locataire'].forEach(function(k) { // acheteur = forfait 'gratuit' en base
     var el = document.getElementById('pp-' + k);
     if (!el) return;
     el.classList.toggle('checked', popupProfils.indexOf(k) !== -1);
