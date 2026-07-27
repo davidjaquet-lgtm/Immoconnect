@@ -126,9 +126,9 @@
         '<div class="ic-sb-field"><div style="flex:1"><label>Type de bien</label>' +
           '<select id="ic-sb-type"><option value="">Tous</option><option>Maison</option><option>Appartement</option>' +
           '<option>Villa</option><option>Terrain</option><option>Immeuble</option><option>Local commercial</option></select></div></div>' +
-        '<div class="ic-sb-field"><div style="flex:1"><label>Prix min</label>' +
+        '<div class="ic-sb-field"><div style="flex:1"><label id="ic-sb-lbl-min">Prix min</label>' +
           '<input id="ic-sb-prixmin" type="number" min="0" step="10000" placeholder="0"></div></div>' +
-        '<div class="ic-sb-field"><div style="flex:1"><label>Prix max</label>' +
+        '<div class="ic-sb-field"><div style="flex:1"><label id="ic-sb-lbl-max">Prix max</label>' +
           '<input id="ic-sb-prixmax" type="number" min="0" step="10000" placeholder="∞"></div></div>' +
         '<div class="ic-sb-field"><div style="flex:1"><label>Surface min</label>' +
           '<input id="ic-sb-surfmin" type="number" min="0" placeholder="m²"></div></div>' +
@@ -138,9 +138,11 @@
           '<select id="ic-sb-pieces"><option value="">Indif.</option>' +
           '<option value="1">1+</option><option value="2">2+</option><option value="3">3+</option>' +
           '<option value="4">4+</option><option value="5">5+</option></select></div></div>' +
-        '<div class="ic-sb-field ic-sb-last"><div style="flex:1"><label>Niveau du bien</label>' +
+        '<div class="ic-sb-field ic-sb-last" id="ic-sb-niveau-field"><div style="flex:1"><label>Niveau du bien</label>' +
           '<select id="ic-sb-niveau"><option value="">Tous</option><option value="standard">Standard</option>' +
           '<option value="silver">Silver</option><option value="gold">Gold</option><option value="platinium">Platinium</option></select></div></div>' +
+        '<div class="ic-sb-field" id="ic-sb-meuble-field" style="display:none"><div style="flex:1"><label>Meublé</label>' +
+          '<select id="ic-sb-meuble"><option value="">Indifférent</option><option value="meuble">Meublé</option><option value="non_meuble">Non meublé</option></select></div></div>' +
         '<div class="ic-sb-field" id="ic-sb-rdt-field" style="display:none"><div style="flex:1"><label>Rendement min %</label>' +
           '<input id="ic-sb-rendement" type="number" min="0" step="0.1" placeholder="Ex : 5"></div></div>' +
         '<button class="ic-sb-btn" id="ic-sb-go">Rechercher →</button>' +
@@ -163,7 +165,7 @@
     function go() {
       var p = new URLSearchParams();
       var v = function (id) { var e = document.getElementById(id); return e ? e.value : ''; };
-      if (v('ic-sb-mode') === 'location') p.set('mode', 'location');
+      if (v('ic-sb-mode') === 'location') { p.set('mode', 'location'); if (v('ic-sb-meuble')) p.set('meuble', v('ic-sb-meuble')); }
       if (v('ic-sb-ville').trim()) p.set('ville', v('ic-sb-ville').trim());
       if (v('ic-sb-type')) p.set('type', v('ic-sb-type'));
       if (v('ic-sb-prixmin')) p.set('prixmin', v('ic-sb-prixmin'));
@@ -180,12 +182,31 @@
     document.getElementById('ic-sb-go').addEventListener('click', go);
     document.getElementById('ic-sb-ville').addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
 
+    function majMode(){
+      var loc = (document.getElementById('ic-sb-mode') || {}).value === 'location';
+      var t = document.getElementById('ic-sb-type');
+      if (t) t.innerHTML = loc
+        ? '<option value="">Tous</option><option>Appartement</option><option>Maison</option><option>Studio</option><option>Colocation</option>'
+        : '<option value="">Tous</option><option>Maison</option><option>Appartement</option><option>Villa</option><option>Terrain</option><option>Immeuble</option><option>Local commercial</option>';
+      var lmin = document.getElementById('ic-sb-lbl-min'), lmax = document.getElementById('ic-sb-lbl-max');
+      if (lmin) lmin.textContent = loc ? 'Loyer min' : 'Prix min';
+      if (lmax) lmax.textContent = loc ? 'Loyer max' : 'Prix max';
+      var nf = document.getElementById('ic-sb-niveau-field'); if (nf) nf.style.display = loc ? 'none' : '';
+      var mf = document.getElementById('ic-sb-meuble-field'); if (mf) mf.style.display = loc ? '' : 'none';
+      var rf = document.getElementById('ic-sb-rdt-field'); if (rf) rf.style.display = (!loc && window.__ic_rdt_ok) ? '' : 'none';
+    }
+    var modeSel = document.getElementById('ic-sb-mode');
+    if (modeSel) modeSel.addEventListener('change', majMode);
+    majMode();
+
     // Filtre rendement : réservé aux abonnés (investisseur / agent abonné) ou admin.
     try {
       detecterForfait(function (ok) {
         if (!ok) return;
+        window.__ic_rdt_ok = true;
         var f = document.getElementById('ic-sb-rdt-field');
         if (!f) return;
+        if ((document.getElementById('ic-sb-mode') || {}).value === 'location') return; // pas de rendement en location
         var nivSel = document.getElementById('ic-sb-niveau');
         if (nivSel && nivSel.closest) { var nivField = nivSel.closest('.ic-sb-field'); if (nivField) nivField.classList.remove('ic-sb-last'); }
         f.style.display = '';

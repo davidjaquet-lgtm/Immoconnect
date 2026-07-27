@@ -275,6 +275,7 @@ function lireParams() {
   set('f-pieces','pieces'); set('f-chambres','chambres');
   set('f-niveau','niveau'); set('f-tri','tri');
   set('f-rendement','rendement');
+  set('f-meuble','meuble');
 }
 
 var mode = 'achat';
@@ -282,6 +283,15 @@ function setMode(m){
   mode = m;
   document.getElementById('mode-achat').className = (m==='achat')?'btn-search':'btn-reset';
   document.getElementById('mode-location').className = (m==='location')?'btn-search':'btn-reset';
+  // Options de type adaptées au mode
+  var ft=document.getElementById('f-type');
+  if(ft){
+    var typeCourant=ft.value||new URLSearchParams(location.search).get('type')||'';
+    ft.innerHTML = (m==='location')
+      ? '<option value="">Tous</option><option>Appartement</option><option>Maison</option><option>Studio</option><option>Colocation</option>'
+      : '<option value="">Tous</option><option>Maison</option><option>Appartement</option><option>Villa</option><option>Terrain</option><option>Immeuble</option><option>Local commercial</option><option>Autre</option>';
+    if(typeCourant) ft.value=typeCourant;
+  }
   // Champs propres à la VENTE : masqués en location
   ['f-niveau','f-chambres'].forEach(function(id){ var e=document.getElementById(id); if(e){ var w=e.closest('.f-field'); if(w) w.style.display=(m==='location')?'none':''; } });
   // Champ propre à la LOCATION
