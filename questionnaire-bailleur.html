@@ -108,21 +108,25 @@ textarea{min-height:80px;resize:vertical}
     <div class="photos-grid" id="photos-grid"></div>
   </div>
 
-  <!-- CRITÈRES -->
+  <!-- CONDITIONS POUR ÊTRE CONTACTÉ -->
   <div class="card">
-    <div class="card-t">🎯 Vos critères de sélection</div>
+    <div class="card-t">🎯 Qui peut vous contacter ?</div>
+    <div class="hint" style="margin-bottom:14px;background:#F1EFE8;border-radius:8px;padding:11px">Définissez les conditions qu'un locataire doit remplir pour vous envoyer son dossier. <strong>Si vous ne changez rien, les conditions standard s'appliquent</strong> : revenus ≥ 3× le loyer, tous types de contrat, aucune note minimale, dossier vérifié non obligatoire.</div>
     <div class="row">
-      <div class="field"><label>Type de contrat souhaité</label>
+      <div class="field"><label>Type de contrat accepté</label>
         <select id="contrat"><option value="tous">Tous</option><option value="cdi_cdd">CDI ou CDD</option><option value="cdi">CDI uniquement</option></select></div>
       <div class="field"><label>Revenus minimum (× le loyer)</label>
         <select id="ratio"><option value="3">3× le loyer (usuel)</option><option value="2.5">2,5× le loyer</option><option value="4">4× le loyer</option></select></div>
     </div>
     <div class="row">
+      <div class="field"><label>Note de dossier minimale pour vous contacter</label>
+        <select id="score_min"><option value="0">Aucune (tous les dossiers)</option><option value="50">50/100 — dossier correct</option><option value="60">60/100 — bon dossier</option><option value="70">70/100 — très bon dossier</option></select></div>
       <div class="field"><label>Occupants max</label><input id="occ_max" type="number" min="1"></div>
-      <div class="field" style="display:flex;align-items:end"><label class="chk" style="width:100%"><input type="checkbox" id="gli"> J'ai souscrit une GLI</label></div>
     </div>
     <div class="checks">
+      <label class="chk"><input type="checkbox" id="verifie_requis"> Dossier vérifié obligatoire (badge ✅)</label>
       <label class="chk"><input type="checkbox" id="garant_exige"> Garant exigé</label>
+      <label class="chk"><input type="checkbox" id="gli"> J'ai souscrit une GLI</label>
       <label class="chk"><input type="checkbox" id="visale_ok" checked> Visale accepté</label>
       <label class="chk"><input type="checkbox" id="fumeur_ok" checked> Fumeur accepté</label>
       <label class="chk"><input type="checkbox" id="animaux_ok" checked> Animaux acceptés</label>
@@ -175,6 +179,8 @@ async function chargerBienEdition(id){
   document.getElementById('description').value=b.description||'';
   document.getElementById('contrat').value=b.type_contrat_souhaite||'tous';
   document.getElementById('ratio').value=b.ratio_revenus_min||3;
+  document.getElementById('score_min').value=b.score_min||0;
+  document.getElementById('verifie_requis').checked=!!b.verifie_requis;
   document.getElementById('occ_max').value=b.nb_occupants_max||'';
   document.getElementById('gli').checked=!!b.gli;
   document.getElementById('garant_exige').checked=!!b.garant_exige;
@@ -237,6 +243,8 @@ async function envoyer(){
     description:document.getElementById('description').value.trim()||null,
     type_contrat_souhaite:document.getElementById('contrat').value,
     ratio_revenus_min:parseFloat(document.getElementById('ratio').value)||3,
+    score_min:parseInt(document.getElementById('score_min').value)||0,
+    verifie_requis:document.getElementById('verifie_requis').checked,
     garant_exige:document.getElementById('garant_exige').checked, garant_visale_ok:document.getElementById('visale_ok').checked,
     gli:document.getElementById('gli').checked, fumeur_accepte:document.getElementById('fumeur_ok').checked,
     animaux_accepte:document.getElementById('animaux_ok').checked,
