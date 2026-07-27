@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes biens en location — ImmoConnect</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--amber:#D4732A;--red:#A32D2D;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}.nav-logo span{color:var(--gold)}
+.nav-sp{flex:1}
+nav a.nl{color:#fff;text-decoration:none;font-size:13px;opacity:.85}nav a.nl:hover{opacity:1}
+.page{max-width:920px;margin:0 auto;padding:28px 20px 80px}
+.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+h1{font-size:24px;font-weight:600}
+.btn-add{background:var(--teal);color:#fff;text-decoration:none;padding:11px 18px;border-radius:9px;font-weight:600;font-size:14px}
+.stats{display:flex;gap:12px;margin-bottom:22px;flex-wrap:wrap}
+.stat{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:14px 18px;flex:1;min-width:130px}
+.stat .n{font-size:24px;font-weight:600}.stat .l{font-size:12px;color:var(--muted)}
+.bien{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px;display:flex;gap:16px}
+.bien-img{width:120px;height:90px;border-radius:8px;object-fit:cover;background:#EFECE4;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--muted)}
+.bien-body{flex:1;min-width:0}
+.bien-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.bien-titre{font-size:16px;font-weight:600}
+.bien-loyer{font-size:16px;font-weight:600;color:var(--amber);white-space:nowrap}
+.bien-meta{font-size:12px;color:var(--muted);margin:4px 0 8px;line-height:1.6}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px}
+.badge.actif{background:#EAF5F1;color:var(--teal)}.badge.pourvu{background:#F1EFE8;color:var(--muted)}
+.match{display:inline-block;font-size:12px;font-weight:600;color:var(--blue);background:#E6F1FB;padding:3px 10px;border-radius:20px;margin-top:6px;cursor:pointer;text-decoration:none}
+.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.act{font-size:12px;padding:7px 12px;border-radius:7px;border:1px solid var(--line);background:#fff;cursor:pointer;font-family:inherit;color:var(--ink);text-decoration:none;display:inline-block}
+.act:hover{border-color:var(--muted)}
+.act.danger{color:var(--red);border-color:#EBD3D3}
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty .ic{font-size:40px;margin-bottom:12px}
+.loading{text-align:center;padding:50px;color:var(--muted)}
+/* modal matchs */
+.overlay{position:fixed;inset:0;background:rgba(15,15,14,.5);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+.modal{background:#fff;border-radius:var(--r);max-width:520px;width:100%;max-height:80vh;overflow:auto;padding:22px}
+.modal h3{font-size:17px;margin-bottom:4px}
+.doss{border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:10px;font-size:13px;line-height:1.7}
+.doss .v{background:#EAF5F1;color:var(--teal);font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+.close{float:right;cursor:pointer;color:var(--muted);font-size:20px;line-height:1}
+@media(max-width:600px){.bien{flex-direction:column}.bien-img{width:100%;height:150px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-sp"></div>
+  <a href="location.html" class="nl">Louer</a>
+  <a href="questionnaire-bailleur.html" class="nl">Mettre en location</a>
+  <a href="messagerie.html" class="nl">💬</a>
+  <a href="connexion.html" class="nl" id="nav-account">Mon compte</a>
+</nav>
+
+<div class="page">
+  <div class="head">
+    <h1>🏠 Mes biens en location</h1>
+    <a href="questionnaire-bailleur.html" class="btn-add">+ Publier un bien</a>
+  </div>
+
+  <div class="stats" id="stats" style="display:none">
+    <div class="stat"><div class="n" id="s-total">0</div><div class="l">Biens publiés</div></div>
+    <div class="stat"><div class="n" id="s-actifs">0</div><div class="l">Actifs</div></div>
+    <div class="stat"><div class="n" id="s-matchs">0</div><div class="l">Dossiers correspondants</div></div>
+  </div>
+
+  <div id="liste"><div class="loading">Chargement…</div></div>
+</div>
+
+<div class="overlay" id="overlay" onclick="if(event.target===this)fermerMatchs()">
+  <div class="modal">
+    <span class="close" onclick="fermerMatchs()">×</span>
+    <h3>Dossiers correspondants</h3>
+    <p style="font-size:12px;color:var(--muted)">Profils compatibles avec votre bien (données minimisées, sans coordonnées tant que le contact n'est pas engagé).</p>
+    <div id="matchs-liste"></div>
+  </div>
+</div>
+
+<script src="messagerie-badge.js" defer></script>
+<script>
+const SB_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const db=supabase.createClient(SB_URL,SB_KEY);
+var currentUser=null, mesBiens=[];
+
+(async function(){
+  var {data:{session}}=await db.auth.getSession();
+  if(!session){ window.location.href='connexion.html?next=dashboard-bailleur.html'; return; }
+  currentUser=session.user;
+  await charger();
+})();
+
+async function charger(){
+  var {data,error}=await db.from('biens_location').select('*')
+    .or('user_id.eq.'+currentUser.id+',email_bailleur.ilike.'+currentUser.email)
+    .order('created_at',{ascending:false});
+  if(error){ document.getElementById('liste').innerHTML='<div class="empty">Erreur de chargement.</div>'; return; }
+  mesBiens=data||[];
+  render();
+}
+
+async function render(){
+  var wrap=document.getElementById('liste');
+  if(!mesBiens.length){
+    wrap.innerHTML='<div class="empty"><div class="ic">🏠</div>Vous n\'avez pas encore de bien en location.<br><br><a href="questionnaire-bailleur.html" class="btn-add">+ Publier mon premier bien</a></div>';
+    return;
+  }
+  var totalMatchs=0, actifs=0;
+  var html='';
+  for(var i=0;i<mesBiens.length;i++){
+    var b=mesBiens[i];
+    if(b.statut==='actif') actifs++;
+    var nbMatch=await compterMatchs(b.id);
+    totalMatchs+=nbMatch;
+    var loyerCC=(Number(b.loyer)||0)+(Number(b.charges)||0);
+    var img=(b.photos&&b.photos[0])?'<img class="bien-img" src="'+b.photos[0]+'">':'<div class="bien-img">🏠</div>';
+    var enPause=(b.statut!=='actif');
+    html+='<div class="bien">'+img+'<div class="bien-body">'
+      +'<div class="bien-top"><div><div class="bien-titre">'+(b.titre||b.type_bien||'Bien')+'</div>'
+      +'<div class="bien-meta">📍 '+(b.ville||'—')+(b.code_postal?' ('+b.code_postal+')':'')+' · '+(b.surface||'—')+' m² · '+(b.nb_pieces||'—')+' pièces'+(b.meuble?' · meublé':'')+(b.dpe?' · DPE '+b.dpe:'')+'</div>'
+      +'<span class="badge '+(enPause?'pourvu':'actif')+'">'+(enPause?'En pause':'En ligne')+'</span></div>'
+      +'<div class="bien-loyer">'+(loyerCC?Math.round(loyerCC).toLocaleString('fr-FR')+' € CC':'—')+'</div></div>'
+      +'<a class="match" onclick="voirMatchs(\''+b.id+'\')">👥 '+nbMatch+' dossier'+(nbMatch>1?'s':'')+' correspondant'+(nbMatch>1?'s':'')+'</a>'
+      +'<div class="actions">'
+      +'<a class="act" href="questionnaire-bailleur.html?edit='+b.id+'">✏️ Modifier</a>'
+      +'<button class="act" onclick="togglePause(\''+b.id+'\','+enPause+')">'+(enPause?'▶️ Remettre en ligne':'⏸️ Mettre en pause')+'</button>'
+      +'<button class="act danger" onclick="supprimer(\''+b.id+'\')">🗑️ Supprimer</button>'
+      +'</div></div></div>';
+  }
+  wrap.innerHTML=html;
+  document.getElementById('stats').style.display='flex';
+  document.getElementById('s-total').textContent=mesBiens.length;
+  document.getElementById('s-actifs').textContent=actifs;
+  document.getElementById('s-matchs').textContent=totalMatchs;
+}
+
+async function compterMatchs(bienId){
+  try{ var {data}=await db.rpc('matcher_locataires_pour_bien',{p_bien_id:bienId}); return (data||[]).length; }
+  catch(e){ return 0; }
+}
+
+async function voirMatchs(bienId){
+  var box=document.getElementById('matchs-liste');
+  box.innerHTML='<div class="loading">Chargement…</div>';
+  document.getElementById('overlay').style.display='flex';
+  var {data}=await db.rpc('matcher_locataires_pour_bien',{p_bien_id:bienId});
+  var l=data||[];
+  if(!l.length){ box.innerHTML='<p style="padding:16px 0;color:var(--muted)">Aucun dossier compatible pour l\'instant.</p>'; return; }
+  box.innerHTML=l.map(function(d){
+    return '<div class="doss">'
+      +(d.badge_verifie?'<span class="v">✅ Dossier vérifié</span> ':'')+'Score '+(d.score_dossier||0)+'/100<br>'
+      +'💼 '+(d.situation_pro||'—')+' · 💶 '+(d.revenus_nets?Math.round(d.revenus_nets).toLocaleString('fr-FR')+' €/mois':'—')+'<br>'
+      +'🤝 Garant : '+(d.garant?(d.type_garant||'oui'):'non')+' · 👥 '+(d.nb_occupants||1)+' occupant(s)'
+      +'</div>';
+  }).join('');
+}
+function fermerMatchs(){ document.getElementById('overlay').style.display='none'; }
+
+async function togglePause(bienId, enPause){
+  var nouveau = enPause ? 'actif' : 'pourvu';
+  var {error}=await db.from('biens_location').update({statut:nouveau}).eq('id',bienId);
+  if(error){ alert('Erreur : '+error.message); return; }
+  await charger();
+}
+
+async function supprimer(bienId){
+  if(!confirm('Supprimer définitivement ce bien en location ?')) return;
+  var r=await db.from('biens_location').delete().eq('id',bienId).select('id');
+  if(r.error){ alert('Erreur : '+r.error.message); return; }
+  if(!r.data||!r.data.length){ alert('Suppression impossible (droits).'); return; }
+  await charger();
+}
+</script>
+</body>
+</html>
