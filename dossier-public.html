@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dossier locataire — ImmoConnect</title>
+<meta name="description" content="Profil locataire vérifié sur ImmoConnect.">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--amber:#D4732A;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}.nav-logo span{color:var(--gold)}
+.page{max-width:620px;margin:0 auto;padding:32px 20px 80px}
+.card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:24px;margin-bottom:16px}
+.head{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.ava{width:56px;height:56px;border-radius:50%;background:#EAF5F1;display:flex;align-items:center;justify-content:center;font-size:26px}
+.nom{font-size:20px;font-weight:600}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:#E6F1FB;color:var(--blue)}
+.score{font-size:14px;font-weight:600;color:var(--teal);margin-top:2px}
+.bar{height:8px;background:#EFECE4;border-radius:4px;overflow:hidden;margin:8px 0 18px}
+.bar span{display:block;height:100%;background:var(--teal)}
+.rows{font-size:14px;line-height:2.1}
+.rows .k{color:var(--muted)}
+.share{display:flex;gap:8px;margin-top:8px}
+.share a,.share button{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--warm);display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;font-size:16px}
+.note{font-size:12px;color:var(--muted);text-align:center;margin-top:8px}
+.loading{text-align:center;padding:60px;color:var(--muted)}
+.btn{display:inline-block;background:var(--teal);color:#fff;border-radius:9px;padding:12px 20px;font-weight:600;text-decoration:none;font-size:14px}
+</style>
+</head>
+<body>
+<nav><a href="index.html" class="nav-logo">Immo<span>Connect</span></a></nav>
+<div class="page" id="page"><div class="loading">Chargement…</div></div>
+
+<script>
+const SB_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const db=supabase.createClient(SB_URL,SB_KEY);
+var id=new URLSearchParams(location.search).get('id');
+
+(async function(){
+  if(!id){ document.getElementById('page').innerHTML='<div class="loading">Dossier introuvable.</div>'; return; }
+  var {data,error}=await db.rpc('dossier_public',{p_id:id});
+  var d=data&&data[0];
+  if(error||!d){ document.getElementById('page').innerHTML='<div class="loading">Ce dossier n\'est plus partagé.</div>'; return; }
+  var pro={cdi:'CDI',fonctionnaire:'Fonctionnaire',cdd:'CDD',independant:'Indépendant',retraite:'Retraité',etudiant:'Étudiant',interim:'Intérim'}[d.situation_pro]||d.situation_pro||'—';
+  var url='https://immoconnect-agence.fr/dossier-public.html?id='+id;
+  document.getElementById('page').innerHTML='<div class="card">'
+    +'<div class="head"><div class="ava">🔑</div><div><div class="nom">'+(d.nom_locataire||'Locataire')+'</div>'
+    +(d.badge_verifie?'<span class="badge">✅ Dossier vérifié</span>':'<span class="badge" style="background:#F1EFE8;color:var(--muted)">Dossier en cours</span>')
+    +'<div class="score">Score '+(d.score_dossier||0)+'/100</div></div></div>'
+    +'<div class="bar"><span style="width:'+(d.score_dossier||0)+'%"></span></div>'
+    +'<div class="rows">'
+    +'<div><span class="k">Recherche :</span> '+(d.type_bien||'—')+' · '+(d.localisation||'—')+'</div>'
+    +'<div><span class="k">Budget :</span> '+(d.loyer_max?Math.round(d.loyer_max).toLocaleString('fr-FR')+' € CC/mois':'—')+'</div>'
+    +'<div><span class="k">Situation :</span> '+pro+'</div>'
+    +'<div><span class="k">Revenus nets :</span> '+(d.revenus_nets?Math.round(d.revenus_nets).toLocaleString('fr-FR')+' €/mois':'—')+'</div>'
+    +'<div><span class="k">Garant :</span> '+(d.garant?(d.type_garant||'oui'):'non')+'</div>'
+    +'<div><span class="k">Occupants :</span> '+(d.nb_occupants||1)+'</div>'
+    +'</div></div>'
+    +'<div class="card" style="text-align:center"><div style="font-weight:600;margin-bottom:10px">Vous êtes bailleur ?</div>'
+    +'<a class="btn" href="mon-espace.html">Contacter via ImmoConnect</a>'
+    +'<div style="margin-top:16px"><div style="font-size:12px;color:var(--muted);margin-bottom:6px">Partager ce profil</div><div class="share" style="justify-content:center">'
+    +'<button onclick="copierLien()" title="Copier">🔗</button>'
+    +'<a href="https://wa.me/?text='+encodeURIComponent('Mon dossier locataire vérifié : '+url)+'" target="_blank">🟢</a>'
+    +'<a href="mailto:?subject='+encodeURIComponent('Mon dossier locataire ImmoConnect')+'&body='+encodeURIComponent(url)+'">✉️</a>'
+    +'</div></div>'
+    +'<div class="note">🔒 Coordonnées masquées. Le contact se fait via ImmoConnect.</div></div>';
+})();
+function copierLien(){ var url='https://immoconnect-agence.fr/dossier-public.html?id='+id; navigator.clipboard.writeText(url).then(function(){alert('Lien copié !');}).catch(function(){prompt('Copiez :',url);}); }
+</script>
+</body>
+</html>

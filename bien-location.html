@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bien à louer — ImmoConnect</title>
+<meta name="description" content="Découvrez ce bien à louer sur ImmoConnect et postulez avec votre dossier vérifié.">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--amber:#D4732A;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}.nav-logo span{color:var(--gold)}
+.nav-sp{flex:1}
+nav a.nl{color:#fff;text-decoration:none;font-size:13px;opacity:.85}
+.page{max-width:880px;margin:0 auto;padding:24px 20px 80px}
+.gallery{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;border-radius:var(--r);overflow:hidden;margin-bottom:20px}
+.gallery img{width:100%;height:100%;object-fit:cover;max-height:340px}
+.gallery .g0{grid-row:span 2;max-height:none}
+.noimg{background:#EFECE4;border-radius:var(--r);height:260px;display:flex;align-items:center;justify-content:center;font-size:50px;color:var(--muted);margin-bottom:20px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+h1{font-size:24px;font-weight:600}
+.loyer{font-size:26px;font-weight:600;color:var(--amber);white-space:nowrap}
+.loc{color:var(--muted);margin:4px 0 16px}
+.specs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.spec{background:var(--warm);border:1px solid var(--line);border-radius:9px;padding:10px 14px;font-size:13px}
+.spec b{display:block;font-size:16px}
+.card{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:16px}
+.card h3{font-size:15px;margin-bottom:8px}
+.desc{line-height:1.7;color:#333}
+.crit{font-size:13px;color:var(--muted);line-height:1.9}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.btn{background:var(--teal);color:#fff;border:none;border-radius:9px;padding:13px 22px;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;font-family:inherit}
+.btn.sec{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.share{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.share a,.share button{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--warm);display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;font-size:16px;color:var(--ink)}
+.share a:hover,.share button:hover{border-color:var(--muted)}
+.loading{text-align:center;padding:60px;color:var(--muted)}
+@media(max-width:640px){.gallery{grid-template-columns:1fr 1fr}.gallery .g0{grid-column:span 2;grid-row:auto}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-sp"></div>
+  <a href="recherche.html?mode=location" class="nl">← Autres biens à louer</a>
+</nav>
+
+<div class="page" id="page"><div class="loading">Chargement…</div></div>
+
+<script src="messagerie-badge.js" defer></script>
+<script>
+const SB_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const db=supabase.createClient(SB_URL,SB_KEY);
+var bienId=new URLSearchParams(location.search).get('id');
+var bien=null, currentUser=null;
+
+(async function(){
+  var {data:{session}}=await db.auth.getSession();
+  currentUser=session?session.user:null;
+  if(!bienId){ document.getElementById('page').innerHTML='<div class="loading">Bien introuvable.</div>'; return; }
+  var {data,error}=await db.from('biens_location').select('*').eq('id',bienId).single();
+  if(error||!data){ document.getElementById('page').innerHTML='<div class="loading">Ce bien n\'est plus disponible.</div>'; return; }
+  bien=data; render();
+})();
+
+function render(){
+  var b=bien, loyerCC=(Number(b.loyer)||0)+(Number(b.charges)||0);
+  var photos=b.photos||[];
+  var gal;
+  if(photos.length){
+    gal='<div class="gallery">'+photos.slice(0,3).map(function(u,i){return '<img class="g'+i+'" src="'+u+'">';}).join('')+'</div>';
+  } else { gal='<div class="noimg">🏠</div>'; }
+
+  var crit=[];
+  crit.push('Contrat : '+({tous:'tous types',cdi_cdd:'CDI ou CDD',cdi:'CDI uniquement'}[b.type_contrat_souhaite]||'tous types'));
+  crit.push('Revenus ≥ '+String(b.ratio_revenus_min||3).replace('.',',')+'× le loyer');
+  if(b.garant_exige) crit.push('Garant exigé');
+  if(b.verifie_requis) crit.push('Dossier vérifié requis');
+  if(b.score_min) crit.push('Note de dossier ≥ '+b.score_min);
+  if(!b.fumeur_accepte) crit.push('Non fumeur');
+  if(!b.animaux_accepte) crit.push('Sans animaux');
+
+  var url='https://immoconnect-agence.fr/bien-location.html?id='+bienId;
+  var txt=encodeURIComponent('Bien à louer sur ImmoConnect : '+(b.titre||b.type_bien+' à '+b.ville));
+
+  document.getElementById('page').innerHTML=gal
+    +'<div class="top"><div><h1>'+(b.titre||(b.type_bien+' à '+b.ville))+'</h1>'
+    +'<div class="loc">📍 '+(b.adresse?b.adresse+', ':'')+(b.ville||'')+(b.code_postal?' '+b.code_postal:'')+'</div></div>'
+    +'<div class="loyer">'+(loyerCC?Math.round(loyerCC).toLocaleString('fr-FR')+' € CC':'—')+'<div style="font-size:12px;color:var(--muted);font-weight:400;text-align:right">par mois</div></div></div>'
+    +'<div class="specs">'
+    +'<div class="spec">Surface<b>'+(b.surface||'—')+' m²</b></div>'
+    +'<div class="spec">Pièces<b>'+(b.nb_pieces||'—')+'</b></div>'
+    +'<div class="spec">Meublé<b>'+(b.meuble?'Oui':'Non')+'</b></div>'
+    +'<div class="spec">DPE<b>'+(b.dpe||'—')+'</b></div>'
+    +(b.etage?'<div class="spec">Étage<b>'+b.etage+'</b></div>':'')
+    +'</div>'
+    +(b.description?'<div class="card"><h3>Description</h3><div class="desc">'+b.description.replace(/</g,'&lt;')+'</div></div>':'')
+    +'<div class="card"><h3>Conditions pour postuler</h3><div class="crit">'+crit.map(function(c){return '• '+c;}).join('<br>')+(b.accepte_hors_criteres?'<br><span style="color:var(--teal)">✓ Les dossiers hors critères sont aussi acceptés</span>':'')+'</div></div>'
+    +'<div class="card"><h3>Intéressé(e) ?</h3>'
+    +'<div class="cta">'
+    +'<button class="btn" onclick="postuler()">📩 Envoyer mon dossier</button>'
+    +'<a class="btn sec" href="mon-espace.html">Mon espace</a>'
+    +'</div>'
+    +'<div style="margin-top:16px"><div style="font-size:12px;color:var(--muted);margin-bottom:6px">Partager ce bien</div><div class="share">'
+    +'<button onclick="copierLien()" title="Copier le lien">🔗</button>'
+    +'<a href="https://wa.me/?text='+txt+'%20'+encodeURIComponent(url)+'" target="_blank" title="WhatsApp">🟢</a>'
+    +'<a href="https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url)+'" target="_blank" title="Facebook">📘</a>'
+    +'<a href="mailto:?subject='+txt+'&body='+encodeURIComponent(url)+'" title="Email">✉️</a>'
+    +'</div></div>'
+    +'</div>';
+}
+
+function copierLien(){
+  var url='https://immoconnect-agence.fr/bien-location.html?id='+bienId;
+  navigator.clipboard.writeText(url).then(function(){ alert('Lien copié !'); }).catch(function(){ prompt('Copiez ce lien :', url); });
+}
+
+async function postuler(){
+  if(!currentUser){ window.location.href='connexion.html?next=bien-location.html?id='+bienId; return; }
+  // A-t-il un dossier ?
+  var {data}=await db.from('projets_locataires').select('id').eq('user_id',currentUser.id).limit(1);
+  if(!data||!data.length){ if(confirm('Vous devez d\'abord déposer votre dossier de location. Le faire maintenant ?')) window.location.href='questionnaire-locataire.html'; return; }
+  var r=await db.functions.invoke('postuler-bien',{body:{bien_id:bienId,hors_criteres:false}});
+  if(r.error||(r.data&&r.data.error)){ alert('Erreur : '+(r.error?r.error.message:(r.data&&r.data.error))); return; }
+  var convId=r.data&&r.data.conversation_id;
+  window.location.href='messagerie.html'+(convId?('?conv='+convId):'');
+}
+</script>
+</body>
+</html>

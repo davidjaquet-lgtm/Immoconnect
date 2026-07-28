@@ -122,6 +122,7 @@ function render(){
     +'</div>'
     +'<div class="actions">'
     +'<a class="act" href="questionnaire-locataire.html?edit='+d.id+'">✏️ Modifier</a>'
+    +'<button class="act" onclick="partagerDossier(\''+d.id+'\')">🔗 Partager</button>'
     +'<button class="act" onclick="togglePause('+enPause+')">'+(enPause?'▶️ Réactiver':'⏸️ Mettre en pause')+'</button>'
     +'<button class="act danger" onclick="supprimer()">🗑️ Supprimer</button>'
     +'</div></div>'
@@ -189,6 +190,13 @@ async function envoyerDossier(bienId, hors, btn){
   if(r.error||(r.data&&r.data.error)){ alert('Erreur : '+(r.error?r.error.message:(r.data&&r.data.error))); btn.disabled=false; btn.textContent=hors?'Postuler quand même →':'📩 Envoyer mon dossier'; return; }
   var convId=r.data&&r.data.conversation_id;
   window.location.href='messagerie.html'+(convId?('?conv='+convId):'');
+}
+
+function partagerDossier(id){
+  var url='https://immoconnect-agence.fr/dossier-public.html?id='+id;
+  if(!monDossier || !monDossier.consentement_partage){ alert('Activez le partage (consentement) dans votre dossier pour pouvoir le partager.'); return; }
+  if(navigator.share){ navigator.share({title:'Mon dossier locataire — ImmoConnect', url:url}).catch(function(){}); return; }
+  navigator.clipboard.writeText(url).then(function(){ alert('Lien de votre dossier copié !\n'+url); }).catch(function(){ prompt('Copiez ce lien :', url); });
 }
 
 async function togglePause(enPause){

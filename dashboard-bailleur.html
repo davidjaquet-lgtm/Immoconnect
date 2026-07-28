@@ -129,6 +129,7 @@ async function render(){
       +'<a class="match" onclick="voirMatchs(\''+b.id+'\')">👥 '+nbMatch+' dossier'+(nbMatch>1?'s':'')+' correspondant'+(nbMatch>1?'s':'')+'</a>'
       +'<div class="actions">'
       +'<a class="act" href="questionnaire-bailleur.html?edit='+b.id+'">✏️ Modifier</a>'
+      +'<button class="act" onclick="partagerBien(\''+b.id+'\')">🔗 Partager</button>'
       +'<button class="act" onclick="togglePause(\''+b.id+'\','+enPause+')">'+(enPause?'▶️ Remettre en ligne':'⏸️ Mettre en pause')+'</button>'
       +'<button class="act danger" onclick="supprimer(\''+b.id+'\')">🗑️ Supprimer</button>'
       +'</div></div></div>';
@@ -138,6 +139,12 @@ async function render(){
   document.getElementById('s-total').textContent=mesBiens.length;
   document.getElementById('s-actifs').textContent=actifs;
   document.getElementById('s-matchs').textContent=totalMatchs;
+}
+
+function partagerBien(id){
+  var url='https://immoconnect-agence.fr/bien-location.html?id='+id;
+  if(navigator.share){ navigator.share({title:'Bien à louer — ImmoConnect', url:url}).catch(function(){}); return; }
+  navigator.clipboard.writeText(url).then(function(){ alert('Lien du bien copié !\n'+url); }).catch(function(){ prompt('Copiez ce lien :', url); });
 }
 
 async function compterMatchs(bienId){
