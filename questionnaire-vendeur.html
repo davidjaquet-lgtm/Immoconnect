@@ -1420,25 +1420,20 @@ async function uploadAutresDocs(){
   return out;
 }
 
-// ── GÉOCODAGE AUTOMATIQUE (Nominatim OpenStreetMap) ──
+// ── GÉOCODAGE AUTOMATIQUE (Base Adresse Nationale — gratuite, sans limite stricte) ──
 async function geocoderAdresse(adresse, ville, codePostal) {
-  try {
-    var q = [adresse, ville, codePostal, 'France'].filter(Boolean).join(' ');
-    var url = 'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(q) + '&format=json&limit=1&countrycodes=fr';
-    var res = await fetch(url, { headers: { 'Accept-Language': 'fr' } });
-    var data = await res.json();
-    if (data && data[0]) {
-      return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
-    }
-    // 2e tentative sans l\'adresse (juste ville + CP)
-    var q2 = [ville, codePostal, 'France'].filter(Boolean).join(' ');
-    var res2 = await fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(q2) + '&format=json&limit=1&countrycodes=fr');
-    var data2 = await res2.json();
-    if (data2 && data2[0]) {
-      return { lat: parseFloat(data2[0].lat), lon: parseFloat(data2[0].lon) };
-    }
-  } catch(e) {}
-  return null;
+  async function ban(q){
+    try{
+      var r = await fetch('https://api-adresse.data.gouv.fr/search/?limit=1&q=' + encodeURIComponent(q));
+      var d = await r.json();
+      var f = d && d.features && d.features[0];
+      if (f && f.geometry && f.geometry.coordinates) return { lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0] };
+    }catch(e){}
+    return null;
+  }
+  var c = await ban([adresse, codePostal, ville].filter(Boolean).join(' '));
+  if (c) return c;
+  return await ban([ville, codePostal].filter(Boolean).join(' ')); // repli ville + CP
 }
 
 // ── MAJ NOM DÉCLARATION SUR L\'HONNEUR ──

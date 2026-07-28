@@ -349,7 +349,7 @@ function afficherLocations(locs) {
         '<br>📍 ' + (b.adresse ? b.adresse + ', ' : '') + (b.ville || '') +
       '</div>' +
       '<div class="popup-prix">' + loyerFmt + '</div>' +
-      '<a href="location.html" class="popup-btn" style="background:#D4732A">Voir / contacter →</a>' +
+      '<a href="bien-location.html?id=' + b.id + '" class="popup-btn" style="background:#D4732A">Voir le bien →</a>' +
       '</div>',
       { maxWidth: 240 }
     );
