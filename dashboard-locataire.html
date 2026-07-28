@@ -33,6 +33,12 @@ h2{font-size:17px;font-weight:600;margin:26px 0 12px}
 .act{font-size:12px;padding:7px 12px;border-radius:7px;border:1px solid var(--line);background:#fff;cursor:pointer;font-family:inherit;color:var(--ink);text-decoration:none;display:inline-block}
 .act:hover{border-color:var(--muted)}
 .act.danger{color:var(--red);border-color:#EBD3D3}
+.act.act-ok{background:var(--teal);color:#fff;border-color:var(--teal);font-weight:600}
+.bareme{margin-top:12px;background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:14px}
+.bareme summary{cursor:pointer;font-weight:600;font-size:13px}
+.bareme table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
+.bareme td{padding:4px 6px;border-bottom:1px solid var(--line)}
+.bareme td:last-child{text-align:right;font-weight:600;color:var(--teal)}
 .bien{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px;display:flex;gap:14px}
 .bien-img{width:110px;height:82px;border-radius:8px;object-fit:cover;background:#EFECE4;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--muted)}
 .bien-body{flex:1;min-width:0}
@@ -118,9 +124,35 @@ function render(){
     +'<a class="act" href="questionnaire-locataire.html?edit='+d.id+'">✏️ Modifier</a>'
     +'<button class="act" onclick="togglePause('+enPause+')">'+(enPause?'▶️ Réactiver':'⏸️ Mettre en pause')+'</button>'
     +'<button class="act danger" onclick="supprimer()">🗑️ Supprimer</button>'
-    +'</div></div>';
+    +'</div></div>'
+    +'<details class="bareme"><summary>ℹ️ Comment est calculée ma note ? (sur 100)</summary>'
+    +'<table>'
+    +'<tr><td>CDI / fonctionnaire</td><td>+20</td></tr>'
+    +'<tr><td>CDD / indépendant / retraité</td><td>+12</td></tr>'
+    +'<tr><td>Autre (étudiant, intérim…)</td><td>+6</td></tr>'
+    +'<tr><td>Ancienneté ≥ 24 mois (sinon ≥ 6 mois : +4)</td><td>+8</td></tr>'
+    +'<tr><td>Ratio d\'effort ≤ 33% (33–40% : +10)</td><td>+20</td></tr>'
+    +'<tr><td>Garant (physique ou Visale)</td><td>+12</td></tr>'
+    +'<tr><td>Chaque pièce justificative vérifiée (max +15)</td><td>+3</td></tr>'
+    +'<tr><td>Coordonnées + consentement</td><td>+20</td></tr>'
+    +'</table>'
+    +'<div style="font-size:11px;color:var(--muted);margin-top:8px">💡 Un dossier vérifié (badge ✅) s\'obtient avec au moins 4 pièces validées. Modifiez votre dossier pour améliorer votre note.</div>'
+    +'</details>';
   document.getElementById('btn-new').style.display='none';
   chargerMatchs();
+}
+
+function evaluerEligibilite(b){
+  var d=monDossier, loyerCC=(Number(b.loyer)||0)+(Number(b.charges)||0), manque=[];
+  var contrat=b.type_contrat_souhaite||'tous', pro=(d.situation_pro||'').toLowerCase();
+  if(contrat==='cdi' && pro!=='cdi' && pro!=='fonctionnaire') manque.push('CDI exigé');
+  if(contrat==='cdi_cdd' && ['cdi','cdd','fonctionnaire'].indexOf(pro)===-1) manque.push('CDI ou CDD exigé');
+  var ratio=Number(b.ratio_revenus_min)||3;
+  if(d.revenus_nets && loyerCC && d.revenus_nets < ratio*loyerCC) manque.push('revenus ≥ '+String(ratio).replace('.',',')+'× le loyer ('+Math.round(ratio*loyerCC).toLocaleString('fr-FR')+' €)');
+  if((b.score_min||0) > (d.score_dossier||0)) manque.push('note ≥ '+b.score_min+' (la vôtre : '+(d.score_dossier||0)+')');
+  if(b.verifie_requis && !d.badge_verifie) manque.push('dossier vérifié');
+  if(b.garant_exige && !d.garant) manque.push('garant');
+  return {eligible:manque.length===0, manque:manque, ouvert:!!b.accepte_hors_criteres};
 }
 
 async function chargerMatchs(){
@@ -132,13 +164,31 @@ async function chargerMatchs(){
   box.innerHTML=biens.map(function(b){
     var loyerCC=(Number(b.loyer)||0)+(Number(b.charges)||0);
     var img=(b.photos&&b.photos[0])?'<img class="bien-img" src="'+b.photos[0]+'">':'<div class="bien-img">🏠</div>';
+    var e=evaluerEligibilite(b), action;
+    if(e.eligible){
+      action='<button class="act act-ok" onclick="envoyerDossier(\''+b.id+'\',false,this)">📩 Envoyer mon dossier</button>';
+    } else if(e.ouvert){
+      action='<div style="font-size:11px;color:var(--amber);margin-bottom:6px">⚠️ Hors critères : '+e.manque.join(', ')+'</div>'
+        +'<button class="act" onclick="envoyerDossier(\''+b.id+'\',true,this)">Postuler quand même →</button>';
+    } else {
+      action='<div style="font-size:11px;color:var(--muted);margin-bottom:6px">🔒 Ce bailleur ne retient que : '+e.manque.join(', ')+'</div>'
+        +'<button class="act" disabled style="opacity:.5;cursor:not-allowed">Non éligible</button>';
+    }
     return '<div class="bien">'+img+'<div class="bien-body">'
       +'<div style="display:flex;justify-content:space-between;gap:10px"><div class="bien-titre">'+(b.titre||b.type_bien||'Bien')+'</div>'
       +'<div class="bien-loyer">'+(loyerCC?Math.round(loyerCC).toLocaleString('fr-FR')+' € CC':'—')+'</div></div>'
       +'<div class="bien-meta">📍 '+(b.ville||'—')+' · '+(b.surface||'—')+' m² · '+(b.nb_pieces||'—')+' pièces'+(b.meuble?' · meublé':'')+(b.dpe?' · DPE '+b.dpe:'')+'</div>'
-      +'<a class="act" style="margin-top:8px" href="messagerie.html">💬 Contacter</a>'
+      +'<div style="margin-top:8px">'+action+'</div>'
       +'</div></div>';
   }).join('');
+}
+
+async function envoyerDossier(bienId, hors, btn){
+  btn.disabled=true; btn.textContent='Envoi…';
+  var r=await db.functions.invoke('postuler-bien',{body:{bien_id:bienId,hors_criteres:hors}});
+  if(r.error||(r.data&&r.data.error)){ alert('Erreur : '+(r.error?r.error.message:(r.data&&r.data.error))); btn.disabled=false; btn.textContent=hors?'Postuler quand même →':'📩 Envoyer mon dossier'; return; }
+  var convId=r.data&&r.data.conversation_id;
+  window.location.href='messagerie.html'+(convId?('?conv='+convId):'');
 }
 
 async function togglePause(enPause){

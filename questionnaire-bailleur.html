@@ -131,6 +131,7 @@ textarea{min-height:80px;resize:vertical}
       <label class="chk"><input type="checkbox" id="fumeur_ok" checked> Fumeur accepté</label>
       <label class="chk"><input type="checkbox" id="animaux_ok" checked> Animaux acceptés</label>
     </div>
+    <label class="chk" style="margin-top:10px;background:#EAF5F1;border-color:var(--teal)"><input type="checkbox" id="accepte_hors_criteres"> J'accepte aussi de recevoir des dossiers <strong>hors critères</strong> (ils me seront signalés — je reste libre d'y répondre ou non)</label>
   </div>
 
   <div class="legal">
@@ -181,6 +182,7 @@ async function chargerBienEdition(id){
   document.getElementById('ratio').value=b.ratio_revenus_min||3;
   document.getElementById('score_min').value=b.score_min||0;
   document.getElementById('verifie_requis').checked=!!b.verifie_requis;
+  document.getElementById('accepte_hors_criteres').checked=!!b.accepte_hors_criteres;
   document.getElementById('occ_max').value=b.nb_occupants_max||'';
   document.getElementById('gli').checked=!!b.gli;
   document.getElementById('garant_exige').checked=!!b.garant_exige;
@@ -245,6 +247,7 @@ async function envoyer(){
     ratio_revenus_min:parseFloat(document.getElementById('ratio').value)||3,
     score_min:parseInt(document.getElementById('score_min').value)||0,
     verifie_requis:document.getElementById('verifie_requis').checked,
+    accepte_hors_criteres:document.getElementById('accepte_hors_criteres').checked,
     garant_exige:document.getElementById('garant_exige').checked, garant_visale_ok:document.getElementById('visale_ok').checked,
     gli:document.getElementById('gli').checked, fumeur_accepte:document.getElementById('fumeur_ok').checked,
     animaux_accepte:document.getElementById('animaux_ok').checked,
