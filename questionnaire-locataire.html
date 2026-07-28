@@ -110,7 +110,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
     <div class="card-t">💼 Votre situation (fait la solidité du dossier)</div>
     <div class="row">
       <div class="field"><label>Situation professionnelle *</label>
-        <select id="situation_pro" onchange="calcScore()">
+        <select id="situation_pro" onchange="toggleEssai();calcScore()">
           <option value="">— Choisir —</option>
           <option value="cdi">CDI</option><option value="fonctionnaire">Fonctionnaire</option>
           <option value="cdd">CDD</option><option value="independant">Indépendant</option>
@@ -119,6 +119,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
         </select></div>
       <div class="field"><label>Ancienneté (mois)</label><input id="anciennete" type="number" oninput="calcScore()"></div>
     </div>
+    <div class="field" id="essai-field" style="display:none"><label class="chk"><input type="checkbox" id="periode_essai" onchange="calcScore()"> Je suis actuellement en <strong>période d'essai</strong> <span class="hint">(un CDI/CDD confirmé rassure davantage les bailleurs)</span></label></div>
     <div class="field"><label>Revenus nets mensuels du foyer * <span class="hint">(sert au calcul du ratio d'effort)</span></label><input id="revenus" type="number" oninput="calcScore()" placeholder="€ / mois"></div>
     <div class="field"><label>Avez-vous un garant ?</label>
       <div class="toggle-row">
@@ -128,6 +129,16 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
       </div>
     </div>
     <div class="field" id="rev-garant-wrap" style="display:none"><label>Revenus du garant (si physique)</label><input id="revenus_garant" type="number" placeholder="€ / mois"></div>
+
+    <div class="field" style="background:#F1EFE8;border-radius:10px;padding:14px;margin-top:6px">
+      <div style="font-weight:600;margin-bottom:4px">🛡️ Suis-je éligible à la garantie Visale ?</div>
+      <div class="hint" style="margin-bottom:10px">Estimation gratuite à partir de vos revenus, du loyer visé et de votre secteur. Visale est une caution gratuite d'État — l'avoir renforce votre dossier.</div>
+      <div class="row">
+        <div class="field"><label>Code postal du logement visé</label><input id="visale_cp" placeholder="ex. 33260" inputmode="numeric"></div>
+        <div class="field" style="display:flex;align-items:end"><button type="button" class="btn" style="width:100%" onclick="estimerVisale()">Estimer mon éligibilité</button></div>
+      </div>
+      <div id="visale-result" style="margin-top:10px"></div>
+    </div>
   </div>
 
   <!-- PRÉFÉRENCES -->
@@ -182,6 +193,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
 
 <script src="messagerie-badge.js" defer></script>
 <script src="adresse-autocomplete.js"></script>
+<script src="visale.js"></script>
 <script>
 const SUPABASE_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
 const SUPABASE_ANON='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
@@ -218,6 +230,7 @@ async function chargerDossierEdition(id){
   document.getElementById('date_emm').value=d.date_emmenagement||'';
   document.getElementById('situation_pro').value=d.situation_pro||'';
   document.getElementById('anciennete').value=d.anciennete_mois||'';
+  toggleEssai(); if(document.getElementById('periode_essai')) document.getElementById('periode_essai').checked=!!d.periode_essai;
   document.getElementById('revenus').value=d.revenus_nets||'';
   if(d.type_garant) setGarant(d.type_garant);
   if(d.revenus_garant) document.getElementById('revenus_garant').value=d.revenus_garant;
@@ -264,6 +277,27 @@ async function uploadDoc(input, docType){
   calcScore();
 }
 
+async function estimerVisale(){
+  var box=document.getElementById('visale-result');
+  if(!window.VisaleEstimator){ box.innerHTML='<div style="font-size:12px;color:#888">Module indisponible.</div>'; return; }
+  var revenus=parseFloat(document.getElementById('revenus').value)||0;
+  var loyer=parseFloat(document.getElementById('loyer_max').value)||0;
+  if(!revenus||!loyer){ box.innerHTML='<div style="font-size:12px;color:#A32D2D">Renseignez d\'abord vos revenus nets et le loyer max souhaité (plus haut).</div>'; return; }
+  var cp=document.getElementById('visale_cp').value.trim();
+  var etu=document.getElementById('situation_pro').value==='etudiant';
+  box.innerHTML='<div style="font-size:12px;color:#888">Estimation…</div>';
+  var r=await window.VisaleEstimator.estimer({revenus:revenus, loyerCC:loyer, codePostal:cp, etudiant:etu});
+  box.innerHTML=window.VisaleEstimator.rendu(r);
+}
+
+function toggleEssai(){
+  var pro=document.getElementById('situation_pro').value;
+  var f=document.getElementById('essai-field');
+  var montre=(pro==='cdi'||pro==='cdd');
+  f.style.display=montre?'':'none';
+  if(!montre){ var cb=document.getElementById('periode_essai'); if(cb) cb.checked=false; }
+}
+
 function calcScore(){
   var s=0;
   if(document.getElementById('nom').value.trim()) s+=5;
@@ -271,7 +305,12 @@ function calcScore(){
   if(document.getElementById('loyer_max').value) s+=5;
   // Solidité pro
   var pro=document.getElementById('situation_pro').value;
-  if(pro==='cdi'||pro==='fonctionnaire') s+=20; else if(pro==='cdd'||pro==='independant'||pro==='retraite') s+=12; else if(pro) s+=6;
+  var essai=document.getElementById('periode_essai')&&document.getElementById('periode_essai').checked;
+  if(pro==='fonctionnaire') s+=20;
+  else if(pro==='cdi') s+= essai?14:20;               // CDI confirmé (hors période d'essai) vs en période d'essai
+  else if(pro==='cdd') s+= essai?8:12;
+  else if(pro==='independant'||pro==='retraite') s+=12;
+  else if(pro) s+=6;
   var anc=parseInt(document.getElementById('anciennete').value)||0;
   if(anc>=24) s+=8; else if(anc>=6) s+=4;
   // Ratio d'effort
@@ -312,6 +351,7 @@ async function envoyer(){
     date_emmenagement:document.getElementById('date_emm').value||null,
     nb_occupants:parseInt(document.getElementById('occupants').value)||1,
     situation_pro:pro, anciennete_mois:parseInt(document.getElementById('anciennete').value)||null,
+    periode_essai:(document.getElementById('periode_essai')&&document.getElementById('periode_essai').checked)||false,
     revenus_nets:rev, ratio_effort:(rev&&loyer)?Math.round((loyer/rev)*100)/100:null,
     garant:(garant!=='aucun'), type_garant:garant, revenus_garant:parseFloat(document.getElementById('revenus_garant').value)||null,
     fumeur:document.getElementById('fumeur').checked, animaux:document.getElementById('animaux').checked,

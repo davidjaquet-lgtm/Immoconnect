@@ -69,6 +69,9 @@ h2{font-size:17px;font-weight:600;margin:26px 0 12px}
 
   <div id="matchs-wrap" style="display:none">
     <h2>🏠 Biens correspondant à votre recherche</h2>
+    <label class="chk" style="display:inline-flex;align-items:center;gap:8px;margin:0 0 14px;cursor:pointer;font-size:13px">
+      <input type="checkbox" id="filtre-eligible" onchange="renderMatchs()"> ✅ Voir seulement les biens où mon dossier est éligible
+    </label>
     <div id="matchs"><div class="loading">Recherche…</div></div>
   </div>
 </div>
@@ -156,16 +159,27 @@ function evaluerEligibilite(b){
   return {eligible:manque.length===0, manque:manque, ouvert:!!b.accepte_hors_criteres};
 }
 
+var mesMatchs=[];
 async function chargerMatchs(){
   document.getElementById('matchs-wrap').style.display='block';
   var box=document.getElementById('matchs');
   var {data}=await db.rpc('matcher_biens_pour_locataire',{p_locataire_id:monDossier.id});
-  var biens=data||[];
-  if(!biens.length){ box.innerHTML='<div class="empty" style="padding:30px">Aucun bien compatible pour l\'instant. Vous serez notifié par email dès qu\'un bien correspond.</div>'; return; }
-  box.innerHTML=biens.map(function(b){
+  mesMatchs=data||[];
+  renderMatchs();
+}
+
+function renderMatchs(){
+  var box=document.getElementById('matchs');
+  if(!mesMatchs.length){ box.innerHTML='<div class="empty" style="padding:30px">Aucun bien compatible pour l\'instant. Vous serez notifié par email dès qu\'un bien correspond.</div>'; return; }
+  var filtre=document.getElementById('filtre-eligible')&&document.getElementById('filtre-eligible').checked;
+  var liste=mesMatchs.map(function(b){ return {b:b, e:evaluerEligibilite(b)}; });
+  if(filtre) liste=liste.filter(function(x){ return x.e.eligible; });
+  if(!liste.length){ box.innerHTML='<div class="empty" style="padding:30px">Aucun bien où votre dossier est actuellement éligible.<br><span style="font-size:12px">Décochez le filtre pour voir tous les biens correspondants, ou améliorez votre dossier.</span></div>'; return; }
+  box.innerHTML=liste.map(function(x){
+    var b=x.b, e=x.e;
     var loyerCC=(Number(b.loyer)||0)+(Number(b.charges)||0);
     var img=(b.photos&&b.photos[0])?'<img class="bien-img" src="'+b.photos[0]+'">':'<div class="bien-img">🏠</div>';
-    var e=evaluerEligibilite(b), action;
+    var action;
     if(e.eligible){
       action='<button class="act act-ok" onclick="envoyerDossier(\''+b.id+'\',false,this)">📩 Envoyer mon dossier</button>';
     } else if(e.ouvert){
