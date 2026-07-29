@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testez votre négociation (démo gratuite) | ImmoConnect</title>
+<meta name="description" content="Testez gratuitement votre talent de négociateur immobilier sur 2 scénarios réels. Démo du simulateur Négocio d'ImmoConnect.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--amber:#D4732A;--red:#A32D2D;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}.nav-logo span{color:var(--gold)}
+.nav-links{margin-left:auto;display:flex;gap:18px}
+.nav-links a{color:#cfcec9;text-decoration:none;font-size:13px}
+.wrap{max-width:640px;margin:0 auto;padding:26px 16px 60px}
+.head{text-align:center;margin-bottom:20px}
+.head .kicker{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
+.head h1{font-size:26px;font-weight:600;margin:6px 0}
+.head p{color:var(--muted);line-height:1.6}
+.card{background:var(--warm);border:1px solid var(--line);border-radius:14px;padding:20px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px}
+.field input{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px 12px;font-family:inherit;font-size:14px}
+.chk{display:flex;gap:9px;align-items:flex-start;font-size:12px;color:#555;line-height:1.5;margin:10px 0 16px}
+.chk input{margin-top:2px}
+.btn{background:var(--teal);color:#fff;border:none;border-radius:9px;padding:13px 18px;font-weight:600;font-family:inherit;font-size:15px;cursor:pointer;width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-sec{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.err{color:var(--red);font-size:12px;margin-top:8px;min-height:14px;text-align:center}
+.sc-grid{display:grid;gap:12px}
+.sc-card{background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;transition:border-color .15s}
+.sc-card:hover{border-color:var(--teal)}
+.sc-titre{font-weight:600;font-size:15px}
+.sc-meta{font-size:12px;color:var(--muted);margin:4px 0 8px}
+.sc-ctx{font-size:13px;color:#444;line-height:1.6}
+.sc-prix{margin-top:10px;font-weight:700;color:var(--teal)}
+.chat{background:var(--warm);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.chat-head{background:var(--ink);color:#fff;padding:12px 16px;font-size:13px}
+.chat-head .t{font-weight:600}
+.chat-body{padding:16px;max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:82%;padding:10px 13px;border-radius:12px;font-size:14px;line-height:1.5}
+.msg.v{background:#efece5;align-self:flex-start;border-bottom-left-radius:3px}
+.msg.a{background:var(--teal);color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
+.tour{font-size:11px;color:var(--muted);text-align:center}
+.play{border-top:1px solid var(--line);padding:14px 16px}
+.args{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
+.arg{border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:13px;cursor:pointer;background:#fff;text-align:left}
+.arg.sel{border-color:var(--teal);background:#E1F5EE;font-weight:600}
+.offre-row{display:flex;gap:8px}
+.offre-row input{flex:1;border:1px solid var(--line);border-radius:8px;padding:11px 12px;font-family:inherit;font-size:14px}
+.offre-row button{background:var(--teal);color:#fff;border:none;border-radius:8px;padding:0 18px;font-weight:600;cursor:pointer;font-family:inherit}
+.debrief{padding:18px;text-align:center}
+.debrief .score{font-size:40px;font-weight:700;color:var(--teal)}
+.debrief .lbl{font-size:12px;color:var(--muted)}
+.reveal{background:#F1EFE8;border-radius:10px;padding:12px;margin:14px 0;font-size:13px;line-height:1.7}
+.cta{background:linear-gradient(135deg,#0F1F19,#1A3528);color:#fff;border-radius:12px;padding:18px;margin-top:16px;text-align:center}
+.cta a{display:inline-block;background:var(--gold);color:#0F1F19;text-decoration:none;padding:11px 20px;border-radius:8px;font-weight:600;margin-top:10px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-links">
+    <a href="negocio-classement.html">🏆 Classement</a>
+    <a href="candidature-agent.html">Devenir agent</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="head">
+    <div class="kicker">Négocio · Démo gratuite</div>
+    <h1>Êtes-vous un bon négociateur ?</h1>
+    <p>Affrontez un vendeur et essayez d'obtenir le meilleur prix. 2 scénarios réels, gratuit.</p>
+  </div>
+
+  <!-- ÉTAPE 1 : lead -->
+  <div id="etape-lead" class="card">
+    <div class="field"><label>Votre prénom</label><input id="d-prenom" placeholder="Jean"></div>
+    <div class="field"><label>Votre email *</label><input id="d-email" type="email" placeholder="jean@email.fr"></div>
+    <label class="chk"><input type="checkbox" id="d-consent"> J'accepte qu'ImmoConnect utilise mon email pour me recontacter au sujet de ses services. (Vous pouvez vous désinscrire à tout moment.)</label>
+    <button class="btn" id="d-go" onclick="demarrer()">Commencer la démo</button>
+    <div class="err" id="d-err"></div>
+  </div>
+
+  <!-- ÉTAPE 2 : choix scénario -->
+  <div id="etape-scenarios" class="hidden">
+    <p style="text-align:center;color:var(--muted);margin-bottom:12px">Choisissez un vendeur à affronter :</p>
+    <div class="sc-grid" id="sc-grid"></div>
+  </div>
+
+  <!-- ÉTAPE 3 : jeu -->
+  <div id="etape-jeu" class="hidden">
+    <div class="chat">
+      <div class="chat-head"><div class="t" id="j-titre">—</div><div id="j-meta" style="opacity:.7;font-size:12px"></div></div>
+      <div class="chat-body" id="j-body"></div>
+      <div class="play" id="j-play">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Choisissez un argument :</div>
+        <div class="args" id="j-args"></div>
+        <div class="offre-row">
+          <input id="j-offre" type="number" placeholder="Votre offre en €">
+          <button onclick="jouer()">Proposer</button>
+        </div>
+        <div class="tour" id="j-tour" style="margin-top:8px"></div>
+      </div>
+    </div>
+    <div id="j-debrief"></div>
+  </div>
+</div>
+
+<script>
+const SB_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const db=supabase.createClient(SB_URL,SB_KEY);
+const TOURS_MAX=12;
+
+var scenarios=[], scen=null, coups=[], argSel=null;
+function euro(n){return Math.round(n).toLocaleString('fr-FR')+' €';}
+function esc(s){return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function show(id){['etape-lead','etape-scenarios','etape-jeu'].forEach(function(e){document.getElementById(e).classList.add('hidden');});document.getElementById(id).classList.remove('hidden');}
+
+async function demarrer(){
+  var err=document.getElementById('d-err'); err.textContent='';
+  var prenom=document.getElementById('d-prenom').value.trim();
+  var email=document.getElementById('d-email').value.trim();
+  var consent=document.getElementById('d-consent').checked;
+  if(!email||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ err.textContent='Merci d\'indiquer un email valide.'; return; }
+  if(!consent){ err.textContent='Merci de cocher la case de consentement.'; return; }
+  var btn=document.getElementById('d-go'); btn.disabled=true; btn.textContent='…';
+  var {data,error}=await db.functions.invoke('negocio-demo',{body:{action:'start',prenom:prenom,email:email,consent:consent}});
+  btn.disabled=false; btn.textContent='Commencer la démo';
+  if(error||!data||data.error){ err.textContent=(data&&data.error)||'Erreur, réessayez.'; return; }
+  scenarios=data.scenarios||[];
+  var g=document.getElementById('sc-grid');
+  g.innerHTML=scenarios.map(function(s){
+    return '<div class="sc-card" onclick="choisir(\''+s.id+'\')">'
+      +'<div class="sc-titre">'+esc(s.titre)+'</div>'
+      +'<div class="sc-meta">'+esc(s.bien_type)+' · '+esc(s.ville)+' · '+s.surface+' m² · '+s.nb_pieces+' pièces</div>'
+      +'<div class="sc-ctx">'+esc(s.contexte)+'</div>'
+      +'<div class="sc-prix">Prix affiché : '+euro(s.prix_affiche)+'</div>'
+      +'</div>';
+  }).join('');
+  show('etape-scenarios');
+}
+
+function choisir(id){
+  scen=scenarios.find(function(s){return s.id===id;});
+  coups=[]; argSel=null;
+  document.getElementById('j-titre').textContent=scen.titre;
+  document.getElementById('j-meta').textContent=scen.bien_type+' · '+scen.ville+' · affiché '+euro(scen.prix_affiche);
+  document.getElementById('j-body').innerHTML='';
+  document.getElementById('j-debrief').innerHTML='';
+  document.getElementById('j-play').style.display='';
+  addMsg('v', 'Bonjour ! Vous me contactez pour '+scen.bien_type.toLowerCase()+' à '+scen.ville+', affiché à '+euro(scen.prix_affiche)+'. Qu\'est-ce que vous proposez ?');
+  renderArgs();
+  majTour();
+  show('etape-jeu');
+}
+
+function renderArgs(){
+  var box=document.getElementById('j-args');
+  box.innerHTML=scen.args.map(function(a){
+    return '<div class="arg'+(argSel===a.id?' sel':'')+'" onclick="selArg(\''+a.id+'\')">'+esc(a.label)+'</div>';
+  }).join('');
+}
+function selArg(id){ argSel=id; renderArgs(); }
+function addMsg(role,txt){
+  var b=document.getElementById('j-body');
+  var d=document.createElement('div'); d.className='msg '+role; d.textContent=txt; b.appendChild(d); b.scrollTop=b.scrollHeight;
+}
+function majTour(){ document.getElementById('j-tour').textContent='Tour '+(coups.length)+' / '+TOURS_MAX; }
+
+async function jouer(){
+  var offreEl=document.getElementById('j-offre');
+  var offre=parseFloat(offreEl.value)||0;
+  if(!offre){ offreEl.focus(); return; }
+  if(!argSel){ alert('Choisissez un argument pour appuyer votre offre.'); return; }
+  var argLabel=(scen.args.find(function(a){return a.id===argSel;})||{}).label||'';
+  addMsg('a', 'Je vous propose '+euro(offre)+'. '+argLabel);
+  coups.push({offre:offre, arg:argSel});
+  offreEl.value=''; majTour();
+  var {data,error}=await db.functions.invoke('negocio-demo',{body:{action:'play',scenario_id:scen.id,coups:coups}});
+  if(error||!data||data.error){ addMsg('v','(erreur, réessayez)'); return; }
+  addMsg('v', data.reply);
+  argSel=null; renderArgs();
+  if(data.statut==='accord'||data.statut==='rompu'){ finPartie(data); }
+}
+
+function finPartie(data){
+  document.getElementById('j-play').style.display='none';
+  var d=data.debrief||{};
+  var html='<div class="card debrief" style="margin-top:14px">';
+  if(data.statut==='accord'){
+    html+='<div class="score">'+(data.score!=null?data.score:'—')+'<span style="font-size:16px;color:var(--muted)">/100</span></div>'
+      +'<div class="lbl">Accord conclu à '+euro(data.prix_final)+'</div>';
+  } else {
+    html+='<div class="score" style="color:var(--red)">Rupture</div><div class="lbl">Le vendeur a mis fin à la négociation.</div>';
+  }
+  if(d.prix_reserve){
+    html+='<div class="reveal">🔓 Le prix de réserve du vendeur était de <strong>'+euro(d.prix_reserve)+'</strong> (affiché '+euro(d.prix_affiche)+').'
+      +(data.statut==='accord'&&d.remise_max_possible?'<br>Remise obtenue : '+euro(d.remise_obtenue)+' sur '+euro(d.remise_max_possible)+' possibles.':'')+'</div>';
+  }
+  html+='<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px">'
+    +'<button class="btn btn-sec" style="width:auto" onclick="choisir(\''+scen.id+'\')">↻ Rejouer</button>'
+    +'<button class="btn btn-sec" style="width:auto" onclick="show(\'etape-scenarios\')">Autre scénario</button>'
+    +'</div>';
+  html+='<div class="cta"><strong>Vous avez aimé ?</strong><br><span style="font-size:13px;opacity:.85">En mode démo, vous choisissez vos arguments dans une liste. Avec un compte agent, vous affrontez un vrai vendeur IA à qui vous parlez librement — et vous entrez au classement du mois.</span><br><a href="candidature-agent.html">Devenir agent ImmoConnect →</a></div>';
+  html+='</div>';
+  document.getElementById('j-debrief').innerHTML=html;
+}
+</script>
+</body>
+</html>
