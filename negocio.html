@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Négocio — Entraînement à la négociation | ImmoConnect</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--amber:#D4732A;--red:#A32D2D;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}.nav-logo span{color:var(--gold)}
+.nav-sp{flex:1}
+nav a.nl{color:#fff;text-decoration:none;font-size:13px;opacity:.85}
+.page{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:26px;font-weight:600}
+.sub{color:var(--muted);margin:4px 0 22px;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.sc{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:16px;cursor:pointer;transition:box-shadow .2s,transform .2s}
+.sc:hover{box-shadow:0 8px 24px rgba(0,0,0,.07);transform:translateY(-2px)}
+.diff{display:inline-block;font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px}
+.diff.facile{background:#EAF5F1;color:var(--teal)}.diff.moyen{background:#E6F1FB;color:var(--blue)}.diff.difficile{background:#F7E4DC;color:var(--amber)}
+.sc-t{font-size:16px;font-weight:600;margin:8px 0 4px}
+.sc-meta{font-size:12px;color:var(--muted);line-height:1.6}
+.sc-prix{font-size:15px;font-weight:600;color:var(--amber);margin-top:6px}
+/* chat */
+.chatwrap{display:none;background:var(--warm);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.chat-head{background:var(--ink);color:#fff;padding:14px 18px}
+.chat-head .t{font-weight:600}.chat-head .m{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px}
+.msgs{height:52vh;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;background:var(--bg)}
+.b{max-width:78%;padding:11px 14px;border-radius:14px;font-size:14px;line-height:1.5;white-space:pre-wrap}
+.b.vend{background:#fff;border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+.b.ach{background:var(--teal);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.b.sys{align-self:center;background:transparent;color:var(--muted);font-size:12px;max-width:90%;text-align:center}
+.inp{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line);background:var(--warm)}
+.inp textarea{flex:1;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-family:inherit;font-size:14px;resize:none;height:46px}
+.inp button{background:var(--teal);color:#fff;border:none;border-radius:10px;padding:0 20px;font-weight:600;cursor:pointer;font-family:inherit}
+.inp button:disabled{opacity:.5;cursor:not-allowed}
+.debrief{margin:16px;border-radius:var(--r);padding:18px;border:1px solid var(--line)}
+.debrief.win{background:#EAF5F1}.debrief.lose{background:#F7E4DC}
+.score-big{font-size:40px;font-weight:600}
+.dline{font-size:13px;line-height:1.9}
+.back{display:inline-block;margin-bottom:16px;color:var(--muted);text-decoration:none;font-size:13px;cursor:pointer}
+.loading{text-align:center;padding:50px;color:var(--muted)}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-sp"></div>
+  <a href="dashboard-agent.html" class="nl">Espace agent</a>
+  <a href="connexion.html" class="nl">Mon compte</a>
+</nav>
+
+<div class="page">
+  <div id="intro">
+    <h1>🤝 Négocio</h1>
+    <p class="sub">Entraînez-vous à la négociation face à un vendeur joué par l'IA. Chaque scénario a un <strong>prix de réserve secret</strong> : à vous d'obtenir le meilleur prix par l'argumentation. Réservé aux agents inscrits.</p>
+    <div id="scenarios"><div class="loading">Chargement des scénarios…</div></div>
+  </div>
+
+  <div id="jeu" style="display:none">
+    <span class="back" onclick="retour()">← Choisir un autre scénario</span>
+    <div class="chatwrap" id="chatwrap">
+      <div class="chat-head"><div class="t" id="ch-titre">—</div><div class="m" id="ch-meta">—</div></div>
+      <div class="msgs" id="msgs"></div>
+      <div id="debrief-slot"></div>
+      <div class="inp" id="inp">
+        <textarea id="msg" placeholder="Votre argument, votre offre…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();envoyer();}"></textarea>
+        <button id="send" onclick="envoyer()">Envoyer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="messagerie-badge.js" defer></script>
+<script>
+const SB_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const db=supabase.createClient(SB_URL,SB_KEY);
+var currentUser=null, partieId=null, scenarioCourant=null;
+
+(async function(){
+  var {data:{session}}=await db.auth.getSession();
+  if(!session){ window.location.href='connexion.html?next=negocio.html'; return; }
+  currentUser=session.user;
+  var {data,error}=await db.from('negocio_scenarios_public').select('*').order('difficulte',{ascending:true});
+  var box=document.getElementById('scenarios');
+  if(error||!data||!data.length){ box.innerHTML='<div class="loading">Aucun scénario disponible pour le moment.</div>'; return; }
+  box.className='grid';
+  box.innerHTML=data.map(function(s){
+    return '<div class="sc" onclick="demarrer(\''+s.id+'\')">'
+      +'<span class="diff '+(s.difficulte||'moyen')+'">'+(s.difficulte||'moyen')+'</span>'
+      +'<div class="sc-t">'+s.titre+'</div>'
+      +'<div class="sc-meta">'+(s.bien_type||'')+' · '+(s.ville||'')+' · '+(s.surface||'?')+' m² · '+(s.nb_pieces||'?')+' pièces</div>'
+      +'<div class="sc-meta" style="margin-top:6px">'+(s.contexte_public||'')+'</div>'
+      +'<div class="sc-prix">Prix affiché : '+Math.round(s.prix_affiche).toLocaleString('fr-FR')+' €</div>'
+      +'</div>';
+  }).join('');
+})();
+
+function bulle(role, txt){
+  var d=document.createElement('div');
+  d.className='b '+(role==='acheteur'?'ach':(role==='systeme'?'sys':'vend'));
+  d.textContent=txt;
+  document.getElementById('msgs').appendChild(d);
+  var m=document.getElementById('msgs'); m.scrollTop=m.scrollHeight;
+}
+
+async function demarrer(scenarioId){
+  document.getElementById('intro').style.display='none';
+  document.getElementById('jeu').style.display='block';
+  document.getElementById('chatwrap').style.display='block';
+  document.getElementById('msgs').innerHTML='';
+  document.getElementById('debrief-slot').innerHTML='';
+  document.getElementById('inp').style.display='flex';
+  document.getElementById('msg').value='';
+  bulle('systeme','Connexion avec le vendeur…');
+  var r=await db.functions.invoke('negocio-chat',{body:{action:'start',scenario_id:scenarioId}});
+  if(r.error||(r.data&&r.data.error)){ bulle('systeme','Erreur : '+(r.error?r.error.message:r.data.error)); return; }
+  partieId=r.data.partie_id;
+  document.getElementById('msgs').innerHTML='';
+  bulle('vendeur', r.data.reply);
+  document.getElementById('ch-titre').textContent='Négociation en cours';
+  document.getElementById('ch-meta').textContent='Objectif : obtenir le meilleur prix. Le prix de réserve du vendeur est secret.';
+}
+
+async function envoyer(){
+  var ta=document.getElementById('msg'), txt=ta.value.trim();
+  if(!txt||!partieId) return;
+  var send=document.getElementById('send');
+  bulle('acheteur',txt); ta.value=''; send.disabled=true; send.textContent='…';
+  bulle('systeme','Le vendeur réfléchit…');
+  var r=await db.functions.invoke('negocio-chat',{body:{partie_id:partieId,message:txt}});
+  var msgs=document.getElementById('msgs'); if(msgs.lastChild&&msgs.lastChild.classList.contains('sys')) msgs.removeChild(msgs.lastChild);
+  send.disabled=false; send.textContent='Envoyer';
+  if(r.error||(r.data&&r.data.error)){ bulle('systeme','Erreur : '+(r.error?r.error.message:r.data.error)); return; }
+  var d=r.data;
+  bulle('vendeur', d.reply);
+  if(d.statut==='accord') finPartie(true, d);
+  else if(d.statut==='rompu') finPartie(false, d);
+}
+
+function finPartie(gagne, d){
+  document.getElementById('inp').style.display='none';
+  var db2=d.debrief||{};
+  var html;
+  if(gagne){
+    html='<div class="debrief win">'
+      +'<div style="color:var(--teal);font-weight:600;margin-bottom:6px">✅ Accord trouvé !</div>'
+      +'<div class="score-big" style="color:var(--teal)">'+d.score+'<span style="font-size:18px;color:var(--muted)">/100</span></div>'
+      +'<div class="dline" style="margin-top:8px">'
+      +'Prix d\'achat obtenu : <strong>'+Math.round(d.prix_final).toLocaleString('fr-FR')+' €</strong><br>'
+      +'Prix affiché : '+Math.round(db2.prix_affiche).toLocaleString('fr-FR')+' € · Remise obtenue : <strong>'+Math.round(db2.remise_obtenue).toLocaleString('fr-FR')+' €</strong><br>'
+      +'🔓 Prix de réserve du vendeur (secret) : <strong>'+Math.round(db2.prix_reserve).toLocaleString('fr-FR')+' €</strong> — remise maximale possible : '+Math.round(db2.remise_max_possible).toLocaleString('fr-FR')+' €<br>'
+      +'Tours de négociation : '+d.nb_tours
+      +'</div>'
+      +conseil(d.score)
+      +'<div style="margin-top:14px"><span class="back" onclick="retour()">← Rejouer un scénario</span></div>'
+      +'</div>';
+  } else {
+    html='<div class="debrief lose">'
+      +'<div style="color:var(--amber);font-weight:600;margin-bottom:6px">❌ Négociation rompue</div>'
+      +'<div class="dline">Le vendeur a mis fin à la discussion. '
+      +(db2.prix_reserve?'🔓 Son prix de réserve était de <strong>'+Math.round(db2.prix_reserve).toLocaleString('fr-FR')+' €</strong> (affiché '+Math.round(db2.prix_affiche).toLocaleString('fr-FR')+' €).':'')
+      +'</div>'
+      +'<div class="dline" style="margin-top:8px">💡 Une offre trop basse ou trop frontale braque le vendeur. Cherchez d\'abord à comprendre sa motivation, puis argumentez avec des faits (marché, travaux).</div>'
+      +'<div style="margin-top:14px"><span class="back" onclick="retour()">← Réessayer</span></div>'
+      +'</div>';
+  }
+  document.getElementById('debrief-slot').innerHTML=html;
+}
+
+function conseil(score){
+  var t;
+  if(score>=85) t='Excellent : vous avez négocié au plus près (voire sous) le prix plancher du vendeur.';
+  else if(score>=60) t='Bonne négociation. Il restait un peu de marge — creusez les motivations du vendeur pour aller plus loin.';
+  else if(score>=35) t='Correct, mais vous avez laissé de la marge sur la table. Argumentez davantage avec des faits avant de converger.';
+  else t='Vous avez payé cher. Prenez le temps de faire baisser progressivement, sans accepter la première contre-proposition.';
+  return '<div class="dline" style="margin-top:8px;color:var(--ink)">💡 '+t+'</div>';
+}
+
+function retour(){
+  partieId=null;
+  document.getElementById('jeu').style.display='none';
+  document.getElementById('intro').style.display='block';
+  document.getElementById('inp').style.display='flex';
+}
+</script>
+</body>
+</html>
