@@ -114,7 +114,7 @@ const SB_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
 const SB_KEY='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
 const db=supabase.createClient(SB_URL,SB_KEY);
 
-var lead={}, partieId=null, history=[], toursMax=8, fini=false;
+var lead={}, partieId=null, historique=[], toursMax=8, fini=false;
 function euro(n){return Math.round(n).toLocaleString('fr-FR')+' €';}
 function show(id){['etape-lead','etape-scenarios','etape-jeu'].forEach(function(e){document.getElementById(e).classList.add('hidden');});document.getElementById(id).classList.remove('hidden');}
 function addMsg(role,txt){var b=document.getElementById('j-body');var d=document.createElement('div');d.className='msg '+(role==='acheteur'?'a':'v');d.textContent=txt;b.appendChild(d);b.scrollTop=b.scrollHeight;}
@@ -134,7 +134,7 @@ async function demarrer(scenarioId){
   var err=document.getElementById('s-err'); err.textContent='';
   var {data,error}=await db.functions.invoke('negocio-demo-ia',{body:{action:'start',prenom:lead.prenom,email:lead.email,consent:lead.consent,scenario_id:scenarioId}});
   if(error||!data||data.error){ err.textContent=(data&&data.message)||(data&&data.error)||'Erreur, réessayez.'; return; }
-  partieId=data.partie_id; toursMax=data.tours_max||8; history=[]; fini=false;
+  partieId=data.partie_id; toursMax=data.tours_max||8; historique=[]; fini=false;
   var sc=data.scenario||{};
   document.getElementById('j-titre').textContent=sc.titre||'Négociation';
   document.getElementById('j-meta').textContent=(sc.bien_type||'')+' · '+(sc.ville||'')+' · espéré '+euro(sc.prix_affiche||0);
@@ -143,7 +143,7 @@ async function demarrer(scenarioId){
   document.getElementById('j-debrief').innerHTML='';
   document.getElementById('j-play').style.display='flex';
   addMsg('vendeur', data.reply);
-  history.push({role:'vendeur',contenu:data.reply});
+  historique.push({role:'vendeur',contenu:data.reply});
   majTour(0);
   show('etape-jeu');
 }
@@ -155,12 +155,12 @@ async function jouer(){
   var ta=document.getElementById('j-msg'); var msg=ta.value.trim();
   if(!msg) return;
   var btn=document.getElementById('j-send'); btn.disabled=true; btn.textContent='…';
-  addMsg('acheteur', msg); history.push({role:'acheteur',contenu:msg}); ta.value='';
-  var {data,error}=await db.functions.invoke('negocio-demo-ia',{body:{action:'play',partie_id:partieId,message:msg,history:history}});
+  addMsg('acheteur', msg); historique.push({role:'acheteur',contenu:msg}); ta.value='';
+  var {data,error}=await db.functions.invoke('negocio-demo-ia',{body:{action:'play',partie_id:partieId,message:msg,history:historique}});
   btn.disabled=false; btn.textContent='Envoyer';
   if(error||!data||data.error){ addMsg('vendeur','('+((data&&data.message)||'erreur, réessayez')+')'); return; }
-  addMsg('vendeur', data.reply); history.push({role:'vendeur',contenu:data.reply});
-  majTour(data.nb_tours||history.filter(function(m){return m.role==='acheteur';}).length);
+  addMsg('vendeur', data.reply); historique.push({role:'vendeur',contenu:data.reply});
+  majTour(data.nb_tours||historique.filter(function(m){return m.role==='acheteur';}).length);
   if(data.statut==='accord'||data.statut==='rompu'){ fini=true; finPartie(data); }
 }
 
