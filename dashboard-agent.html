@@ -344,7 +344,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
       <div class="card">
         <div class="card-title">
           <span>Mes mandats publies</span>
-          <button class="btn-sm btn-sm-primary" onclick="ajouterMandat()">+ Publier un mandat</button>
+          <button class="btn-sm btn-sm-primary" onclick="ajouterMandat()">+ Publier un bien à vendre</button>
         </div>
         <div id="mandats-list">
           <div style="text-align:center;padding:20px;color:var(--muted)">Chargement...</div>
@@ -947,6 +947,24 @@ async function chargerMandats() {
   mandats = mands || [];
   afficherMandats();
   afficherAcheteurs().then(undefined, function(){});
+  // Offre fondateur : 10 premiers agents à publier un bien/mandat = Starter à vie (atomique, idempotent)
+  if (mandats.length >= 1) reclamerOffreFondateur();
+}
+
+async function reclamerOffreFondateur() {
+  try {
+    var { data, error } = await db.rpc('reclamer_offre_fondateur');
+    if (error || !data || !data.length) return;
+    var r = data[0];
+    if (r.accorde && r.rang && !sessionStorage.getItem('ic_fondateur_vu')) {
+      sessionStorage.setItem('ic_fondateur_vu', '1');
+      if (typeof showToast === 'function') {
+        showToast('🎉 Félicitations ! Vous êtes agent fondateur n°' + r.rang + '/10 : forfait Starter offert À VIE.', 'ok');
+      } else {
+        alert('🎉 Vous êtes agent fondateur n°' + r.rang + '/10 : forfait Starter offert à vie !');
+      }
+    }
+  } catch (e) {}
 }
 
 function afficherMandats() {
