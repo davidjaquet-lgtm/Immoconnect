@@ -120,7 +120,7 @@ async function demarrer(scenarioId){
   document.getElementById('msg').value='';
   bulle('systeme','Connexion avec le vendeur…');
   var r=await db.functions.invoke('negocio-chat',{body:{action:'start',scenario_id:scenarioId}});
-  if(r.error||(r.data&&r.data.error)){ bulle('systeme','Erreur : '+(r.error?r.error.message:r.data.error)); return; }
+  if(r.error||(r.data&&r.data.error)){ bulle('systeme',(r.data&&r.data.message)?r.data.message:('Erreur : '+(r.error?r.error.message:r.data.error))); return; }
   partieId=r.data.partie_id;
   document.getElementById('msgs').innerHTML='';
   bulle('vendeur', r.data.reply);
