@@ -72,8 +72,8 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 <div class="wrap">
   <div class="head">
     <div class="kicker">Négocio · Démo gratuite</div>
-    <h1>Êtes-vous un bon négociateur ?</h1>
-    <p>Affrontez un vendeur et essayez d'obtenir le meilleur prix. 2 scénarios réels, gratuit.</p>
+    <h1>Savez-vous décrocher un mandat au juste prix ?</h1>
+    <p>Vous êtes l'agent. En face, un vendeur qui surestime son bien. À vous de le convaincre du <strong>bon prix de mise en vente</strong> — ni trop haut (invendable), ni trop bas (on brade). 2 cas réels, gratuit.</p>
   </div>
 
   <!-- ÉTAPE 1 : lead -->
@@ -87,7 +87,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
 
   <!-- ÉTAPE 2 : choix scénario -->
   <div id="etape-scenarios" class="hidden">
-    <p style="text-align:center;color:var(--muted);margin-bottom:12px">Choisissez un vendeur à affronter :</p>
+    <p style="text-align:center;color:var(--muted);margin-bottom:12px">Choisissez un rendez-vous d'estimation :</p>
     <div class="sc-grid" id="sc-grid"></div>
   </div>
 
@@ -100,8 +100,8 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
         <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Choisissez un argument :</div>
         <div class="args" id="j-args"></div>
         <div class="offre-row">
-          <input id="j-offre" type="number" placeholder="Votre offre en €">
-          <button onclick="jouer()">Proposer</button>
+          <input id="j-offre" type="number" placeholder="Prix de mise en vente conseillé (€)">
+          <button onclick="jouer()">Conseiller</button>
         </div>
         <div class="tour" id="j-tour" style="margin-top:8px"></div>
       </div>
@@ -153,7 +153,7 @@ function choisir(id){
   document.getElementById('j-body').innerHTML='';
   document.getElementById('j-debrief').innerHTML='';
   document.getElementById('j-play').style.display='';
-  addMsg('v', 'Bonjour ! Vous me contactez pour '+scen.bien_type.toLowerCase()+' à '+scen.ville+', affiché à '+euro(scen.prix_affiche)+'. Qu\'est-ce que vous proposez ?');
+  addMsg('v', 'Bonjour ! Je veux mettre en vente '+scen.bien_type.toLowerCase()+' à '+scen.ville+'. J\'aimerais en tirer '+euro(scen.prix_affiche)+'. Vous en pensez quoi comme prix de mise en vente ?');
   renderArgs();
   majTour();
   show('etape-jeu');
@@ -178,7 +178,7 @@ async function jouer(){
   if(!offre){ offreEl.focus(); return; }
   if(!argSel){ alert('Choisissez un argument pour appuyer votre offre.'); return; }
   var argLabel=(scen.args.find(function(a){return a.id===argSel;})||{}).label||'';
-  addMsg('a', 'Je vous propose '+euro(offre)+'. '+argLabel);
+  addMsg('a', 'Je vous conseille de le mettre à '+euro(offre)+'. '+argLabel);
   coups.push({offre:offre, arg:argSel});
   offreEl.value=''; majTour();
   var {data,error}=await db.functions.invoke('negocio-demo',{body:{action:'play',scenario_id:scen.id,coups:coups}});
@@ -194,19 +194,28 @@ function finPartie(data){
   var html='<div class="card debrief" style="margin-top:14px">';
   if(data.statut==='accord'){
     html+='<div class="score">'+(data.score!=null?data.score:'—')+'<span style="font-size:16px;color:var(--muted)">/100</span></div>'
-      +'<div class="lbl">Accord conclu à '+euro(data.prix_final)+'</div>';
+      +'<div class="lbl">Mandat signé à '+euro(data.prix_final)+'</div>';
   } else {
-    html+='<div class="score" style="color:var(--red)">Rupture</div><div class="lbl">Le vendeur a mis fin à la négociation.</div>';
+    html+='<div class="score" style="color:var(--red)">Mandat perdu</div><div class="lbl">Le vendeur est parti voir une autre agence.</div>';
   }
-  if(d.prix_reserve){
-    html+='<div class="reveal">🔓 Le prix de réserve du vendeur était de <strong>'+euro(d.prix_reserve)+'</strong> (affiché '+euro(d.prix_affiche)+').'
-      +(data.statut==='accord'&&d.remise_max_possible?'<br>Remise obtenue : '+euro(d.remise_obtenue)+' sur '+euro(d.remise_max_possible)+' possibles.':'')+'</div>';
+  if(d.fourchette_bas){
+    var dansFourchette = data.prix_final && data.prix_final>=d.fourchette_bas && data.prix_final<=d.fourchette_haut;
+    var verdict='';
+    if(data.statut==='accord'){
+      if(dansFourchette) verdict='✅ Pile dans le juste prix : mandat vendable ET client respecté. Parfait.';
+      else if(data.prix_final>d.fourchette_haut) verdict='⚠️ Trop haut : vous avez flatté le vendeur, mais à ce prix le bien risque de ne pas se vendre (mandat « dormant »).';
+      else verdict='⚠️ Trop bas : vous avez bradé le bien de votre client. On décroche le mandat, mais ce n\'est pas honnête envers lui.';
+    }
+    html+='<div class="reveal">🎯 Le <strong>juste prix</strong> pour ce bien se situait entre <strong>'+euro(d.fourchette_bas)+'</strong> et <strong>'+euro(d.fourchette_haut)+'</strong> (cible ~'+euro(d.prix_cible)+'), à partir des DVF moins les travaux, le ravalement et une décote raisonnable pour vendre vite.'
+      +(verdict?'<br><br>'+verdict:'')
+      +(d.bons_args!=null?'<br><br>Bons leviers utilisés : <strong>'+d.bons_args+'</strong> (3 = maximum de points arguments).':'')
+      +'</div>';
   }
   html+='<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px">'
     +'<button class="btn btn-sec" style="width:auto" onclick="choisir(\''+scen.id+'\')">↻ Rejouer</button>'
-    +'<button class="btn btn-sec" style="width:auto" onclick="show(\'etape-scenarios\')">Autre scénario</button>'
+    +'<button class="btn btn-sec" style="width:auto" onclick="show(\'etape-scenarios\')">Autre cas</button>'
     +'</div>';
-  html+='<div class="cta"><strong>Vous avez aimé ?</strong><br><span style="font-size:13px;opacity:.85">En mode démo, vous choisissez vos arguments dans une liste. Avec un compte agent, vous affrontez un vrai vendeur IA à qui vous parlez librement — et vous entrez au classement du mois.</span><br><a href="candidature-agent.html">Devenir agent ImmoConnect →</a></div>';
+  html+='<div class="cta"><strong>Vous avez aimé ?</strong><br><span style="font-size:13px;opacity:.85">En démo, vous choisissez vos arguments dans une liste. Avec un compte agent, vous affrontez un vendeur IA à qui vous parlez librement — 13 cas, et le classement du mois.</span><br><a href="candidature-agent.html">Devenir agent ImmoConnect →</a></div>';
   html+='</div>';
   document.getElementById('j-debrief').innerHTML=html;
 }
