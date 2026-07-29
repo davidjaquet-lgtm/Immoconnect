@@ -953,16 +953,18 @@ async function chargerMandats() {
 
 async function reclamerOffreFondateur() {
   try {
-    var { data, error } = await db.rpc('reclamer_offre_fondateur');
-    if (error || !data || !data.length) return;
-    var r = data[0];
+    var { data, error } = await db.functions.invoke('reclamer-offre-fondateur');
+    if (error || !data || data.error) return;
+    var r = data;
     if (r.accorde && r.rang && !sessionStorage.getItem('ic_fondateur_vu')) {
       sessionStorage.setItem('ic_fondateur_vu', '1');
+      try { await db.auth.refreshSession(); } catch (e) {} // recharge le forfait 'starter' dans la session
       if (typeof showToast === 'function') {
         showToast('🎉 Félicitations ! Vous êtes agent fondateur n°' + r.rang + '/10 : forfait Starter offert À VIE.', 'ok');
       } else {
         alert('🎉 Vous êtes agent fondateur n°' + r.rang + '/10 : forfait Starter offert à vie !');
       }
+      setTimeout(function () { location.reload(); }, 1600); // rafraîchit badge + quotas + matching
     }
   } catch (e) {}
 }
