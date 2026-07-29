@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L'agent du mois | ImmoConnect</title>
+<meta name="description" content="Découvrez l'agent immobilier mis à l'honneur ce mois-ci sur ImmoConnect, le meilleur négociateur du mois.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--amber:#D4732A;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}.nav-logo span{color:var(--gold)}
+.nav-links{margin-left:auto;display:flex;gap:18px}
+.nav-links a{color:#cfcec9;text-decoration:none;font-size:13px}
+.nav-links a:hover{color:#fff}
+.wrap{max-width:680px;margin:0 auto;padding:34px 18px 60px}
+.head{text-align:center;margin-bottom:26px}
+.head .kicker{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
+.head h1{font-size:28px;font-weight:600;margin:6px 0}
+.head p{color:var(--muted);max-width:520px;margin:0 auto;line-height:1.6}
+.card{background:var(--warm);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(0,0,0,.07)}
+.card-top{background:linear-gradient(135deg,#0F1F19,#1A3528);padding:26px 24px;text-align:center;position:relative}
+.trophy{font-size:34px}
+.period{color:var(--gold);font-weight:700;font-size:13px;letter-spacing:.5px;margin-top:4px;text-transform:uppercase}
+.photo{width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid var(--warm);margin:14px auto 0;display:block;background:#efece5}
+.photo-ph{width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:44px;margin:14px auto 0;color:var(--gold)}
+.card-body{padding:22px 24px;text-align:center}
+.nm{font-size:22px;font-weight:600}
+.ag{color:var(--muted);font-size:14px;margin-top:2px}
+.sc{display:inline-block;background:#E1F5EE;color:#085041;border-radius:20px;padding:5px 14px;font-weight:600;font-size:13px;margin-top:12px}
+.phrase{font-style:italic;color:#444;margin:18px auto 0;max-width:440px;line-height:1.7;font-size:15px}
+.site{display:inline-block;margin-top:18px;background:var(--gold);color:#0F0F0E;text-decoration:none;padding:10px 20px;border-radius:8px;font-weight:600;font-size:14px}
+.empty{background:var(--warm);border:1px dashed var(--line);border-radius:16px;padding:40px 24px;text-align:center;color:var(--muted);line-height:1.7}
+.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+.cta a{text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;font-size:14px}
+.cta .a1{background:var(--teal);color:#fff}
+.cta .a2{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.note{font-size:12px;color:var(--muted);text-align:center;margin-top:18px;line-height:1.6}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-links">
+    <a href="negocio-classement.html">🏆 Classement</a>
+    <a href="negocio.html">🤝 S'entraîner</a>
+    <a href="candidature-agent.html">Devenir agent</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="head">
+    <div class="kicker">ImmoConnect</div>
+    <h1>L'agent du mois</h1>
+    <p>Chaque mois, le meilleur négociateur de notre simulateur Négocio est mis à l'honneur.</p>
+  </div>
+
+  <div id="contenu"><div class="empty">Chargement…</div></div>
+
+  <div class="cta">
+    <a class="a1" href="negocio.html">🤝 M'entraîner à négocier</a>
+    <a class="a2" href="negocio-classement.html">Voir le classement du mois</a>
+  </div>
+  <div class="note">Vous êtes agent et vous voulez figurer ici ? Entraînez-vous sur Négocio : le meilleur négociateur du mois est mis en avant sur cette page.</div>
+</div>
+
+<script>
+const SB_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const db=supabase.createClient(SB_URL,SB_KEY);
+
+function esc(s){return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function safeUrl(u){ u=(u||'').trim(); if(!u) return ''; if(!/^https?:\/\//i.test(u)) u='https://'+u; return u; }
+
+async function charger(){
+  var box=document.getElementById('contenu');
+  var {data,error}=await db.from('agent_du_mois').select('*').eq('actif',true).order('created_at',{ascending:false}).limit(1);
+  if(error){ box.innerHTML='<div class="empty">Indisponible pour le moment.</div>'; return; }
+  var a=(data&&data[0]);
+  if(!a){
+    box.innerHTML='<div class="empty">🏆 Le premier <strong>agent du mois</strong> sera bientôt désigné.<br>Agents : entraînez-vous sur Négocio pour être mis à l\'honneur ici !</div>';
+    return;
+  }
+  var nom=((a.prenom||'')+' '+(a.nom||'')).trim()||'Agent ImmoConnect';
+  var photo = a.photo_url
+    ? '<img class="photo" src="'+esc(a.photo_url)+'" alt="'+esc(nom)+'" onerror="this.outerHTML=\'<div class=&quot;photo-ph&quot;>👤</div>\'">'
+    : '<div class="photo-ph">👤</div>';
+  var site = a.site_url
+    ? '<a class="site" href="'+esc(safeUrl(a.site_url))+'" target="_blank" rel="noopener nofollow">Voir son site →</a>'
+    : '';
+  box.innerHTML=
+    '<div class="card">'
+    +'<div class="card-top"><div class="trophy">🏆</div><div class="period">Agent du mois · '+esc(a.periode||'')+'</div>'+photo+'</div>'
+    +'<div class="card-body">'
+    +'<div class="nm">'+esc(nom)+'</div>'
+    +'<div class="ag">'+esc([a.agence,a.ville].filter(Boolean).join(' · '))+'</div>'
+    +(a.score!=null?'<div class="sc">Score Négocio : '+a.score+'</div>':'')
+    +(a.phrase?'<div class="phrase">« '+esc(a.phrase)+' »</div>':'')
+    +site
+    +'</div></div>';
+}
+charger();
+</script>
+</body>
+</html>

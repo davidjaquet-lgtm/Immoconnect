@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classement des négociateurs du mois | ImmoConnect</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--amber:#D4732A;--red:#A32D2D;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}.nav-logo span{color:var(--gold)}
+.nav-links{margin-left:auto;display:flex;gap:18px}
+.nav-links a{color:#cfcec9;text-decoration:none;font-size:13px}
+.nav-links a:hover{color:#fff}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+.head{text-align:center;margin-bottom:22px}
+.head .kicker{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
+.head h1{font-size:27px;font-weight:600;margin:6px 0 6px}
+.head p{color:var(--muted);max-width:520px;margin:0 auto;line-height:1.6}
+.moisbar{display:flex;align-items:center;justify-content:center;gap:14px;margin:18px 0}
+.moisbar button{background:var(--warm);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:13px}
+.moisbar .mois{font-weight:600;min-width:150px;text-align:center;text-transform:capitalize}
+.podium{display:flex;justify-content:center;gap:12px;align-items:flex-end;margin:26px 0 18px}
+.pod{background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:16px 12px;text-align:center;width:160px}
+.pod .medal{font-size:26px}
+.pod .nm{font-weight:600;margin-top:6px;font-size:14px}
+.pod .ag{font-size:11px;color:var(--muted)}
+.pod .sc{font-size:20px;font-weight:700;color:var(--teal);margin-top:6px}
+.pod.p1{transform:scale(1.06);border-color:var(--gold);box-shadow:0 8px 26px rgba(192,155,90,.22)}
+.badge1{display:inline-block;background:var(--gold);color:#0F0F0E;font-size:10px;font-weight:700;border-radius:20px;padding:3px 9px;margin-top:6px}
+table{width:100%;border-collapse:collapse;background:var(--warm);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{padding:11px 14px;text-align:left;font-size:13px;border-bottom:1px solid var(--line)}
+th{background:#efece5;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+tr:last-child td{border-bottom:none}
+.rang{font-weight:700;color:var(--muted);width:38px}
+.sc-cell{font-weight:700;color:var(--teal);text-align:right}
+.nb-cell{color:var(--muted);text-align:right}
+.empty{text-align:center;color:var(--muted);padding:40px 20px;line-height:1.7}
+.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+.cta a{text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;font-size:14px}
+.cta .a1{background:var(--teal);color:#fff}
+.cta .a2{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.note{font-size:12px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.6}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-links">
+    <a href="negocio.html">🤝 S'entraîner</a>
+    <a href="agent-du-mois.html">🏆 Agent du mois</a>
+    <a href="candidature-agent.html">Devenir agent</a>
+    <a href="index.html">Accueil</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="head">
+    <div class="kicker">Négocio · Classement</div>
+    <h1>Les meilleurs négociateurs du mois</h1>
+    <p>Chaque mois, les agents s'affrontent sur des scénarios de négociation réels. Le meilleur est mis à l'honneur ici et sur sa fiche.</p>
+  </div>
+
+  <div class="moisbar">
+    <button onclick="changerMois(-1)">← Mois précédent</button>
+    <div class="mois" id="mois-label">—</div>
+    <button onclick="changerMois(1)" id="btn-next">Mois suivant →</button>
+  </div>
+
+  <div id="podium"></div>
+  <div id="reste"></div>
+
+  <div class="cta">
+    <a class="a1" href="negocio.html">🤝 M'entraîner à négocier</a>
+    <a class="a2" href="candidature-agent.html">Devenir agent ImmoConnect</a>
+  </div>
+  <div class="note">Classement basé sur la moyenne des 3 meilleures parties du mois, pondérée par la difficulté des scénarios. Réservé aux agents inscrits.</div>
+</div>
+
+<script>
+const SB_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const db=supabase.createClient(SB_URL,SB_KEY);
+
+var cur=new Date();
+var vA=cur.getFullYear(), vM=cur.getMonth()+1;
+var MOIS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+function nomAffiche(r){
+  var n=((r.prenom||'')+' '+(r.nom||'')).trim();
+  return n||'Agent';
+}
+function escapeHtml(s){return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+function changerMois(delta){
+  vM+=delta;
+  if(vM<1){vM=12;vA--;}
+  if(vM>12){vM=1;vA++;}
+  // pas de futur au-delà du mois courant
+  var maxA=cur.getFullYear(), maxM=cur.getMonth()+1;
+  if(vA>maxA||(vA===maxA&&vM>maxM)){vA=maxA;vM=maxM;}
+  document.getElementById('btn-next').style.visibility=(vA===maxA&&vM===maxM)?'hidden':'visible';
+  charger();
+}
+
+async function charger(){
+  document.getElementById('mois-label').textContent=MOIS[vM-1]+' '+vA;
+  var pod=document.getElementById('podium'), reste=document.getElementById('reste');
+  pod.innerHTML=''; reste.innerHTML='<div class="empty">Chargement…</div>';
+  var {data,error}=await db.rpc('negocio_classement_mois',{p_annee:vA,p_mois:vM});
+  if(error){ reste.innerHTML='<div class="empty">Classement indisponible pour le moment.</div>'; return; }
+  var list=data||[];
+  if(!list.length){
+    reste.innerHTML='<div class="empty">Aucune partie jouée ce mois-ci pour l\'instant.<br>Soyez le premier à figurer au classement !</div>';
+    return;
+  }
+  // Podium (top 3)
+  var medals=['🥇','🥈','🥉'];
+  var top=list.slice(0,3);
+  pod.innerHTML='<div class="podium">'+top.map(function(r,i){
+    return '<div class="pod p'+(i+1)+'">'
+      +'<div class="medal">'+medals[i]+'</div>'
+      +'<div class="nm">'+escapeHtml(nomAffiche(r))+'</div>'
+      +'<div class="ag">'+escapeHtml(r.agence||'')+'</div>'
+      +'<div class="sc">'+(r.score_moyen!=null?r.score_moyen:'—')+'</div>'
+      +(i===0?'<div class="badge1">🏆 Meilleur du mois</div>':'')
+      +'</div>';
+  }).join('')+'</div>';
+  // Reste (4+)
+  var rest=list.slice(3);
+  var rows=list.map(function(r,i){
+    return '<tr>'
+      +'<td class="rang">'+(i+1)+'</td>'
+      +'<td>'+escapeHtml(nomAffiche(r))+(i===0?' <span style="color:var(--gold)">🏆</span>':'')+'</td>'
+      +'<td style="color:var(--muted)">'+escapeHtml(r.agence||'')+'</td>'
+      +'<td class="sc-cell">'+(r.score_moyen!=null?r.score_moyen:'—')+'</td>'
+      +'<td class="nb-cell">'+(r.nb_parties||0)+'</td>'
+      +'</tr>';
+  }).join('');
+  reste.innerHTML='<table><thead><tr><th>#</th><th>Agent</th><th>Agence</th><th style="text-align:right">Score</th><th style="text-align:right">Parties</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+changerMois(0);
+</script>
+</body>
+</html>

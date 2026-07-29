@@ -136,6 +136,7 @@ nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 
     <a href="comment-ca-marche-agents.html">Comment ca marche</a>
     <a href="forfaits.html">Forfaits</a>
     <a href="negocio.html" title="Entraînement à la négociation">🤝 Négocio</a>
+    <a href="negocio-classement.html" title="Classement des négociateurs du mois">🏆 Classement</a>
     <a href="messagerie.html" id="lien-messagerie" style="position:relative">💬 Messagerie<span id="msg-badge" style="display:none;position:absolute;top:-8px;right:-12px;background:#A32D2D;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;line-height:16px;border-radius:8px;padding:0 3px;text-align:center">0</span></a>
   </div>
   <a href="#" onclick="deconnexion()" class="nav-out">Deconnexion</a>
@@ -587,7 +588,24 @@ const QUOTAS_MAX = { pay_per_use: { cands: 0, leads: 2, mandats: 2, acheteurs: 3
   meta = user.user_metadata || {};
   await Promise.all([chargerProfil(), chargerCandidatures(), chargerMandats(), chargerMandatsRecherche(), chargerPreuves(), chargerMesAnnonces(), chargerMessagesAgentNonLus()]);
   abonnerMessagesAgent();
+  badgeMeilleurNegociateur();
 })();
+
+async function badgeMeilleurNegociateur() {
+  try {
+    var d = new Date();
+    var { data } = await db.rpc('negocio_meilleur_agent', { p_annee: d.getFullYear(), p_mois: d.getMonth() + 1 });
+    if (!data || !data.length) return;
+    var top = data[0];
+    if (!top.agent_email || !currentUser || top.agent_email.toLowerCase() !== (currentUser.email || '').toLowerCase()) return;
+    var mois = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'][d.getMonth()];
+    var el = document.createElement('div');
+    el.style.cssText = 'background:linear-gradient(135deg,#C09B5A,#a9843f);color:#0F0F0E;border-radius:12px;padding:14px 18px;margin:14px 0;font-weight:600;display:flex;align-items:center;gap:12px';
+    el.innerHTML = '<span style="font-size:24px">🏆</span><div>Vous êtes le <strong>meilleur négociateur du mois</strong> (' + mois + ') !<div style="font-weight:400;font-size:12px;margin-top:2px">Votre nom est mis en avant sur le <a href="negocio-classement.html" style="color:#0F0F0E;text-decoration:underline">classement public</a>.</div></div>';
+    var main = document.querySelector('.wrap') || document.querySelector('main') || document.body;
+    main.insertBefore(el, main.firstChild);
+  } catch (e) {}
+}
 
 // ── MESSAGES REÇUS (pastille nav + bandeau + temps réel) ──
 var _agentConvIds = [];
