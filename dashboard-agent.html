@@ -966,26 +966,6 @@ async function chargerMandats() {
   mandats = mands || [];
   afficherMandats();
   afficherAcheteurs().then(undefined, function(){});
-  // Offre fondateur : 10 premiers agents à publier un bien/mandat = Starter à vie (atomique, idempotent)
-  if (mandats.length >= 1) reclamerOffreFondateur();
-}
-
-async function reclamerOffreFondateur() {
-  try {
-    var { data, error } = await db.functions.invoke('reclamer-offre-fondateur');
-    if (error || !data || data.error) return;
-    var r = data;
-    if (r.accorde && r.rang && !sessionStorage.getItem('ic_fondateur_vu')) {
-      sessionStorage.setItem('ic_fondateur_vu', '1');
-      try { await db.auth.refreshSession(); } catch (e) {} // recharge le forfait 'starter' dans la session
-      if (typeof showToast === 'function') {
-        showToast('🎉 Félicitations ! Vous êtes agent fondateur n°' + r.rang + '/10 : forfait Starter offert À VIE.', 'ok');
-      } else {
-        alert('🎉 Vous êtes agent fondateur n°' + r.rang + '/10 : forfait Starter offert à vie !');
-      }
-      setTimeout(function () { location.reload(); }, 1600); // rafraîchit badge + quotas + matching
-    }
-  } catch (e) {}
 }
 
 function afficherMandats() {
