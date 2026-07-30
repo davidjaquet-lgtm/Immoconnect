@@ -34,6 +34,7 @@ h1{font-size:26px;font-weight:600}
 .b.vend{background:#fff;border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
 .b.ach{background:var(--teal);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
 .b.sys{align-self:center;background:transparent;color:var(--muted);font-size:12px;max-width:90%;text-align:center}
+.geste{font-size:12.5px;font-style:italic;color:var(--muted);line-height:1.5;margin-bottom:7px;padding-left:9px;border-left:2px solid var(--line)}
 .inp{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line);background:var(--warm)}
 .inp textarea{flex:1;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-family:inherit;font-size:14px;resize:none;height:46px}
 .inp button{background:var(--teal);color:#fff;border:none;border-radius:10px;padding:0 20px;font-weight:600;cursor:pointer;font-family:inherit}
@@ -105,10 +106,18 @@ var currentUser=null, partieId=null, scenarioCourant=null, SCN=[];
   }).join('');
 })();
 
-function bulle(role, txt){
+function bulle(role, txt, geste){
   var d=document.createElement('div');
   d.className='b '+(role==='acheteur'?'ach':(role==='systeme'?'sys':'vend'));
-  d.textContent=txt;
+  if(geste){
+    var g=document.createElement('div');
+    g.className='geste';
+    g.textContent=geste;
+    d.appendChild(g);
+  }
+  var p=document.createElement('div');
+  p.textContent=txt;
+  d.appendChild(p);
   document.getElementById('msgs').appendChild(d);
   var m=document.getElementById('msgs'); m.scrollTop=m.scrollHeight;
 }
@@ -132,7 +141,7 @@ async function demarrer(scenarioId){
     vis.innerHTML='<img src="'+scenarioCourant.image_url+'" alt="Visite du bien" style="width:100%;border-radius:10px;display:block">';
     document.getElementById('msgs').appendChild(vis);
   }
-  bulle('vendeur', r.data.reply);
+  bulle('vendeur', r.data.reply, r.data.geste);
   document.getElementById('ch-titre').textContent='Rendez-vous d\'estimation';
   document.getElementById('ch-meta').textContent=scenarioCourant.prix_dvf
     ? 'Objectif : décrocher le mandat au juste prix — avec les bons arguments ET le bon relationnel.'
@@ -150,7 +159,7 @@ async function envoyer(){
   send.disabled=false; send.textContent='Envoyer';
   if(r.error||(r.data&&r.data.error)){ bulle('systeme','Erreur : '+(r.error?r.error.message:r.data.error)); return; }
   var d=r.data;
-  bulle('vendeur', d.reply);
+  bulle('vendeur', d.reply, d.geste);
   if(d.statut==='accord') finPartie(true, d);
   else if(d.statut==='rompu') finPartie(false, d);
 }
