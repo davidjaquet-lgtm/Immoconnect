@@ -58,7 +58,8 @@ h1{font-size:26px;font-weight:600}
 <div class="page">
   <div id="intro">
     <h1>🤝 Négocio</h1>
-    <p class="sub">Entraînez-vous à la négociation face à un vendeur joué par l'IA. Chaque scénario a un <strong>prix de réserve secret</strong> : à vous d'obtenir le meilleur prix par l'argumentation. Réservé aux agents inscrits.</p>
+    <p class="sub">Entraînez-vous face à un vendeur joué par l'IA, en rendez-vous d'estimation. Objectif : <strong>décrocher le mandat au juste prix, sans braquer le vendeur</strong>.<br>
+    Certains cas vous donnent tous les éléments. D'autres non : le vendeur <strong>garde pour lui</strong> ce qu'on ne lui demande pas, et l'illustration de la visite contient des indices qu'il ne commentera pas. Observez, questionnez, puis argumentez. Réservé aux agents inscrits.</p>
     <div id="scenarios"><div class="loading">Chargement des scénarios…</div></div>
   </div>
 
@@ -167,12 +168,10 @@ function finPartie(gagne, d){
         +'<div class="dline" style="margin-top:8px">'
         +'Prix de mandat signé : <strong>'+e(d.prix_final)+'</strong><br>'
         +'🎯 Juste prix : '+e(db2.fourchette_bas)+' – '+e(db2.fourchette_haut)+(db2.prix_dvf?' (DVF ~'+e(db2.prix_dvf)+')':'')+'<br>'
-        +'<div style="margin-top:8px;display:flex;gap:16px;justify-content:center">'
-        +'<div>💶 Prix<br><strong>'+db2.prix_score+'/100</strong></div>'
-        +'<div>🤝 Relationnel<br><strong>'+db2.relationnel+'/100</strong></div>'
+        +sousScores(db2)
         +'</div>'
-        +'</div>'
-        +conseilPsy(db2.prix_score, db2.relationnel)
+        +blocElements(db2)
+        +conseilPsy(db2.prix_score, db2.relationnel, db2)
         +'<div style="margin-top:14px"><span class="back" onclick="retour()">← Rejouer un scénario</span></div>'
         +'</div>';
     } else {
@@ -182,6 +181,7 @@ function finPartie(gagne, d){
         +'🎯 Le juste prix était '+e(db2.fourchette_bas)+' – '+e(db2.fourchette_haut)+(db2.prix_dvf?' (DVF ~'+e(db2.prix_dvf)+')':'')+'.</div>'
         +'<div class="dline" style="margin-top:8px">🤝 Note relationnelle : <strong>'+(db2.relationnel||0)+'/100</strong>. '
         +'💡 Le juste prix ne suffit pas : il faut d\'abord valoriser le bien et créer la confiance, puis amener les points négatifs avec tact. Un vendeur braqué ne signe pas.</div>'
+        +blocElements(db2)
         +'<div style="margin-top:14px"><span class="back" onclick="retour()">← Réessayer</span></div>'
         +'</div>';
     }
@@ -215,12 +215,46 @@ function finPartie(gagne, d){
   document.getElementById('debrief-slot').innerHTML=html;
 }
 
-function conseilPsy(prix, rel){
+function sousScores(d){
+  var enq=!!d.enquete;
+  var cell=function(ico,lib,val,poids){
+    return '<div style="min-width:88px"><div style="font-size:12px;color:var(--muted)">'+ico+' '+lib+'</div>'
+      +'<div style="font-size:22px;font-weight:600">'+(val||0)+'<span style="font-size:12px;color:var(--muted)">/100</span></div>'
+      +'<div style="font-size:11px;color:var(--muted)">'+poids+'</div></div>';
+  };
+  return '<div style="margin-top:10px;display:flex;gap:18px;justify-content:center;text-align:center;flex-wrap:wrap">'
+    +cell('💶','Prix',d.prix_score, enq?'40 %':'50 %')
+    +cell('🤝','Relationnel',d.relationnel, enq?'30 %':'50 %')
+    +(enq?cell('🕵️','Découverte',d.decouverte,'30 %'):'')
+    +'</div>';
+}
+
+function blocElements(d){
+  if(!d.enquete||!d.elements||!d.elements.length) return '';
+  var nb=0;
+  var lignes=d.elements.map(function(e){
+    if(e.trouve) nb++;
+    return '<div style="font-size:12.5px;line-height:1.65;margin-top:5px">'
+      +(e.trouve?'✅ ':'❌ ')
+      +'<span'+(e.trouve?'':' style="color:var(--muted)"')+'>'+e.titre+'</span></div>';
+  }).join('');
+  return '<div style="margin-top:12px;padding:12px 14px;background:rgba(255,255,255,.6);border-radius:10px;text-align:left">'
+    +'<div style="font-weight:600;font-size:13px">🕵️ Ce que le vendeur ne disait pas — '+nb+'/'+d.elements.length+' découvert'+(nb>1?'s':'')+'</div>'
+    +lignes
+    +(nb<d.elements.length
+      ? '<div style="font-size:12px;color:var(--muted);margin-top:9px;font-style:italic">Ces éléments existaient dès le début de la visite. Ils ne se révèlent qu\'à l\'agent qui pose la bonne question.</div>'
+      : '')
+    +'</div>';
+}
+
+function conseilPsy(prix, rel, d){
+  var enq=d&&d.enquete, dec=(d&&d.decouverte)||0;
   var t;
-  if(prix>=80&&rel>=80) t='Sans faute : juste prix ET excellent relationnel. C\'est exactement le métier.';
-  else if(prix>=80&&rel<60) t='Bon prix, mais votre approche a manqué de tact. Un vendeur mieux ménagé aurait signé plus sereinement (et parlé de vous autour de lui).';
-  else if(prix<60&&rel>=80) t='Très bon relationnel, mais le prix n\'est pas au bon niveau : trop haut, le bien risque de ne pas se vendre ; trop bas, vous lésez le client.';
-  else t='Le juste prix se construit sur la confiance : comprenez d\'abord le vendeur, valorisez son bien, puis amenez les faits (DVF, travaux) avec délicatesse.';
+  if(enq&&dec<50) t='Vous avez conclu, mais en aveugle : l\'essentiel de la situation du vendeur vous a échappé. Un mandat pris sans connaître les charges, les travaux votés et le vrai motif de vente est un mandat fragile — c\'est en cours de commercialisation que ça se paie.';
+  else if(prix>=80&&rel>=80&&(!enq||dec>=80)) t='Sans faute : vous avez enquêté, respecté votre interlocuteur et abouti au juste prix. C\'est exactement le métier.';
+  else if(prix>=80&&rel<60) t='Bon prix, mais votre approche a manqué de tact. Un vendeur mieux ménagé aurait signé plus sereinement — et parlé de vous autour de lui.';
+  else if(prix<60&&rel>=80) t='Très bon relationnel, mais le prix n\'est pas au bon niveau : trop haut, le bien ne se vendra pas ; trop bas, vous lésez votre client.';
+  else t='Le juste prix se construit sur la confiance : comprenez d\'abord le vendeur, valorisez son bien, puis amenez les faits (DVF, travaux, charges) avec délicatesse.';
   return '<div class="dline" style="margin-top:10px;font-style:italic">💡 '+t+'</div>';
 }
 
