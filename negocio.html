@@ -81,7 +81,7 @@ h1{font-size:26px;font-weight:600}
 const SB_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
 const SB_KEY='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
 const db=supabase.createClient(SB_URL,SB_KEY);
-var currentUser=null, partieId=null, scenarioCourant=null;
+var currentUser=null, partieId=null, scenarioCourant=null, SCN=[];
 
 (async function(){
   var {data:{session}}=await db.auth.getSession();
@@ -91,13 +91,15 @@ var currentUser=null, partieId=null, scenarioCourant=null;
   var box=document.getElementById('scenarios');
   if(error||!data||!data.length){ box.innerHTML='<div class="loading">Aucun scénario disponible pour le moment.</div>'; return; }
   box.className='grid';
+  SCN=data||[];
   box.innerHTML=data.map(function(s){
     return '<div class="sc" onclick="demarrer(\''+s.id+'\')">'
+      +(s.image_url?'<img src="'+s.image_url+'" alt="" style="width:100%;border-radius:8px;margin-bottom:8px;display:block">':'')
       +'<span class="diff '+(s.difficulte||'moyen')+'">'+(s.difficulte||'moyen')+'</span>'
       +'<div class="sc-t">'+s.titre+'</div>'
       +'<div class="sc-meta">'+(s.bien_type||'')+' · '+(s.ville||'')+' · '+(s.surface||'?')+' m² · '+(s.nb_pieces||'?')+' pièces</div>'
       +'<div class="sc-meta" style="margin-top:6px">'+(s.contexte_public||'')+'</div>'
-      +'<div class="sc-prix">Prix affiché : '+Math.round(s.prix_affiche).toLocaleString('fr-FR')+' €</div>'
+      +'<div class="sc-prix">Prix espéré vendeur : '+Math.round(s.prix_affiche).toLocaleString('fr-FR')+' €'+(s.prix_dvf?' · DVF ~'+Math.round(s.prix_dvf).toLocaleString('fr-FR')+' €':'')+'</div>'
       +'</div>';
   }).join('');
 })();
@@ -123,9 +125,17 @@ async function demarrer(scenarioId){
   if(r.error||(r.data&&r.data.error)){ bulle('systeme',(r.data&&r.data.message)?r.data.message:('Erreur : '+(r.error?r.error.message:r.data.error))); return; }
   partieId=r.data.partie_id;
   document.getElementById('msgs').innerHTML='';
+  scenarioCourant=SCN.find(function(s){return s.id===scenarioId;})||{};
+  if(scenarioCourant.image_url){
+    var vis=document.createElement('div'); vis.style.cssText='margin:0 0 10px';
+    vis.innerHTML='<img src="'+scenarioCourant.image_url+'" alt="Visite du bien" style="width:100%;border-radius:10px;display:block">';
+    document.getElementById('msgs').appendChild(vis);
+  }
   bulle('vendeur', r.data.reply);
-  document.getElementById('ch-titre').textContent='Négociation en cours';
-  document.getElementById('ch-meta').textContent='Objectif : obtenir le meilleur prix. Le prix de réserve du vendeur est secret.';
+  document.getElementById('ch-titre').textContent='Rendez-vous d\'estimation';
+  document.getElementById('ch-meta').textContent=scenarioCourant.prix_dvf
+    ? 'Objectif : décrocher le mandat au juste prix — avec les bons arguments ET le bon relationnel.'
+    : 'Objectif : obtenir le meilleur prix. Le prix de réserve du vendeur est secret.';
 }
 
 async function envoyer(){
@@ -147,15 +157,46 @@ async function envoyer(){
 function finPartie(gagne, d){
   document.getElementById('inp').style.display='none';
   var db2=d.debrief||{};
+  var e=function(n){return Math.round(n).toLocaleString('fr-FR')+' €';};
   var html;
+  if(db2.modele==='psy'){
+    if(gagne){
+      html='<div class="debrief win">'
+        +'<div style="color:var(--teal);font-weight:600;margin-bottom:6px">✅ Mandat décroché !</div>'
+        +'<div class="score-big" style="color:var(--teal)">'+d.score+'<span style="font-size:18px;color:var(--muted)">/100</span></div>'
+        +'<div class="dline" style="margin-top:8px">'
+        +'Prix de mandat signé : <strong>'+e(d.prix_final)+'</strong><br>'
+        +'🎯 Juste prix : '+e(db2.fourchette_bas)+' – '+e(db2.fourchette_haut)+(db2.prix_dvf?' (DVF ~'+e(db2.prix_dvf)+')':'')+'<br>'
+        +'<div style="margin-top:8px;display:flex;gap:16px;justify-content:center">'
+        +'<div>💶 Prix<br><strong>'+db2.prix_score+'/100</strong></div>'
+        +'<div>🤝 Relationnel<br><strong>'+db2.relationnel+'/100</strong></div>'
+        +'</div>'
+        +'</div>'
+        +conseilPsy(db2.prix_score, db2.relationnel)
+        +'<div style="margin-top:14px"><span class="back" onclick="retour()">← Rejouer un scénario</span></div>'
+        +'</div>';
+    } else {
+      html='<div class="debrief lose">'
+        +'<div style="color:var(--amber);font-weight:600;margin-bottom:6px">❌ Mandat perdu</div>'
+        +'<div class="dline">Le vendeur ne vous a pas confié son bien. '
+        +'🎯 Le juste prix était '+e(db2.fourchette_bas)+' – '+e(db2.fourchette_haut)+(db2.prix_dvf?' (DVF ~'+e(db2.prix_dvf)+')':'')+'.</div>'
+        +'<div class="dline" style="margin-top:8px">🤝 Note relationnelle : <strong>'+(db2.relationnel||0)+'/100</strong>. '
+        +'💡 Le juste prix ne suffit pas : il faut d\'abord valoriser le bien et créer la confiance, puis amener les points négatifs avec tact. Un vendeur braqué ne signe pas.</div>'
+        +'<div style="margin-top:14px"><span class="back" onclick="retour()">← Réessayer</span></div>'
+        +'</div>';
+    }
+    document.getElementById('debrief-slot').innerHTML=html;
+    return;
+  }
+  // ── ancien modèle (repli) ──
   if(gagne){
     html='<div class="debrief win">'
       +'<div style="color:var(--teal);font-weight:600;margin-bottom:6px">✅ Accord trouvé !</div>'
       +'<div class="score-big" style="color:var(--teal)">'+d.score+'<span style="font-size:18px;color:var(--muted)">/100</span></div>'
       +'<div class="dline" style="margin-top:8px">'
-      +'Prix d\'achat obtenu : <strong>'+Math.round(d.prix_final).toLocaleString('fr-FR')+' €</strong><br>'
-      +'Prix affiché : '+Math.round(db2.prix_affiche).toLocaleString('fr-FR')+' € · Remise obtenue : <strong>'+Math.round(db2.remise_obtenue).toLocaleString('fr-FR')+' €</strong><br>'
-      +'🔓 Prix de réserve du vendeur (secret) : <strong>'+Math.round(db2.prix_reserve).toLocaleString('fr-FR')+' €</strong> — remise maximale possible : '+Math.round(db2.remise_max_possible).toLocaleString('fr-FR')+' €<br>'
+      +'Prix d\'achat obtenu : <strong>'+e(d.prix_final)+'</strong><br>'
+      +'Prix affiché : '+e(db2.prix_affiche)+' · Remise obtenue : <strong>'+e(db2.remise_obtenue)+'</strong><br>'
+      +'🔓 Prix de réserve du vendeur (secret) : <strong>'+e(db2.prix_reserve)+'</strong> — remise maximale possible : '+e(db2.remise_max_possible)+'<br>'
       +'Tours de négociation : '+d.nb_tours
       +'</div>'
       +conseil(d.score)
@@ -165,13 +206,22 @@ function finPartie(gagne, d){
     html='<div class="debrief lose">'
       +'<div style="color:var(--amber);font-weight:600;margin-bottom:6px">❌ Négociation rompue</div>'
       +'<div class="dline">Le vendeur a mis fin à la discussion. '
-      +(db2.prix_reserve?'🔓 Son prix de réserve était de <strong>'+Math.round(db2.prix_reserve).toLocaleString('fr-FR')+' €</strong> (affiché '+Math.round(db2.prix_affiche).toLocaleString('fr-FR')+' €).':'')
+      +(db2.prix_reserve?'🔓 Son prix de réserve était de <strong>'+e(db2.prix_reserve)+'</strong> (affiché '+e(db2.prix_affiche)+').':'')
       +'</div>'
-      +'<div class="dline" style="margin-top:8px">💡 Une offre trop basse ou trop frontale braque le vendeur. Cherchez d\'abord à comprendre sa motivation, puis argumentez avec des faits (marché, travaux).</div>'
+      +'<div class="dline" style="margin-top:8px">💡 Une offre trop basse ou trop frontale braque le vendeur.</div>'
       +'<div style="margin-top:14px"><span class="back" onclick="retour()">← Réessayer</span></div>'
       +'</div>';
   }
   document.getElementById('debrief-slot').innerHTML=html;
+}
+
+function conseilPsy(prix, rel){
+  var t;
+  if(prix>=80&&rel>=80) t='Sans faute : juste prix ET excellent relationnel. C\'est exactement le métier.';
+  else if(prix>=80&&rel<60) t='Bon prix, mais votre approche a manqué de tact. Un vendeur mieux ménagé aurait signé plus sereinement (et parlé de vous autour de lui).';
+  else if(prix<60&&rel>=80) t='Très bon relationnel, mais le prix n\'est pas au bon niveau : trop haut, le bien risque de ne pas se vendre ; trop bas, vous lésez le client.';
+  else t='Le juste prix se construit sur la confiance : comprenez d\'abord le vendeur, valorisez son bien, puis amenez les faits (DVF, travaux) avec délicatesse.';
+  return '<div class="dline" style="margin-top:10px;font-style:italic">💡 '+t+'</div>';
 }
 
 function conseil(score){
