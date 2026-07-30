@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes annonces automatiques — ImmoConnect</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0F0F0E;--muted:#888780;--bg:#F5F2EC;--warm:#FEFDFB;--line:#E8E6E0;--gold:#C09B5A;--teal:#1E7A62;--blue:#185FA5;--amber:#D4732A;--red:#A32D2D;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+nav{background:var(--ink);height:54px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:600;color:#fff;text-decoration:none}.nav-logo span{color:var(--gold)}
+.nav-sp{flex:1}
+nav a.nl{color:#fff;text-decoration:none;font-size:13px;opacity:.85}nav a.nl:hover{opacity:1}
+.page{max-width:820px;margin:0 auto;padding:36px 20px 80px}
+h1{font-size:26px;font-weight:600;margin-bottom:6px}
+.sub{color:var(--muted);line-height:1.6;margin-bottom:26px}
+.box{background:var(--warm);border:1px solid var(--line);border-radius:var(--r);padding:22px;margin-bottom:18px}
+.box h2{font-size:16px;font-weight:600;margin-bottom:12px}
+label{display:block;font-size:13px;font-weight:500;margin:14px 0 5px}
+input[type=url],input[type=text]{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;background:#fff}
+input[type=url]:focus,input[type=text]:focus{outline:none;border-color:var(--gold)}
+.hint{font-size:12px;color:var(--muted);line-height:1.55;margin-top:6px}
+.check{display:flex;gap:10px;align-items:flex-start;margin-top:16px;padding:13px;background:rgba(192,155,90,.07);border-radius:8px}
+.check input{margin-top:2px;flex-shrink:0}
+.check label{margin:0;font-weight:400;font-size:13px;line-height:1.55}
+.btn{display:inline-block;padding:11px 20px;border-radius:8px;border:none;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;margin-top:18px}
+.btn-p{background:var(--ink);color:#fff}
+.btn-s{background:transparent;color:var(--ink);border:1px solid var(--line);margin-left:8px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.msg{margin-top:14px;padding:12px;border-radius:8px;font-size:13px;line-height:1.55;display:none}
+.msg.ok{background:rgba(30,122,98,.09);color:var(--teal);display:block}
+.msg.err{background:rgba(163,45,45,.08);color:var(--red);display:block}
+.msg.info{background:rgba(24,95,165,.07);color:var(--blue);display:block}
+.etat{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px;margin-top:6px}
+.stat{background:var(--bg);border-radius:8px;padding:12px}
+.stat .n{font-size:22px;font-weight:600}
+.stat .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding:8px 6px;border-bottom:1px solid var(--line)}
+td{padding:9px 6px;border-bottom:1px solid var(--line)}
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:500}
+.pill.pub{background:rgba(30,122,98,.12);color:var(--teal)}
+.pill.att{background:rgba(212,115,42,.12);color:var(--amber)}
+.pill.sup{background:rgba(136,135,128,.14);color:var(--muted)}
+.vide{color:var(--muted);padding:22px 0;text-align:center;line-height:1.6}
+.loading{text-align:center;padding:60px;color:var(--muted)}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Immo<span>Connect</span></a>
+  <div class="nav-sp"></div>
+  <a href="mon-espace.html" class="nl">Mon espace</a>
+  <a href="messagerie.html" class="nl">💬</a>
+  <a href="#" class="nl" onclick="deconnexion();return false">Déconnexion</a>
+</nav>
+
+<div class="page">
+  <h1>Mes annonces automatiques</h1>
+  <p class="sub">Branchez votre logiciel de transaction une seule fois : vos biens remontent ensuite chaque nuit, et sont confrontés aux projets d'acheteurs déposés sur ImmoConnect. Vous continuez à travailler dans votre logiciel habituel, il n'y a rien à ressaisir ici.</p>
+
+  <div id="contenu"><div class="loading">Chargement…</div></div>
+</div>
+
+<script>
+const SB_URL='https://zxxhyefajfwqcxcfxpmg.supabase.co';
+const SB_KEY='sb_publishable_cW5-jNMT_wq5ng4XdOYgQQ_BM6DecbM';
+const db=supabase.createClient(SB_URL,SB_KEY);
+var currentUser=null, fluxActuel=null;
+
+(async function(){
+  var {data:{session}}=await db.auth.getSession();
+  if(!session){ window.location.href='connexion.html?next=flux-agent.html'; return; }
+  currentUser=session.user;
+  await charger();
+})();
+
+async function charger(){
+  try{
+    var {data}=await db.from('flux_agents').select('*').ilike('agent_email',currentUser.email).limit(1);
+    fluxActuel=(data&&data.length)?data[0]:null;
+  }catch(e){ fluxActuel=null; }
+  document.getElementById('contenu').innerHTML = vueFormulaire() + (fluxActuel?vueEtat():'');
+  if(fluxActuel) chargerBiens();
+}
+
+function vueFormulaire(){
+  var f=fluxActuel||{};
+  return '<div class="box">'
+    +'<h2>'+(fluxActuel?'Votre flux':'Brancher votre logiciel')+'</h2>'
+    +'<label for="url">Adresse du flux</label>'
+    +'<input type="url" id="url" placeholder="https://…" value="'+(f.url||'').replace(/"/g,'&quot;')+'">'
+    +'<div class="hint">Votre logiciel de transaction (Apimo, Hektor, Netty, Périclès…) sait produire un flux d\'annonces accessible par une adresse web. Demandez-la à votre éditeur ou à votre support en précisant que vous souhaitez diffuser vers un nouveau portail. Formats acceptés : XML ou CSV.</div>'
+    +'<div class="check"><input type="checkbox" id="mandat"'+(f.mandat_atteste?' checked':'')+'>'
+    +'<label for="mandat">Je certifie détenir un mandat en cours de validité sur chacun des biens diffusés par ce flux, et que les mentions obligatoires (DPE, honoraires) y figurent.</label></div>'
+    +'<div class="hint" style="margin-top:10px">Les biens dont le DPE est absent du flux ne seront pas publiés : la loi l\'impose dans toute annonce immobilière. Ils apparaîtront dans le bilan avec leur motif.</div>'
+    +'<button class="btn btn-p" id="btn-save" onclick="enregistrer()">'+(fluxActuel?'Mettre à jour':'Enregistrer')+'</button>'
+    +(fluxActuel?'<button class="btn btn-s" id="btn-test" onclick="tester()">Tester maintenant</button>':'')
+    +'<div class="msg" id="msg"></div>'
+    +'</div>';
+}
+
+function vueEtat(){
+  var f=fluxActuel;
+  var quand = f.derniere_execution ? new Date(f.derniere_execution).toLocaleString('fr-FR',{dateStyle:'medium',timeStyle:'short'}) : 'jamais';
+  var bloc = '<div class="box"><h2>Dernier import</h2>'
+    +'<div class="hint" style="margin-top:0">Exécuté&nbsp;: '+quand+'. L\'import automatique tourne chaque nuit vers 3h15.</div>'
+    +'<div class="etat">'
+    +'<div class="stat"><div class="n">'+(f.nb_biens||0)+'</div><div class="l">Biens traités</div></div>'
+    +'<div class="stat"><div class="n">'+(f.nb_ignores||0)+'</div><div class="l">Écartés</div></div>'
+    +'</div>';
+  if(f.dernier_message){
+    var cls = (f.dernier_statut==='ok') ? 'info' : 'err';
+    bloc += '<div class="msg '+cls+'" style="display:block">'+echapper(f.dernier_message)+'</div>';
+  }
+  bloc += '</div><div class="box"><h2>Vos biens importés</h2><div id="biens"><div class="vide">Chargement…</div></div></div>';
+  return bloc;
+}
+
+async function chargerBiens(){
+  var el=document.getElementById('biens'); if(!el) return;
+  try{
+    var {data}=await db.from('annonces_vendeurs')
+      .select('reference_externe,titre,ville,prix,statut_annonce')
+      .eq('flux_agent_id',fluxActuel.id).order('reference_externe').limit(100);
+    if(!data||!data.length){ el.innerHTML='<div class="vide">Aucun bien importé pour l\'instant.<br>Enregistrez votre flux puis lancez un test.</div>'; return; }
+    var l='<table><tr><th>Réf.</th><th>Bien</th><th>Prix</th><th>État</th></tr>';
+    for(var i=0;i<data.length;i++){
+      var b=data[i], s=b.statut_annonce;
+      var cls = s==='publiee'?'pub':(s==='supprimee'?'sup':'att');
+      var lib = s==='publiee'?'En ligne':(s==='supprimee'?'Retiré':'En validation');
+      l+='<tr><td>'+echapper(b.reference_externe||'')+'</td>'
+        +'<td>'+echapper(b.titre||'')+'<br><span class="hint">'+echapper(b.ville||'')+'</span></td>'
+        +'<td>'+(b.prix?Number(b.prix).toLocaleString('fr-FR')+' €':'—')+'</td>'
+        +'<td><span class="pill '+cls+'">'+lib+'</span></td></tr>';
+    }
+    el.innerHTML=l+'</table>';
+  }catch(e){ el.innerHTML='<div class="vide">Impossible de charger vos biens.</div>'; }
+}
+
+async function enregistrer(){
+  var url=document.getElementById('url').value.trim();
+  var mandat=document.getElementById('mandat').checked;
+  if(!/^https?:\/\//i.test(url)) return afficher('err','L\'adresse doit commencer par http:// ou https://');
+  if(!mandat) return afficher('err','L\'attestation de mandat est obligatoire pour diffuser des biens.');
+  var b=document.getElementById('btn-save'); b.disabled=true; b.textContent='Enregistrement…';
+  try{
+    if(fluxActuel){
+      var {error}=await db.from('flux_agents').update({url:url,mandat_atteste:true,actif:true}).eq('id',fluxActuel.id);
+      if(error) throw error;
+    }else{
+      var r=await db.from('flux_agents').insert({agent_email:currentUser.email,url:url,format:'auto',actif:true,mandat_atteste:true,auto_valide:false}).select('*').single();
+      if(r.error) throw r.error;
+      fluxActuel=r.data;
+    }
+    afficher('ok','Flux enregistré. Lancez un test pour vérifier qu\'il est correctement lu.');
+    await charger();
+  }catch(e){ afficher('err','Enregistrement impossible : '+(e.message||e)); }
+  b.disabled=false; b.textContent=fluxActuel?'Mettre à jour':'Enregistrer';
+}
+
+async function tester(){
+  var b=document.getElementById('btn-test'); b.disabled=true; b.textContent='Import en cours…';
+  afficher('info','Lecture de votre flux… cela peut prendre une minute selon le nombre de biens.');
+  try{
+    var {data:{session}}=await db.auth.getSession();
+    var res=await fetch(SB_URL+'/functions/v1/importer-flux',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({})
+    });
+    var j=await res.json();
+    if(!res.ok) throw new Error(j.error||'erreur inconnue');
+    var r=(j.resultats&&j.resultats[0])||{};
+    afficher(r.statut==='ok'?'ok':'err', r.message||'Import terminé.');
+    await charger();
+  }catch(e){ afficher('err','Import impossible : '+(e.message||e)); }
+  b.disabled=false; b.textContent='Tester maintenant';
+}
+
+function afficher(type,txt){
+  var m=document.getElementById('msg'); if(!m) return;
+  m.className='msg '+type; m.textContent=txt;
+}
+function echapper(s){ var d=document.createElement('div'); d.textContent=s==null?'':s; return d.innerHTML; }
+async function deconnexion(){ await db.auth.signOut(); window.location.href='index.html'; }
+</script>
+</body>
+</html>

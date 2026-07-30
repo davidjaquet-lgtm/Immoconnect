@@ -74,8 +74,10 @@ async function construire(meta){
   // ── Espaces selon profils (métadonnées) ──
   if(profils.indexOf('vendeur')!==-1)
     cartes.push(carte('🏠','Espace vendeur','Gérez vos annonces de vente et vos messages.','dashboard-vendeur.html','Ouvrir'));
-  if(profils.indexOf('agent')!==-1)
+  if(profils.indexOf('agent')!==-1){
     cartes.push(carte('🤝','Espace agent','Vos annonces suivies, contacts et prospection.','dashboard-agent.html','Ouvrir'));
+    cartes.push(carte('🔗','Mes annonces automatiques','Branchez votre logiciel : vos biens remontent chaque nuit.','flux-agent.html','Configurer'));
+  }
   if(profils.indexOf('acheteur')!==-1 || profils.indexOf('investisseur')!==-1)
     cartes.push(carte('🔑','Espace acheteur','Votre projet d\'achat et vos biens favoris.','dashboard.html','Ouvrir'));
 
