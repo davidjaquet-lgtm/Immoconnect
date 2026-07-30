@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<annonces>
+
+  <annonce>
+    <reference>TEST-001</reference>
+    <titre>Maison familiale avec jardin clos</titre>
+    <type>Maison</type>
+    <ville>Gujan-Mestras</ville>
+    <code_postal>33470</code_postal>
+    <adresse>12 avenue de la Plage</adresse>
+    <prix>389000</prix>
+    <surface>102</surface>
+    <nb_pieces>5</nb_pieces>
+    <nb_chambres>3</nb_chambres>
+    <annee_construction>1998</annee_construction>
+    <classe_dpe>D</classe_dpe>
+    <conso_energie>198</conso_energie>
+    <classe_ges>B</classe_ges>
+    <honoraires>Honoraires à la charge du vendeur</honoraires>
+    <description><![CDATA[Maison de plain-pied sur terrain clos et arboré de 620 m². Séjour lumineux, cuisine ouverte récente, trois chambres. Garage et abri de jardin. Proche écoles et commerces.]]></description>
+    <photos>
+      <photo>https://immoconnect-agence.fr/visite-gujan.png</photo>
+    </photos>
+  </annonce>
+
+  <annonce>
+    <reference>TEST-002</reference>
+    <titre>Appartement vue bassin</titre>
+    <type>Appartement</type>
+    <ville>Lège-Cap-Ferret</ville>
+    <code_postal>33950</code_postal>
+    <adresse>3 rue des Ostréiculteurs</adresse>
+    <prix>465 000 €</prix>
+    <surface>55,5</surface>
+    <nb_pieces>2</nb_pieces>
+    <nb_chambres>1</nb_chambres>
+    <etage>2</etage>
+    <classe_dpe>Classe E</classe_dpe>
+    <conso_energie>276</conso_energie>
+    <classe_ges>C</classe_ges>
+    <description>Deux pièces au deuxième étage, large baie donnant sur le bassin. Copropriété de 18 lots.</description>
+    <photos>
+      <photo>https://immoconnect-agence.fr/visite-capferret.png</photo>
+    </photos>
+  </annonce>
+
+  <annonce>
+    <reference>TEST-003</reference>
+    <titre>Studio proche plage — SANS DPE, doit etre ignore</titre>
+    <type>Appartement</type>
+    <ville>La Teste-de-Buch</ville>
+    <code_postal>33260</code_postal>
+    <prix>179000</prix>
+    <surface>26</surface>
+    <nb_pieces>1</nb_pieces>
+    <description>Ce bien ne porte volontairement aucun DPE : il doit apparaitre dans les "ignores" du bilan d'import, pas dans les annonces.</description>
+  </annonce>
+
+</annonces>
