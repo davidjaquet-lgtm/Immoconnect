@@ -63,6 +63,24 @@ textarea{min-height:80px;resize:vertical}
 
   <div id="msg" class="msg"></div>
 
+  <!-- MANDANT — visible uniquement pour un agent validé -->
+  <div class="card" id="bloc-mandant" style="display:none">
+    <div class="card-t">📋 Pour le compte de qui publiez-vous&nbsp;?</div>
+    <div class="field">
+      <label style="display:flex;gap:9px;align-items:flex-start;font-weight:400">
+        <input type="checkbox" id="pour_mandant" style="margin-top:3px;flex-shrink:0" onchange="majMandant()">
+        <span>Je publie ce bien <strong>pour le compte d'un propriétaire</strong>, dans le cadre d'un mandat de gestion.</span>
+      </label>
+    </div>
+    <div id="champs-mandant" style="display:none">
+      <div class="row">
+        <div class="field"><label>Nom du propriétaire *</label><input id="mandant_nom" placeholder="ex : M. et Mme Martin"></div>
+        <div class="field"><label>Référence du mandat</label><input id="mandat_reference" placeholder="ex : MG-2026-045"></div>
+      </div>
+      <p class="sub" style="font-size:12.5px;margin:4px 0 0">Ces informations ne sont pas publiées : elles restent internes et attestent que vous agissez dans le cadre d'un mandat (loi Hoguet). Les candidats vous contactent, vous.</p>
+    </div>
+  </div>
+
   <!-- LE BIEN -->
   <div class="card">
     <div class="card-t">🏠 Votre bien</div>
@@ -155,14 +173,44 @@ var editId = null;
   var {data:{session}}=await db.auth.getSession();
   if(!session){ window.location.href='connexion.html?next=questionnaire-bailleur.html'+(location.search||''); return; }
   currentUser=session.user;
+  await detecterAgent();
   initAutocompleteAdresse({input:'adresse', inputVille:'ville', inputCP:'cp', onSelect:function(r){ bailleurCoords={lat:r.lat,lng:r.lng}; }});
   editId = new URLSearchParams(location.search).get('edit');
   if(editId){ await chargerBienEdition(editId); } else { renderPhotos(); }
 })();
 
+var estAgent=false, forfaitAgent=null;
+
+async function detecterAgent(){
+  try{
+    var {data}=await db.from('agents_validation')
+      .select('forfait_agent,statut').ilike('email',currentUser.email).maybeSingle();
+    if(data && data.statut==='valide'){
+      estAgent=true; forfaitAgent=data.forfait_agent;
+      document.getElementById('bloc-mandant').style.display='';
+      // Les contacts locatifs sont inclus dans les forfaits payants.
+      if(['starter','pro','premium'].indexOf(forfaitAgent)!==-1){
+        var b=document.querySelector('.banner');
+        if(b) b.innerHTML='✅ <strong>Contacts inclus dans votre forfait '+forfaitAgent+'.</strong> Publiez autant de lots que nécessaire, les candidats vous contactent sans frais supplémentaires.';
+      }
+    }
+  }catch(e){ /* pas agent : formulaire bailleur normal */ }
+}
+
+function majMandant(){
+  var on=document.getElementById('pour_mandant').checked;
+  document.getElementById('champs-mandant').style.display = on ? '' : 'none';
+}
+
 async function chargerBienEdition(id){
   var {data:b,error}=await db.from('biens_location').select('*').eq('id',id).single();
   if(error||!b){ renderPhotos(); return; }
+  if(b.publie_par_agent){
+    var cb=document.getElementById('pour_mandant');
+    if(cb){ cb.checked=true; majMandant(); }
+    if(document.getElementById('mandant_nom')) document.getElementById('mandant_nom').value=b.mandant_nom||'';
+    if(document.getElementById('mandat_reference')) document.getElementById('mandat_reference').value=b.mandat_reference||'';
+  }
   document.getElementById('titre').value=b.titre||'';
   (b.type_bien||'').split(',').forEach(function(t){ var cb=document.querySelector('.tb[value="'+t.trim()+'"]'); if(cb) cb.checked=true; });
   document.getElementById('meuble').value=b.meuble?'true':'false';
@@ -255,6 +303,20 @@ async function envoyer(){
     latitude:bailleurCoords.lat, longitude:bailleurCoords.lng,
     photos:photoUrls
   };
+
+  // Publication par un agent pour le compte d'un mandant
+  var pm = document.getElementById('pour_mandant');
+  if(estAgent && pm && pm.checked){
+    var nomMandant=(document.getElementById('mandant_nom').value||'').trim();
+    if(!nomMandant){
+      msg.className='msg err'; msg.textContent='Merci d\'indiquer le nom du propriétaire pour le compte duquel vous publiez.';
+      btn.disabled=false; btn.textContent='Publier mon bien'; window.scrollTo(0,0); return;
+    }
+    payload.publie_par_agent=true;
+    payload.agent_email=currentUser.email;
+    payload.mandant_nom=nomMandant;
+    payload.mandat_reference=(document.getElementById('mandat_reference').value||'').trim()||null;
+  }
 
   var reponse;
   if(editId){

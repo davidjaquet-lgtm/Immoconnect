@@ -77,6 +77,7 @@ async function construire(meta){
   if(profils.indexOf('agent')!==-1){
     cartes.push(carte('🤝','Espace agent','Vos annonces suivies, contacts et prospection.','dashboard-agent.html','Ouvrir'));
     cartes.push(carte('🔗','Mes annonces automatiques','Branchez votre logiciel : vos biens remontent chaque nuit.','flux-agent.html','Configurer'));
+    cartes.push(carte('🔑','Publier un bien en location','Un lot de votre gestion locative — contacts inclus dans votre forfait.','questionnaire-bailleur.html','Publier'));
   }
   if(profils.indexOf('acheteur')!==-1 || profils.indexOf('investisseur')!==-1)
     cartes.push(carte('🔑','Espace acheteur','Votre projet d\'achat et vos biens favoris.','dashboard.html','Ouvrir'));
